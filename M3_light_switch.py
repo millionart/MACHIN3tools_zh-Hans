@@ -11,7 +11,7 @@ bl_info = {
 
 # SETTINGS
 
-themelocation = "/home/%USERNAME/.config/blender/2.77/scripts/presets/interface_theme/"  # change appropriately
+themelocation = "/home/%USERNAME/.config/blender/2.77/scripts/presets/interface_theme/"  # change accordingly
 lighttheme = "flatcream.xml"  # http://www.blendswap.com/blends/view/77937
 darktheme = "rtheme.xml"
 lightmatcap = "01"
