@@ -9,7 +9,7 @@ Default Key: CTRL + Mouse Button 5
 
 # Clipping Plane Toggle
 
-This script allows for quick toggling through 3 different clipping plan values. Useful when you need to get very close to some vertices. Toggle back to a bigger value when you aee zoomed out again, to avoid "bleeding edges" on the bounderies of your objects.
+This script allows for quick toggling through 3 different clipping plain values. Useful when you need to get very close to some vertices. Toggle back to a bigger value when you are zoomed out again, to avoid "bleeding edges" on the bounderies of your objects or viewport AO creating a moire pattern
 The clipping values will also influence how close "View Selected" will focus on your selection.
 
 Default Key: Mouse Button 5
