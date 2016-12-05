@@ -29,7 +29,7 @@ import os
 
 
 class LightSwitch(bpy.types.Operator):
-    bl_idname = "prefs.light_switch"
+    bl_idname = "machin3.light_switch"
     bl_label = "MACHIN3: Light Switch"
 
     def execute(self, context):
