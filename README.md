@@ -1,7 +1,7 @@
 # Light Switch
 
 This script allows for quick switching between two themes and matcaps at the same time.
-Usefull when working in changing light situations, but also handy when cleaning up edges after boolean operations, to get a fresh look at your model and re-evaluate it in different "light conditions" or just to better see dark mesh areas.
+Useful when working in changing light situations, but also handy when cleaning up edges after boolean operations, to get a fresh look at your model and re-evaluate it in different "light conditions" or just to better see dark mesh areas.
 
 Set up the theme folder as well as the themes and matcaps you want to use in the script.
 
@@ -18,15 +18,15 @@ Video Demonstration: https://twitter.com/machin3io/status/805790547889844224
 
 # Focus
 
-Disables all Mirror modifiers of the selected objects, then enters local view. Renables mirror modifers again, when exiting localview.
+Disables all Mirror modifiers of the selected objects, then enters local view. Re-enables mirror modifiers again, when exiting local view.
 
 Default Key: CTRL + F  
 Video Demonstration: https://twitter.com/machin3io/status/806936075784462336 
 
 # Center Cube
 
-If nothing is selected, places a cube at the cursor location, but with X zeroed out, enters edit mode, selects all and initiates the scale tool. If objects are selcted, it zeroes out x.
-This allows for quick, precise additions and alignment of geometry, without having to manualy center them on the x axis using the N panel.
+If nothing is selected, places a cube at the cursor location, but with X zeroed out, enters edit mode, selects all and initiates the scale tool. If objects are selected, it zeroes out x.
+This allows for quick, precise additions and alignment of geometry, without having to manually center them on the x axis using the N panel.
 
 Default Key: Shift + C  
 Video Demonstration: https://twitter.com/machin3io/status/806963166404087808   
