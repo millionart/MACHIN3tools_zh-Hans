@@ -21,4 +21,12 @@ Video Demonstration: https://twitter.com/machin3io/status/805790547889844224
 Disables all Mirror modifiers of the selected objects, then enters local view. Renables mirror modifers again, when exiting localview.
 
 Default Key: CTRL + F  
-Video Demonstration: https://twitter.com/machin3io/status/806936075784462336  
+Video Demonstration: https://twitter.com/machin3io/status/806936075784462336 
+
+# Center Cube
+
+If nothing is selected, places a cube at the cursor location, but with X zeroed out, enters edit mode, selects all and initiates the scale tool. If objects are selcted, it zeroes out x.
+This allows for quick, precise additions and alignment of geometry, without having to manualy center them on the x axis using the N panel.
+
+Default Key: Shift + C  
+Video Demonstration: 
