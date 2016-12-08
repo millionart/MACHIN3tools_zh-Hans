@@ -15,3 +15,10 @@ The clipping values will also influence how close "View Selected" will focus on 
 
 Default Key: Mouse Button 5  
 Video Demonstration: https://twitter.com/machin3io/status/805790547889844224
+
+# Focus
+
+Disables all Mirror modifiers of the selected objects, then enters local view. Renables mirror modifers again, when exiting localview.
+
+Default Key: CTRL + F
+Video Demonstration: 
