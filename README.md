@@ -29,4 +29,4 @@ If nothing is selected, places a cube at the cursor location, but with X zeroed 
 This allows for quick, precise additions and alignment of geometry, without having to manualy center them on the x axis using the N panel.
 
 Default Key: Shift + C  
-Video Demonstration: 
+Video Demonstration: https://twitter.com/machin3io/status/806963166404087808   
