@@ -1,11 +1,11 @@
-# Light Switch
+# Center Cube
 
-Useful when working in changing light situations, but also handy when cleaning up edges after boolean operations, to get a fresh look at your model and re-evaluate it in different "light conditions" or just to better see dark mesh areas.
+If nothing is selected, places a cube at the cursor location, but with X zeroed out, enters edit mode, selects all and initiates the scale tool. If objects are selected, it zeroes out x.
+This allows for quick, precise additions and alignment of geometry, without having to manually center them on the x axis using the N panel.
 
-Set up the theme folder as well as the themes and matcaps you want to use in the script.
+Default Key: Shift + C  
+Video Demonstration: https://twitter.com/machin3io/status/806963166404087808  
 
-Default Key: CTRL + Mouse Button 5  
-Video Demonstration: https://twitter.com/machin3io/status/805770460755595264
 
 # Clipping Plane Toggle
 
@@ -15,19 +15,23 @@ The clipping values will also influence how close "View Selected" will focus on 
 Default Key: Mouse Button 5  
 Video Demonstration: https://twitter.com/machin3io/status/805790547889844224
 
+
 # Focus
 Disables all Mirror modifiers of the selected objects, then enters local view. Re-enables mirror modifiers again, when exiting local view.
 
 Default Key: CTRL + F  
 Video Demonstration: https://twitter.com/machin3io/status/806936075784462336 
 
-# Center Cube
 
-If nothing is selected, places a cube at the cursor location, but with X zeroed out, enters edit mode, selects all and initiates the scale tool. If objects are selected, it zeroes out x.
-This allows for quick, precise additions and alignment of geometry, without having to manually center them on the x axis using the N panel.
+# Light Switch
 
-Default Key: Shift + C  
-Video Demonstration: https://twitter.com/machin3io/status/806963166404087808   
+Useful when working in changing light situations, but also handy when cleaning up edges after boolean operations, to get a fresh look at your model and re-evaluate it in different "light conditions" or just to better see dark mesh areas.
+
+Set up the theme folder as well as the themes and matcaps you want to use in the script.
+
+Default Key: CTRL + Mouse Button 5  
+Video Demonstration: https://twitter.com/machin3io/status/805770460755595264
+ 
 
 # Multi Mirror Mirror
 This script wraps around Rob Fornof's excellent Mirror Mirror Tool(https://github.com/fornof/BlenderAddons/blob/master/MirrorMirrorTool.py) and adds support for mirroring a selection of objects at once.
