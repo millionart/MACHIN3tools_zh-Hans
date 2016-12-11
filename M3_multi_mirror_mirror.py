@@ -1,10 +1,10 @@
 bl_info = {
-    "name": "Multi Mirror Mirror X",
+    "name": "Multi Mirror Mirror",
     "author": "MACHIN3",
     "version": (0, 1),
     "blender": (2, 77, 0),
     "location": "Spacebar Menu/ Shift + Alt + X/Y/Z",
-    "description": "Mirror Mirror Tool, but allows multiple objects at once.",
+    "description": "Mirror Mirror Tool, but allows mirroring of multiple objects at once.",
     "warning": "",
     "wiki_url": "",
     "category": "Mesh"}
