@@ -31,5 +31,5 @@ Video Demonstration: https://twitter.com/machin3io/status/806963166404087808
 
 # Multi Mirror Mirror
 This script wraps around Rob Fornof's excellent Mirror Mirror Tool(https://github.com/fornof/BlenderAddons/blob/master/MirrorMirrorTool.py) and adds support for mirroring a selection of objects at once.
-Default Key: Shift + Alt + X/Y/Z
-Video Demonstration: https://twitter.com/machin3io/status/807718239044300800
+Default Key: Shift + Alt + X/Y/Z  
+Video Demonstration: https://twitter.com/machin3io/status/807718239044300800  
