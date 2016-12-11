@@ -1,6 +1,5 @@
 # Light Switch
 
-This script allows for quick switching between two themes and matcaps at the same time.
 Useful when working in changing light situations, but also handy when cleaning up edges after boolean operations, to get a fresh look at your model and re-evaluate it in different "light conditions" or just to better see dark mesh areas.
 
 Set up the theme folder as well as the themes and matcaps you want to use in the script.
@@ -17,7 +16,6 @@ Default Key: Mouse Button 5
 Video Demonstration: https://twitter.com/machin3io/status/805790547889844224
 
 # Focus
-
 Disables all Mirror modifiers of the selected objects, then enters local view. Re-enables mirror modifiers again, when exiting local view.
 
 Default Key: CTRL + F  
@@ -30,3 +28,8 @@ This allows for quick, precise additions and alignment of geometry, without havi
 
 Default Key: Shift + C  
 Video Demonstration: https://twitter.com/machin3io/status/806963166404087808   
+
+# Multi Mirror Mirror
+This script wraps around Rob Fornof's excellent Mirror Mirror Tool(https://github.com/fornof/BlenderAddons/blob/master/MirrorMirrorTool.py) and adds support for mirroring a selection of objects at once.
+Default Key: Shift + Alt + X/Y/Z
+Video Demonstration: https://twitter.com/machin3io/status/807718239044300800
