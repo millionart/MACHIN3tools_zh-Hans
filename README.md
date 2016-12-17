@@ -40,7 +40,7 @@ Default Key: Shift + Alt + X/Y/Z
 Video Demonstration: https://twitter.com/machin3io/status/807718239044300800  
 
 # Shading Switch
-Switches between Material and Solid shading modes. Also re-assigns Z key for wireframe switching, and Shift + Z for render switching accordingly.
+Switches between Material and Solid shading modes. Also re-assigns Z key for wireframe switching, and Shift + Z for render switching dynamically according to the current shading mode.
 This allows for consistent use of the Z and Shift + Z keys across those two shading modes. 
 
 Default Key: Shift + Mouse Button 5   
