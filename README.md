@@ -38,3 +38,9 @@ This script wraps around Rob Fornof's excellent Mirror Mirror Tool(https://githu
 
 Default Key: Shift + Alt + X/Y/Z  
 Video Demonstration: https://twitter.com/machin3io/status/807718239044300800  
+
+# Shading Switch
+Switches between Material and Solid shading modes. Also re-assigns Z key for wireframe switching, and Shift + Z for render switching accordingly.
+
+Default Key: Shift + Mouse Button 5   
+Video Demonstration:   
