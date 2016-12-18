@@ -6,6 +6,13 @@ This allows for quick, precise additions and alignment of geometry, without havi
 Default Key: Shift + C  
 Video Demonstration: https://twitter.com/machin3io/status/806963166404087808  
 
+# Cleans Up Good
+All at once: removes doubles, deletes loose vertices and edges, dissolves degenerates, recalculates normals, removes 2-edged vertices, selects non-manifold geometry.
+To be used frequently while modeling, to keep everything clean, tidy and working.
+
+Default Key: 3 
+Video Demonstration: soon
+
 
 # Clipping Plane Toggle
 
