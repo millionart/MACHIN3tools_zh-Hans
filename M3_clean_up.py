@@ -111,10 +111,12 @@ class Remove2EdgedVerts(bpy.types.Operator):
 
     def remove_2_edged_verts(self):
         mesh = bpy.context.object.data
+
+        # get vertex count
+        bpy.ops.object.mode_set(mode='OBJECT')
         count = len(mesh.vertices)
 
         # select first edge
-        bpy.ops.object.mode_set(mode='OBJECT')
         mesh.edges[0].select = True
         bpy.ops.object.mode_set(mode='EDIT')
 
