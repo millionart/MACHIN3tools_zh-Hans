@@ -8,7 +8,8 @@ Video Demonstration: https://twitter.com/machin3io/status/806963166404087808
 
 # Cleans Up Good
 All at once: removes doubles, deletes loose vertices and edges, dissolves degenerates, recalculates normals, removes 2-edged vertices, selects non-manifold geometry.
-To be used frequently while modeling, to keep everything clean, tidy and working.
+To be used frequently while modeling, to keep everything clean, tidy and working.  
+The also exposes the "Remove 2-edged vertices", to be called independently via the spacebar menu, should that be desired.
 
 Default Key: 3 
 Video Demonstration: soon
@@ -18,6 +19,7 @@ Video Demonstration: soon
 
 This script allows for quick toggling through 3 different clipping plain values. Useful when you need to get very close to some vertices, or when you need to see and select through overlapping geometry. Toggle back to a bigger valuei, when you are zoomed out again, to avoid "bleeding edges" on the bounderies of your objects or viewport AO creating a moire pattern.
 The clipping values will also influence how close "View Selected" will focus on your selection.
+
 
 Default Key: Mouse Button 5  
 Video Demonstration: https://twitter.com/machin3io/status/805790547889844224
