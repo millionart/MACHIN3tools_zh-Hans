@@ -11,7 +11,7 @@ bl_info = {
 
 
 # SETTINGS
-buttton = "THREE"
+button = "THREE"
 press = "PRESS"
 alt = False
 shift = False
