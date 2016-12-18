@@ -22,7 +22,6 @@ auto2edged = True  # set to False, if 2 edged vertices should not be removed on 
 
 
 import bpy
-import os
 
 
 class CleansUpGood(bpy.types.Operator):
@@ -30,19 +29,18 @@ class CleansUpGood(bpy.types.Operator):
     bl_label = "MACHIN3: Cleans Up Good"
 
     def execute(self, context):
-        os.system("clear")
-
         # get object mode
         mode = self.get_mode()
 
         if mode == "OBJECT":
-            for obj in context.selected_objects:
-                print(obj.name)
-                context.scene.objects.active = obj
-                bpy.ops.object.mode_set(mode='EDIT')
-                compmode = self.get_comp_mode()
-                self.clean_up(compmode)
-                bpy.ops.object.mode_set(mode='OBJECT')
+            for obj in bpy.context.selected_objects:
+                if obj.type == "MESH":
+                    print(obj.name)
+                    bpy.context.scene.objects.active = obj
+                    bpy.ops.object.mode_set(mode='EDIT')
+                    compmode = self.get_comp_mode()
+                    self.clean_up(compmode)
+                    bpy.ops.object.mode_set(mode='OBJECT')
         elif mode in ["VERT", "EDGE", "FACE"]:
             self.clean_up(mode)
 
