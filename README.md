@@ -9,8 +9,10 @@ Video Demonstration: https://twitter.com/machin3io/status/806963166404087808
 # Cleans Up Good
 All at once: removes doubles, deletes loose vertices and edges, dissolves degenerates, recalculates normals, removes 2-edged vertices, selects non-manifold geometry.
 To be used frequently while modeling, to keep everything clean, tidy and working.   
+Cleans Up Good can be called in edit mode and object mode, including on a selection of objects. By default, the keyboard shortcut will only work in edit mode.
+Access the sript from the spacebarmenu or set the 'objectmodeshortcut' switch to true.  
 The script also exposes the "Remove 2-edged vertices" class seperatedly, to be called via the spacebar menu, should that be desired.
-Set "auto2edged" to False, if you don't want it to run with each clean up.
+Set "auto2edged" to False, if you don't want it to run with each clean up. There will be a delay with heavy geometry.
 
 Default Key: 3  
 Video Demonstration: https://twitter.com/machin3io/status/810309079075848193  

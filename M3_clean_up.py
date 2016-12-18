@@ -4,7 +4,7 @@ bl_info = {
     "version": (0, 1),
     "blender": (2, 77, 0),
     "location": "Spacebar Menu/Hotkey 3",
-    "description": "Removes doubles, deletes loose vertices and edges, dissolves degenerates, recalculates normals, removes 2-edged vertices, selects non-manifold geometry",
+    "description": "Removes doubles, dissolves degenerates, deletes loose vertices and edges, recalculates normals, dissolves 2-edged vertices, selects non-manifold geometry. Works in edit mode and object mode(incl. on multiple objects).",
     "warning": "",
     "wiki_url": "",
     "category": "Mesh"}
@@ -17,10 +17,12 @@ alt = False
 shift = False
 ctrl = False
 
-auto2edged = True
+objectmodeshortcut = False  # set to True, if the keyboard shortcut(assigned above) should work in OBJECT mode as well, otherwise it's just EDIT mode. Call the script from the spacebar menu in object mode in that case.
+auto2edged = True  # set to False, if 2 edged vertices should not be removed on each clean up run. It can always be called separately from the spacebar menu. You might want to disable this if you are working with meshes above 50k triangles, if the clean up delay bothers you.
 
 
 import bpy
+import os
 
 
 class CleansUpGood(bpy.types.Operator):
@@ -28,9 +30,25 @@ class CleansUpGood(bpy.types.Operator):
     bl_label = "MACHIN3: Cleans Up Good"
 
     def execute(self, context):
-        # get component mode
+        os.system("clear")
+
+        # get object mode
         mode = self.get_mode()
 
+        if mode == "OBJECT":
+            for obj in context.selected_objects:
+                print(obj.name)
+                context.scene.objects.active = obj
+                bpy.ops.object.mode_set(mode='EDIT')
+                compmode = self.get_comp_mode()
+                self.clean_up(compmode)
+                bpy.ops.object.mode_set(mode='OBJECT')
+        elif mode in ["VERT", "EDGE", "FACE"]:
+            self.clean_up(mode)
+
+        return {'FINISHED'}
+
+    def clean_up(self, mode):  # needs to be in edit mode
         # remove doubles
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.remove_doubles()
@@ -59,8 +77,6 @@ class CleansUpGood(bpy.types.Operator):
         elif mode == "FACE":
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='FACE')
 
-        return {'FINISHED'}
-
     def get_mode(self):
         objmode = bpy.context.active_object.mode
 
@@ -68,19 +84,22 @@ class CleansUpGood(bpy.types.Operator):
             # print("object mode")
             return "OBJECT"
         elif objmode == "EDIT":
-            subobjtuple = tuple(bpy.context.scene.tool_settings.mesh_select_mode)
-            if subobjtuple == (True, False, False):
-                # print("edit mode: vertex")
-                return "VERT"
-            elif subobjtuple == (False, True, False):
-                # print("edit mode: edge")
-                return "EDGE"
-            elif subobjtuple == (False, False, True):
-                # print("edit mode: face")
-                return "FACE"
-            else:
-                # print("Unsupported multi sub-object mode")
-                return None
+            return self.get_comp_mode()
+
+    def get_comp_mode(self):
+        subobjtuple = tuple(bpy.context.scene.tool_settings.mesh_select_mode)
+        if subobjtuple == (True, False, False):
+            # print("edit mode: vertex")
+            return "VERT"
+        elif subobjtuple == (False, True, False):
+            # print("edit mode: edge")
+            return "EDGE"
+        elif subobjtuple == (False, False, True):
+            # print("edit mode: face")
+            return "FACE"
+        else:
+            # print("Unsupported multi sub-object mode")
+            return None
 
 
 class Remove2EdgedVerts(bpy.types.Operator):
@@ -131,7 +150,11 @@ def register():
     bpy.utils.register_class(Remove2EdgedVerts)
 
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+
+    if objectmodeshortcut:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
+    else:
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
 
     kmi = km.keymap_items.new(CleansUpGood.bl_idname, button, press, alt=alt, shift=shift, ctrl=ctrl)
 
@@ -139,7 +162,6 @@ def register():
 def unregister():
     bpy.utils.unregister_class(CleansUpGood)
     bpy.utils.unregister_class(Remove2EdgedVerts)
-
 
 
 if __name__ == "__main__":
