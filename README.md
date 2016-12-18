@@ -13,7 +13,7 @@ The script also exposes the "Remove 2-edged vertices" class seperatedly, to be c
 Set "auto2edged" to False, if you don't want it to run with each clean up.
 
 Default Key: 3  
-Video Demonstration: soon   
+Video Demonstration: https://twitter.com/machin3io/status/810309079075848193  
 
 
 # Clipping Plane Toggle
