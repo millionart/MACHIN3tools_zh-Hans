@@ -10,6 +10,16 @@ bl_info = {
     "category": "Mesh"}
 
 
+# SETTINGS
+buttton = "THREE"
+press = "PRESS"
+alt = False
+shift = False
+ctrl = False
+
+auto2edged = True
+
+
 import bpy
 
 
@@ -36,7 +46,8 @@ class CleansUpGood(bpy.types.Operator):
         bpy.ops.mesh.select_all(action='DESELECT')
 
         # dissolve two-edged vertices, will go into vertex mode
-        bpy.ops.machin3.remove_2_edged_verts()
+        if auto2edged:
+            bpy.ops.machin3.remove_2_edged_verts()
 
         # select non-manifold geometry, helpful to find holes
         # also helpful for finding overlapping bevels too and rarely invisible/undetectable vertices, both of which can prevent booleans to work
@@ -122,7 +133,7 @@ def register():
     wm = bpy.context.window_manager
     km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
 
-    kmi = km.keymap_items.new(CleansUpGood.bl_idname, 'THREE', 'PRESS')
+    kmi = km.keymap_items.new(CleansUpGood.bl_idname, button, press, alt=alt, shift=shift, ctrl=ctrl)
 
 
 def unregister():
