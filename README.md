@@ -8,11 +8,11 @@ Video Demonstration: https://twitter.com/machin3io/status/806963166404087808
 
 # Cleans Up Good
 All at once: removes doubles, deletes loose vertices and edges, dissolves degenerates, recalculates normals, removes 2-edged vertices, selects non-manifold geometry.
-To be used frequently while modeling, to keep everything clean, tidy and working.  
+To be used frequently while modeling, to keep everything clean, tidy and working.   
 The also exposes the "Remove 2-edged vertices", to be called independently via the spacebar menu, should that be desired.
 
-Default Key: 3 
-Video Demonstration: soon
+Default Key: 3  
+Video Demonstration: soon   
 
 
 # Clipping Plane Toggle
