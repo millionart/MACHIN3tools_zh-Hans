@@ -52,17 +52,18 @@ This script wraps around Rob Fornof's excellent Mirror Mirror Tool(https://githu
 Default Key: Shift + Alt + X/Y/Z  
 Video Demonstration: https://twitter.com/machin3io/status/807718239044300800  
 
-# Shading Switch
-Switches between Material and Solid shading modes. Also re-assigns Z key for wireframe switching, and Shift + Z for render switching dynamically according to the current shading mode.
-This allows for consistent use of the Z and Shift + Z keys across those two shading modes. 
-
-Default Key: Shift + Mouse Button 5   
-Video Demonstration: https://twitter.com/machin3io/status/810133309497999360  
-
 
 # Project
 
 Wraps around Paul Marshall's excellent "Edge Tools - Project (End Point) and makes using it quicker. Select polygon, fire script, shift select edges and fire it again to project the edges.
 
 Default Key: Shift + Alt + E  
-Video Demonstration: 
+Video Demonstration: https://twitter.com/machin3io/status/812280644420194304
+
+
+# Shading Switch
+Switches between Material and Solid shading modes. Also re-assigns Z key for wireframe switching, and Shift + Z for render switching dynamically according to the current shading mode.
+This allows for consistent use of the Z and Shift + Z keys across those two shading modes. 
+
+Default Key: Shift + Mouse Button 5   
+Video Demonstration: https://twitter.com/machin3io/status/810133309497999360  
