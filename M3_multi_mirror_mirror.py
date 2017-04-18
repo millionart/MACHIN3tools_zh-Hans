@@ -62,6 +62,12 @@ def multi_mirror_mirror(mirrormirrortool):
         bpy.context.scene.objects.active = activeobj
         mirrormirrortool()
 
+        # DECALmachine support (u mirror for parallax and for info decals!)
+        if "decal" in obj.name or "info" in obj.name:
+            for mod in obj.modifiers:
+                if "mirror" in mod.name.lower():
+                    mod.use_mirror_u = True
+
     for obj in selection:
         bpy.data.objects[obj.name].select = True
     bpy.data.objects[activeobj.name].select = True
