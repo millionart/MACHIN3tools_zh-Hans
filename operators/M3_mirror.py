@@ -97,5 +97,9 @@ def mirror(axisx, axisy, axisz):
         # DECALmachine wstep.copy_normals() support
         mod = obj.modifiers.get("M3_copied_normals")
         if mod:
+            # making obj active for ops
+            m3.make_active(obj)
             while obj.modifiers[-1].name != "M3_copied_normals":
                 bpy.ops.object.modifier_move_down(modifier="M3_copied_normals")
+            # setting the original active back again
+            m3.make_active(active)
