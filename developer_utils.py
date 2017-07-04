@@ -1,6 +1,7 @@
 import os
 import pkgutil
 import importlib
+import rna_keymap_ui
 
 
 def setup_addon_modules(path, package_name, reload):
@@ -36,3 +37,35 @@ def setup_addon_modules(path, package_name, reload):
     if reload:
         reload_modules(modules)
     return modules
+
+
+def get_keymap_item(km, kmi_name, kmi_value, properties):
+    for i, km_item in enumerate(km.keymap_items):
+        if km.keymap_items.keys()[i] == kmi_name:
+            if properties == 'name':
+                if km.keymap_items[i].properties.name == kmi_value:
+                    return km_item
+            elif properties == 'tab':
+                if km.keymap_items[i].properties.tab == kmi_value:
+                    return km_item
+            elif properties == 'none':
+                return km_item
+    return None
+
+
+def show_keymap(condition, kc, keymap, addon, col):
+    km = kc.keymaps[keymap]
+    if condition:
+        try:
+            kmi = get_keymap_item(km, addon, 'none', 'none')
+            kmi.active = True
+            col.context_pointer_set("keymap", km)
+            rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+        except:
+            pass
+    else:
+        try:
+            kmi = get_keymap_item(km, addon, 'none', 'none')
+            kmi.active = False
+        except:
+            pass

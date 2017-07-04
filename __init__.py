@@ -31,10 +31,10 @@ bl_info = {
 
 import bpy
 from bpy.props import BoolProperty
-from . import developer_utils
+from . import developer_utils as du
 from . import M3utils as m3
 
-modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in locals())
+modules = du.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
 
 class MACHIN3Settings(bpy.types.PropertyGroup):
@@ -60,39 +60,56 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     def draw(self, context):
         layout=self.layout
 
+        wm = bpy.context.window_manager
+        kc = wm.keyconfigs.user
+
         col = layout.column()
 
+        col.label("Activating modules requires saving user preferences and re-starting Blender.")
+        col.separator()
+
+        # SHADING SWITCH
+
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_ShadingSwitch")
+        row.prop(self, "activate_ShadingSwitch", toggle=True)
         row.label("Switches between Material and Solid shading modes. Also re-assigns Z key for wireframe switching and Shift + Z for render switching accordingly.")
+        du.show_keymap(self.activate_ShadingSwitch, kc, "3D View", "machin3.shading_switch", col)
 
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_RedMode")
+        row.prop(self, "activate_RedMode", toggle=True)
         row.label("In SOLID mode: switch to red matcap and back. In MATERIAL mode: switch turn bevels of WStep materials red and.")
+        du.show_keymap(self.activate_RedMode, kc, "3D View", "machin3.red_mode", col)
 
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_CenterCube")
+        row.prop(self, "activate_CenterCube", toggle=True)
         row.label("If nothing is selected, places a cube at the cursor location, with any of X/Y/Z zeroed out, enters edit mode, selects all and initiates the scale tool. If objects are selected, it zeroes out any of X/Y/Z.")
+        du.show_keymap(self.activate_CenterCube, kc, "Object Mode", "machin3.center_cube", col)
 
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_CleansUpGood")
+        row.prop(self, "activate_CleansUpGood", toggle=True)
         row.label("Removes doubles, dissolves degenerates, deletes loose vertices and edges, recalculates normals, dissolves 2-edged vertices, selects non-manifold geometry. Works in edit mode and object mode(incl. on multiple objects).")
+        du.show_keymap(self.activate_CenterCube, kc, "Mesh", "machin3.clean_up", col)
 
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_ClippingToggle")
+        row.prop(self, "activate_ClippingToggle", toggle=True)
         row.label("Toggle through different clipping plane settings")
+        du.show_keymap(self.activate_ClippingToggle, kc, "3D View", "machin3.clipping_toggle", col)
 
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_Focus")
+        row.prop(self, "activate_Focus", toggle=True)
         row.label("Disables all Mirror modifiers of the selected objects, then enters local view. Renables mirror modifers again, when exiting localview.")
+        du.show_keymap(self.activate_Focus, kc, "Object Mode", "machin3.focus", col)
 
         # row = col.split(percentage=0.2)
         # row.prop(self, "activate_ThemeSwitch")
         # row.label("Switchs Theme. Optionally switches Matcap at the same time")
 
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_Mirror")
+        row.prop(self, "activate_Mirror", toggle=True)
         row.label("Mirrors selected objects across the active object, allows mirroring of multiple objects at once and supports DECALmachine.")
+        du.show_keymap(self.activate_Mirror, kc, "Object Mode", "machin3.mirror_x", col)
+        du.show_keymap(self.activate_Mirror, kc, "Object Mode", "machin3.mirror_y", col)
+        du.show_keymap(self.activate_Mirror, kc, "Object Mode", "machin3.mirror_z", col)
 
 MACHIN3_keymaps = []
 
@@ -106,7 +123,7 @@ def register():
 
     # SHADING SWITCH
 
-    if m3.M3_prefs().activate_RedMode:
+    if m3.M3_prefs().activate_ShadingSwitch:
         km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
         kmi = km.keymap_items.new("machin3.shading_switch", 'BUTTON5MOUSE', 'PRESS', shift=True)
         MACHIN3_keymaps.append((km, kmi))
@@ -139,7 +156,7 @@ def register():
 
     if m3.M3_prefs().activate_ClippingToggle:
         km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
-        kmi = km.keymap_items.new("machin3.clipping_plane_toggle", "BUTTON5MOUSE", "PRESS")
+        kmi = km.keymap_items.new("machin3.clipping_toggle", "BUTTON5MOUSE", "PRESS")
 
     # FOCUS
 

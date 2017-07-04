@@ -19,7 +19,7 @@ class Focus(bpy.types.Operator):
     def turn_mirror(self, string):
         for obj in bpy.context.selected_objects:
             for mod in obj.modifiers:
-                if "Mirror" in mod.name or "mirror_mirror" in mod.name:
+                if "mirror" in mod.name.lower():
                     # print("Found mirror: %s" % (mod.name))
                     if string == "OFF":
                         mod.show_viewport = False

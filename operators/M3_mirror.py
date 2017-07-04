@@ -72,34 +72,38 @@ class MirrorZ(bpy.types.Operator):
 def mirror(axisx, axisy, axisz):
     active = m3.get_active()
     selection = m3.selected_objects()
-    selection.remove(active)
 
-    for obj in selection:
-        mirror = obj.modifiers.new(name="M3_mirror", type="MIRROR")
+    if len(selection) > 1:
+        selection.remove(active)
 
-        mirror.use_x = axisx
-        mirror.use_y = axisy
-        mirror.use_z = axisz
+        for obj in selection:
+            mirror = obj.modifiers.new(name="M3_mirror", type="MIRROR")
 
-        mirror.mirror_object = active
+            mirror.use_x = axisx
+            mirror.use_y = axisy
+            mirror.use_z = axisz
 
-        # DECALmachine support (u mirror for parallax and for info decals!)
-        if "decal" in obj.name or "info" in obj.name:
-            mirror.use_mirror_u = True
+            mirror.mirror_object = active
 
-        # DECALmachine wstep.create_weighted_normals() support
-        mod = obj.modifiers.get("M3_custom_normals")
-        if mod:
-            active.select = False
-            bpy.ops.machin3.wstep()  # needs to wstep, because we need to get the mirror also on the target, re-stepping seems be the easiest way to do it
-            active.select = True
+            # DECALmachine support (u mirror for parallax and for info decals!)
+            if "decal" in obj.name or "info" in obj.name:
+                mirror.use_mirror_u = True
 
-        # DECALmachine wstep.copy_normals() support
-        mod = obj.modifiers.get("M3_copied_normals")
-        if mod:
-            # making obj active for ops
-            m3.make_active(obj)
-            while obj.modifiers[-1].name != "M3_copied_normals":
-                bpy.ops.object.modifier_move_down(modifier="M3_copied_normals")
-            # setting the original active back again
-            m3.make_active(active)
+            # DECALmachine wstep.create_weighted_normals() support
+            mod = obj.modifiers.get("M3_custom_normals")
+            if mod:
+                active.select = False
+                bpy.ops.machin3.wstep()  # needs to wstep, because we need to get the mirror also on the target, re-stepping seems be the easiest way to do it
+                active.select = True
+
+            # DECALmachine wstep.copy_normals() support
+            mod = obj.modifiers.get("M3_copied_normals")
+            if mod:
+                # making obj active for ops
+                m3.make_active(obj)
+                while obj.modifiers[-1].name != "M3_copied_normals":
+                    bpy.ops.object.modifier_move_down(modifier="M3_copied_normals")
+                # setting the original active back again
+                m3.make_active(active)
+    else:
+        print("Mirror: Select at least 2 objects.")
