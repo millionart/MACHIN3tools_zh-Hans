@@ -54,6 +54,8 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_Focus = BoolProperty(name="Focus", default=False)
     # activate_ThemeSwitch = BoolProperty(name="Theme Switch", default=False)
     activate_Mirror = BoolProperty(name="Mirror", default=False)
+    activate_StarConnect = BoolProperty(name="Star Connect", default=False)
+    activate_SmartConnect = BoolProperty(name="Smart Connect", default=False)
 
     CleansUpgGood_objectmodeshortcut = False  # set to True, if the keyboard shortcut should work in OBJECT mode as well, otherwise it's just EDIT mode. Call the script from the spacebar menu in object mode in that case.
 
@@ -75,34 +77,48 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.label("Switches between Material and Solid shading modes. Also re-assigns Z key for wireframe switching and Shift + Z for render switching accordingly.")
         du.show_keymap(self.activate_ShadingSwitch, kc, "3D View", "machin3.shading_switch", col)
 
+        # RED MODE
+
         row = col.split(percentage=0.2)
         row.prop(self, "activate_RedMode", toggle=True)
         row.label("In SOLID mode: switch to red matcap and back. In MATERIAL mode: switch turn bevels of WStep materials red and.")
         du.show_keymap(self.activate_RedMode, kc, "3D View", "machin3.red_mode", col)
+
+        # Center Cube
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_CenterCube", toggle=True)
         row.label("If nothing is selected, places a cube at the cursor location, with any of X/Y/Z zeroed out, enters edit mode, selects all and initiates the scale tool. If objects are selected, it zeroes out any of X/Y/Z.")
         du.show_keymap(self.activate_CenterCube, kc, "Object Mode", "machin3.center_cube", col)
 
+        # Cleans Up Good
+
         row = col.split(percentage=0.2)
         row.prop(self, "activate_CleansUpGood", toggle=True)
         row.label("Removes doubles, dissolves degenerates, deletes loose vertices and edges, recalculates normals, dissolves 2-edged vertices, selects non-manifold geometry. Works in edit mode and object mode(incl. on multiple objects).")
-        du.show_keymap(self.activate_CenterCube, kc, "Mesh", "machin3.clean_up", col)
+        du.show_keymap(self.activate_CleansUpGood, kc, "Mesh", "machin3.clean_up", col)
+
+        # CLIPPING TOGGLE
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_ClippingToggle", toggle=True)
         row.label("Toggle through different clipping plane settings")
         du.show_keymap(self.activate_ClippingToggle, kc, "3D View", "machin3.clipping_toggle", col)
 
+        # FOCUS
+
         row = col.split(percentage=0.2)
         row.prop(self, "activate_Focus", toggle=True)
         row.label("Disables all Mirror modifiers of the selected objects, then enters local view. Renables mirror modifers again, when exiting localview.")
         du.show_keymap(self.activate_Focus, kc, "Object Mode", "machin3.focus", col)
 
+        # THEME SWITCH
+
         # row = col.split(percentage=0.2)
         # row.prop(self, "activate_ThemeSwitch")
         # row.label("Switchs Theme. Optionally switches Matcap at the same time")
+
+        # MIRROR
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_Mirror", toggle=True)
@@ -110,6 +126,21 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         du.show_keymap(self.activate_Mirror, kc, "Object Mode", "machin3.mirror_x", col)
         du.show_keymap(self.activate_Mirror, kc, "Object Mode", "machin3.mirror_y", col)
         du.show_keymap(self.activate_Mirror, kc, "Object Mode", "machin3.mirror_z", col)
+
+        # STAR CONNECT
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_StarConnect", toggle=True)
+        row.label("In Vert mode, connects all selected verts to the last one of the selection, in Face mode it creates a center star vert")
+        du.show_keymap(self.activate_StarConnect, kc, "Mesh", "machin3.star_connect", col)
+
+        # SMART CONNECT
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_SmartConnect", toggle=True)
+        row.label("In Vert mode connects vert path, in edge mode is turns the edge.")
+        du.show_keymap(self.activate_SmartConnect, kc, "Mesh", "machin3.smart_connect", col)
+
 
 MACHIN3_keymaps = []
 
@@ -176,8 +207,24 @@ def register():
     if m3.M3_prefs().activate_Focus:
         km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.mirror_x", "X", "PRESS", alt=True, shift=True)
+        MACHIN3_keymaps.append((km, kmi))
         kmi = km.keymap_items.new("machin3.mirror_y", "Y", "PRESS", alt=True, shift=True)
+        MACHIN3_keymaps.append((km, kmi))
         kmi = km.keymap_items.new("machin3.mirror_z", "Z", "PRESS", alt=True, shift=True)
+        MACHIN3_keymaps.append((km, kmi))
+
+    # STAR CONNECT
+
+    if m3.M3_prefs().activate_StarConnect:
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.star_connect", "TWO", "PRESS", shift=True)
+        MACHIN3_keymaps.append((km, kmi))
+
+    # SMART CONNECT
+
+    if m3.M3_prefs().activate_SmartConnect:
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.smart_connect", "TWO", "PRESS")
         MACHIN3_keymaps.append((km, kmi))
 
 
