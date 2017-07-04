@@ -39,6 +39,16 @@ def setup_addon_modules(path, package_name, reload):
     return modules
 
 
+def kmi_props_setattr(kmi_props, attr, value):
+    try:
+        setattr(kmi_props, attr, value)
+    except AttributeError:
+        print("Warning: property '%s' not found in keymap item '%s'" %
+              (attr, kmi_props.__class__.__name__))
+    except Exception as e:
+        print("Warning: %r" % e)
+
+
 def get_keymap_item(km, kmi_name, kmi_value, properties):
     for i, km_item in enumerate(km.keymap_items):
         if km.keymap_items.keys()[i] == kmi_name:
@@ -53,19 +63,19 @@ def get_keymap_item(km, kmi_name, kmi_value, properties):
     return None
 
 
-def show_keymap(condition, kc, keymap, addon, col):
+def show_keymap(condition, kc, keymap, addon, col, kmivalue='none', properties='none'):
     km = kc.keymaps[keymap]
     if condition:
         try:
-            kmi = get_keymap_item(km, addon, 'none', 'none')
-            kmi.active = True
+            kmi = get_keymap_item(km, addon, kmivalue, properties)
+            # kmi.active = True
             col.context_pointer_set("keymap", km)
             rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
         except:
             pass
     else:
         try:
-            kmi = get_keymap_item(km, addon, 'none', 'none')
+            kmi = get_keymap_item(km, addon, kmivalue, properties)
             kmi.active = False
         except:
             pass
