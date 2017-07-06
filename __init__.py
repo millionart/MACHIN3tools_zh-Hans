@@ -37,6 +37,10 @@ from . import M3utils as m3
 modules = du.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
 
+# TODO: add automatic custom blender keymaps option
+# TODO: OSD feedback, so you dont have to check into the op props to verify a tool did what you want it to do
+
+
 class MACHIN3Settings(bpy.types.PropertyGroup):
     debugmode = BoolProperty(name="Debug Mode", default=False)
 
@@ -55,7 +59,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     # activate_ThemeSwitch = BoolProperty(name="Theme Switch", default=False)
     activate_Mirror = BoolProperty(name="Mirror", default=False)
     activate_StarConnect = BoolProperty(name="Star Connect", default=False)
-    activate_SmartConnect = BoolProperty(name="Smart Connect", default=False)
+    activate_SmartModes = BoolProperty(name="Smart Modes", default=False)
     activate_CleanoutMaterials = BoolProperty(name="Cleanout Materials", default=False)
     activate_CleanoutUVs = BoolProperty(name="Cleanout UVs", default=False)
     activate_CleanoutTransforms = BoolProperty(name="Cleanout Transforms", default=False)
@@ -142,12 +146,12 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.label("In Vert mode, connects all selected verts to the last one of the selection, in Face mode it creates a center star vert")
         du.show_keymap(self.activate_StarConnect, kc, "Mesh", "machin3.star_connect", col)
 
-        # SMART CONNECT
+        # SMART MODES
 
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_SmartConnect", toggle=True)
-        row.label("In Vert mode connects vert path, in edge mode is turns the edge.")
-        du.show_keymap(self.activate_SmartConnect, kc, "Mesh", "machin3.smart_connect", col)
+        row.prop(self, "activate_SmartModes", toggle=True)
+        row.label("In Vert mode connects vert path, in edge mode is turns the edge, in face mode it converts the selection to a bounder loop.")
+        du.show_keymap(self.activate_SmartModes, kc, "Mesh", "machin3.smart_modes", col)
 
         # CLEANOUT MATERIALS
 
@@ -264,8 +268,8 @@ class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
 
         if m3.M3_prefs().activate_CleansUpGood:
             column.operator("machin3.clean_up", text="Cleans Up Good")
-        if m3.M3_prefs().activate_SmartConnect:
-            column.operator("machin3.smart_connect", text="Smart Connect")
+        if m3.M3_prefs().activate_SmartModes:
+            column.operator("machin3.smart_modes", text="Smart Modes")
         if m3.M3_prefs().activate_StarConnect:
             column.operator("machin3.star_connect", text="Star Connect")
         if m3.M3_prefs().activate_CleanoutTransforms:
@@ -358,23 +362,23 @@ def register():
         kmi = km.keymap_items.new("machin3.mirror_z", "Z", "PRESS", alt=True, shift=True)
         MACHIN3_keymaps.append((km, kmi))
 
-    # STAR CONNECT
+    # STAR MODES
 
     if m3.M3_prefs().activate_StarConnect:
         km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.star_connect", "TWO", "PRESS", shift=True)
         MACHIN3_keymaps.append((km, kmi))
 
-    # SMART CONNECT
+    # SMART MODES
 
-    if m3.M3_prefs().activate_SmartConnect:
+    if m3.M3_prefs().activate_SmartModes:
         km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
-        kmi = km.keymap_items.new("machin3.smart_connect", "TWO", "PRESS")
+        kmi = km.keymap_items.new("machin3.smart_modes", "TWO", "PRESS")
         MACHIN3_keymaps.append((km, kmi))
 
     # SLIDE EXTEND
 
-    if m3.M3_prefs().activate_SmartConnect:
+    if m3.M3_prefs().activate_SlideExtend:
         km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.slide_extend", "E", "PRESS", shift=True)
         MACHIN3_keymaps.append((km, kmi))
