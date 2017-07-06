@@ -1,5 +1,5 @@
 import bpy
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, FloatProperty
 from .. import M3utils as m3
 
 
@@ -12,7 +12,19 @@ class CenterCube(bpy.types.Operator):
     axisy = BoolProperty(name="Y", default=False)
     axisz = BoolProperty(name="Z", default=False)
 
-    autoeditmodescale = BoolProperty(name="Auto Edit Mode Scale", default=True)
+    scale = FloatProperty(name="Scale", default=1)
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        row = column.row(align=True)
+        row.prop(self, "axisx", toggle=True)
+        row.prop(self, "axisy", toggle=True)
+        row.prop(self, "axisz", toggle=True)
+
+        column.prop(self, "scale", toggle=True)
 
     def execute(self, context):
         sel = m3.selected_objects()
@@ -28,10 +40,12 @@ class CenterCube(bpy.types.Operator):
             if self.axisz:
                 active.location[2] = 0
 
-            if self.autoeditmodescale:
-                m3.set_mode("EDIT")
-                m3.select_all("MESH")
-                bpy.ops.transform.resize('INVOKE_DEFAULT', constraint_axis=(False, False, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+            scale = self.scale
+
+            m3.set_mode("EDIT")
+            m3.select_all("MESH")
+            bpy.ops.transform.resize(value=(scale, scale, scale), constraint_axis=(False, False, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+            m3.set_mode("OBJECT")
         else:  # objects selected
             for obj in sel:
                 if self.axisx:
@@ -42,11 +56,3 @@ class CenterCube(bpy.types.Operator):
                     obj.location[2] = 0
 
         return {'FINISHED'}
-
-    def draw(self, context):
-        layout = self.layout
-
-        row = layout.row(align=True)
-        row.prop(self, "axisx", toggle=True)
-        row.prop(self, "axisy", toggle=True)
-        row.prop(self, "axisz", toggle=True)

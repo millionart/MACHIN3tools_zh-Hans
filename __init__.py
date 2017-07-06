@@ -37,6 +37,9 @@ from . import M3utils as m3
 modules = du.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
 
+# TODO: speccials menu entries, in object and edit mode
+
+
 class MACHIN3Settings(bpy.types.PropertyGroup):
     debugmode = BoolProperty(name="Debug Mode", default=False)
 
@@ -56,8 +59,10 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_Mirror = BoolProperty(name="Mirror", default=False)
     activate_StarConnect = BoolProperty(name="Star Connect", default=False)
     activate_SmartConnect = BoolProperty(name="Smart Connect", default=False)
-
-    CleansUpgGood_objectmodeshortcut = False  # set to True, if the keyboard shortcut should work in OBJECT mode as well, otherwise it's just EDIT mode. Call the script from the spacebar menu in object mode in that case.
+    activate_CleanoutMaterials = BoolProperty(name="Cleanout Materials", default=False)
+    activate_CleanoutUVs = BoolProperty(name="Cleanout UVs", default=False)
+    activate_CleanoutTransforms = BoolProperty(name="Cleanout Transforms", default=False)
+    activate_SlideExtend = BoolProperty(name="Slide Extend", default=False)
 
     def draw(self, context):
         layout=self.layout
@@ -141,6 +146,84 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.label("In Vert mode connects vert path, in edge mode is turns the edge.")
         du.show_keymap(self.activate_SmartConnect, kc, "Mesh", "machin3.smart_connect", col)
 
+        # CLEANOUT MATERIALS
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_CleanoutMaterials", toggle=True)
+        row.label("Removes all material assignments and all materials from the scene.")
+        du.show_keymap(self.activate_CleanoutMaterials, kc, "Object Mode", "machin3.cleanout_materials", col)
+
+        # CLEANOUT UVS
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_CleanoutUVs", toggle=True)
+        row.label("Removes all UV channels from selected objects.")
+        du.show_keymap(self.activate_CleanoutMaterials, kc, "Object Mode", "machin3.cleanout_uvs", col)
+
+        # CLEANOUT TRANSFORM ORIENTATIONS
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_CleanoutTransforms", toggle=True)
+        row.label("Removes all custom transform orientations.")
+        du.show_keymap(self.activate_CleanoutTransforms, kc, "3D View", "machin3.cleanout_transforms", col)
+
+        # SLIDE EXTEND
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_SlideExtend", toggle=True)
+        row.label("Moves selected vert away or closer to active vert.")
+        du.show_keymap(self.activate_SlideExtend, kc, "Mesh", "machin3.slide_extend", col)
+
+
+class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
+    bl_label = "MACHIN3tools"
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        if m3.M3_prefs().activate_CleansUpGood:
+            column.operator("machin3.clean_up", text="Cleans Up Good")
+        if m3.M3_prefs().activate_CenterCube:
+            column.operator("machin3.center_cube", text="Center Cube")
+        if m3.M3_prefs().activate_CleanoutMaterials:
+            column.operator("machin3.cleanout_materials", text="Cleanout Materials")
+        if m3.M3_prefs().activate_CleanoutUVs:
+            column.operator("machin3.cleanout_uvs", text="Cleanout UVs")
+        if m3.M3_prefs().activate_CleanoutTransforms:
+            column.operator("machin3.cleanout_transforms", text="Cleanout Transforms")
+
+
+class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
+    bl_label = "MACHIN3tools"
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        if m3.M3_prefs().activate_CleansUpGood:
+            column.operator("machin3.clean_up", text="Cleans Up Good")
+        if m3.M3_prefs().activate_SmartConnect:
+            column.operator("machin3.smart_connect", text="Smart Connect")
+        if m3.M3_prefs().activate_StarConnect:
+            column.operator("machin3.star_connect", text="Star Connect")
+        if m3.M3_prefs().activate_CleanoutTransforms:
+            column.operator("machin3.cleanout_transforms", text="Cleanout Transforms")
+        if m3.M3_prefs().activate_SlideExtend:
+            column.operator("machin3.slide_extend", text="Slide Extend")
+
+
+def edit_menu_func(self, context):
+    self.layout.menu("VIEW3D_MT_edit_mesh_machin3tools")
+    self.layout.separator()
+
+
+def object_menu_func(self, context):
+    self.layout.menu("VIEW3D_MT_object_machin3tools")
+    self.layout.separator()
+
 
 MACHIN3_keymaps = []
 
@@ -149,6 +232,9 @@ def register():
     bpy.utils.register_module(__name__)
 
     bpy.types.Scene.machin3 = bpy.props.PointerProperty(type=MACHIN3Settings)
+
+    bpy.types.VIEW3D_MT_edit_mesh_specials.prepend(edit_menu_func)
+    bpy.types.VIEW3D_MT_object_specials.prepend(object_menu_func)
 
     wm = bpy.context.window_manager
 
@@ -176,10 +262,10 @@ def register():
     # CLEANS UP GOOD
 
     if m3.M3_prefs().activate_CleansUpGood:
-        if m3.M3_prefs().CleansUpgGood_objectmodeshortcut:
-            km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
-        else:
-            km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        # if m3.M3_prefs().CleansUpgGood_objectmodeshortcut:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
+        # else:
+            # km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.clean_up", "THREE", "PRESS")
         MACHIN3_keymaps.append((km, kmi))
 
@@ -227,9 +313,19 @@ def register():
         kmi = km.keymap_items.new("machin3.smart_connect", "TWO", "PRESS")
         MACHIN3_keymaps.append((km, kmi))
 
+    # SLIDE EXTEND
+
+    if m3.M3_prefs().activate_SmartConnect:
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.slide_extend", "E", "PRESS", shift=True)
+        MACHIN3_keymaps.append((km, kmi))
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)
+
+    bpy.types.VIEW3D_MT_edit_mesh_specials.remove(edit_menu_func)
+    bpy.types.VIEW3D_MT_object_specials.remove(object_menu_func)
 
     for km, kmi in MACHIN3_keymaps:
         km.keymap_items.remove(kmi)
