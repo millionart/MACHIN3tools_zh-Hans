@@ -37,9 +37,6 @@ from . import M3utils as m3
 modules = du.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
 
-# TODO: speccials menu entries, in object and edit mode
-
-
 class MACHIN3Settings(bpy.types.PropertyGroup):
     debugmode = BoolProperty(name="Debug Mode", default=False)
 
@@ -63,6 +60,9 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_CleanoutUVs = BoolProperty(name="Cleanout UVs", default=False)
     activate_CleanoutTransforms = BoolProperty(name="Cleanout Transforms", default=False)
     activate_SlideExtend = BoolProperty(name="Slide Extend", default=False)
+    activate_LockItAll = BoolProperty(name="Lock It All", default=False)
+    activate_HideMeshes = BoolProperty(name="Hide Meshes", default=False)
+    activate_MergeDown = BoolProperty(name="Merge Down", default=False)
 
     def draw(self, context):
         layout=self.layout
@@ -174,6 +174,27 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.label("Moves selected vert away or closer to active vert.")
         du.show_keymap(self.activate_SlideExtend, kc, "Mesh", "machin3.slide_extend", col)
 
+        # LOCK IT ALL
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_LockItAll", toggle=True)
+        row.label("Locks any or all selected objects' transforms")
+        du.show_keymap(self.activate_LockItAll, kc, "Object Mode", "machin3.lock_it_all", col)
+
+        # HIDE MESHES
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_HideMeshes", toggle=True)
+        row.label("Hides Meshes of selection in Object Mode.")
+        du.show_keymap(self.activate_HideMeshes, kc, "Object Mode", "machin3.hide_meshes", col)
+
+        # MERGE DOWN
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_MergeDown", toggle=True)
+        row.label("Merges down the entire modifier stack of objects in selection.")
+        du.show_keymap(self.activate_MergeDown, kc, "Object Mode", "machin3.merge_down", col)
+
 
 class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
     bl_label = "MACHIN3tools"
@@ -193,10 +214,18 @@ class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
             column.operator("machin3.cleanout_uvs", text="Cleanout UVs")
         if m3.M3_prefs().activate_CleanoutTransforms:
             column.operator("machin3.cleanout_transforms", text="Cleanout Transforms")
+        if m3.M3_prefs().activate_LockItAll:
+            column.operator("machin3.lock_it_all", text="Lock It All")
+        if m3.M3_prefs().activate_HideMeshes:
+            column.operator("machin3.hide_meshes", text="Hide Meshes")
+        if m3.M3_prefs().activate_MergeDown:
+            column.operator("machin3.merge_down", text="Merge Down")
 
 
 class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
     bl_label = "MACHIN3tools"
+
+    # TODO: comp mode availability check
 
     def draw(self, context):
         layout = self.layout
@@ -263,7 +292,7 @@ def register():
 
     if m3.M3_prefs().activate_CleansUpGood:
         # if m3.M3_prefs().CleansUpgGood_objectmodeshortcut:
-        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
+        km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='VIEW_3D')
         # else:
             # km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.clean_up", "THREE", "PRESS")
@@ -318,6 +347,13 @@ def register():
     if m3.M3_prefs().activate_SmartConnect:
         km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.slide_extend", "E", "PRESS", shift=True)
+        MACHIN3_keymaps.append((km, kmi))
+
+    # HIDE MESHES
+
+    if m3.M3_prefs().activate_HideMeshes:
+        km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.hide_meshes", "H", "PRESS", ctrl=True)
         MACHIN3_keymaps.append((km, kmi))
 
 

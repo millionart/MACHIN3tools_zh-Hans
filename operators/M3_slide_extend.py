@@ -1,8 +1,11 @@
 import bpy
 import bmesh
+from .. import M3utils as m3
 
 
 vertliststored = []
+
+# TODO: refactor and safety checks
 
 
 class SlideExtend(bpy.types.Operator):
@@ -10,78 +13,81 @@ class SlideExtend(bpy.types.Operator):
     bl_label = "MACHIN3: Slide Extend"
 
     def execute(self, context):
-        global vertliststored
-        # print(vertliststored)
+        mode = m3.get_mode()
 
-        # SNAPPING CHECK ###
+        if mode == "VERT":
+            global vertliststored
+            # print(vertliststored)
 
-        # check current snapping state
-        if bpy.context.scene.tool_settings.use_snap:
-            print("Snapping is on!")
-            self.snapState = True
-            # turn snapping off
-            bpy.context.scene.tool_settings.use_snap = False    # works as expected
-        else:
-            print("Snapping is off!")
-            self.snapState = False
+            # SNAPPING CHECK ###
 
-        # ORIENTATION from 2 VERT SELECTION ###
+            # check current snapping state
+            if bpy.context.scene.tool_settings.use_snap:
+                print("Snapping is on!")
+                self.snapState = True
+                # turn snapping off
+                bpy.context.scene.tool_settings.use_snap = False    # works as expected
+            else:
+                print("Snapping is off!")
+                self.snapState = False
 
-        # get current orientation and save it to a variable
-        currentOrientation = str(bpy.context.space_data.transform_orientation)
+            # ORIENTATION from 2 VERT SELECTION ###
 
-        # create new orientation based on selection
-        bpy.ops.transform.create_orientation(name="Topo Slide", use=True, overwrite=True)
+            # get current orientation and save it to a variable
+            currentOrientation = str(bpy.context.space_data.transform_orientation)
 
-        # SELECT ONLY ORIGINAL VERT ###
+            # create new orientation based on selection
+            bpy.ops.transform.create_orientation(name="Topo Slide", use=True, overwrite=True)
 
-        mesh = bpy.context.object.data
-        bm = bmesh.from_edit_mesh(mesh)
+            # SELECT ONLY ORIGINAL VERT ###
 
-        vertlist = [elem.index for elem in bm.select_history if isinstance(elem, bmesh.types.BMVert)]
-        # print(vertlist)
-        if len(vertlist) < 2:
-            # print("using stored selection history.")
-            vertlist = vertliststored
-        else:
-            # print("created new selection history.")
-            vertliststored = vertlist
-        firstvert = vertlist[0]
+            mesh = bpy.context.object.data
+            bm = bmesh.from_edit_mesh(mesh)
 
-        bpy.ops.mesh.select_all(action='DESELECT')
+            vertlist = [elem.index for elem in bm.select_history if isinstance(elem, bmesh.types.BMVert)]
+            # print(vertlist)
+            if len(vertlist) < 2:
+                # print("using stored selection history.")
+                vertlist = vertliststored
+            else:
+                # print("created new selection history.")
+                vertliststored = vertlist
+            firstvert = vertlist[0]
 
-        # the vertex selection needs to happen in object mode for some reason,
-        # so we toggle out of edit mode and in it again at the end
-        bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all(action='DESELECT')
 
-        obj = bpy.context.active_object.data
+            # the vertex selection needs to happen in object mode for some reason,
+            # so we toggle out of edit mode and in it again at the end
+            bpy.ops.object.editmode_toggle()
 
-        obj.vertices[firstvert].select = True
+            obj = bpy.context.active_object.data
 
-        bpy.ops.object.editmode_toggle()
+            obj.vertices[firstvert].select = True
 
-        # TRANSFORM.TRANSLATE ###
+            bpy.ops.object.editmode_toggle()
 
-        # full translate options for renference:
-        # bpy.ops.transform.translate(value=(0, -1, 0), constraint_axis=(False, True, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1, snap=False, snap_target='CLOSEST', snap_point=(0, 0, 0), snap_align=False, snap_normal=(0, 0, 0), texture_space=False, release_confirm=False)
+            # TRANSFORM.TRANSLATE ###
 
-        # invoking it like this bring you into modal mode, see https://www.blender.org/api/blender_python_api_current/bpy.types.Operator.html
-        bpy.ops.transform.translate('INVOKE_DEFAULT', constraint_orientation='Topo Slide', constraint_axis=(False, True, False), release_confirm=True)
+            # full translate options for renference:
+            # bpy.ops.transform.translate(value=(0, -1, 0), constraint_axis=(False, True, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1, snap=False, snap_target='CLOSEST', snap_point=(0, 0, 0), snap_align=False, snap_normal=(0, 0, 0), texture_space=False, release_confirm=False)
 
-        # SWITCH BACK ORIENTATION ###
+            # invoking it like this bring you into modal mode, see https://www.blender.org/api/blender_python_api_current/bpy.types.Operator.html
+            bpy.ops.transform.translate('INVOKE_DEFAULT', constraint_orientation='Topo Slide', constraint_axis=(False, True, False), release_confirm=True)
 
-        # optionally, delete the newly created orientation
-        # bpy.ops.transform.delete_orientation()
+            # SWITCH BACK ORIENTATION ###
 
-        # change the orientation back to what is was before
-        bpy.context.space_data.transform_orientation = currentOrientation
+            # optionally, delete the newly created orientation
+            # bpy.ops.transform.delete_orientation()
 
-        ### RE-ENABLE SNAPPING ###
+            # change the orientation back to what is was before
+            bpy.context.space_data.transform_orientation = currentOrientation
 
-        # re-enable snapping, if it was turned on before
-        # neither of these are working for some reason ###
-        if self.snapState:
-            bpy.context.scene.tool_settings.use_snap = True  # has no effect
-            print("test")  # this executes just fine
+            ### RE-ENABLE SNAPPING ###
+
+            # re-enable snapping, if it was turned on before
+            # neither of these are working for some reason ###
+            if self.snapState:
+                bpy.context.scene.tool_settings.use_snap = True  # has no effect
+                print("test")  # this executes just fine
 
         return {'FINISHED'}
