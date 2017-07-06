@@ -63,6 +63,9 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_LockItAll = BoolProperty(name="Lock It All", default=False)
     activate_HideMeshes = BoolProperty(name="Hide Meshes", default=False)
     activate_MergeDown = BoolProperty(name="Merge Down", default=False)
+    activate_CameraHelper = BoolProperty(name="Camera Helper", default=False)
+    activate_ChildOf = BoolProperty(name="Child Of", default=False)
+    activate_FlipNormals = BoolProperty(name="Flip Normals", default=False)
 
     def draw(self, context):
         layout=self.layout
@@ -195,6 +198,27 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.label("Merges down the entire modifier stack of objects in selection.")
         du.show_keymap(self.activate_MergeDown, kc, "Object Mode", "machin3.merge_down", col)
 
+        # CAMERA HELPER
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_CameraHelper", toggle=True)
+        row.label("Creates a new camera from view if nothing is selected. If Camera is selcted, aligns camera to current view and makes it the scene camera.")
+        du.show_keymap(self.activate_CameraHelper, kc, "Object Mode", "machin3.camera_helper", col)
+
+        # CHILD OF
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_ChildOf", toggle=True)
+        row.label("Child of's instead of parents. Works on geo and bones. On geo, can be fired multile times to switch between 'set inverse' and 'clear inverse. On geo defaults to 'set inverse', while on bones defaults to 'clear inverse'.")
+        du.show_keymap(self.activate_ChildOf, kc, "Object Mode", "machin3.child_of", col)
+
+        # FLIP NORMALS
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_FlipNormals", toggle=True)
+        row.label("Flips normals of selected objects.")
+        du.show_keymap(self.activate_FlipNormals, kc, "Object Mode", "machin3.flip_normals", col)
+
 
 class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
     bl_label = "MACHIN3tools"
@@ -220,6 +244,12 @@ class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
             column.operator("machin3.hide_meshes", text="Hide Meshes")
         if m3.M3_prefs().activate_MergeDown:
             column.operator("machin3.merge_down", text="Merge Down")
+        if m3.M3_prefs().activate_CameraHelper:
+            column.operator("machin3.camera_helper", text="Camera Helper")
+        if m3.M3_prefs().activate_ChildOf:
+            column.operator("machin3.child_of", text="Child Of")
+        if m3.M3_prefs().activate_FlipNormals:
+            column.operator("machin3.flip_normals", text="Flip Normals")
 
 
 class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
@@ -356,6 +386,19 @@ def register():
         kmi = km.keymap_items.new("machin3.hide_meshes", "H", "PRESS", ctrl=True)
         MACHIN3_keymaps.append((km, kmi))
 
+    # CAMERA HELPER
+
+    if m3.M3_prefs().activate_CameraHelper:
+        km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.camera_helper", "NUMPAD_0", "PRESS", alt=True)
+        MACHIN3_keymaps.append((km, kmi))
+
+    # CHILD OF
+
+    if m3.M3_prefs().activate_ChildOf:
+        km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.child_of", "P", "PRESS", ctrl=True)
+        MACHIN3_keymaps.append((km, kmi))
 
 def unregister():
     bpy.utils.unregister_module(__name__)
