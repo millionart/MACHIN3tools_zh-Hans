@@ -325,10 +325,7 @@ def register():
     # CLEANS UP GOOD
 
     if m3.M3_prefs().activate_CleansUpGood:
-        # if m3.M3_prefs().CleansUpgGood_objectmodeshortcut:
-        km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='VIEW_3D')
-        # else:
-            # km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.clean_up", "THREE", "PRESS")
         MACHIN3_keymaps.append((km, kmi))
 

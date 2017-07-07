@@ -1,10 +1,12 @@
 import bpy
 
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, EnumProperty
 from .. import M3utils as m3
 
 
-# TODO: select tris and ngons!
+selectchoice = [("MANIFOLD", "Manifold", ""),
+                ("TRIS", "Tris", ""),
+                ("NGONS", "Ngons", "")]
 
 
 class CleansUpGood(bpy.types.Operator):
@@ -18,7 +20,25 @@ class CleansUpGood(bpy.types.Operator):
     deleteloose = BoolProperty(name="Delete Loose", default=True)
     deletelooseincludefaces = BoolProperty(name=" incl. Faces", default=False)
     recalcnormals = BoolProperty(name="Recalculate Normals", default=True)
-    selectnonmanifold = BoolProperty(name="Select Non-Manifold", default=True)
+
+    select = EnumProperty(name="Select", items=selectchoice, default="MANIFOLD")
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.prop(self, "removedoubles")
+        col.prop(self, "removedegenerates")
+        col.prop(self, "remove2edged")
+
+        row = col.split()
+        row.prop(self, "deleteloose")
+        row.prop(self, "deletelooseincludefaces")
+
+        col.prop(self, "recalcnormals")
+
+        col.label("Select")
+        row = col.row()
+        row.prop(self, "select", expand=True)
 
     def execute(self, context):
         mode = m3.get_mode()
@@ -34,22 +54,10 @@ class CleansUpGood(bpy.types.Operator):
                     m3.set_mode("OBJECT")
         elif mode in ["VERT", "EDGE", "FACE"]:
             self.clean_up(mode)
+        else:
+            print("Unsupported component mode.")
 
         return {'FINISHED'}
-
-    def draw(self, context):
-        layout = self.layout
-        col = layout.column()
-        col.prop(self, "removedoubles")
-        col.prop(self, "removedegenerates")
-        col.prop(self, "remove2edged")
-
-        row = col.split()
-        row.prop(self, "deleteloose")
-        row.prop(self, "deletelooseincludefaces")
-
-        col.prop(self, "recalcnormals")
-        col.prop(self, "selectnonmanifold")
 
     def clean_up(self, mode):  # needs to be in edit mode
         m3.select_all("MESH")
@@ -78,9 +86,9 @@ class CleansUpGood(bpy.types.Operator):
         if self.remove2edged:
             self.remove_2_edged_verts()
 
-        # select non-manifold geometry, helpful to find holes
-        # also helpful for finding overlapping bevels too and rarely invisible/undetectable vertices, both of which can prevent booleans to work
-        if self.selectnonmanifold:
+        if self.select == "MANIFOLD":
+            # select non-manifold geometry, helpful to find holes
+            # also helpful for finding overlapping bevels too and rarely invisible/undetectable vertices, both of which can prevent booleans to work
             if mode in["VERT", "EDGE"]:
                 bpy.ops.mesh.select_non_manifold()  # will work in either vert or edge mode, but not in face mode
                 if mode == "EDGE":
@@ -89,6 +97,10 @@ class CleansUpGood(bpy.types.Operator):
                 m3.set_mode("VERT")
                 bpy.ops.mesh.select_non_manifold()
                 bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='FACE')
+        elif self.select == "TRIS":
+            bpy.ops.mesh.select_face_by_sides(number=3)
+        elif self.select == "NGONS":
+            bpy.ops.mesh.select_face_by_sides(number=4, type="GREATER")
 
     def remove_2_edged_verts(self):
         mesh = bpy.context.object.data
