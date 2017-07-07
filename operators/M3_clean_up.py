@@ -96,11 +96,17 @@ class CleansUpGood(bpy.types.Operator):
             else:
                 m3.set_mode("VERT")
                 bpy.ops.mesh.select_non_manifold()
-                bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='FACE')
-        elif self.select == "TRIS":
-            bpy.ops.mesh.select_face_by_sides(number=3)
-        elif self.select == "NGONS":
-            bpy.ops.mesh.select_face_by_sides(number=4, type="GREATER")
+                bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='FACE')  # manifold selection(loop of verts or edges) is by default not converted to faces, unless a face it encircled, hence use_expand
+        elif self.select in ["TRIS", "NGONS"]:
+            if self.select == "TRIS":
+                bpy.ops.mesh.select_face_by_sides(number=3)
+            else:
+                bpy.ops.mesh.select_face_by_sides(number=4, type="GREATER")
+            if self.remove_2_edged_verts:  # leaves you in vert mode
+                if mode == "EDGE":
+                    m3.set_mode("EDGE")
+                elif mode == "FACE":
+                    m3.set_mode("FACE")
 
     def remove_2_edged_verts(self):
         mesh = bpy.context.object.data
