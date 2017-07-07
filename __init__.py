@@ -66,7 +66,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_SlideExtend = BoolProperty(name="Slide Extend", default=False)
     activate_LockItAll = BoolProperty(name="Lock It All", default=False)
     activate_HideMeshes = BoolProperty(name="Hide Meshes", default=False)
-    activate_MergeDown = BoolProperty(name="Merge Down", default=False)
+    activate_ModMachine = BoolProperty(name="Mod Machine", default=False)
     activate_CameraHelper = BoolProperty(name="Camera Helper", default=False)
     activate_ChildOf = BoolProperty(name="Child Of", default=False)
     activate_FlipNormals = BoolProperty(name="Flip Normals", default=False)
@@ -195,12 +195,12 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.label("Hides Meshes of selection in Object Mode.")
         du.show_keymap(self.activate_HideMeshes, kc, "Object Mode", "machin3.hide_meshes", col)
 
-        # MERGE DOWN
+        # MOD MACHINE
 
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_MergeDown", toggle=True)
-        row.label("Merges down the entire modifier stack of objects in selection.")
-        du.show_keymap(self.activate_MergeDown, kc, "Object Mode", "machin3.merge_down", col)
+        row.prop(self, "activate_ModMachine", toggle=True)
+        row.label("Applys/Shows/Hides the entire modifier stack or any of the selceted mods on objects in selection.")
+        du.show_keymap(self.activate_ModMachine, kc, "Object Mode", "machin3.mod_machine", col)
 
         # CAMERA HELPER
 
@@ -246,8 +246,8 @@ class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
             column.operator("machin3.lock_it_all", text="Lock It All")
         if m3.M3_prefs().activate_HideMeshes:
             column.operator("machin3.hide_meshes", text="Hide Meshes")
-        if m3.M3_prefs().activate_MergeDown:
-            column.operator("machin3.merge_down", text="Merge Down")
+        if m3.M3_prefs().activate_ModMachine:
+            column.operator("machin3.mod_machine", text="Mod Machine")
         if m3.M3_prefs().activate_CameraHelper:
             column.operator("machin3.camera_helper", text="Camera Helper")
         if m3.M3_prefs().activate_ChildOf:
