@@ -1,10 +1,13 @@
 import bpy
 
-from bpy.props import BoolProperty, EnumProperty
+from bpy.props import BoolProperty, EnumProperty, FloatProperty
 from .. import M3utils as m3
 
 
-selectchoice = [("MANIFOLD", "Manifold", ""),
+# TODO: check out 534_003a.blend and figure out why remove 2 edged isnt working
+
+selectchoice = [("NONE", "None", ""),
+                ("MANIFOLD", "Manifold", ""),
                 ("TRIS", "Tris", ""),
                 ("NGONS", "Ngons", "")]
 
@@ -15,8 +18,9 @@ class CleansUpGood(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     removedoubles = BoolProperty(name="Remove Doubles", default=True)
+    removethreshold = FloatProperty(name="Threshold", default=1)
     removedegenerates = BoolProperty(name="Remove Degenerates (also removes doubles!)", default=True)
-    remove2edged = BoolProperty(name="Remove 2-Edged Verts", default=True)
+    remove2edged = BoolProperty(name="Remove 2-Edged Verts (experimental)", default=True)
     deleteloose = BoolProperty(name="Delete Loose", default=True)
     deletelooseincludefaces = BoolProperty(name=" incl. Faces", default=False)
     recalcnormals = BoolProperty(name="Recalculate Normals", default=True)
@@ -26,7 +30,10 @@ class CleansUpGood(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         col = layout.column()
-        col.prop(self, "removedoubles")
+        row = col.row()
+        row.prop(self, "removedoubles")
+        row.prop(self, "removethreshold")
+
         col.prop(self, "removedegenerates")
         col.prop(self, "remove2edged")
 
@@ -63,7 +70,7 @@ class CleansUpGood(bpy.types.Operator):
         m3.select_all("MESH")
 
         if self.removedoubles:
-            bpy.ops.mesh.remove_doubles()
+            bpy.ops.mesh.remove_doubles(threshold=self.removethreshold / 10000)
 
         # dissolve degenerates
         if self.removedegenerates:
@@ -86,7 +93,13 @@ class CleansUpGood(bpy.types.Operator):
         if self.remove2edged:
             self.remove_2_edged_verts()
 
-        if self.select == "MANIFOLD":
+        if self.select == "NONE":
+            if self.remove_2_edged_verts:  # leaves you in vert mode
+                if mode == "EDGE":
+                    m3.set_mode("EDGE")
+                elif mode == "FACE":
+                    m3.set_mode("FACE")
+        elif self.select == "MANIFOLD":
             # select non-manifold geometry, helpful to find holes
             # also helpful for finding overlapping bevels too and rarely invisible/undetectable vertices, both of which can prevent booleans to work
             if mode in["VERT", "EDGE"]:
