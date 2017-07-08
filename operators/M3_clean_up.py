@@ -27,6 +27,8 @@ class CleansUpGood(bpy.types.Operator):
 
     select = EnumProperty(name="Select", items=selectchoice, default="MANIFOLD")
 
+    view_selected = BoolProperty(name="View Selected", default=False)
+
     def draw(self, context):
         layout = self.layout
         col = layout.column()
@@ -46,6 +48,8 @@ class CleansUpGood(bpy.types.Operator):
         col.label("Select")
         row = col.row()
         row.prop(self, "select", expand=True)
+
+        col.prop(self, "view_selected", toggle=True)
 
     def execute(self, context):
         mode = m3.get_mode()
@@ -120,6 +124,9 @@ class CleansUpGood(bpy.types.Operator):
                     m3.set_mode("EDGE")
                 elif mode == "FACE":
                     m3.set_mode("FACE")
+
+        if self.view_selected:
+            bpy.ops.view3d.view_selected(use_all_regions=False)
 
     def remove_2_edged_verts(self):
         mesh = bpy.context.object.data

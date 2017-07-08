@@ -4,6 +4,7 @@ from .. import M3utils as m3
 
 
 applyorshow = [("APPLY", "Apply", ""),
+               ("REMOVE", "Remove", ""),
                ("SHOW", "Show", ""),
                ("HIDE", "Hide", "")]
 
@@ -73,6 +74,10 @@ class ModMachine(bpy.types.Operator):
                             if self.applyorshow == "APPLY":
                                 bpy.ops.object.modifier_apply(apply_as='DATA', modifier=mod.name)
                                 print("Applied '%s's '%s' modifier" % (obj.name, mod.name))
+                            elif self.applyorshow == "REMOVE":
+                                bpy.ops.object.modifier_remove(modifier=mod.name)
+                                print("Removed '%s's '%s' modifier" % (obj.name, mod.name))
+
                             elif self.applyorshow == "SHOW":
                                 mod.show_viewport = True
                                 print("'%s's '%s' modifier is now visible" % (obj.name, mod.name))
@@ -88,6 +93,9 @@ class ModMachine(bpy.types.Operator):
                                 if self.applyorshow == "APPLY":
                                     bpy.ops.object.modifier_apply(apply_as='DATA', modifier=mod.name)
                                     print("Applied '%s's '%s' modifier" % (obj.name, mod.name))
+                                elif self.applyorshow == "REMOVE":
+                                    bpy.ops.object.modifier_remove(modifier=mod.name)
+                                    print("Removed '%s's '%s' modifier" % (obj.name, mod.name))
                                 elif self.applyorshow == "SHOW":
                                     mod.show_viewport = True
                                     print("'%s's '%s' modifier is now visible" % (obj.name, mod.name))
