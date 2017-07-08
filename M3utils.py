@@ -160,6 +160,10 @@ def get_AM_library_path():
             return addons[addonname].preferences.asset_M_library_path
 
 
+def DM_check():
+    return addon_check("DECALmachine")
+
+
 def HOps_check():
     return addon_check("HOps")
 
