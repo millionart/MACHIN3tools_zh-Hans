@@ -46,6 +46,15 @@ def select(objlist):
         obj.select = True
 
 
+def hide_all(string):
+    if string == "OBJECT":
+        select_all(string)
+        bpy.ops.object.hide_view_set(unselected=False)
+    elif string == "MESH":
+        select_all(string)
+        bpy.ops.mesh.hide(unselected=False)
+
+
 def unhide_all(string="OBJECT"):
     if string == "OJBECT":
         for obj in bpy.data.objects:

@@ -1,9 +1,14 @@
 import bpy
+from bpy.props import BoolProperty, EnumProperty
 import bmesh
 from .. import M3utils as m3
 
 
 vertliststored = []
+
+axischoice = [("AXISX", "X", ""),
+              ("AXISY", "Y", ""),
+              ("AXISZ", "Z", "")]
 
 # TODO: refactor and safety checks
 
@@ -86,8 +91,8 @@ class SlideExtend(bpy.types.Operator):
 
             # re-enable snapping, if it was turned on before
             # neither of these are working for some reason ###
-            if self.snapState:
-                bpy.context.scene.tool_settings.use_snap = True  # has no effect
-                print("test")  # this executes just fine
+            # if self.snapState:
+                # bpy.context.scene.tool_settings.use_snap = True  # has no effect
+                # print("test")  # this executes just fine
 
         return {'FINISHED'}

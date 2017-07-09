@@ -44,11 +44,16 @@ modules = du.setup_addon_modules(__path__, __name__, "bpy" in locals())
 class MACHIN3Settings(bpy.types.PropertyGroup):
     debugmode = BoolProperty(name="Debug Mode", default=False)
 
+    pieobjecteditmodehide = BoolProperty(name="Auto Hide", default=False)
+    pieobjecteditmodeshow = BoolProperty(name="Auto Reveal", default=False)
+
 
 class MACHIN3Preferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     M3path = __path__[0]
+
+    activate_pies = BoolProperty(name="Pie Menus", default=False)
 
     activate_ShadingSwitch = BoolProperty(name="Shading Switch", default=False)
     activate_RedMode = BoolProperty(name="Red Mode", default=False)
@@ -81,6 +86,10 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
 
         col.label("Activating modules requires saving user preferences and re-starting Blender.")
         col.separator()
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pies", toggle=True)
+        row.label(" Pies based on Wazou's Pie Menus")
 
         # SHADING SWITCH
 
@@ -124,12 +133,6 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.label("Disables all Mirror modifiers of the selected objects, then enters local view. Renables mirror modifers again, when exiting localview.")
         du.show_keymap(self.activate_Focus, kc, "Object Mode", "machin3.focus", col)
 
-        # THEME SWITCH
-
-        # row = col.split(percentage=0.2)
-        # row.prop(self, "activate_ThemeSwitch")
-        # row.label("Switchs Theme. Optionally switches Matcap at the same time")
-
         # MIRROR
 
         row = col.split(percentage=0.2)
@@ -158,21 +161,18 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row = col.split(percentage=0.2)
         row.prop(self, "activate_CleanoutMaterials", toggle=True)
         row.label("Removes all material assignments and all materials from the scene.")
-        du.show_keymap(self.activate_CleanoutMaterials, kc, "Object Mode", "machin3.cleanout_materials", col)
 
         # CLEANOUT UVS
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_CleanoutUVs", toggle=True)
         row.label("Removes all UV channels from selected objects.")
-        du.show_keymap(self.activate_CleanoutMaterials, kc, "Object Mode", "machin3.cleanout_uvs", col)
 
         # CLEANOUT TRANSFORM ORIENTATIONS
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_CleanoutTransforms", toggle=True)
         row.label("Removes all custom transform orientations.")
-        du.show_keymap(self.activate_CleanoutTransforms, kc, "3D View", "machin3.cleanout_transforms", col)
 
         # SLIDE EXTEND
 
@@ -186,7 +186,6 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row = col.split(percentage=0.2)
         row.prop(self, "activate_LockItAll", toggle=True)
         row.label("Locks any or all selected objects' transforms")
-        du.show_keymap(self.activate_LockItAll, kc, "Object Mode", "machin3.lock_it_all", col)
 
         # HIDE MESHES
 
@@ -200,7 +199,6 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row = col.split(percentage=0.2)
         row.prop(self, "activate_ModMachine", toggle=True)
         row.label("Applys/Shows/Hides the entire modifier stack or any of the selceted mods on objects in selection.")
-        du.show_keymap(self.activate_ModMachine, kc, "Object Mode", "machin3.mod_machine", col)
 
         # CAMERA HELPER
 
@@ -214,14 +212,12 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row = col.split(percentage=0.2)
         row.prop(self, "activate_ChildOf", toggle=True)
         row.label("Child of's instead of parents. Works on geo and bones. On geo, can be fired multile times to switch between 'set inverse' and 'clear inverse. On geo defaults to 'set inverse', while on bones defaults to 'clear inverse'.")
-        du.show_keymap(self.activate_ChildOf, kc, "Object Mode", "machin3.child_of", col)
 
         # FLIP NORMALS
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_FlipNormals", toggle=True)
         row.label("Flips normals of selected objects.")
-        du.show_keymap(self.activate_FlipNormals, kc, "Object Mode", "machin3.flip_normals", col)
 
 
 class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
@@ -288,19 +284,7 @@ def object_menu_func(self, context):
     self.layout.separator()
 
 
-MACHIN3_keymaps = []
-
-
-def register():
-    bpy.utils.register_module(__name__)
-
-    bpy.types.Scene.machin3 = bpy.props.PointerProperty(type=MACHIN3Settings)
-
-    bpy.types.VIEW3D_MT_edit_mesh_specials.prepend(edit_menu_func)
-    bpy.types.VIEW3D_MT_object_specials.prepend(object_menu_func)
-
-    wm = bpy.context.window_manager
-
+def register_MACHIN3_keys(wm, keymaps):
     # SHADING SWITCH
 
     if m3.M3_prefs().activate_ShadingSwitch:
@@ -400,6 +384,104 @@ def register():
         km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.child_of", "P", "PRESS", ctrl=True)
         MACHIN3_keymaps.append((km, kmi))
+
+
+def register_pie_keys(wm, keymaps):
+    # SELECT MODE
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Object Non-modal')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
+    kmi.properties.name = "pie.objecteditmode"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+    # LAYOUTS
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Screen')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', ctrl=True)
+    kmi.properties.name = "pie.areaviews"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+    # SNAPPING
+
+    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'MIDDLEMOUSE', 'PRESS', alt=True)
+    kmi.properties.name = "pie.snapping"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+    # ORIENTATIONS
+
+    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', alt=True)
+    kmi.properties.name = "pie.orientation"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+    # OBJECT SHADING
+
+    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'Q', 'PRESS', alt=True)
+    kmi.properties.name = "pie.objectshading"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+    # ALIGN
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Mesh')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'A', 'PRESS', alt=True)
+    kmi.properties.name = "pie.align"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+    # SAVE, OPEN, APPEND, LINK, ...
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Window')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'S', 'PRESS', ctrl=True)
+    kmi.properties.name = "pie.saveopen"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+    # UV SELECT MODE
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Image', space_type='IMAGE_EDITOR')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
+    kmi.properties.name = "pie.uvsselectmode"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+    # UV WELD, ALIGN
+
+    km = wm.keyconfigs.addon.keymaps.new(name='UV Editor')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'W', 'PRESS')
+    kmi.properties.name = "pie.uvsweldalign"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+
+MACHIN3_keymaps = []
+
+
+def register():
+    bpy.utils.register_module(__name__)
+
+    bpy.types.Scene.machin3 = bpy.props.PointerProperty(type=MACHIN3Settings)
+
+    bpy.types.VIEW3D_MT_edit_mesh_specials.prepend(edit_menu_func)
+    bpy.types.VIEW3D_MT_object_specials.prepend(object_menu_func)
+
+    wm = bpy.context.window_manager
+
+    # MACHIN3 addon KEYMAPS
+
+    register_MACHIN3_keys(wm, MACHIN3_keymaps)
+
+    # PIE KEYMAPS
+
+    if m3.M3_prefs().activate_pies:
+        register_pie_keys(wm, MACHIN3_keymaps)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)
