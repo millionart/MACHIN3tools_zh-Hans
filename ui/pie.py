@@ -6,317 +6,7 @@ import bmesh
 from .. import M3utils as m3
 
 
-"""
-class WazouPieMenuPrefs(bpy.types.AddonPreferences):
-    bl_idname = __name__
-
-    bpy.types.Scene.Enable_Tab_01 = BoolProperty(default=False)
-    bpy.types.Scene.Enable_Tab_03 = BoolProperty(default=False)
-    bpy.types.Scene.Enable_Tab_04 = BoolProperty(default=False)
-
-    def draw(self, context):
-        layout = self.layout
-
-        layout.prop(context.scene, "Enable_Tab_01", text="Info", icon="QUESTION")
-        if context.scene.Enable_Tab_01:
-            row = layout.row()
-            layout.label(text="This Addon Need to activate 'Loop Tools' and 'Bsurfaces' in the Addon Tab to work properly.")
-            layout.label(text="You need to install Iceking's Tool And Auto Mirror")
-
-            layout.operator("wm.url_open", text="IceKing's tools").url = "http://www.blenderartists.org/forum/showthread.php?343641-Iceking-s-Tools"
-            layout.operator("wm.url_open", text="Auto Mirror").url = "http://le-terrier-de-lapineige.over-blog.com/2014/07/automirror-mon-add-on-pour-symetriser-vos-objets-rapidement.html"
-
-        layout.prop(context.scene, "Enable_Tab_03", text="Keymap", icon="URL")
-        if context.scene.Enable_Tab_03:
-            #Add the keymap in the prefs
-            col = layout.column()
-            kc = bpy.context.window_manager.keyconfigs.addon
-            for km, kmi in addon_keymaps:
-                km = km.active()
-                col.context_pointer_set("keymap", km)
-                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
-
-
-        layout.prop(context.scene, "Enable_Tab_04", text="URL's", icon="URL")
-        if context.scene.Enable_Tab_04:
-            row = layout.row()
-            row.operator("wm.url_open", text="Pitiwazou.com").url = "http://www.pitiwazou.com/"
-            row.operator("wm.url_open", text="Wazou's Ghitub").url = "https://github.com/pitiwazou/Scripts-Blender"
-            row.operator("wm.url_open", text="BlenderLounge Forum ").url = "http://blenderlounge.fr/forum/"
-"""
-
-#####################################
-#      Proportional Edit Object     #
-#####################################
-
-
-class ProportionalEditObj(bpy.types.Operator):
-    bl_idname = "proportional_obj.active"
-    bl_label = "Proportional Edit Object"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.use_proportional_edit_objects == (True):
-            bpy.context.scene.tool_settings.use_proportional_edit_objects = False
-
-        elif bpy.context.scene.tool_settings.use_proportional_edit_objects == (False):
-            bpy.context.scene.tool_settings.use_proportional_edit_objects = True
-
-        return {'FINISHED'}
-
-
-class ProportionalSmoothObj(bpy.types.Operator):
-    bl_idname = "proportional_obj.smooth"
-    bl_label = "Proportional Smooth Object"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.use_proportional_edit_objects == (False):
-            bpy.context.scene.tool_settings.use_proportional_edit_objects = True
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SMOOTH'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'SMOOTH':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SMOOTH'
-        return {'FINISHED'}
-
-
-class ProportionalSphereObj(bpy.types.Operator):
-    bl_idname = "proportional_obj.sphere"
-    bl_label = "Proportional Sphere Object"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.use_proportional_edit_objects == (False):
-            bpy.context.scene.tool_settings.use_proportional_edit_objects = True
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SPHERE'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'SPHERE':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SPHERE'
-        return {'FINISHED'}
-
-
-class ProportionalRootObj(bpy.types.Operator):
-    bl_idname = "proportional_obj.root"
-    bl_label = "Proportional Root Object"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.use_proportional_edit_objects == (False):
-            bpy.context.scene.tool_settings.use_proportional_edit_objects = True
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'ROOT'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'ROOT':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'ROOT'
-        return {'FINISHED'}
-
-
-class ProportionalSharpObj(bpy.types.Operator):
-    bl_idname = "proportional_obj.sharp"
-    bl_label = "Proportional Sharp Object"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.use_proportional_edit_objects == (False):
-            bpy.context.scene.tool_settings.use_proportional_edit_objects = True
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SHARP'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'SHARP':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SHARP'
-        return {'FINISHED'}
-
-
-class ProportionalLinearObj(bpy.types.Operator):
-    bl_idname = "proportional_obj.linear"
-    bl_label = "Proportional Linear Object"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.use_proportional_edit_objects == (False):
-            bpy.context.scene.tool_settings.use_proportional_edit_objects = True
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'LINEAR'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'LINEAR':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'LINEAR'
-        return {'FINISHED'}
-
-
-class ProportionalConstantObj(bpy.types.Operator):
-    bl_idname = "proportional_obj.constant"
-    bl_label = "Proportional Constant Object"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.use_proportional_edit_objects == (False):
-            bpy.context.scene.tool_settings.use_proportional_edit_objects = True
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'CONSTANT'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'CONSTANT':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'CONSTANT'
-        return {'FINISHED'}
-
-
-class ProportionalRandomObj(bpy.types.Operator):
-    bl_idname = "proportional_obj.random"
-    bl_label = "Proportional Random Object"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.use_proportional_edit_objects == (False):
-            bpy.context.scene.tool_settings.use_proportional_edit_objects = True
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'RANDOM'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'RANDOM':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'RANDOM'
-        return {'FINISHED'}
-
-#######################################
-#     Proportional Edit Edit Mode     #
-#######################################
-
-
-class ProportionalEditEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.active"
-    bl_label = "Proportional Edit EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit != ('DISABLED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'DISABLED'
-        elif bpy.context.scene.tool_settings.proportional_edit != ('ENABLED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'ENABLED'
-        return {'FINISHED'}
-
-
-class ProportionalConnectedEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.connected"
-    bl_label = "Proportional Connected EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit != ('CONNECTED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'CONNECTED'
-        return {'FINISHED'}
-
-
-class ProportionalProjectedEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.projected"
-    bl_label = "Proportional projected EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit != ('PROJECTED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'PROJECTED'
-        return {'FINISHED'}
-
-
-class ProportionalSmoothEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.smooth"
-    bl_label = "Proportional Smooth EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit == ('DISABLED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'ENABLED'
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SMOOTH'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'SMOOTH':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SMOOTH'
-        return {'FINISHED'}
-
-
-class ProportionalSphereEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.sphere"
-    bl_label = "Proportional Sphere EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit == ('DISABLED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'ENABLED'
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SPHERE'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'SPHERE':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SPHERE'
-        return {'FINISHED'}
-
-
-class ProportionalRootEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.root"
-    bl_label = "Proportional Root EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit == ('DISABLED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'ENABLED'
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'ROOT'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'ROOT':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'ROOT'
-        return {'FINISHED'}
-
-
-class ProportionalSharpEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.sharp"
-    bl_label = "Proportional Sharp EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit == ('DISABLED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'ENABLED'
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SHARP'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'SHARP':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'SHARP'
-        return {'FINISHED'}
-
-
-class ProportionalLinearEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.linear"
-    bl_label = "Proportional Linear EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit == ('DISABLED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'ENABLED'
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'LINEAR'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'LINEAR':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'LINEAR'
-        return {'FINISHED'}
-
-
-class ProportionalConstantEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.constant"
-    bl_label = "Proportional Constant EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit == ('DISABLED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'ENABLED'
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'CONSTANT'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'CONSTANT':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'CONSTANT'
-        return {'FINISHED'}
-
-
-class ProportionalRandomEdt(bpy.types.Operator):
-    bl_idname = "proportional_edt.random"
-    bl_label = "Proportional Random EditMode"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.scene.tool_settings.proportional_edit == ('DISABLED'):
-            bpy.context.scene.tool_settings.proportional_edit = 'ENABLED'
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'RANDOM'
-
-        if bpy.context.scene.tool_settings.proportional_edit_falloff != 'RANDOM':
-            bpy.context.scene.tool_settings.proportional_edit_falloff = 'RANDOM'
-        return {'FINISHED'}
-
-######################
-#      Snapping      #
-######################
-
+# SNAPPING
 
 class SnapActive(bpy.types.Operator):
     bl_idname = "snap.active"
@@ -437,10 +127,8 @@ class SnapTargetVariable(bpy.types.Operator):
         bpy.context.scene.tool_settings.snap_target=self.variable
         return {'FINISHED'}
 
-######################
-#    Orientation     #
-######################
 
+# ORIENTATION
 
 class OrientationVariable(bpy.types.Operator):
     bl_idname = "object.orientationvariable"
@@ -456,61 +144,8 @@ class OrientationVariable(bpy.types.Operator):
         bpy.context.space_data.transform_orientation=self.variable
         return {'FINISHED'}
 
-######################
-#      Shading       #
-######################
 
-
-class ShadingVariable(bpy.types.Operator):
-    bl_idname = "object.shadingvariable"
-    bl_label = "Shading Variable"
-    bl_options = {'REGISTER', 'UNDO'}
-    variable = bpy.props.StringProperty()
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-        bpy.context.space_data.viewport_shade=self.variable
-        return {'FINISHED'}
-
-
-class ShadingSmooth(bpy.types.Operator):
-    bl_idname = "shading.smooth"
-    bl_label = "Shading Smooth"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.object.mode == "OBJECT":
-            bpy.ops.object.shade_smooth()
-
-        elif bpy.context.object.mode == "EDIT":
-            bpy.ops.object.mode_set(mode='OBJECT')
-            bpy.ops.object.shade_smooth()
-            bpy.ops.object.mode_set(mode='EDIT')
-        return {'FINISHED'}
-
-
-class ShadingFlat(bpy.types.Operator):
-    bl_idname = "shading.flat"
-    bl_label = "Shading Flat"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if bpy.context.object.mode == "OBJECT":
-            bpy.ops.object.shade_flat()
-
-        elif bpy.context.object.mode == "EDIT":
-            bpy.ops.object.mode_set(mode='OBJECT')
-            bpy.ops.object.shade_flat()
-            bpy.ops.object.mode_set(mode='EDIT')
-        return {'FINISHED'}
-
-######################
-#   Object shading   #
-######################
-
+# OBJECT SHADING
 
 class WireSelectedAll(bpy.types.Operator):
     bl_idname = "wire.selectedall"
@@ -562,10 +197,10 @@ class MeshDisplayOverlays(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
 
-        with_freestyle = bpy.app.build_options.freestyle
+        # with_freestyle = bpy.app.build_options.freestyle
 
         mesh = context.active_object.data
-        scene = context.scene
+        # scene = context.scene
 
         split = layout.split()
 
@@ -608,9 +243,9 @@ class UsePivotAlign(bpy.types.Operator):
 
     def execute(self, context):
 
-        if bpy.context.space_data.use_pivot_point_align == (False) :
+        if bpy.context.space_data.use_pivot_point_align == (False):
             bpy.context.space_data.use_pivot_point_align = True
-        elif bpy.context.space_data.use_pivot_point_align == (True) :
+        elif bpy.context.space_data.use_pivot_point_align == (True):
             bpy.context.space_data.use_pivot_point_align = False
         return {'FINISHED'}
 
@@ -2221,7 +1856,9 @@ class PieObjectShading(Menu):
         row.prop(context.space_data, "show_axis_x", text="X")
         row.prop(context.space_data, "show_axis_y", text="Y")
         row.prop(context.space_data, "show_axis_z", text="Z")
-        column.operator("measureit.runopenglbutton", text="Show/Hide Annotations", icon="TEXT")
+
+        if m3.addon_check("measureit"):
+            column.operator("measureit.runopenglbutton", text="Show/Hide Annotations", icon="TEXT")
         # /MACHIN3
 
         #6 - RIGHT

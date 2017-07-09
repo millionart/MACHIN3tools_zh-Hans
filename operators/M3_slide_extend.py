@@ -1,14 +1,9 @@
 import bpy
-from bpy.props import BoolProperty, EnumProperty
 import bmesh
 from .. import M3utils as m3
 
 
 vertliststored = []
-
-axischoice = [("AXISX", "X", ""),
-              ("AXISY", "Y", ""),
-              ("AXISZ", "Z", "")]
 
 # TODO: refactor and safety checks
 
@@ -71,28 +66,10 @@ class SlideExtend(bpy.types.Operator):
 
             bpy.ops.object.editmode_toggle()
 
-            # TRANSFORM.TRANSLATE ###
-
-            # full translate options for renference:
-            # bpy.ops.transform.translate(value=(0, -1, 0), constraint_axis=(False, True, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1, snap=False, snap_target='CLOSEST', snap_point=(0, 0, 0), snap_align=False, snap_normal=(0, 0, 0), texture_space=False, release_confirm=False)
-
-            # invoking it like this bring you into modal mode, see https://www.blender.org/api/blender_python_api_current/bpy.types.Operator.html
+            # invoking move tool_
             bpy.ops.transform.translate('INVOKE_DEFAULT', constraint_orientation='Topo Slide', constraint_axis=(False, True, False), release_confirm=True)
-
-            # SWITCH BACK ORIENTATION ###
-
-            # optionally, delete the newly created orientation
-            # bpy.ops.transform.delete_orientation()
 
             # change the orientation back to what is was before
             bpy.context.space_data.transform_orientation = currentOrientation
-
-            ### RE-ENABLE SNAPPING ###
-
-            # re-enable snapping, if it was turned on before
-            # neither of these are working for some reason ###
-            # if self.snapState:
-                # bpy.context.scene.tool_settings.use_snap = True  # has no effect
-                # print("test")  # this executes just fine
 
         return {'FINISHED'}

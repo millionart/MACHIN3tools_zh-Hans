@@ -63,14 +63,16 @@ def get_keymap_item(km, kmi_name, kmi_value, properties):
     return None
 
 
-def show_keymap(condition, kc, keymap, addon, col, kmivalue='none', properties='none'):
+def show_keymap(condition, kc, keymap, addon, layout, kmivalue='none', properties='none'):
     km = kc.keymaps[keymap]
     if condition:
         try:
+            layout.separator()
             kmi = get_keymap_item(km, addon, kmivalue, properties)
             # kmi.active = True
-            col.context_pointer_set("keymap", km)
-            rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+            layout.context_pointer_set("keymap", km)
+            rna_keymap_ui.draw_kmi([], kc, km, kmi, layout, 0)
+            layout.separator()
         except:
             pass
     else:

@@ -30,7 +30,7 @@ bl_info = {
 
 
 import bpy
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, EnumProperty
 from . import developer_utils as du
 from . import M3utils as m3
 
@@ -48,12 +48,21 @@ class MACHIN3Settings(bpy.types.PropertyGroup):
     pieobjecteditmodeshow = BoolProperty(name="Auto Reveal", default=False)
 
 
+preferences_tabs = [("MODULES", "Modules", ""),
+                    ("SPECIALMENUS", "Special Menus", ""),
+                    ("PIEMENUS", "Pie Menus", ""),
+                    ("CUSTOMKEYS", "Custom Keys", "")]
+
+
 class MACHIN3Preferences(bpy.types.AddonPreferences):
     bl_idname = __name__
-
     M3path = __path__[0]
 
-    activate_pies = BoolProperty(name="Pie Menus", default=False)
+    # TABS
+
+    tabs = EnumProperty(name="Tabs", items=preferences_tabs, default="MODULES")
+
+    # MODULES
 
     activate_ShadingSwitch = BoolProperty(name="Shading Switch", default=False)
     activate_RedMode = BoolProperty(name="Red Mode", default=False)
@@ -76,20 +85,47 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_ChildOf = BoolProperty(name="Child Of", default=False)
     activate_FlipNormals = BoolProperty(name="Flip Normals", default=False)
 
+    # SPECIAL MENUS
+
+    activate_special_Object = BoolProperty(name="Object Mode", default=False)
+    activate_special_Edit = BoolProperty(name="Edit Mode", default=False)
+
+    # PIE MENUS
+
+    activate_pie_SelectMode = BoolProperty(name="Select Mode", default=False)
+    activate_pie_Layouts = BoolProperty(name="Layouts", default=False)
+    activate_pie_Snapping = BoolProperty(name="Snapping", default=False)
+    activate_pie_Orientations = BoolProperty(name="Orientations", default=False)
+    activate_pie_ObjectShading = BoolProperty(name="Object Shading", default=False)
+    activate_pie_Align = BoolProperty(name="Align", default=False)
+    activate_pie_SaveOpen = BoolProperty(name="Save and Open", default=False)
+    activate_pie_UVSelectMode = BoolProperty(name="UV Select Mode", default=False)
+    activate_pie_UVWeldAlign = BoolProperty(name="UV Weld and Align", default=False)
+
     def draw(self, context):
         layout=self.layout
 
         wm = bpy.context.window_manager
         kc = wm.keyconfigs.user
 
-        col = layout.column()
+        column = layout.column(align=True)
+        row = column.row()
+        row.prop(self, "tabs", expand=True)
+
+        box = column.box()
+
+        if self.tabs == "MODULES":
+            self.draw_modules(box, kc)
+        elif self.tabs == "SPECIALMENUS":
+            self.draw_special(box, kc)
+        elif self.tabs == "PIEMENUS":
+            self.draw_pies(box, kc)
+
+    def draw_modules(self, box, kc):
+        col = box.column()
 
         col.label("Activating modules requires saving user preferences and re-starting Blender.")
         col.separator()
-
-        row = col.split(percentage=0.2)
-        row.prop(self, "activate_pies", toggle=True)
-        row.label(" Pies based on Wazou's Pie Menus")
 
         # SHADING SWITCH
 
@@ -218,6 +254,91 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row = col.split(percentage=0.2)
         row.prop(self, "activate_FlipNormals", toggle=True)
         row.label("Flips normals of selected objects.")
+
+    def draw_special(self, box, kc):
+        col = box.column()
+
+        col.label("Activating special menus requires saving user preferences and re-starting Blender.")
+        col.separator()
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_special_Object", toggle=True)
+        row.label("Add MACHIN3tools to Blender's Object Mode Special Menu")
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_special_Edit", toggle=True)
+        row.label("Add MACHIN3tools to Blender's Edit Mode Special Menu")
+
+    def draw_pies(self, box, kc):
+        col = box.column()
+
+        col.label("Activating pie menus requires saving user preferences and re-starting Blender.")
+        col.separator()
+        col.label("These pie menus are based on the excellent 'Wazou's Pie Menus' with some changes and additions.")
+        col.separator()
+
+        # SELECT MODE
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_SelectMode", toggle=True)
+        row.label("Select Object and Edit Modes.")
+        du.show_keymap(self.activate_pie_SelectMode, kc, "Object Non-modal", "wm.call_menu_pie", col, kmivalue="pie.objecteditmode", properties="name")
+
+        # LAYOUTS
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_Layouts", toggle=True)
+        row.label("Switch Layouts.")
+        du.show_keymap(self.activate_pie_Layouts, kc, "Screen", "wm.call_menu_pie", col, kmivalue="pie.areaviews", properties="name")
+
+        # SNAPPING
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_Snapping", toggle=True)
+        row.label("Change Snapping.")
+        du.show_keymap(self.activate_pie_Snapping, kc, "3D View Generic", "wm.call_menu_pie", col, kmivalue="pie.snapping", properties="name")
+
+        # ORIENTATIONS
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_Orientations", toggle=True)
+        row.label("Set Transform Orientations.")
+        du.show_keymap(self.activate_pie_Orientations, kc, "3D View Generic", "wm.call_menu_pie", col, kmivalue="pie.orientation", properties="name")
+
+        # OBJECT SHADING
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_ObjectShading", toggle=True)
+        row.label("Grid, Wireframe, Smooth, Flat Shading and Auto Smooth, Matcaps, Backface Culling, AO, etc.")
+        du.show_keymap(self.activate_pie_ObjectShading, kc, "3D View Generic", "wm.call_menu_pie", col, kmivalue="pie.objectshading", properties="name")
+
+        # ALIGN
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_Align", toggle=True)
+        row.label("Align Verts in Edit Mode.")
+        du.show_keymap(self.activate_pie_Align, kc, "Mesh", "wm.call_menu_pie", col, kmivalue="pie.align", properties="name")
+
+        # SAVE, OPEN, APPEND, LINK, ...
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_SaveOpen", toggle=True)
+        row.label("Save, Open, Append, Link, Export, etc.")
+        du.show_keymap(self.activate_pie_UVSelectMode, kc, "Window", "wm.call_menu_pie", col, kmivalue="pie.saveopen", properties="name")
+
+        # UV SELECT MODE
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_UVSelectMode", toggle=True)
+        row.label("UV Editor - Select Object and Edit Modes.")
+        du.show_keymap(self.activate_pie_UVSelectMode, kc, "Image", "wm.call_menu_pie", col, kmivalue="pie.uvsselectmode", properties="name")
+
+        # UV WELD, ALIGN
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_UVWeldAlign", toggle=True)
+        row.label("UV Editor - Weld and Align tools.")
+        du.show_keymap(self.activate_pie_UVWeldAlign, kc, "UV Editor", "wm.call_menu_pie", col, kmivalue="pie.uvsweldalign", properties="name")
 
 
 class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
@@ -389,75 +510,84 @@ def register_MACHIN3_keys(wm, keymaps):
 def register_pie_keys(wm, keymaps):
     # SELECT MODE
 
-    km = wm.keyconfigs.addon.keymaps.new(name='Object Non-modal')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
-    kmi.properties.name = "pie.objecteditmode"
-    kmi.active = True
-    keymaps.append((km, kmi))
+    if m3.M3_prefs().activate_pie_SelectMode:
+        km = wm.keyconfigs.addon.keymaps.new(name='Object Non-modal')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
+        kmi.properties.name = "pie.objecteditmode"
+        kmi.active = True
+        keymaps.append((km, kmi))
 
     # LAYOUTS
 
-    km = wm.keyconfigs.addon.keymaps.new(name='Screen')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', ctrl=True)
-    kmi.properties.name = "pie.areaviews"
-    kmi.active = True
-    keymaps.append((km, kmi))
+    if m3.M3_prefs().activate_pie_Layouts:
+        km = wm.keyconfigs.addon.keymaps.new(name='Screen')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', ctrl=True)
+        kmi.properties.name = "pie.areaviews"
+        kmi.active = True
+        keymaps.append((km, kmi))
 
     # SNAPPING
 
-    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'MIDDLEMOUSE', 'PRESS', alt=True)
-    kmi.properties.name = "pie.snapping"
-    kmi.active = True
-    keymaps.append((km, kmi))
+    if m3.M3_prefs().activate_pie_Snapping:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'MIDDLEMOUSE', 'PRESS', alt=True)
+        kmi.properties.name = "pie.snapping"
+        kmi.active = True
+        keymaps.append((km, kmi))
 
     # ORIENTATIONS
 
-    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', alt=True)
-    kmi.properties.name = "pie.orientation"
-    kmi.active = True
-    keymaps.append((km, kmi))
+    if m3.M3_prefs().activate_pie_Orientations:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', alt=True)
+        kmi.properties.name = "pie.orientation"
+        kmi.active = True
+        keymaps.append((km, kmi))
 
     # OBJECT SHADING
 
-    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'Q', 'PRESS', alt=True)
-    kmi.properties.name = "pie.objectshading"
-    kmi.active = True
-    keymaps.append((km, kmi))
+    if m3.M3_prefs().activate_pie_ObjectShading:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'Q', 'PRESS', alt=True)
+        kmi.properties.name = "pie.objectshading"
+        kmi.active = True
+        keymaps.append((km, kmi))
 
     # ALIGN
 
-    km = wm.keyconfigs.addon.keymaps.new(name='Mesh')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'A', 'PRESS', alt=True)
-    kmi.properties.name = "pie.align"
-    kmi.active = True
-    keymaps.append((km, kmi))
+    if m3.M3_prefs().activate_pie_Align:
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'A', 'PRESS', alt=True)
+        kmi.properties.name = "pie.align"
+        kmi.active = True
+        keymaps.append((km, kmi))
 
     # SAVE, OPEN, APPEND, LINK, ...
 
-    km = wm.keyconfigs.addon.keymaps.new(name='Window')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'S', 'PRESS', ctrl=True)
-    kmi.properties.name = "pie.saveopen"
-    kmi.active = True
-    keymaps.append((km, kmi))
+    if m3.M3_prefs().activate_pie_SaveOpen:
+        km = wm.keyconfigs.addon.keymaps.new(name='Window')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'S', 'PRESS', ctrl=True)
+        kmi.properties.name = "pie.saveopen"
+        kmi.active = True
+        keymaps.append((km, kmi))
 
     # UV SELECT MODE
 
-    km = wm.keyconfigs.addon.keymaps.new(name='Image', space_type='IMAGE_EDITOR')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
-    kmi.properties.name = "pie.uvsselectmode"
-    kmi.active = True
-    keymaps.append((km, kmi))
+    if m3.M3_prefs().activate_pie_UVSelectMode:
+        km = wm.keyconfigs.addon.keymaps.new(name='Image', space_type='IMAGE_EDITOR')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
+        kmi.properties.name = "pie.uvsselectmode"
+        kmi.active = True
+        keymaps.append((km, kmi))
 
     # UV WELD, ALIGN
 
-    km = wm.keyconfigs.addon.keymaps.new(name='UV Editor')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'W', 'PRESS')
-    kmi.properties.name = "pie.uvsweldalign"
-    kmi.active = True
-    keymaps.append((km, kmi))
+    if m3.M3_prefs().activate_pie_UVWeldAlign:
+        km = wm.keyconfigs.addon.keymaps.new(name='UV Editor')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'W', 'PRESS')
+        kmi.properties.name = "pie.uvsweldalign"
+        kmi.active = True
+        keymaps.append((km, kmi))
 
 
 MACHIN3_keymaps = []
@@ -468,19 +598,23 @@ def register():
 
     bpy.types.Scene.machin3 = bpy.props.PointerProperty(type=MACHIN3Settings)
 
-    bpy.types.VIEW3D_MT_edit_mesh_specials.prepend(edit_menu_func)
-    bpy.types.VIEW3D_MT_object_specials.prepend(object_menu_func)
+    # SPECIAL MENUS
+
+    if m3.M3_prefs().activate_special_Edit:
+        bpy.types.VIEW3D_MT_edit_mesh_specials.prepend(edit_menu_func)
+
+    if m3.M3_prefs().activate_special_Object:
+        bpy.types.VIEW3D_MT_object_specials.prepend(object_menu_func)
 
     wm = bpy.context.window_manager
 
-    # MACHIN3 addon KEYMAPS
+    # MACHIN3 MODULE KEYS
 
     register_MACHIN3_keys(wm, MACHIN3_keymaps)
 
-    # PIE KEYMAPS
+    # PIE MENUS  KEYS
 
-    if m3.M3_prefs().activate_pies:
-        register_pie_keys(wm, MACHIN3_keymaps)
+    register_pie_keys(wm, MACHIN3_keymaps)
 
 
 def unregister():
