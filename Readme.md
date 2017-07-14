@@ -1,0 +1,17 @@
+MACHIN3tools is a continuously evolving collection of scripts, to simplify and automate a variety of task.
+
+If you find any of this useful, consider supporting my other work.
+
+[machin3.io](https://machin3.io) | [gumroad](https://gumroad.com/machin3) | [blender market](https://blendermarket.com/creators/machin3) - [youtube](https://www.youtube.com/channel/UC4yaFzFDILd2yAqOWRuLOvA/videos) - [twitter](https://twitter.com/machin3io) - [facebook](https://www.facebook.com/MACHIN3-1735915690014923)
+
+
+# Installation
+
+* install like any other addon
+* in preferences, activate the scripts you need
+* save user preferences and restart Blender
+
+# Usage
+
+* some scripts have shortcuts, which can be changed or deactivated in the addon preferences
+* addons appear in the special menu(W key) in Edit or Object mode
