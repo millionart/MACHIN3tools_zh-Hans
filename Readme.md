@@ -1,4 +1,4 @@
-MACHIN3tools is a continuously evolving collection of scripts, to simplify and automate a variety of task.
+MACHIN3tools is a continuously evolving collection of scripts, to simplify and automate a variety of tasks.
 
 If you find any of this useful, consider supporting my other work.
 
@@ -13,5 +13,5 @@ If you find any of this useful, consider supporting my other work.
 
 # Usage
 
-* some scripts have shortcuts, which can be changed or deactivated in the addon preferences
-* addons appear in the special menu(W key) in Edit or Object mode
+* MACHIN3tools appear in the special menu(W key) in Edit or Object mode
+* some tools have shortcuts, which can be changed or deactivated in the addon preferences
