@@ -46,6 +46,7 @@ class MACHIN3Settings(bpy.types.PropertyGroup):
 
     pieobjecteditmodehide = BoolProperty(name="Auto Hide", default=False)
     pieobjecteditmodeshow = BoolProperty(name="Auto Reveal", default=False)
+    pieobjecteditmodeshowunselect = BoolProperty(name="Unselect", default=False)
 
 
 preferences_tabs = [("MODULES", "Modules", ""),
@@ -84,6 +85,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_CameraHelper = BoolProperty(name="Camera Helper", default=False)
     activate_ChildOf = BoolProperty(name="Child Of", default=False)
     activate_FlipNormals = BoolProperty(name="Flip Normals", default=False)
+    activate_SurfaceSlide = BoolProperty(name="Surface Slide", default=False)
 
     # SPECIAL MENUS
 
@@ -255,6 +257,12 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.prop(self, "activate_FlipNormals", toggle=True)
         row.label("Flips normals of selected objects.")
 
+        # SURFACE SLIDE
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_SurfaceSlide", toggle=True)
+        row.label("Edit Verts, Edges and Polygons and maintain the Surface.")
+
     def draw_special(self, box, kc):
         col = box.column()
 
@@ -264,10 +272,12 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row = col.split(percentage=0.2)
         row.prop(self, "activate_special_Object", toggle=True)
         row.label("Add MACHIN3tools to Blender's Object Mode Special Menu")
+        du.show_keymap(self.activate_special_Object, kc, "Object Mode", "wm.call_menu", col, kmivalue="VIEW3D_MT_object_specials", properties="name", keepactive=True)
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_special_Edit", toggle=True)
         row.label("Add MACHIN3tools to Blender's Edit Mode Special Menu")
+        du.show_keymap(self.activate_special_Object, kc, "Mesh", "wm.call_menu", col, kmivalue="VIEW3D_MT_edit_mesh_specials", properties="name", keepactive=True)
 
     def draw_pies(self, box, kc):
         col = box.column()
@@ -342,7 +352,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
 
 
 class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
-    bl_label = "MACHIN3tools"
+    bl_label = "(W)MACHIN3tools"
 
     def draw(self, context):
         layout = self.layout
@@ -374,7 +384,7 @@ class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
 
 
 class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
-    bl_label = "MACHIN3tools"
+    bl_label = "(W)MACHIN3tools"
 
     # TODO: comp mode availability check
 
@@ -393,6 +403,8 @@ class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
             column.operator("machin3.cleanout_transforms", text="Cleanout Transforms")
         if m3.M3_prefs().activate_SlideExtend:
             column.operator("machin3.slide_extend", text="Slide Extend")
+        if m3.M3_prefs().activate_SurfaceSlide:
+            column.operator("machin3.surface_slide", text="Surface Slide")
 
 
 def edit_menu_func(self, context):
@@ -504,6 +516,13 @@ def register_MACHIN3_keys(wm, keymaps):
     if m3.M3_prefs().activate_ChildOf:
         km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.child_of", "P", "PRESS", ctrl=True)
+        MACHIN3_keymaps.append((km, kmi))
+
+    # SURFACE SLIDE
+
+    if m3.M3_prefs().activate_SurfaceSlide:
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.surface_slide", "G", "PRESS", alt=True)
         MACHIN3_keymaps.append((km, kmi))
 
 

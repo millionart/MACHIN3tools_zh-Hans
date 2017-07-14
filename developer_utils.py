@@ -63,7 +63,7 @@ def get_keymap_item(km, kmi_name, kmi_value, properties):
     return None
 
 
-def show_keymap(condition, kc, keymap, addon, layout, kmivalue='none', properties='none'):
+def show_keymap(condition, kc, keymap, addon, layout, kmivalue='none', properties='none', keepactive=False):
     km = kc.keymaps[keymap]
     if condition:
         try:
@@ -78,6 +78,7 @@ def show_keymap(condition, kc, keymap, addon, layout, kmivalue='none', propertie
     else:
         try:
             kmi = get_keymap_item(km, addon, kmivalue, properties)
-            kmi.active = False
+            if not keepactive:
+                kmi.active = False
         except:
             pass

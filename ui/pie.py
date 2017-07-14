@@ -446,9 +446,25 @@ class ClassObject(bpy.types.Operator):
             bpy.ops.object.mode_set(mode="EDIT")
             if bpy.context.scene.machin3.pieobjecteditmodeshow:
                 m3.unhide_all("MESH")
+                if bpy.context.scene.machin3.pieobjecteditmodeshowunselect:
+                    m3.unselect_all("MESH")
         else:
             if bpy.context.scene.machin3.pieobjecteditmodehide:
-                m3.hide_all("MESH")
+                # TODO: why does this sometimes occur?
+                # Traceback (most recent call last):
+                  # File "/home/x/.config/blender/2.78/scripts/addons/MACHIN3tools/ui/pie.py", line 453, in execute
+                    # m3.hide_all("MESH")
+                  # File "/home/x/.config/blender/2.78/scripts/addons/MACHIN3tools/M3utils.py", line 54, in hide_all
+                    # select_all(string)
+                  # File "/home/x/.config/blender/2.78/scripts/addons/MACHIN3tools/M3utils.py", line 32, in select_all
+                    # bpy.ops.mesh.select_all(action='SELECT')
+                  # File "/opt/Blender 2.78c/2.78/scripts/modules/bpy/ops.py", line 189, in __call__
+                    # ret = op_call(self.idname_py(), None, kw)
+                # RuntimeError: Operator bpy.ops.mesh.select_all.poll() failed, context is incorrect
+                try:
+                    m3.hide_all("MESH")
+                except:
+                    pass
             bpy.ops.object.mode_set(mode="OBJECT")
         return {'FINISHED'}
 
@@ -464,6 +480,8 @@ class ClassVertex(bpy.types.Operator):
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
             if bpy.context.scene.machin3.pieobjecteditmodeshow:
                 m3.unhide_all("MESH")
+                if bpy.context.scene.machin3.pieobjecteditmodeshowunselect:
+                    m3.unselect_all("MESH")
         if bpy.ops.mesh.select_mode != "EDGE, FACE":
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
         return {'FINISHED'}
@@ -480,6 +498,8 @@ class ClassEdge(bpy.types.Operator):
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
             if bpy.context.scene.machin3.pieobjecteditmodeshow:
                 m3.unhide_all("MESH")
+                if bpy.context.scene.machin3.pieobjecteditmodeshowunselect:
+                    m3.unselect_all("MESH")
         if bpy.ops.mesh.select_mode != "VERT, FACE":
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
         return {'FINISHED'}
@@ -496,6 +516,8 @@ class ClassFace(bpy.types.Operator):
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
             if bpy.context.scene.machin3.pieobjecteditmodeshow:
                 m3.unhide_all("MESH")
+                if bpy.context.scene.machin3.pieobjecteditmodeshowunselect:
+                    m3.unselect_all("MESH")
         if bpy.ops.mesh.select_mode != "VERT, EDGE":
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
         return {'FINISHED'}
@@ -1374,7 +1396,17 @@ class PieObjectEditMode(Menu):
             # 8 - TOP
             pie.operator("class.object", text="Edit/Object", icon='OBJECT_DATAMODE')
             # 7 - TOP - LEFT
-            pie.operator("wm.context_toggle", text="Limit to Visible", icon="ORTHO").data_path = "space_data.use_occlude_geometry"
+            if bpy.context.object.mode == "EDIT":
+                pie.prop(bpy.context.space_data, "use_occlude_geometry", text="Occlude")
+            elif bpy.context.object.mode == "SCULPT":
+                row = pie.row(align=True)
+                row.scale_x = 1.5
+                row.scale_y = 1.25
+                row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_x", text="X")
+                row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_y", text="Y")
+                row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_z", text="Z")
+            else:
+                pie.separator()
             # 9 - TOP - RIGHT
             pie.operator("sculpt.sculptmode_toggle", text="Sculpt", icon='SCULPTMODE_HLT')
             # 1 - BOTTOM - LEFT
@@ -1382,10 +1414,11 @@ class PieObjectEditMode(Menu):
             # 3 - BOTTOM - RIGHT
             box = pie.split()
             column = box.column()
-            column.prop(bpy.context.scene.machin3, "pieobjecteditmodeshow")
             column.prop(bpy.context.scene.machin3, "pieobjecteditmodehide")
+            row = column.row(align=True)
+            row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshow")
+            row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshowunselect")
             column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
-            column.operator("wm.call_menu_pie", text="V/E/F Modes", icon='UV_VERTEXSEL').name="pie.vertexedgesfacesmodes"
 
         elif ob.object.type == 'CURVE':
             pie = layout.menu_pie()

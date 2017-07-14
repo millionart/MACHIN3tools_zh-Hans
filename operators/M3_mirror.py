@@ -59,8 +59,11 @@ class MirrorY(bpy.types.Operator):
     DMmirrorU = BoolProperty(name="U", default=True)
     DMmirrorV = BoolProperty(name="V", default=False)
 
+    DMcustomNormals = BoolProperty(name="re-do custom Normals", default=True)
+    DMcopiedNormals = BoolProperty(name="move copied Normals to end of stack", default=True)
+
     def execute(self, context):
-        mirror(self.axisx, self.axisy, self.axisz)
+        mirror(self)
         return {'FINISHED'}
 
     def draw(self, context):
@@ -100,8 +103,11 @@ class MirrorZ(bpy.types.Operator):
     DMmirrorU = BoolProperty(name="U", default=True)
     DMmirrorV = BoolProperty(name="V", default=False)
 
+    DMcustomNormals = BoolProperty(name="re-do custom Normals", default=True)
+    DMcopiedNormals = BoolProperty(name="move copied Normals to end of stack", default=True)
+
     def execute(self, context):
-        mirror(self.axisx, self.axisy, self.axisz)
+        mirror(self)
         return {'FINISHED'}
 
     def draw(self, context):
