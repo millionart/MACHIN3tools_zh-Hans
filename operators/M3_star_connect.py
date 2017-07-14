@@ -8,8 +8,6 @@ class StarConnect(bpy.types.Operator):
     bl_label = "MACHIN3: Star Connect"
 
     def execute(self, context):
-        m3.clear()
-
         mode = m3.get_comp_mode()
 
         if mode == "VERT":
