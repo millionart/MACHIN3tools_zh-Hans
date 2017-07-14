@@ -277,7 +277,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row = col.split(percentage=0.2)
         row.prop(self, "activate_special_Edit", toggle=True)
         row.label("Add MACHIN3tools to Blender's Edit Mode Special Menu")
-        du.show_keymap(self.activate_special_Object, kc, "Mesh", "wm.call_menu", col, kmivalue="VIEW3D_MT_edit_mesh_specials", properties="name", keepactive=True)
+        du.show_keymap(self.activate_special_Edit, kc, "Mesh", "wm.call_menu", col, kmivalue="VIEW3D_MT_edit_mesh_specials", properties="name", keepactive=True)
 
     def draw_pies(self, box, kc):
         col = box.column()
