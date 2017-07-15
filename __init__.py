@@ -250,6 +250,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row = col.split(percentage=0.2)
         row.prop(self, "activate_ChildOf", toggle=True)
         row.label("Child of's instead of parents. Works on geo and bones. On geo, can be fired multile times to switch between 'set inverse' and 'clear inverse. On geo defaults to 'set inverse', while on bones defaults to 'clear inverse'.")
+        du.show_keymap(self.activate_ChildOf, kc, "Object Mode", "machin3.child_of", col)
 
         # FLIP NORMALS
 
