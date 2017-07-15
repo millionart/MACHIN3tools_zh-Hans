@@ -261,7 +261,8 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_SurfaceSlide", toggle=True)
-        row.label("Edit Verts, Edges and Polygons and maintain the Surface.")
+        row.label("Edit Verts, Edges and Polygons while maintaining the Surface and Form.")
+        du.show_keymap(self.activate_SurfaceSlide, kc, "Mesh", "machin3.surface_slide", col)
 
     def draw_special(self, box, kc):
         col = box.column()
