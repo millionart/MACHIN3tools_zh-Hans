@@ -1,8 +1,8 @@
 import bpy
+from bpy.props import BoolProperty
 from .. import M3utils as m3
 
 
-# TODO: expose the backtrace selection as an option in preferences
 # TODO: First not working
 
 class QuickJoinCenter(bpy.types.Operator):
@@ -10,11 +10,20 @@ class QuickJoinCenter(bpy.types.Operator):
     bl_label = "MACHIN3: Quick Join (Center)"
     bl_options = {'REGISTER', 'UNDO'}
 
+    backtrace = BoolProperty(name="Backtrace Selection", default=True)
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        column.prop(self, "backtrace")
+
     def execute(self, context):
         history = m3.get_selection_history()
 
         if len(history) > 3:
-            quick_join("CENTER", history)
+            quick_join("CENTER", history, self.backtrace)
         else:
             bpy.ops.mesh.merge(type='CENTER')
 
@@ -26,11 +35,20 @@ class QuickJoinLast(bpy.types.Operator):
     bl_label = "MACHIN3: Quick Join (Last)"
     bl_options = {'REGISTER', 'UNDO'}
 
+    backtrace = BoolProperty(name="Backtrace Selection", default=True)
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        column.prop(self, "backtrace")
+
     def execute(self, context):
 
         history = m3.get_selection_history()
         if len(history) > 3:
-            quick_join("LAST", history)
+            quick_join("LAST", history, self.backtrace)
         else:
             bpy.ops.mesh.merge(type='LAST')
 
@@ -53,7 +71,7 @@ class QuickJoinFirst(bpy.types.Operator):
 """
 
 
-def quick_join(string, selection):
+def quick_join(string, selection, backtrace):
     mergeswitched = False
     pivotswitched = False
     aborted = False
@@ -76,7 +94,7 @@ def quick_join(string, selection):
 
     if not aborted:
         try:
-            join(string, path1, path2)
+            join(string, path1, path2, backtrace)
         except:
             print(m3.red("Results will be unpredictable."))
 
@@ -88,11 +106,14 @@ def quick_join(string, selection):
         bpy.context.space_data.pivot_point = pivot
 
 
-def join(string, vertlist1, vertlist2):  # joining by moving/scaling, as vertids would be changing when using the actual merge operator
+def join(string, vertlist1, vertlist2, backtrace):  # joining by moving/scaling, as vertids would be changing when using the actual merge operator
     bpy.context.scene.tool_settings.use_mesh_automerge = False
     mesh = bpy.context.object.data
 
-    vertlist2.reverse()  # reverse the second path to allow for a backtracing selection
+    # reverse the second path to allow for a backtracing selection
+    if backtrace:
+        vertlist2.reverse()
+
     for vert in vertlist1:
         vert2 = vertlist2[vertlist1.index(vert)]
         m3.unselect_all("MESH")
