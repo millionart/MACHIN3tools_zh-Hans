@@ -191,7 +191,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_SmartModes", toggle=True)
-        row.label("In Vert mode connects vert path, in edge mode is turns the edge, in face mode it converts the selection to a bounder loop.")
+        row.label("In Vert mode connects vert path or initiates knife, in edge mode is turns the edge, in face mode it converts the selection to a bounder loop.")
         du.show_keymap(self.activate_SmartModes, kc, "Mesh", "machin3.smart_modes", col)
 
         # CLEANOUT MATERIALS
