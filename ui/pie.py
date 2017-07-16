@@ -1181,6 +1181,27 @@ class FileIncrementalSave(bpy.types.Operator):
         self.report({'INFO'}, "File: {0} - Created at: {1}".format(output[len(bpy.path.abspath("//")):], output[:len(bpy.path.abspath("//"))]))
         return {'FINISHED'}
 
+
+# Load Most Recent
+class LoadMostRecent(bpy.types.Operator):
+    bl_idname = "machin3.load_most_recent"
+    bl_label = "Load Most Recent"
+    bl_options = {"REGISTER"}
+
+    def execute(self, context):
+        recent_path = bpy.utils.user_resource('CONFIG', "recent-files.txt")
+
+        try:
+            with open(recent_path) as file:
+                recent_files = file.read().splitlines()
+        except (IOError, OSError, FileNotFoundError):
+            recent_files = []
+
+        most_recent = recent_files[0]
+
+        bpy.ops.wm.open_mainfile(filepath=most_recent)
+        return {'FINISHED'}
+
 ######################
 #    Views Ortho     #
 ######################
@@ -2279,6 +2300,8 @@ class PieSaveOpen(Menu):
         #1 - BOTTOM - LEFT
         box = pie.split().column()
         row = box.row(align=True)
+        box.operator("machin3.load_most_recent", text="(R) Load Most Recent", icon='FILE_FOLDER')
+        box.separator()
         box.operator("wm.recover_auto_save", text="Recover Auto Save...", icon='RECOVER_AUTO')
         box.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
         box.operator("wm.revert_mainfile", text="Revert", icon='FILE_REFRESH')

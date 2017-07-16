@@ -235,3 +235,140 @@ def DM_prefs():
 
 def M3_prefs():
     return bpy.context.user_preferences.addons["MACHIN3tools"].preferences
+
+
+def make_selection(string, idlist):
+    mesh = bpy.context.object.data
+    set_mode("OBJECT")
+    if string == "VERT":
+        for v in idlist:
+            mesh.vertices[v].select = True
+    elif string == "EDGE":
+        for e in idlist:
+            mesh.edges[e].select = True
+    elif string == "FACE":
+        for p in idlist:
+            mesh.polygons[p].select = True
+    set_mode("EDIT")
+
+
+def get_selection(string):
+    mesh = bpy.context.object.data
+    set_mode('OBJECT')
+    if string == "VERT":
+        idlist = [v.index for v in mesh.vertices if v.select]
+    if string == "EDGE":
+        idlist = [e.index for e in mesh.edges if e.select]
+    if string == "FACE":
+        idlist = [f.index for f in mesh.faces if f.select]
+    set_mode('EDIT')
+    return idlist
+
+
+def get_selection_history():
+    import bmesh
+    mesh = bpy.context.object.data
+    bm = bmesh.from_edit_mesh(mesh)
+    vertlist = [elem.index for elem in bm.select_history if isinstance(elem, bmesh.types.BMVert)]
+    return vertlist
+
+
+class ShortestPath():
+    # "author": "G Bantle, Bagration, MACHIN3",
+    # "source": "https://blenderartists.org/forum/showthread.php?58564-Path-Select-script(Update-20060307-Ported-to-C-now-in-CVS",
+
+    # TODO: do edge support?
+
+    def __init__(self, input=False, select=True, multiple=True, silent=True):
+        # go out of edit mode to update the vertex indices, in case geometry has been edited
+        # go back into edit(vert) mode to retrieve the bmesh selection history
+
+        for mode in ["OBJECT", "EDIT", "VERT"]:
+            set_mode(mode)
+
+        self.mesh = bpy.context.object.data
+        self.multiple = multiple
+        self.input = input
+
+        self.selection = self.get_selection()
+
+        mg = self.build_mesh_graph()
+
+        if self.multiple:
+            path = []
+            for pair in self.selection:
+                path += self.dijkstra_algorithm(mg, pair[0], pair[1])
+            self.path = self.f7(path)
+        else:
+            self.path = self.dijkstra_algorithm(mg, self.selection[0], self.selection[1])
+
+        if not silent:
+            print(self.selection)
+            print(self.path)
+
+        if select:
+            make_selection("VERT", self.path)
+
+    def f7(self, seq):  # removes duplicates, keeps order (https://stackoverflow.com/a/480227)
+        seen = set()
+        seen_add = seen.add
+        return [x for x in seq if not (x in seen or seen_add(x))]
+
+    def dijkstra_algorithm(self, Q, s, t):
+        unknownverts = []  # [(shortest dist from s (start vert) to vert, vert)]
+        import sys
+        infinity = sys.maxsize
+
+        d = dict.fromkeys(Q.keys(), infinity)  # {vert: shortest dist from s to vert}
+        predecessor = dict.fromkeys(Q.keys())  # {vert: predecessor in the shortest path to the vert}
+
+        d[s] = 0
+        unknownverts.append((0, s))  # The distance of the start vert to itself is 0
+
+        while s != t:
+            unknownverts.sort()
+            dist, u = unknownverts[0]  # Get the next vert that is closest to s
+            edges = Q[u]
+
+            for v, w in edges:  # v = neighbour vert, w = distance from u to this vert
+                if d[v] > d[u] + w:
+                    d[v] = d[u] + w
+                    unknownverts.append((d[v], v))
+                    predecessor[v] = u
+
+            unknownverts.pop(0)  # We just finished exploring this vert, so it can be removed
+            s = u  # Set new start vert
+
+        path = []
+        endvert = t
+
+        while endvert is not None:  # Backtrace rom the end vertex using the "predecessor" dict
+            path.append(endvert)
+            endvert = predecessor[endvert]
+
+        return reversed(path)
+
+    def build_mesh_graph(self):
+        mesh_graph = {}
+        for v in self.mesh.vertices:
+            mesh_graph[v.index] = []
+
+        for edge in self.mesh.edges:
+            mesh_graph[edge.vertices[0]].append((edge.vertices[1], 1))
+            mesh_graph[edge.vertices[1]].append((edge.vertices[0], 1))
+
+        return mesh_graph
+
+    def get_selection(self):
+        if self.input is False:
+            selection = get_selection_history()
+        else:
+            selection = self.input
+
+        if self.multiple:
+            selpairs = []
+            for s in selection[1:]:
+                selpairs.append([selection[selection.index(s) - 1], s])
+            return selpairs
+        else:
+            return selection

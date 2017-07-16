@@ -86,6 +86,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_ChildOf = BoolProperty(name="Child Of", default=False)
     activate_FlipNormals = BoolProperty(name="Flip Normals", default=False)
     activate_SurfaceSlide = BoolProperty(name="Surface Slide", default=False)
+    activate_QuickJoin = BoolProperty(name="Quick Join", default=False)
 
     # SPECIAL MENUS
 
@@ -265,6 +266,14 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.label("Edit Verts, Edges and Polygons while maintaining the Surface and Form.")
         du.show_keymap(self.activate_SurfaceSlide, kc, "Mesh", "machin3.surface_slide", col)
 
+        # QUICK JOIN
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_QuickJoin", toggle=True)
+        row.label("Creates shortest vertex paths and joins vertex path pairs accordingly.")
+        du.show_keymap(self.activate_QuickJoin, kc, "Mesh", "machin3.quick_join_last", col)
+        du.show_keymap(self.activate_QuickJoin, kc, "Mesh", "machin3.quick_join_center", col)
+
     def draw_special(self, box, kc):
         col = box.column()
 
@@ -395,12 +404,16 @@ class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
 
         column = layout.column()
 
-        if m3.M3_prefs().activate_CleansUpGood:
-            column.operator("machin3.clean_up", text="Cleans Up Good")
+        if m3.M3_prefs().activate_QuickJoin:
+            column.operator("machin3.quick_join_last", text="Quick Join (Last)")
+        if m3.M3_prefs().activate_QuickJoin:
+            column.operator("machin3.quick_join_center", text="Quick Join (Center)")
         if m3.M3_prefs().activate_SmartModes:
             column.operator("machin3.smart_modes", text="Smart Modes")
         if m3.M3_prefs().activate_StarConnect:
             column.operator("machin3.star_connect", text="Star Connect")
+        if m3.M3_prefs().activate_CleansUpGood:
+            column.operator("machin3.clean_up", text="Cleans Up Good")
         if m3.M3_prefs().activate_CleanoutTransforms:
             column.operator("machin3.cleanout_transforms", text="Cleanout Transforms")
         if m3.M3_prefs().activate_SlideExtend:
@@ -525,6 +538,17 @@ def register_MACHIN3_keys(wm, keymaps):
     if m3.M3_prefs().activate_SurfaceSlide:
         km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.surface_slide", "G", "PRESS", alt=True)
+        MACHIN3_keymaps.append((km, kmi))
+
+    # QUICK JOIN
+
+    if m3.M3_prefs().activate_QuickJoin:
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.quick_join_last", "ONE", "PRESS", alt=True)
+        MACHIN3_keymaps.append((km, kmi))
+
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.quick_join_center", "ONE", "PRESS", shift=True)
         MACHIN3_keymaps.append((km, kmi))
 
 

@@ -6,6 +6,7 @@ from .. import M3utils as m3
 class StarConnect(bpy.types.Operator):
     bl_idname = "machin3.star_connect"
     bl_label = "MACHIN3: Star Connect"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         mode = m3.get_comp_mode()
