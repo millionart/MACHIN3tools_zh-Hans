@@ -11,12 +11,22 @@ class SmartModes(bpy.types.Operator):
         mode = m3.get_comp_mode()
 
         if mode == "VERT":
-            try:
-                bpy.ops.mesh.vert_connect_path()
-            except:  # for it to fail by running it without a vert selection, or just a single vert
-                bpy.ops.mesh.knife_tool('INVOKE_DEFAULT', use_occlude_geometry=True, only_selected=False)
+            vertlist = m3.get_selection("VERT")
+            if len(vertlist) < 2:
+                bpy.ops.mesh.knife_tool('INVOKE_DEFAULT')
+            else:
+                try:
+                    bpy.ops.mesh.vert_connect_path()
+                except:  # invalid selection order
+                    pass
         elif mode == "EDGE":
-            bpy.ops.mesh.edge_rotate(use_ccw=False)
+            edgelist = m3.get_selection("EDGE")
+            if len(edgelist) == 0:
+                pass
+            elif len(edgelist) < 3:  # you need at least 3 edges to mark a boundary, so anything below can be used for turning instead
+                bpy.ops.mesh.edge_rotate(use_ccw=False)
+            else:
+                bpy.ops.mesh.region_to_loop()
         elif mode == "FACE":
             bpy.ops.mesh.region_to_loop()
 
