@@ -1,14 +1,25 @@
 import bpy
+from bpy.props import StringProperty
 from .. import M3utils as m3
-
-
-# TODO: matcap selection
 
 
 class RedMode(bpy.types.Operator):
     bl_idname = "machin3.red_mode"
     bl_label = "MACHIN3: Red Mode"
     bl_options = {'REGISTER', 'UNDO'}
+
+    defaultmatcap = StringProperty(name="Default Matcap", default="05")
+    redmatcap = StringProperty(name="Red Matcap", default="17")
+
+    def draw(self, context):
+        layout = self.layout
+        column = layout.column()
+
+        mc = bpy.context.space_data.matcap_icon
+
+        if mc != self.defaultmatcap:
+            view = context.space_data
+            column.template_icon_view(view, "matcap_icon")
 
     def execute(self, context):
         shadingmode = bpy.context.space_data.viewport_shade
@@ -31,7 +42,7 @@ class RedMode(bpy.types.Operator):
 
                     red = wstepmat.node_tree.nodes['RGB']
 
-                    if red.mute is True:  # if it is muted, so tuened OFF
+                    if red.mute is True:  # it is muted, so the red bevels are turned OFF
                         print("Turned red bevels ON.")
                         red.mute = False
                     else:
@@ -41,7 +52,12 @@ class RedMode(bpy.types.Operator):
 
     def switch_matcaps(self):
         mc = bpy.context.space_data.matcap_icon
-        if mc != '17':
-            bpy.context.space_data.matcap_icon = '17'
+
+        if mc == self.redmatcap:
+            bpy.context.space_data.matcap_icon = self.defaultmatcap
         else:
-            bpy.context.space_data.matcap_icon = '05'
+            if mc == self.defaultmatcap:
+                bpy.context.space_data.matcap_icon = self.redmatcap
+            else:
+                self.redmatcap = mc
+                bpy.context.space_data.matcap_icon = self.redmatcap
