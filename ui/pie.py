@@ -1906,15 +1906,8 @@ class PieObjectShading(Menu):
         # MACHIN3
         box = pie.split()
 
-        if m3.addon_check("measureit"):
-            column = box.column()
-            column.scale_x = 2
-            column.operator("measureit.runopenglbutton", text="Show/Hide Annotations", icon="TEXT")
-            column.prop(scene, "measureit_gl_txt", text="")
-            column.operator("measureit.addnotebutton", text="Annotate", icon="NEW")
-
         column = box.column()
-        column.operator("scene.togglegridaxis", text="Show/Hide Grid", icon="MESH_GRID")
+        column.operator("scene.togglegridaxis", text="Grid Toggle", icon="MESH_GRID")
         row = column.row(align=True)
         row.prop(context.space_data, "show_axis_x", text="X")
         row.prop(context.space_data, "show_axis_y", text="Y")
@@ -1961,24 +1954,43 @@ class PieObjectShading(Menu):
         # /MACHIN3
 
         #7 - TOP - LEFT
-        box = pie.split().column()
-        row = box.row(align=True)
-        row.prop(mesh, "show_normal_face", text="Show Normals Faces", icon='FACESEL')
-        row = box.row()
-        row.menu("meshdisplay.overlays", text="Mesh display", icon='OBJECT_DATAMODE')
-        #9 - TOP - RIGHT
+        if m3.addon_check("measureit"):
+            box = pie.split()
+            column = box.column()
+            column.scale_x = 1.5
+            column.operator("measureit.runopenglbutton", text="Show/Hide Annotations", icon="TEXT")
+            column.prop(scene, "measureit_gl_txt", text="")
+            column.operator("measureit.addnotebutton", text="Annotate", icon="NEW")
+        else:
+            pie.separator()
+
+        # box = pie.split().column()
+        # row = box.row(align=True)
+        # row.prop(mesh, "show_normal_face", text="Show Normals Faces", icon='FACESEL')
+        # row = box.row()
+        # row.menu("meshdisplay.overlays", text="Mesh display", icon='OBJECT_DATAMODE')
+
+        # #9 - TOP - RIGHT
+
         # MACHIN3
         box = pie.split()
         column = box.column()
-        row = column.row(align=True)
-        row.operator("object.shade_smooth", text="Smooth", icon="TEXT")
-        row.operator("object.shade_flat", text="Flat", icon="TEXT")
-        column.prop(mesh, "show_double_sided", text="Double sided")
+
+        if bpy.context.object.mode == "OBJECT":
+            row = column.row(align=True)
+            row.operator("object.shade_smooth", text="Smooth", icon="TEXT")
+            row.operator("object.shade_flat", text="Flat", icon="TEXT")
         column.prop(mesh, "use_auto_smooth")
         if mesh.use_auto_smooth:
-            # row = box.row(align=True)
             column.prop(mesh, "auto_smooth_angle", text="Angle")
+        if bpy.context.object.mode == "EDIT":
+            row = column.row(align=True)
+            row.prop(mesh, "show_normal_vertex", text=" ", icon='VERTEXSEL')
+            row.prop(mesh, "show_normal_loop", text=" ", icon='LOOPSEL')
+            row.prop(mesh, "show_normal_face", text=" ", icon='FACESEL')
+            column.menu("meshdisplay.overlays", text="Mesh display", icon='OBJECT_DATAMODE')
         # /MACHIN3
+
         #1 - BOTTOM - LEFT
         box = pie.split().column()
         row = box.row(align=True)
