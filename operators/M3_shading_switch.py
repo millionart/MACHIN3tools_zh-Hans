@@ -6,7 +6,7 @@ from .. import developer_utils as du
 class ShadingSwitch(bpy.types.Operator):
     bl_idname = "machin3.shading_switch"
     bl_label = "MACHIN3: Shading Switch"
-    # bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     def execute(self, context):
         shadingmode = bpy.context.space_data.viewport_shade

@@ -1,5 +1,5 @@
 import bpy
-import M3utils.M3utils as m3
+from .. import M3utils as m3
 
 
 # TODO: if the target is a parent, then you actually want to parent, I think
