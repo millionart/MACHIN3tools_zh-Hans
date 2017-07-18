@@ -73,7 +73,8 @@ class SurfaceSlide(bpy.types.Operator):
 
     def cancel(self, context):
         context.area.header_text_set()
-        m3.set_mode("OBJECT")
+        m3.set_mode("OBJECT")  # this is causing the crash when escaping out of the move tool after starting surface slide(with a selection)
+
         # manually push the undo state, otherwise you can't undo as the operator is still unfinished
         bpy.ops.ed.undo_push(message="MACHIN3: Surface Slide")
         bpy.ops.ed.undo()

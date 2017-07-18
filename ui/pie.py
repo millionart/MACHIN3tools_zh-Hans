@@ -1898,21 +1898,27 @@ class PieObjectShading(Menu):
         obj = context.object
         mesh = context.active_object.data
         fx_settings = view.fx_settings
+        scene = context.scene
 
         pie = layout.menu_pie()
         #4 - LEFT
 
         # MACHIN3
         box = pie.split()
+
+        if m3.addon_check("measureit"):
+            column = box.column()
+            column.scale_x = 2
+            column.operator("measureit.runopenglbutton", text="Show/Hide Annotations", icon="TEXT")
+            column.prop(scene, "measureit_gl_txt", text="")
+            column.operator("measureit.addnotebutton", text="Annotate", icon="NEW")
+
         column = box.column()
         column.operator("scene.togglegridaxis", text="Show/Hide Grid", icon="MESH_GRID")
         row = column.row(align=True)
         row.prop(context.space_data, "show_axis_x", text="X")
         row.prop(context.space_data, "show_axis_y", text="Y")
         row.prop(context.space_data, "show_axis_z", text="Z")
-
-        if m3.addon_check("measureit"):
-            column.operator("measureit.runopenglbutton", text="Show/Hide Annotations", icon="TEXT")
         # /MACHIN3
 
         #6 - RIGHT
