@@ -143,7 +143,7 @@ def mirror(self):
         selection.remove(active)
 
         for obj in selection:
-            if obj.type == "MESH":
+            if obj.type in ["MESH", "CURVE"]:
                 m3.unselect_all("OBJECT")
                 obj.select = True
 
