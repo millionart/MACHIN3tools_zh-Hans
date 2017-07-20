@@ -1809,7 +1809,10 @@ class PieSnaping(Menu):
         #7 - TOP - LEFT
         pie.operator("snap.volume", text="Volume", icon='SNAP_VOLUME')
         #9 - TOP - RIGHT
-        pie.operator("snap.increment", text="Increment", icon='SNAP_INCREMENT')
+        if bpy.context.scene.tool_settings.snap_element != 'INCREMENT':
+            pie.operator("snap.increment", text="Increment", icon='SNAP_INCREMENT')
+        else:
+            pie.prop(context.scene.tool_settings, "use_snap_grid_absolute")
         #1 - BOTTOM - LEFT
         pie.operator("snap.alignrotation", text="Align rotation", icon='SNAP_NORMAL')
         #3 - BOTTOM - RIGHT

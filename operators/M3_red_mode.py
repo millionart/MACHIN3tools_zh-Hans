@@ -35,20 +35,21 @@ class RedMode(bpy.types.Operator):
         active = m3.get_active()
 
         if active:
-            wstepmat = None
-            for mat in active.data.materials:
-                if mat.name.endswith("_wstep"):
-                    wstepmat = mat
+            if active.type == "MESH":
+                wstepmat = None
+                for mat in active.data.materials:
+                    if mat.name.endswith("_wstep"):
+                        wstepmat = mat
 
-                    red = wstepmat.node_tree.nodes['RGB']
+                        red = wstepmat.node_tree.nodes['RGB']
 
-                    if red.mute is True:  # it is muted, so the red bevels are turned OFF
-                        print("Turned red bevels ON.")
-                        red.mute = False
-                    else:
-                        print("Turned red bevels OFF.")
-                        red.mute = True
-                    break
+                        if red.mute is True:  # it is muted, so the red bevels are turned OFF
+                            print("Turned red bevels ON.")
+                            red.mute = False
+                        else:
+                            print("Turned red bevels OFF.")
+                            red.mute = True
+                        break
 
     def switch_matcaps(self):
         mc = bpy.context.space_data.matcap_icon
