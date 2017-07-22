@@ -251,7 +251,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row = col.split(percentage=0.2)
         row.prop(self, "activate_ChildOf", toggle=True)
         row.label("Child of's instead of parents. Works on geo and bones. On geo, can be fired multile times to switch between 'set inverse' and 'clear inverse. On geo defaults to 'set inverse', while on bones defaults to 'clear inverse'.")
-        du.show_keymap(self.activate_ChildOf, kc, "Object Mode", "machin3.child_of", col)
+        du.show_keymap(self.activate_ChildOf, kc, "3D View", "machin3.child_of", col)
 
         # FLIP NORMALS
 
@@ -529,7 +529,8 @@ def register_MACHIN3_keys(wm, keymaps):
     # CHILD OF
 
     if m3.M3_prefs().activate_ChildOf:
-        km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+        # km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
         kmi = km.keymap_items.new("machin3.child_of", "P", "PRESS", ctrl=True)
         MACHIN3_keymaps.append((km, kmi))
 

@@ -64,7 +64,8 @@ class ChildOf(bpy.types.Operator):
                     self.childof_set_inverse(c, parentobject, childof)
 
             # update the child data, otherwise, you won't see the effect of set/clear inverse unless you interact with the viewport
-            c.data.update()
+            if c.type == "MESH":
+                c.data.update()
 
     def childof_clear_inverse(self, childobject, constraint):
         # setting "clear inverse" - this is default when creating a new child-of constraint
