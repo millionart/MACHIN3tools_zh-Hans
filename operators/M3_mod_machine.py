@@ -16,7 +16,7 @@ class ModMachine(bpy.types.Operator):
 
     applyorshow = EnumProperty(name="Apply or Show", items=applyorshow, default="APPLY")
 
-    applyall = BoolProperty(name="All (Overwrite)", default=True)
+    applyall = BoolProperty(name="All (Overwrite)", default=False)
     applymirror = BoolProperty(name="Mirror", default=False)
     applybevel = BoolProperty(name="Bevel", default=False)
     applydisplace = BoolProperty(name="Displace", default=False)
@@ -46,7 +46,9 @@ class ModMachine(bpy.types.Operator):
         row.prop(self, "applyshrinkwrap", toggle=True)
 
     def execute(self, context):
-        selection = m3.selected_objects()
+        bpy.ops.ed.undo_push(message="MACHIN3: Pre-Mod-Machine-State")  # without pushing the state, there you might loose the selections, when redoing the op and switching the type of mod
+
+        self.selection = m3.selected_objects()
         active = m3.get_active()
 
         applylist = []
@@ -64,7 +66,7 @@ class ModMachine(bpy.types.Operator):
         if self.applyshrinkwrap:
             applylist.append("SHRINKWRAP")
 
-        for obj in selection:
+        for obj in self.selection:
             if obj.type == "MESH":
                 m3.make_active(obj)
 
@@ -105,6 +107,6 @@ class ModMachine(bpy.types.Operator):
                             except:
                                 # print(m3.red("Failed to apply modifier") % (obj.name, mod.name))
                                 pass
-
         m3.make_active(active)
+
         return {'FINISHED'}
