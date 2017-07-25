@@ -260,7 +260,7 @@ def get_selection(string):
     if string == "EDGE":
         idlist = [e.index for e in mesh.edges if e.select]
     if string == "FACE":
-        idlist = [f.index for f in mesh.faces if f.select]
+        idlist = [f.index for f in mesh.polygons if f.select]
     set_mode('EDIT')
     return idlist
 

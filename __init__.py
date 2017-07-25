@@ -75,6 +75,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_Mirror = BoolProperty(name="Mirror", default=False)
     activate_StarConnect = BoolProperty(name="Star Connect", default=False)
     activate_SmartModes = BoolProperty(name="Smart Modes", default=False)
+    activate_MoreSmartModes = BoolProperty(name="More Smart Modes", default=False)
     activate_CleanoutMaterials = BoolProperty(name="Cleanout Materials", default=False)
     activate_CleanoutUVs = BoolProperty(name="Cleanout UVs", default=False)
     activate_CleanoutTransforms = BoolProperty(name="Cleanout Transforms", default=False)
@@ -194,6 +195,13 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.prop(self, "activate_SmartModes", toggle=True)
         row.label("In Vert mode connects vert path or initiates knife, in edge mode is turns the edge, in face mode it converts the selection to a bounder loop.")
         du.show_keymap(self.activate_SmartModes, kc, "Mesh", "machin3.smart_modes", col)
+
+        # MORE SMART MODES
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_MoreSmartModes", toggle=True)
+        row.label("In Vert or Edge mode runs F2, in Face mode without selection runs Bisect, with selection duplicates and separates it.")
+        du.show_keymap(self.activate_SmartModes, kc, "Mesh", "machin3.more_smart_modes", col)
 
         # CLEANOUT MATERIALS
 
@@ -414,6 +422,8 @@ class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
             column.operator("machin3.star_connect", text="Star Connect")
         if m3.M3_prefs().activate_CleansUpGood:
             column.operator("machin3.clean_up", text="Cleans Up Good")
+        if m3.M3_prefs().activate_MoreSmartModes:
+            column.operator("machin3.more_smart_modes", text="More Smart Modes")
         if m3.M3_prefs().activate_CleanoutTransforms:
             column.operator("machin3.cleanout_transforms", text="Cleanout Transforms")
         if m3.M3_prefs().activate_SlideExtend:
@@ -503,6 +513,13 @@ def register_MACHIN3_keys(wm, keymaps):
     if m3.M3_prefs().activate_SmartModes:
         km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.smart_modes", "TWO", "PRESS")
+        MACHIN3_keymaps.append((km, kmi))
+
+    # MORE SMART MODES
+
+    if m3.M3_prefs().activate_MoreSmartModes:
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        kmi = km.keymap_items.new("machin3.more_smart_modes", "FOUR", "PRESS")
         MACHIN3_keymaps.append((km, kmi))
 
     # SLIDE EXTEND
