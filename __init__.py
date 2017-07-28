@@ -89,6 +89,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_SurfaceSlide = BoolProperty(name="Surface Slide", default=False)
     activate_QuickJoin = BoolProperty(name="Quick Join", default=False)
     activate_EdgeLength = BoolProperty(name="Edge Length", default=False)
+    activate_SymmetrizeGPencil = BoolProperty(name="Symmetrize GPencil", default=False)
 
     # SPECIAL MENUS
 
@@ -289,6 +290,12 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.prop(self, "activate_EdgeLength", toggle=True)
         row.label("Average length of selected edges or precisely set their length")
 
+        # SYMMETRIZE GPENCIL
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_SymmetrizeGPencil", toggle=True)
+        row.label("Symmetrizes the Grease Pencil using the cursor as the mid point.")
+
     def draw_special(self, box, kc):
         col = box.column()
 
@@ -407,6 +414,9 @@ class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
             column.operator("machin3.child_of", text="Child Of")
         if m3.M3_prefs().activate_FlipNormals:
             column.operator("machin3.flip_normals", text="Flip Normals")
+        if m3.M3_prefs().activate_SymmetrizeGPencil:
+            if context.gpencil_data:
+                column.operator("machin3.symmetrize_gpencil", text="Symmetrize GPencil")
 
 
 class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):

@@ -7,6 +7,8 @@ from .. import M3utils as m3
 scalemode = [("AVERAGE", "Average", ""),
              ("PRECISE", "Precise", "")]
 
+# NOTE: if selected edges are conntected to each other, results will be not as expected
+
 
 class EdgeLength(bpy.types.Operator):
     bl_idname = "machin3.edge_length"

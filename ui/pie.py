@@ -1426,8 +1426,11 @@ class PieObjectEditMode(Menu):
                 row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_x", text="X")
                 row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_y", text="Y")
                 row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_z", text="Z")
+            elif bpy.context.object.mode == "OBJECT":
+                pie.operator("gpencil.editmode_toggle", text="Gpencil", icon='GREASEPENCIL')
             else:
                 pie.separator()
+
             # 9 - TOP - RIGHT
             pie.operator("sculpt.sculptmode_toggle", text="Sculpt", icon='SCULPTMODE_HLT')
             # 1 - BOTTOM - LEFT
