@@ -88,6 +88,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_FlipNormals = BoolProperty(name="Flip Normals", default=False)
     activate_SurfaceSlide = BoolProperty(name="Surface Slide", default=False)
     activate_QuickJoin = BoolProperty(name="Quick Join", default=False)
+    activate_EdgeLength = BoolProperty(name="Edge Length", default=False)
 
     # SPECIAL MENUS
 
@@ -282,6 +283,12 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         du.show_keymap(self.activate_QuickJoin, kc, "Mesh", "machin3.quick_join_last", col)
         du.show_keymap(self.activate_QuickJoin, kc, "Mesh", "machin3.quick_join_center", col)
 
+        # EDGE LENGTH
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_EdgeLength", toggle=True)
+        row.label("Average length of selected edges or precisely set their length")
+
     def draw_special(self, box, kc):
         col = box.column()
 
@@ -430,6 +437,8 @@ class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
             column.operator("machin3.slide_extend", text="Slide Extend")
         if m3.M3_prefs().activate_SurfaceSlide:
             column.operator("machin3.surface_slide", text="Surface Slide")
+        if m3.M3_prefs().activate_EdgeLength:
+            column.operator("machin3.edge_length", text="Edge Length")
 
 
 def edit_menu_func(self, context):
