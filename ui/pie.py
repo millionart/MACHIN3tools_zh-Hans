@@ -1426,8 +1426,8 @@ class PieObjectEditMode(Menu):
                 row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_x", text="X")
                 row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_y", text="Y")
                 row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_z", text="Z")
-            elif bpy.context.object.mode == "OBJECT":
-                pie.operator("gpencil.editmode_toggle", text="Gpencil", icon='GREASEPENCIL')
+            elif bpy.context.object.mode == "OBJECT" and bpy.context.gpencil_data:
+                pie.operator("gpencil.editmode_toggle", text="Edit Strokes", icon='GREASEPENCIL')
             else:
                 pie.separator()
 
