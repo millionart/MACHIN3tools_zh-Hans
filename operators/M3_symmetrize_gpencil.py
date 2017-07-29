@@ -7,6 +7,9 @@ mirroraxis = [("X", "X", ""),
               ("Y", "Y", ""),
               ("Z", "Z", "")]
 
+deleteside = [("NEG", "Negative", ""),
+              ("POS", "Positive", "")]
+
 
 class SymmetrizeGPencil(bpy.types.Operator):
     bl_idname = "machin3.symmetrize_gpencil"
@@ -14,7 +17,8 @@ class SymmetrizeGPencil(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     mirror = EnumProperty(name="Mirror Axis", items=mirroraxis, default="X")
-    deleteneg = BoolProperty(name="Delete Negative", default=True)
+    delete = BoolProperty(name="Delete", default=True)
+    deleteside = EnumProperty(name="Delete Side", items=deleteside, default="NEG")
 
     def draw(self, context):
         layout = self.layout
@@ -23,7 +27,9 @@ class SymmetrizeGPencil(bpy.types.Operator):
         row = column.row(align=True)
         row.prop(self, "mirror", expand=True)
 
-        column.prop(self, "deleteneg")
+        row = column.row(align=True)
+        row.prop(self, "delete")
+        row.prop(self, "deleteside", expand=True)
 
     def execute(self, context):
         gtoggled = False
@@ -37,21 +43,32 @@ class SymmetrizeGPencil(bpy.types.Operator):
         cursorloc = bpy.context.scene.cursor_location
         gplayer = bpy.context.active_gpencil_layer
 
-        if self.deleteneg:
+        if self.delete:
             bpy.ops.gpencil.select_all(action='DESELECT')
 
             for stroke in gplayer.active_frame.strokes:
                 for point in stroke.points:
                     if self.mirror == "X":
-                        if point.co[0] < (cursorloc[0]):
-                            point.select = True
+                        if self.deleteside == "NEG":
+                            if point.co[0] < (cursorloc[0]):
+                                point.select = True
+                        else:
+                            if point.co[0] > (cursorloc[0]):
+                                point.select = True
                     elif self.mirror == "Y":
-                        if point.co[1] < (cursorloc[1]):
-                            point.select = True
+                        if self.deleteside == "NEG":
+                            if point.co[1] < (cursorloc[1]):
+                                point.select = True
+                        else:
+                            if point.co[1] > (cursorloc[1]):
+                                point.select = True
                     elif self.mirror == "Z":
-                        if point.co[2] < (cursorloc[2]):
-                            point.select = True
-
+                        if self.deleteside == "NEG":
+                            if point.co[2] < (cursorloc[2]):
+                                point.select = True
+                        else:
+                            if point.co[1] > (cursorloc[1]):
+                                point.select = True
             try:
                 bpy.ops.gpencil.delete(type='POINTS')
             except:  # no grease pencil layer or empty layer
