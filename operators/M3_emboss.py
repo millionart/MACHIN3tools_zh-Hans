@@ -3,6 +3,9 @@ from bpy.props import FloatProperty, BoolProperty, IntProperty
 from .. import M3utils as m3
 
 
+# TODO: auto bevel(edge weight+ bevel mod)
+
+
 class Emboss(bpy.types.Operator):
     bl_idname = "machin3.emboss"
     bl_label = "MACHIN3: Emboss"
@@ -20,6 +23,8 @@ class Emboss(bpy.types.Operator):
 
     depth = FloatProperty(name="Depth", default=1, min=0)
     invert = BoolProperty(name="Invert", default=False)
+
+    marksharp = BoolProperty(name="Mark Sharp", default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -39,6 +44,8 @@ class Emboss(bpy.types.Operator):
 
         column.prop(self, "depth")
         column.prop(self, "invert")
+
+        column.prop(self, "marksharp")
 
     def execute(self, context):
         self.scene_scale = m3.get_scene_scale()
@@ -86,17 +93,28 @@ class Emboss(bpy.types.Operator):
             tempinsetmat = bpy.data.materials.new("temp_inset")
             tempinsetmat.diffuse_color = (1, 0.1, 0.1)
 
+        mat = bpy.data.materials.get("temp_bottom")
+
+        if mat:
+            tempbottommat = mat
+        else:
+            tempbottommat = bpy.data.materials.new("temp_bottom")
+            tempbottommat.diffuse_color = (0.1, 1, 0.1)
+
         # append both
         if tempbasemat.name not in active.data.materials:
             active.data.materials.append(tempbasemat)
         if tempinsetmat.name not in active.data.materials:
             active.data.materials.append(tempinsetmat)
+        if tempbottommat.name not in active.data.materials:
+            active.data.materials.append(tempbottommat)
 
         # find the slots of the temp mats
         for idx, slot in enumerate(active.material_slots):
             if slot.material.name == "temp_base":
                 tempbaseslot = idx
                 tempinsetslot = idx + 1
+                tempbottomslot = idx + 2
                 break
 
         # assign the tempbase material to everything
@@ -136,8 +154,8 @@ class Emboss(bpy.types.Operator):
         # inner inset
         bpy.ops.mesh.inset(use_boundary=True, use_even_offset=True, thickness=self.inner, depth=self.d, use_outset=False, use_select_inset=False, use_individual=False, use_interpolate=True)
 
-        # remove the insetmaterial from the "bottom" polys
-        active.active_material_index = tempbaseslot
+        # assign the bottom mat
+        active.active_material_index = tempbottomslot
         bpy.ops.object.material_slot_assign()
 
         if self.bevel:
@@ -158,11 +176,51 @@ class Emboss(bpy.types.Operator):
             # bevel the corners
             bpy.ops.mesh.bevel(offset=self.amount, segments=self.bevelsegments, vertex_only=False)
 
+            m3.unselect_all("MESH")
+            m3.set_mode("FACE")
+
+        if self.marksharp:
+            # select the "bottom" polygons
+            m3.set_mode("OBJECT")
+
+            # shader smooth while in  object mode
+            bpy.ops.object.shade_smooth()
+
+            mesh = bpy.context.active_object.data
+
+            for f in mesh.polygons:
+                if f.material_index == tempbottomslot:
+                    f.select = True
+                else:
+                    f.select = False
+            m3.set_mode("EDIT")
+
+            # increase selection
+            bpy.ops.mesh.select_more()
+
+            # deselect the bottom polygons
+            m3.set_mode("OBJECT")
+
+            for f in mesh.polygons:
+                if f.material_index == tempbottomslot:
+                    f.select = False
+            m3.set_mode("EDIT")
+
+            # boundary loop
+            bpy.ops.mesh.region_to_loop()
+
+            bpy.ops.mesh.mark_sharp()
+            active.data.use_auto_smooth = True
+
+            # bpy.ops.transform.edge_bevelweight(value=1)
+
         # remove the temp materials again
         m3.set_mode("OBJECT")
         active.active_material_index = tempinsetslot
         bpy.ops.object.material_slot_remove()
         active.active_material_index = tempbaseslot
+        bpy.ops.object.material_slot_remove()
+        active.active_material_index = tempbottomslot
         bpy.ops.object.material_slot_remove()
         m3.set_mode("EDIT")
         m3.set_mode("FACE")
