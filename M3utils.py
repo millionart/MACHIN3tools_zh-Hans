@@ -273,6 +273,10 @@ def get_selection_history():
     return vertlist
 
 
+def get_scene_scale():
+    return bpy.context.scene.unit_settings.scale_length
+
+
 class ShortestPath():
     # "author": "G Bantle, Bagration, MACHIN3",
     # "source": "https://blenderartists.org/forum/showthread.php?58564-Path-Select-script(Update-20060307-Ported-to-C-now-in-CVS",

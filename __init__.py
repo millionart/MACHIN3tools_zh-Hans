@@ -90,6 +90,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_QuickJoin = BoolProperty(name="Quick Join", default=False)
     activate_EdgeLength = BoolProperty(name="Edge Length", default=False)
     activate_SymmetrizeGPencil = BoolProperty(name="Symmetrize GPencil", default=False)
+    activate_Emboss = BoolProperty(name="Emboss", default=False)
 
     # SPECIAL MENUS
 
@@ -296,6 +297,12 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.prop(self, "activate_SymmetrizeGPencil", toggle=True)
         row.label("Symmetrizes the Grease Pencil using the cursor as the mid point.")
 
+        # EMBOSS
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_Emboss", toggle=True)
+        row.label("Embosses the selected polygons.")
+
     def draw_special(self, box, kc):
         col = box.column()
 
@@ -425,6 +432,7 @@ class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
     # TODO: comp mode availability check
 
     def draw(self, context):
+        mode = m3.get_mode()
         layout = self.layout
 
         column = layout.column()
@@ -444,11 +452,15 @@ class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
         if m3.M3_prefs().activate_CleanoutTransforms:
             column.operator("machin3.cleanout_transforms", text="Cleanout Transforms")
         if m3.M3_prefs().activate_SlideExtend:
-            column.operator("machin3.slide_extend", text="Slide Extend")
+            if mode == "VERT":
+                column.operator("machin3.slide_extend", text="Slide Extend")
         if m3.M3_prefs().activate_SurfaceSlide:
             column.operator("machin3.surface_slide", text="Surface Slide")
         if m3.M3_prefs().activate_EdgeLength:
             column.operator("machin3.edge_length", text="Edge Length")
+        if m3.M3_prefs().activate_Emboss:
+            if mode == "FACE":
+                column.operator("machin3.emboss", text="Emboss")
 
 
 def edit_menu_func(self, context):
