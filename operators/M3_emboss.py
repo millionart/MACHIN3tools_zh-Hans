@@ -110,27 +110,28 @@ class Emboss(bpy.types.Operator):
         active.active_material_index = tempinsetslot
         bpy.ops.object.material_slot_assign()
 
-        if self.individual:
-            # select the gap edges
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='EDGE')
+        if len(faces) > 1:  # whith just 1 polygon selected individual doesnt work, as there are no interior edges
+            if self.individual:
+                # select the gap edges
+                bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='EDGE')
 
-            bpy.ops.mesh.bevel(offset=self.gap, vertex_only=False)
+                bpy.ops.mesh.bevel(offset=self.gap, vertex_only=False)
 
-            m3.set_mode("FACE")
+                m3.set_mode("FACE")
 
-            active.active_material_index = tempbaseslot
-            bpy.ops.object.material_slot_assign()
+                active.active_material_index = tempbaseslot
+                bpy.ops.object.material_slot_assign()
 
-            # select the inner inset polygons
-            m3.set_mode("OBJECT")
-            mesh = bpy.context.active_object.data
+                # select the inner inset polygons
+                m3.set_mode("OBJECT")
+                mesh = bpy.context.active_object.data
 
-            for f in mesh.polygons:
-                if f.material_index == tempinsetslot:
-                    f.select = True
-                else:
-                    f.select = False
-            m3.set_mode("EDIT")
+                for f in mesh.polygons:
+                    if f.material_index == tempinsetslot:
+                        f.select = True
+                    else:
+                        f.select = False
+                m3.set_mode("EDIT")
 
         # inner inset
         bpy.ops.mesh.inset(use_boundary=True, use_even_offset=True, thickness=self.inner, depth=self.d, use_outset=False, use_select_inset=False, use_individual=False, use_interpolate=True)
