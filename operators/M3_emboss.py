@@ -165,3 +165,4 @@ class Emboss(bpy.types.Operator):
         bpy.ops.object.material_slot_remove()
         m3.set_mode("EDIT")
         m3.set_mode("FACE")
+        m3.unselect_all("MESH")
