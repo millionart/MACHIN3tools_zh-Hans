@@ -3,9 +3,6 @@ from bpy.props import FloatProperty, BoolProperty, IntProperty
 from .. import M3utils as m3
 
 
-# TODO: auto bevel(edge weight+ bevel mod)
-
-
 class Emboss(bpy.types.Operator):
     bl_idname = "machin3.emboss"
     bl_label = "MACHIN3: Emboss"
@@ -25,6 +22,8 @@ class Emboss(bpy.types.Operator):
     invert = BoolProperty(name="Invert", default=False)
 
     marksharp = BoolProperty(name="Mark Sharp", default=False)
+    addbevelweight = BoolProperty(name="Add Bevel Weight", default=False)
+    bevelweight = FloatProperty(name="Weight", default=1, min=0, max=1)
 
     def draw(self, context):
         layout = self.layout
@@ -32,6 +31,10 @@ class Emboss(bpy.types.Operator):
 
         column.prop(self, "outerinset")
         column.prop(self, "innerinset")
+        column.prop(self, "depth")
+        column.prop(self, "invert")
+
+        column.separator()
 
         row = column.row()
         row.prop(self, "individual")
@@ -42,10 +45,12 @@ class Emboss(bpy.types.Operator):
         row.prop(self, "bevelamount")
         row.prop(self, "bevelsegments")
 
-        column.prop(self, "depth")
-        column.prop(self, "invert")
+        column.separator()
 
         column.prop(self, "marksharp")
+        row = column.row()
+        row.prop(self, "addbevelweight")
+        row.prop(self, "bevelweight")
 
     def execute(self, context):
         self.scene_scale = m3.get_scene_scale()
@@ -54,6 +59,8 @@ class Emboss(bpy.types.Operator):
         self.inner = self.innerinset / 100 / self.scene_scale
         self.d = - self.depth / 4 / self.scene_scale
         self.amount = self.bevelamount / 100 / self.scene_scale
+        self.bweight = self.bevelweight
+
         if self.invert:
             self.d = abs(self.d)
 
@@ -73,10 +80,11 @@ class Emboss(bpy.types.Operator):
         # outer inset
         bpy.ops.mesh.inset(use_boundary=True, use_even_offset=True, thickness=self.outer, depth=0, use_outset=False, use_select_inset=False, use_individual=False, use_interpolate=True)
 
-        # get currently selected faces
-        faces = m3.get_selection("FACE")
+        # clear any existing bevel weights and sharps
+        bpy.ops.transform.edge_bevelweight(value=-1)
+        bpy.ops.mesh.mark_sharp(clear=True)
 
-        # create temporary base and inset materials
+        # create temporary base and inset materials and bottom materials, used to select specific polygons
         mat = bpy.data.materials.get("temp_base")
 
         if mat:
@@ -101,7 +109,7 @@ class Emboss(bpy.types.Operator):
             tempbottommat = bpy.data.materials.new("temp_bottom")
             tempbottommat.diffuse_color = (0.1, 1, 0.1)
 
-        # append both
+        # append them
         if tempbasemat.name not in active.data.materials:
             active.data.materials.append(tempbasemat)
         if tempinsetmat.name not in active.data.materials:
@@ -128,7 +136,7 @@ class Emboss(bpy.types.Operator):
         active.active_material_index = tempinsetslot
         bpy.ops.object.material_slot_assign()
 
-        if len(faces) > 1:  # whith just 1 polygon selected individual doesnt work, as there are no interior edges
+        if len(faces) > 1:  # with just 1 polygon selected individual doesnt work, as there are no interior edges
             if self.individual:
                 # select the gap edges
                 bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='EDGE')
@@ -179,13 +187,17 @@ class Emboss(bpy.types.Operator):
             m3.unselect_all("MESH")
             m3.set_mode("FACE")
 
-        if self.marksharp:
+        if self.marksharp or self.addbevelweight:
             # select the "bottom" polygons
             m3.set_mode("OBJECT")
 
-            # shader smooth while in  object mode
+            # shade smooth while in object mode
             bpy.ops.object.shade_smooth()
 
+            # also enable auto-smooth
+            active.data.use_auto_smooth = True
+
+            # to selct the "wall" polygons, first select the bottom polys
             mesh = bpy.context.active_object.data
 
             for f in mesh.polygons:
@@ -209,10 +221,13 @@ class Emboss(bpy.types.Operator):
             # boundary loop
             bpy.ops.mesh.region_to_loop()
 
-            bpy.ops.mesh.mark_sharp()
-            active.data.use_auto_smooth = True
+            # mark sharp
+            if self.marksharp:
+                bpy.ops.mesh.mark_sharp()
 
-            # bpy.ops.transform.edge_bevelweight(value=1)
+            # add bevelweight
+            if self.addbevelweight:
+                bpy.ops.transform.edge_bevelweight(value=self.bweight)
 
         # remove the temp materials again
         m3.set_mode("OBJECT")
