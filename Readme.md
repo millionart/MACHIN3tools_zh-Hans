@@ -8,13 +8,18 @@ If you find any of this useful, consider supporting my other work.
 # Installation
 
 * clone the repo into Blender's addon folder
-* Alternatively, download the zipped repo and extract it into Blender's addon folder
+* alternatively, download the zipped repo and extract it into Blender's addon folder
     * rename "MACHIN3tools-master" to just "MACHIN3tools"
-* in preferences, activate the scripts you need
+* in preferences, activate MACHIN3tools
+    * in MACHIN3tools preferences
+        * activate the scripts you need
+        * activate the pie menus you want to use
 * save user preferences and restart Blender
+    * in MACHin3tools preferences
+        * change shortcuts of scripts and pie menues as you like
+        * save user preferences if you've made any changes
 
 # Usage
 
 * MACHIN3tools appear in the special menu(W key) in Edit or Object mode
-* some tools have shortcuts, which can be changed or deactivated in the addon preferences
-* some tools have operator propertiers(F6 key by default) to customizae and adapt the behaviour to specific needs
+* some tools have operator propertiers(F6 key by default) to customize and adapt their behaviour

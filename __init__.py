@@ -94,8 +94,8 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
 
     # SPECIAL MENUS
 
-    activate_special_Object = BoolProperty(name="Object Mode", default=False)
-    activate_special_Edit = BoolProperty(name="Edit Mode", default=False)
+    activate_special_Object = BoolProperty(name="Object Mode", default=True)
+    activate_special_Edit = BoolProperty(name="Edit Mode", default=True)
 
     # PIE MENUS
 
