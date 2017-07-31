@@ -7,7 +7,9 @@ If you find any of this useful, consider supporting my other work.
 
 # Installation
 
-* install like any other addon
+* clone the repo into Blender's addon folder
+* Alternatively, download the zipped repo and extract it into Blender's addon folder
+    * rename "MACHIN3tools-master" to just "MACHIN3tools"
 * in preferences, activate the scripts you need
 * save user preferences and restart Blender
 
