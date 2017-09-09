@@ -11,6 +11,7 @@ vertliststored = []
 class SlideExtend(bpy.types.Operator):
     bl_idname = "machin3.slide_extend"
     bl_label = "MACHIN3: Slide Extend"
+    bl_options = {'REGISTER'}
 
     def execute(self, context):
         mode = m3.get_mode()

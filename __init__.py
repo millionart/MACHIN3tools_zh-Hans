@@ -84,7 +84,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_HideMeshes = BoolProperty(name="Hide Meshes", default=False)
     activate_ModMachine = BoolProperty(name="Mod Machine", default=False)
     activate_CameraHelper = BoolProperty(name="Camera Helper", default=False)
-    activate_ChildOf = BoolProperty(name="Child Of", default=False)
+    activate_Hierarch = BoolProperty(name="Hierarch", default=False)
     activate_FlipNormals = BoolProperty(name="Flip Normals", default=False)
     activate_SurfaceSlide = BoolProperty(name="Surface Slide", default=False)
     activate_QuickJoin = BoolProperty(name="Quick Join", default=False)
@@ -257,12 +257,12 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.label("Creates a new camera from view if nothing is selected. If Camera is selcted, aligns camera to current view and makes it the scene camera.")
         du.show_keymap(self.activate_CameraHelper, kc, "Object Mode", "machin3.camera_helper", col)
 
-        # CHILD OF
+        # HIERARCHY
 
         row = col.split(percentage=0.2)
-        row.prop(self, "activate_ChildOf", toggle=True)
+        row.prop(self, "activate_Hierarch", toggle=True)
         row.label("Child of's instead of parents. Works on geo and bones. On geo, can be fired multile times to switch between 'set inverse' and 'clear inverse. On geo defaults to 'set inverse', while on bones defaults to 'clear inverse'.")
-        du.show_keymap(self.activate_ChildOf, kc, "3D View", "machin3.child_of", col)
+        du.show_keymap(self.activate_Hierarch, kc, "3D View", "machin3.hierarch", col)
 
         # FLIP NORMALS
 
@@ -417,8 +417,8 @@ class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
             column.operator("machin3.mod_machine", text="Mod Machine")
         if m3.M3_prefs().activate_CameraHelper:
             column.operator("machin3.camera_helper", text="Camera Helper")
-        if m3.M3_prefs().activate_ChildOf:
-            column.operator("machin3.child_of", text="Child Of")
+        if m3.M3_prefs().activate_Hierarch:
+            column.operator("machin3.hierarch", text="Hierarch")
         if m3.M3_prefs().activate_FlipNormals:
             column.operator("machin3.flip_normals", text="Flip Normals")
         if m3.M3_prefs().activate_SymmetrizeGPencil:
@@ -574,12 +574,12 @@ def register_MACHIN3_keys(wm, keymaps):
         kmi = km.keymap_items.new("machin3.camera_helper", "NUMPAD_0", "PRESS", alt=True)
         MACHIN3_keymaps.append((km, kmi))
 
-    # CHILD OF
+    # HIERARCHY
 
-    if m3.M3_prefs().activate_ChildOf:
+    if m3.M3_prefs().activate_Hierarch:
         # km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
         km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
-        kmi = km.keymap_items.new("machin3.child_of", "P", "PRESS", ctrl=True)
+        kmi = km.keymap_items.new("machin3.hierarch", "P", "PRESS", ctrl=True)
         MACHIN3_keymaps.append((km, kmi))
 
     # SURFACE SLIDE
