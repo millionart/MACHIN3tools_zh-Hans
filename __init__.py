@@ -30,7 +30,7 @@ bl_info = {
 
 
 import bpy
-from bpy.props import BoolProperty, EnumProperty
+from bpy.props import BoolProperty, EnumProperty, FloatProperty
 from . import developer_utils as du
 from . import M3utils as m3
 
@@ -109,6 +109,22 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     activate_pie_UVSelectMode = BoolProperty(name="UV Select Mode", default=False)
     activate_pie_UVWeldAlign = BoolProperty(name="UV Weld and Align", default=False)
 
+    # SETTINGS
+
+    # Shading Switch
+
+    viewportcompensation = BoolProperty(name="Material Viewport Compensation", default=True)
+
+    compensationmodes = [("278", "2.78 Mode", ""),
+                         ("279", "2.79 Mode", "")]
+
+    shadingcompensation = EnumProperty(name="Viewport Shading Compensation", description="Adjusts Material Viewport Shading for overly dark metallic Materials in 2.79", items=compensationmodes, default="279")
+    targetmetallic = FloatProperty(name="Target Metallic", description="Interpolation Target Metallic Value for Full Metallness", default=0.9, min=0, max=1)
+    secondarytargetmetallic = FloatProperty(name="2nd Target Metallic", description="Interpolation Target Metallic Value for Secondary Color Based Adjustment", default=0.1, min=0, max=1)
+    targetroughness = FloatProperty(name="Target Roughness", description="Interpolation Target Roughness Value for full Metallness", default=0.6, min=0, max=1)
+
+    alphafix = BoolProperty(name="Fix white Decal borders in Viewport", default=True)
+
     def draw(self, context):
         layout=self.layout
 
@@ -140,6 +156,8 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.prop(self, "activate_ShadingSwitch", toggle=True)
         row.label("Switches between Material and Solid shading modes. Also re-assigns Z key for wireframe switching and Shift + Z for render switching accordingly.")
         du.show_keymap(self.activate_ShadingSwitch, kc, "3D View", "machin3.shading_switch", col)
+
+        self.draw_shading_switch(col)
 
         # RED MODE
 
@@ -389,6 +407,25 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.prop(self, "activate_pie_UVWeldAlign", toggle=True)
         row.label("UV Editor - Weld and Align tools.")
         du.show_keymap(self.activate_pie_UVWeldAlign, kc, "UV Editor", "wm.call_menu_pie", col, kmivalue="pie.uvsweldalign", properties="name")
+
+    def draw_shading_switch(self, column):
+        if self.activate_ShadingSwitch:
+            column.prop(self, "viewportcompensation")
+
+            if self.viewportcompensation:
+                row = column.row()
+                row.prop(self, "shadingcompensation", expand=True)
+
+                if self.shadingcompensation == "279":
+                    row = column.row()
+                    row.prop(self, "targetmetallic")
+                    row.prop(self, "secondarytargetmetallic")
+                    row.prop(self, "targetroughness")
+                    column.prop(self, "alphafix")
+
+            column.separator()
+            column.separator()
+            column.separator()
 
 
 class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
