@@ -409,23 +409,24 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         du.show_keymap(self.activate_pie_UVWeldAlign, kc, "UV Editor", "wm.call_menu_pie", col, kmivalue="pie.uvsweldalign", properties="name")
 
     def draw_shading_switch(self, column):
-        if self.activate_ShadingSwitch:
-            column.prop(self, "viewportcompensation")
+        if bpy.app.version >= (2, 79, 0):
+            if self.activate_ShadingSwitch:
+                column.prop(self, "viewportcompensation")
 
-            if self.viewportcompensation:
-                row = column.row()
-                row.prop(self, "shadingcompensation", expand=True)
-
-                if self.shadingcompensation == "279":
+                if self.viewportcompensation:
                     row = column.row()
-                    row.prop(self, "targetmetallic")
-                    row.prop(self, "secondarytargetmetallic")
-                    row.prop(self, "targetroughness")
-                    column.prop(self, "alphafix")
+                    row.prop(self, "shadingcompensation", expand=True)
 
-            column.separator()
-            column.separator()
-            column.separator()
+                    if self.shadingcompensation == "279":
+                        row = column.row()
+                        row.prop(self, "targetmetallic")
+                        row.prop(self, "secondarytargetmetallic")
+                        row.prop(self, "targetroughness")
+                        column.prop(self, "alphafix")
+
+                column.separator()
+                column.separator()
+                column.separator()
 
 
 class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
