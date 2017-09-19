@@ -150,9 +150,7 @@ def reset_principledpbr_node(mode, material, node, group=None):
                 elif node.name == "Principled BSDF.001":
                     metallic = group.inputs['Subset Metallic']
                     roughness = group.inputs['Subset Roughness']
-            elif "Subtractor" in groupname:
-                metallic = group.inputs['Material Metallic']
-                roughness = group.inputs['Material Roughness']
+
             elif "Panel" in groupname:
                 if node.name == "Principled BSDF":
                     metallic = group.inputs['Material 1 Metallic']
@@ -160,9 +158,16 @@ def reset_principledpbr_node(mode, material, node, group=None):
                 elif node.name == "Principled BSDF.001":
                     metallic = group.inputs['Material 2 Metallic']
                     roughness = group.inputs['Material 2 Roughness']
+
             elif "Info" in groupname:
                 metallic = group.inputs['Info Metallic']
                 roughness = group.inputs['Info Roughness']
+
+            # Subtractors have either 'Subtractor' in the group name or are just called 'Decal Group'
+            else:
+                metallic = group.inputs['Material Metallic']
+                roughness = group.inputs['Material Roughness']
+
 
             transparent = group.node_tree.nodes.get("Transparent BSDF")
             transparent.inputs[0].default_value = (1, 1, 1, 1)
@@ -211,6 +216,7 @@ def adjust_principledpbr_node(mode, material, node, group=None):
     # Decal Material
     if group:
         groupname = group.node_tree.name
+
         if "Subset" in groupname:
             if node.name == "Principled BSDF":
                 color = group.inputs['Material Color'].links[0].from_socket
@@ -220,10 +226,7 @@ def adjust_principledpbr_node(mode, material, node, group=None):
                 color = group.inputs['Subset Color'].links[0].from_socket
                 metallic = group.inputs['Subset Metallic']
                 roughness = group.inputs['Subset Roughness']
-        elif "Subtractor" in groupname:
-            color = group.inputs['Material Color'].links[0].from_socket
-            metallic = group.inputs['Material Metallic']
-            roughness = group.inputs['Material Roughness']
+
         elif "Panel" in groupname:
             if node.name == "Principled BSDF":
                 color = group.inputs['Material 1 Color'].links[0].from_socket
@@ -233,10 +236,17 @@ def adjust_principledpbr_node(mode, material, node, group=None):
                 color = group.inputs['Material 2 Color'].links[0].from_socket
                 metallic = group.inputs['Material 2 Metallic']
                 roughness = group.inputs['Material 2 Roughness']
+
         elif "Info" in groupname:
             color = node.inputs[0]  # color is irrelevant for info decals, as it comes from an image, we just need it for the dict below
             metallic = group.inputs['Info Metallic']
             roughness = group.inputs['Info Roughness']
+
+        # Subtractors have either 'Subtractor' in the group name or are just called 'Decal Group'
+        else:  # Subtractors have either 'Subtractor' in the group name or are just called 'Decal Group'
+            color = group.inputs['Material Color'].links[0].from_socket
+            metallic = group.inputs['Material Metallic']
+            roughness = group.inputs['Material Roughness']
 
     # Non-Decal Material
     else:
