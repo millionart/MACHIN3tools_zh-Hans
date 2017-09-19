@@ -5,6 +5,11 @@ If you find any of this useful, consider supporting my other work.
 [machin3.io](https://machin3.io) | [gumroad](https://gumroad.com/machin3) | [blender market](https://blendermarket.com/creators/machin3) | [youtube](https://www.youtube.com/channel/UC4yaFzFDILd2yAqOWRuLOvA/videos) | [twitter](https://twitter.com/machin3io) | [facebook](https://www.facebook.com/MACHIN3-1735915690014923)
 
 
+# Requirements
+
+* Blender 2.79
+
+
 # Installation
 
 * clone the repo into Blender's addon folder
