@@ -2,6 +2,9 @@ import bpy
 from bpy.props import FloatProperty, BoolProperty, IntProperty
 from .. import M3utils as m3
 
+# TODO: extend it to be cut from object mode where an intersecting cutter object determines the shape/polygon selection
+# ####: or maybe make a second, simpler tool, might not need all the things Emboss has
+
 
 class Emboss(bpy.types.Operator):
     bl_idname = "machin3.emboss"

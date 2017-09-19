@@ -4,9 +4,8 @@ from .. import M3utils as m3
 from .. import developer_utils as du
 
 
-# TODO: prepare_for_rendering() must also be called when doing actual rendering
 # TODO: ShadingSwitch() must call prepare_for_viewport_shading() when switching from solid to material shading
-# TODO: reset operator, that can be run before doing any rendering or when viewportcompensation is turned off, but the scene is using compensated values from a previous save
+
 
 class ShadingSwitch(bpy.types.Operator):
     bl_idname = "machin3.shading_switch"
