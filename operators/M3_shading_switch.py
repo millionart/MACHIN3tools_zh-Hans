@@ -18,30 +18,51 @@ class ShadingSwitch(bpy.types.Operator):
         wm = bpy.context.window_manager
         km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D', region_type='WINDOW', modal=False)
 
-        print("\n----- MACHIN3: Shading Switch -----")
+        # deactivate the default render toggle
+        defaultrendertoggle = wm.keyconfigs.default.keymaps['3D View'].keymap_items['view3d.toggle_render']
+
+        if defaultrendertoggle.active:
+            defaultrendertoggle.active = False
+
+        # look for an existing machin3 render toggle
+        try:
+            wm.keyconfigs.addon.keymaps['3D View'].keymap_items['machin3.toggle_rendered']
+        except:
+            km.keymap_items.new('machin3.toggle_rendered', "Z", 'PRESS', shift=True)
+
+        # look for an existing machin3 wire toggle
+        try:
+            machin3wiretoggle = wm.keyconfigs.addon.keymaps['3D View'].keymap_items['machin3.toggle_wireframe']
+        except:
+            machin3wiretoggle = None
 
         if shadingmode == "SOLID":
             bpy.context.space_data.viewport_shade = "MATERIAL"
             print("Switched to MATERIAL shading mode.")
 
+            if machin3wiretoggle:
+                km.keymap_items.remove(machin3wiretoggle)
+
             kmi = km.keymap_items.new('machin3.toggle_wireframe', "Z", 'PRESS')
             du.kmi_props_setattr(kmi.properties, 'shading', 'MATERIAL')
-            print("'%s' key now switches between MATERIAL and WIREFRAME." % ("Z"))
 
-            kmi = km.keymap_items.new('machin3.toggle_rendered', "Z", 'PRESS', shift=True)
-            du.kmi_props_setattr(kmi.properties, 'shading', 'MATERIAL')
-            print("Shift + '%s' key now switches between MATERIAL and RENDERED." % ("Z"))
+            print(" » '%s' switches between MATERIAL and RENDERED." % ("SHIFT + Z"))
+            print(" » '%s' switches between MATERIAL and WIREFRAME." % ("Z"))
+
         elif shadingmode == "MATERIAL":
             bpy.context.space_data.viewport_shade = "SOLID"
             print("Switched to SOLID shading mode.")
 
+            if machin3wiretoggle:
+                km.keymap_items.remove(machin3wiretoggle)
+
             kmi = km.keymap_items.new('machin3.toggle_wireframe', "Z", 'PRESS')
             du.kmi_props_setattr(kmi.properties, 'shading', 'SOLID')
-            print("'%s' key now switches between SOLID and WIREFRAME." % ("Z"))
 
-            kmi = km.keymap_items.new('machin3.toggle_rendered', "Z", 'PRESS', shift=True)
-            du.kmi_props_setattr(kmi.properties, 'shading', 'SOLID')
-            print("Shift + '%s' key now switches between SOLID and RENDERED." % ("Z"))
+            print(" » '%s' switches between SOLID and RENDERED." % ("SHIFT + Z"))
+            print(" » '%s' switches between SOLID and WIREFRAME." % ("Z"))
+
+        print()
 
         return {'FINISHED'}
 
@@ -50,7 +71,7 @@ class ToggleWireframe(bpy.types.Operator):
     bl_idname = "machin3.toggle_wireframe"
     bl_label = "MACHIN3: Toggle Wireframe"
 
-    shading = StringProperty(name="Value", description="Toggle enum", maxlen=1024)
+    shading = StringProperty(name="Shading", description="Toggle enum", maxlen=1024)
 
     def execute(self, context):
         bpy.ops.wm.context_toggle_enum(data_path="space_data.viewport_shade", value_1=self.shading, value_2="WIREFRAME")
@@ -61,7 +82,7 @@ class ToggleRendered(bpy.types.Operator):
     bl_idname = "machin3.toggle_rendered"
     bl_label = "MACHIN3: Toggle Rendered"
 
-    shading = StringProperty(name="Value", description="Toggle enum", maxlen=1024)
+    # shading = StringProperty(name="Shading", description="Toggle enum", maxlen=1024)
 
     def execute(self, context):
         if bpy.app.version >= (2, 79, 0) and m3.M3_prefs().viewportcompensation:
@@ -74,7 +95,11 @@ class ToggleRendered(bpy.types.Operator):
             else:
                 prepare_for_rendering()
 
-        bpy.ops.wm.context_toggle_enum(data_path="space_data.viewport_shade", value_1=self.shading, value_2="RENDERED")
+        # NOTE: since 2.79 blender is smart enough to do the rendered swithing on its own
+
+        # bpy.ops.wm.context_toggle_enum(data_path="space_data.viewport_shade", value_1=self.shading, value_2="RENDERED")
+        bpy.ops.view3d.toggle_render()
+
         return {'FINISHED'}
 
 
@@ -92,7 +117,7 @@ class ResetMaterialViewportComensation(bpy.types.Operator):
 def prepare_for_rendering():
     mode = m3.M3_prefs().shadingcompensation
 
-    print("\nPreparing Materials for Rendering")
+    print("Preparing Materials for Rendering")
 
     for mat in bpy.data.materials:
         if mat.use_nodes:
@@ -161,7 +186,7 @@ def reset_principledpbr_node(mode, material, node, group=None):
 def prepare_for_material_shading():
     mode = m3.M3_prefs().shadingcompensation
 
-    print("\nPreparing Materials for Viewport Display")
+    print("Preparing Materials for Viewport Display")
 
     for mat in bpy.data.materials:
         if mat.use_nodes:
