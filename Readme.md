@@ -1,4 +1,4 @@
-[MACHIN3tools](https://mahchin3.io/MACHIN3tools) is a continuously evolving collection of scripts, to simplify and automate a variety of tasks.
+[MACHIN3tools](https://machin3.io/MACHIN3tools) is a continuously evolving collection of scripts, to simplify and automate a variety of tasks.
 
 If you find any of this useful, consider supporting my other work.
 
