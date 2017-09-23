@@ -181,6 +181,10 @@ def AM_check():
     return addon_check("asset_management", precise=False)
 
 
+def GP_check():
+    return addon_check("GroupPro")
+
+
 def addon_check(string, precise=True):
     for addon in bpy.context.user_preferences.addons.keys():
         if precise:

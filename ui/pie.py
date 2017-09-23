@@ -685,6 +685,30 @@ class LayoutSwitch(bpy.types.Operator):
         return {'FINISHED'}
 # /MACHIN3
 
+# MACHIN3
+class DissolveGroupPro(bpy.types.Operator):
+    bl_idname = "machin3.dissolve_grouppro"
+    bl_label = "Dissolve GroupPro"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        groupobjects = bpy.context.active_object.dupli_group.objects
+
+        bpy.ops.object.edit_grouppro()
+
+        m3.unselect_all("OBJECT")
+
+        for obj in groupobjects:
+            obj.select = True
+
+        bpy.ops.object.remove_from_grouppro()
+        bpy.ops.object.close_grouppro()
+
+        m3.make_active(obj)
+
+        return {'FINISHED'}
+# /MACHIN3
+
 
 ##############
 #   Sculpt   #
@@ -1428,6 +1452,21 @@ class PieObjectEditMode(Menu):
                 row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_z", text="Z")
             elif bpy.context.object.mode == "OBJECT" and bpy.context.gpencil_data:
                 pie.operator("gpencil.editmode_toggle", text="Edit Strokes", icon='GREASEPENCIL')
+            elif m3.GP_check():
+                if bpy.context.object.mode == "OBJECT":
+                    if len(bpy.context.scene.storedGroupSettings) > 0:
+                        if len(bpy.context.selected_objects) > 0:
+                            pie.operator("object.add_to_grouppro", text="Add to GroupPro")
+                        else:
+                            pie.operator("object.close_grouppro", text="Close GroupPro")
+                    else:
+                        if len(bpy.context.selected_objects) > 1:
+                            op = pie.operator("object.create_grouppro", text="Create GroupPro")
+                            op.Name = bpy.context.active_object.name
+                        else:
+                            pie.separator()
+                else:
+                    pie.separator()
             else:
                 pie.separator()
 
@@ -1443,6 +1482,34 @@ class PieObjectEditMode(Menu):
             row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshow")
             row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshowunselect")
             column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
+
+            if m3.GP_check():
+                row = column.split(percentage=0.7, align=True)
+                row.prop(context.scene, 'GroupLocalView', icon='RESTRICT_VIEW_OFF')
+                row.prop(context.scene, 'GroupLocalViewDepth', slider=False, text='')
+
+        elif ob.object.type == 'EMPTY':
+            if m3.GP_check():
+                if bpy.context.active_object.dupli_group:
+                    pie = layout.menu_pie()
+
+                    if bpy.context.object.mode == "OBJECT" and len(bpy.context.scene.storedGroupSettings) == 0:
+                        # 4 - LEFT
+                        pie.separator()
+                        # 6 - RIGHT
+                        pie.separator()
+                        # 2 - BOTTOM
+                        pie.operator("machin3.dissolve_grouppro", text="Dissolve GroupPro")
+                        # 8 - TOP
+                        pie.separator()
+                        # 7 - TOP - LEFT
+                        pie.operator("object.edit_grouppro", text="Edit GroupPro")
+                        # 9 - TOP - RIGHT
+                        pie.separator()
+                        # 1 - BOTTOM - LEFT
+                        pie.separator()
+                        # 3 - BOTTOM - RIGHT
+                        pie.separator()
 
         elif ob.object.type == 'CURVE':
             pie = layout.menu_pie()
