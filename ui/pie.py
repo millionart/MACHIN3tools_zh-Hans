@@ -1497,7 +1497,7 @@ class PieObjectEditMode(Menu):
                         # 4 - LEFT
                         pie.separator()
                         # 6 - RIGHT
-                        pie.separator()
+                        pie.operator("object.grouppro_flip", text="Flip Selection")
                         # 2 - BOTTOM
                         pie.operator("machin3.dissolve_grouppro", text="Dissolve GroupPro")
                         # 8 - TOP
@@ -1509,7 +1509,9 @@ class PieObjectEditMode(Menu):
                         # 1 - BOTTOM - LEFT
                         pie.separator()
                         # 3 - BOTTOM - RIGHT
-                        pie.separator()
+                        op = pie.operator("object.grouper_dupper_makeunique", text="Make Unique")
+                        op.maxDept = 1
+
 
         elif ob.object.type == 'CURVE':
             pie = layout.menu_pie()
