@@ -1430,124 +1430,162 @@ class PieObjectEditMode(Menu):
         toolsettings = context.tool_settings
         ob = context
 
-        if ob.object.type == 'MESH':
-            pie = layout.menu_pie()
-            # 4 - LEFT
-            pie.operator("class.vertex", text="Vertex", icon='VERTEXSEL')
-            # 6 - RIGHT
-            pie.operator("class.face", text="Face", icon='FACESEL')
-            # 2 - BOTTOM
-            pie.operator("class.edge", text="Edge", icon='EDGESEL')
-            # 8 - TOP
-            pie.operator("class.object", text="Edit/Object", icon='OBJECT_DATAMODE')
-            # 7 - TOP - LEFT
-            if bpy.context.object.mode == "EDIT":
-                pie.prop(bpy.context.space_data, "use_occlude_geometry", text="Occlude")
-            elif bpy.context.object.mode == "SCULPT":
-                row = pie.row(align=True)
-                row.scale_x = 1.5
-                row.scale_y = 1.25
-                row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_x", text="X")
-                row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_y", text="Y")
-                row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_z", text="Z")
-            elif bpy.context.object.mode == "OBJECT" and bpy.context.gpencil_data:
-                pie.operator("gpencil.editmode_toggle", text="Edit Strokes", icon='GREASEPENCIL')
-            elif m3.GP_check():
-                if bpy.context.object.mode == "OBJECT":
-                    if len(bpy.context.scene.storedGroupSettings) > 0:
-                        if len(bpy.context.selected_objects) > 0:
-                            pie.operator("object.add_to_grouppro", text="Add to GroupPro")
+        if ob.object is not None:
+            if ob.object.type == 'MESH':
+                pie = layout.menu_pie()
+                # 4 - LEFT
+                pie.operator("class.vertex", text="Vertex", icon='VERTEXSEL')
+                # 6 - RIGHT
+                pie.operator("class.face", text="Face", icon='FACESEL')
+                # 2 - BOTTOM
+                pie.operator("class.edge", text="Edge", icon='EDGESEL')
+                # 8 - TOP
+                pie.operator("class.object", text="Edit/Object", icon='OBJECT_DATAMODE')
+                # 7 - TOP - LEFT
+                if bpy.context.object.mode == "EDIT":
+                    pie.prop(bpy.context.space_data, "use_occlude_geometry", text="Occlude")
+                elif bpy.context.object.mode == "SCULPT":
+                    row = pie.row(align=True)
+                    row.scale_x = 1.5
+                    row.scale_y = 1.25
+                    row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_x", text="X")
+                    row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_y", text="Y")
+                    row.prop(bpy.context.scene.tool_settings.sculpt, "use_symmetry_z", text="Z")
+                elif bpy.context.object.mode == "OBJECT" and bpy.context.gpencil_data:
+                    pie.operator("gpencil.editmode_toggle", text="Edit Strokes", icon='GREASEPENCIL')
+                elif m3.GP_check():
+                    if bpy.context.object.mode == "OBJECT":
+                        if len(bpy.context.scene.storedGroupSettings) > 0:
+                            if len(bpy.context.selected_objects) > 0:
+                                pie.operator("object.add_to_grouppro", text="Add to GroupPro")
+                            else:
+                                pie.operator("object.close_grouppro", text="Close GroupPro")
                         else:
-                            pie.operator("object.close_grouppro", text="Close GroupPro")
+                            if len(bpy.context.selected_objects) > 1:
+                                op = pie.operator("object.create_grouppro", text="Create GroupPro")
+                                op.Name = bpy.context.active_object.name
+                            else:
+                                pie.separator()
                     else:
-                        if len(bpy.context.selected_objects) > 1:
-                            op = pie.operator("object.create_grouppro", text="Create GroupPro")
-                            op.Name = bpy.context.active_object.name
-                        else:
-                            pie.separator()
+                        pie.separator()
                 else:
                     pie.separator()
+
+                # 9 - TOP - RIGHT
+                pie.operator("sculpt.sculptmode_toggle", text="Sculpt", icon='SCULPTMODE_HLT')
+                # 1 - BOTTOM - LEFT
+                pie.operator("wm.call_menu_pie", text="Other Modes", icon='TPAINT_HLT').name="pie.objecteditmodeothermodes"
+                # 3 - BOTTOM - RIGHT
+                box = pie.split()
+                column = box.column()
+                column.prop(bpy.context.scene.machin3, "pieobjecteditmodehide")
+                row = column.row(align=True)
+                row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshow")
+                row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshowunselect")
+                column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
+
+                if m3.GP_check():
+                    row = column.split(percentage=0.7, align=True)
+                    row.prop(context.scene, 'GroupLocalView', icon='RESTRICT_VIEW_OFF')
+                    row.prop(context.scene, 'GroupLocalViewDepth', slider=False, text='')
+
+            elif ob.object.type == 'EMPTY':
+                if m3.GP_check():
+                    if bpy.context.active_object.dupli_group:
+                        pie = layout.menu_pie()
+
+                        if bpy.context.object.mode == "OBJECT" and len(bpy.context.scene.storedGroupSettings) == 0:
+                            # 4 - LEFT
+                            pie.separator()
+                            # 6 - RIGHT
+                            pie.operator("object.grouppro_flip", text="Flip Selection")
+                            # 2 - BOTTOM
+                            pie.operator("machin3.dissolve_grouppro", text="Dissolve GroupPro")
+                            # 8 - TOP
+                            pie.separator()
+                            # 7 - TOP - LEFT
+                            pie.operator("object.edit_grouppro", text="Edit GroupPro")
+                            # 9 - TOP - RIGHT
+                            pie.separator()
+                            # 1 - BOTTOM - LEFT
+                            pie.separator()
+                            # 3 - BOTTOM - RIGHT
+                            op = pie.operator("object.grouper_dupper_makeunique", text="Make Unique")
+                            op.maxDept = 1
+
+            elif ob.object.type == 'CURVE':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'ARMATURE':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit Mode", icon='OBJECT_DATAMODE')
+                pie.operator("object.posemode_toggle", text="Pose", icon='POSE_HLT')
+                pie.operator("class.object", text="Object Mode", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'FONT':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'SURFACE':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'ARMATURE':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'META':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'LATTICE':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'ARMATURE':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
             else:
-                pie.separator()
-
-            # 9 - TOP - RIGHT
-            pie.operator("sculpt.sculptmode_toggle", text="Sculpt", icon='SCULPTMODE_HLT')
-            # 1 - BOTTOM - LEFT
-            pie.operator("wm.call_menu_pie", text="Other Modes", icon='TPAINT_HLT').name="pie.objecteditmodeothermodes"
-            # 3 - BOTTOM - RIGHT
-            box = pie.split()
-            column = box.column()
-            column.prop(bpy.context.scene.machin3, "pieobjecteditmodehide")
-            row = column.row(align=True)
-            row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshow")
-            row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshowunselect")
-            column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
-
-            if m3.GP_check():
-                row = column.split(percentage=0.7, align=True)
-                row.prop(context.scene, 'GroupLocalView', icon='RESTRICT_VIEW_OFF')
-                row.prop(context.scene, 'GroupLocalViewDepth', slider=False, text='')
-
-        elif ob.object.type == 'EMPTY':
-            if m3.GP_check():
-                if bpy.context.active_object.dupli_group:
+                if len(ob.selected_objects) > 1:
                     pie = layout.menu_pie()
 
-                    if bpy.context.object.mode == "OBJECT" and len(bpy.context.scene.storedGroupSettings) == 0:
-                        # 4 - LEFT
-                        pie.separator()
-                        # 6 - RIGHT
-                        pie.operator("object.grouppro_flip", text="Flip Selection")
-                        # 2 - BOTTOM
-                        pie.operator("machin3.dissolve_grouppro", text="Dissolve GroupPro")
-                        # 8 - TOP
-                        pie.separator()
-                        # 7 - TOP - LEFT
-                        pie.operator("object.edit_grouppro", text="Edit GroupPro")
-                        # 9 - TOP - RIGHT
-                        pie.separator()
-                        # 1 - BOTTOM - LEFT
-                        pie.separator()
-                        # 3 - BOTTOM - RIGHT
-                        op = pie.operator("object.grouper_dupper_makeunique", text="Make Unique")
-                        op.maxDept = 1
+                    # 4 - LEFT
+                    pie.separator()
+                    # 6 - RIGHT
+                    pie.separator()
+                    # 2 - BOTTOM
+                    pie.separator()
+                    # 8 - TOP
+                    pie.separator()
+                    # 7 - TOP - LEFT
+                    op = pie.operator("object.create_grouppro", text="Create GroupPro")
+                    op.Name = bpy.context.active_object.name
+                    # 9 - TOP - RIGHT
+                    pie.separator()
+                    # 1 - BOTTOM - LEFT
+                    pie.separator()
+                    # 3 - BOTTOM - RIGHT
 
-
-        elif ob.object.type == 'CURVE':
+        elif len(bpy.context.scene.storedGroupSettings) > 0:
             pie = layout.menu_pie()
-            pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 
-        elif ob.object.type == 'ARMATURE':
-            pie = layout.menu_pie()
-            pie.operator("object.editmode_toggle", text="Edit Mode", icon='OBJECT_DATAMODE')
-            pie.operator("object.posemode_toggle", text="Pose", icon='POSE_HLT')
-            pie.operator("class.object", text="Object Mode", icon='OBJECT_DATAMODE')
-
-        elif ob.object.type == 'FONT':
-            pie = layout.menu_pie()
-            pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-        elif ob.object.type == 'SURFACE':
-            pie = layout.menu_pie()
-            pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-        elif ob.object.type == 'ARMATURE':
-            pie = layout.menu_pie()
-            pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-        elif ob.object.type == 'META':
-            pie = layout.menu_pie()
-            pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-        elif ob.object.type == 'LATTICE':
-            pie = layout.menu_pie()
-            pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-        elif ob.object.type == 'ARMATURE':
-            pie = layout.menu_pie()
-            pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-
+            # 4 - LEFT
+            pie.separator()
+            # 6 - RIGHT
+            pie.separator()
+            # 2 - BOTTOM
+            pie.separator()
+            # 8 - TOP
+            pie.separator()
+            # 7 - TOP - LEFT
+            pie.operator("object.close_grouppro", text="Close GroupPro")
+            # 9 - TOP - RIGHT
+            pie.separator()
+            # 1 - BOTTOM - LEFT
+            pie.separator()
+            # 3 - BOTTOM - RIGHT
 
 #Pie View Animation Etc - Space
 class PieAnimationEtc(Menu):
