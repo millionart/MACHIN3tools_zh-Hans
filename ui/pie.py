@@ -1485,9 +1485,10 @@ class PieObjectEditMode(Menu):
                 column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
 
                 if m3.GP_check():
-                    row = column.split(percentage=0.7, align=True)
-                    row.prop(context.scene, 'GroupLocalView', icon='RESTRICT_VIEW_OFF')
-                    row.prop(context.scene, 'GroupLocalViewDepth', slider=False, text='')
+                    if len(bpy.context.scene.storedGroupSettings) > 0:
+                        row = column.split(percentage=0.7, align=True)
+                        row.prop(context.scene, 'GroupLocalView', icon='RESTRICT_VIEW_OFF')
+                        row.prop(context.scene, 'GroupLocalViewDepth', slider=False, text='')
 
             elif ob.object.type == 'EMPTY':
                 if m3.GP_check():

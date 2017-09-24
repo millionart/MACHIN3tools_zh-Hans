@@ -14,6 +14,8 @@ class CenterCube(bpy.types.Operator):
 
     scale = FloatProperty(name="Scale", default=1)
 
+    applybasemat = BoolProperty(name="Apply base material", default=True)
+
     def draw(self, context):
         layout = self.layout
 
@@ -26,10 +28,12 @@ class CenterCube(bpy.types.Operator):
 
         column.prop(self, "scale", toggle=True)
 
+        column.prop(self, "applybasemat")
+
     def execute(self, context):
         sel = m3.selected_objects()
 
-        if len(sel) == 0:  # nothing object selected
+        if len(sel) == 0:  # nothing selected
             bpy.ops.mesh.primitive_cube_add(radius=1, view_align=False, enter_editmode=False, layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
             active = m3.get_active()
 
@@ -46,6 +50,13 @@ class CenterCube(bpy.types.Operator):
             m3.select_all("MESH")
             bpy.ops.transform.resize(value=(scale, scale, scale), constraint_axis=(False, False, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
             m3.set_mode("OBJECT")
+
+            if self.applybasemat:
+                mat = bpy.data.materials.get("base")
+
+                if mat:
+                    active.data.materials.append(mat)
+
         else:  # objects selected
             for obj in sel:
                 if self.axisx:
