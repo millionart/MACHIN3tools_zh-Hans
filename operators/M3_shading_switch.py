@@ -1,5 +1,5 @@
 import bpy
-from bpy.props import StringProperty
+from bpy.props import StringProperty, BoolProperty
 from .. import M3utils as m3
 from .. import developer_utils as du
 
@@ -209,23 +209,32 @@ class AdjustPrincipledPBRnode(bpy.types.Operator):
     bl_idname = "machin3.adjust_principled_pbr_node"
     bl_label = "MACHIN3: Adjust Principled PBR Node Rendered"
 
+    isdecal = BoolProperty(name="Is Decal?", default=True)
+
     def execute(self, context):
         mode = m3.M3_prefs().shadingcompensation
-        decal = m3.get_active()
+        obj = m3.get_active()
 
-        decalmat = decal.material_slots[0].material
-        decalgroup = decalmat.node_tree.nodes['Material Output'].inputs['Surface'].links[0].from_node
-        groupname = decalgroup.node_tree.name
+        mat = obj.material_slots[0].material
 
-        shadernodes = []
+        if self.isdecal:
+            decalgroup = mat.node_tree.nodes['Material Output'].inputs['Surface'].links[0].from_node
+            groupname = decalgroup.node_tree.name
 
-        shadernodes.append(decalgroup.node_tree.nodes.get("Principled BSDF"))
-        if "Subset" in groupname or "Panel" in groupname:
-            shadernodes.append(decalgroup.node_tree.nodes.get("Principled BSDF.001"))
+            shadernodes = []
 
-        for node in shadernodes:
-            adjust_principledpbr_node(mode, decalmat, node, decalgroup)
-            print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (decalmat.name, node.name))
+            shadernodes.append(decalgroup.node_tree.nodes.get("Principled BSDF"))
+            if "Subset" in groupname or "Panel" in groupname:
+                shadernodes.append(decalgroup.node_tree.nodes.get("Principled BSDF.001"))
+
+            for node in shadernodes:
+                adjust_principledpbr_node(mode, mat, node, decalgroup)
+                print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
+        else:
+            node = mat.node_tree.nodes['Material Output'].inputs['Surface'].links[0].from_node
+            adjust_principledpbr_node(mode, mat, node)
+            print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
+
         return {'FINISHED'}
 
 
