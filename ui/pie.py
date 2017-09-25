@@ -1507,7 +1507,7 @@ class PieObjectEditMode(Menu):
                             # 7 - TOP - LEFT
                             pie.operator("object.edit_grouppro", text="Edit GroupPro")
                             # 9 - TOP - RIGHT
-                            pie.separator()
+                            pie.menu("object.set_group_origin", "Set Group Origin")
                             # 1 - BOTTOM - LEFT
                             pie.separator()
                             # 3 - BOTTOM - RIGHT

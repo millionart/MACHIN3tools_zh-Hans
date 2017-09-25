@@ -205,6 +205,30 @@ def prepare_for_material_shading():
                                 adjust_principledpbr_node(mode, mat, n, node)
 
 
+class AdjustPrincipledPBRnode(bpy.types.Operator):
+    bl_idname = "machin3.adjust_principled_pbr_node"
+    bl_label = "MACHIN3: Adjust Principled PBR Node Rendered"
+
+    def execute(self, context):
+        mode = m3.M3_prefs().shadingcompensation
+        decal = m3.get_active()
+
+        decalmat = decal.material_slots[0].material
+        decalgroup = decalmat.node_tree.nodes['Material Output'].inputs['Surface'].links[0].from_node
+        groupname = decalgroup.node_tree.name
+
+        shadernodes = []
+
+        shadernodes.append(decalgroup.node_tree.nodes.get("Principled BSDF"))
+        if "Subset" in groupname or "Panel" in groupname:
+            shadernodes.append(decalgroup.node_tree.nodes.get("Principled BSDF.001"))
+
+        for node in shadernodes:
+            adjust_principledpbr_node(mode, decalmat, node, decalgroup)
+            print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (decalmat.name, node.name))
+        return {'FINISHED'}
+
+
 def adjust_principledpbr_node(mode, material, node, group=None):
     targetmetallic = m3.M3_prefs().targetmetallic
     secondarytargetmetallic = m3.M3_prefs().secondarytargetmetallic
