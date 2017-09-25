@@ -228,12 +228,20 @@ class AdjustPrincipledPBRnode(bpy.types.Operator):
                 shadernodes.append(decalgroup.node_tree.nodes.get("Principled BSDF.001"))
 
             for node in shadernodes:
-                adjust_principledpbr_node(mode, mat, node, decalgroup)
-                print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
+                # only adjust, when there isn't a M3 prop already!
+                try:
+                    node["M3"]
+                except:
+                    adjust_principledpbr_node(mode, mat, node, decalgroup)
+                    print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
         else:
             node = mat.node_tree.nodes['Material Output'].inputs['Surface'].links[0].from_node
-            adjust_principledpbr_node(mode, mat, node)
-            print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
+
+            try:
+                node["M3"]
+            except:
+                adjust_principledpbr_node(mode, mat, node)
+                print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
 
         return {'FINISHED'}
 
