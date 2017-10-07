@@ -12,7 +12,7 @@ class CenterCube(bpy.types.Operator):
     axisy = BoolProperty(name="Y", default=False)
     axisz = BoolProperty(name="Z", default=False)
 
-    scale = FloatProperty(name="Scale", default=1)
+    scale = FloatProperty(name="Scale", default=1, min=0)
 
     applybasemat = BoolProperty(name="Apply base material", default=True)
 
