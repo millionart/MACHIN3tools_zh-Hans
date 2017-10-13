@@ -85,15 +85,16 @@ class ToggleRendered(bpy.types.Operator):
     # shading = StringProperty(name="Shading", description="Toggle enum", maxlen=1024)
 
     def execute(self, context):
-        if bpy.app.version >= (2, 79, 0) and m3.M3_prefs().viewportcompensation:
-            # print("Viewport Material Compensation normal switching")
+        if bpy.app.version >= (2, 79, 0):
+            if m3.M3_prefs().viewportcompensation or m3.M3_prefs().alphafix:
+                # print("Viewport Material Compensation normal switching")
 
-            shadingmode = bpy.context.space_data.viewport_shade
+                shadingmode = bpy.context.space_data.viewport_shade
 
-            if shadingmode == "RENDERED":
-                prepare_for_material_shading()
-            else:
-                prepare_for_rendering()
+                if shadingmode == "RENDERED":
+                    prepare_for_material_shading()
+                else:
+                    prepare_for_rendering()
 
         # NOTE: since 2.79 blender is smart enough to do the rendered swithing on its own
 
@@ -139,7 +140,6 @@ def reset_principledpbr_node(mode, material, node, group=None):
         ischanged = False
 
     if ischanged:  # reset changes and delete M3 id prop
-
         # Decal Material
         if group:
             groupname = group.node_tree.name
@@ -168,10 +168,6 @@ def reset_principledpbr_node(mode, material, node, group=None):
                 metallic = group.inputs['Material Metallic']
                 roughness = group.inputs['Material Roughness']
 
-
-            transparent = group.node_tree.nodes.get("Transparent BSDF")
-            transparent.inputs[0].default_value = (1, 1, 1, 1)
-
         # Non-Decal Material
         else:
             metallic = node.inputs[4]
@@ -186,6 +182,11 @@ def reset_principledpbr_node(mode, material, node, group=None):
     else:
         # print("Material: '%s', Node: '%s' - No M3 ID Property found" % (material.name, node.name))
         pass
+
+    # alays make sure the decal transparency works, by resetting it to white
+    if group:
+        transparent = group.node_tree.nodes.get("Transparent BSDF")
+        transparent.inputs[0].default_value = (1, 1, 1, 1)
 
 
 def prepare_for_material_shading():
@@ -251,74 +252,76 @@ def adjust_principledpbr_node(mode, material, node, group=None):
     secondarytargetmetallic = m3.M3_prefs().secondarytargetmetallic
     targetroughness = m3.M3_prefs().targetroughness
     alphafix = m3.M3_prefs().alphafix
+    viewportcompensation = m3.M3_prefs().viewportcompensation
 
     # get render parameters
 
     # Decal Material
-    if group:
-        groupname = group.node_tree.name
+    if viewportcompensation:
+        if group:
+            groupname = group.node_tree.name
 
-        if "Subset" in groupname:
-            if node.name == "Principled BSDF":
+            if "Subset" in groupname:
+                if node.name == "Principled BSDF":
+                    color = group.inputs['Material Color'].links[0].from_socket
+                    metallic = group.inputs['Material Metallic']
+                    roughness = group.inputs['Material Roughness']
+                elif node.name == "Principled BSDF.001":
+                    color = group.inputs['Subset Color'].links[0].from_socket
+                    metallic = group.inputs['Subset Metallic']
+                    roughness = group.inputs['Subset Roughness']
+
+            elif "Panel" in groupname:
+                if node.name == "Principled BSDF":
+                    color = group.inputs['Material 1 Color'].links[0].from_socket
+                    metallic = group.inputs['Material 1 Metallic']
+                    roughness = group.inputs['Material 1 Roughness']
+                elif node.name == "Principled BSDF.001":
+                    color = group.inputs['Material 2 Color'].links[0].from_socket
+                    metallic = group.inputs['Material 2 Metallic']
+                    roughness = group.inputs['Material 2 Roughness']
+
+            elif "Info" in groupname:
+                color = node.inputs[0]  # color is irrelevant for info decals, as it comes from an image, we just need it for the dict below
+                metallic = group.inputs['Info Metallic']
+                roughness = group.inputs['Info Roughness']
+
+            # Subtractors have either 'Subtractor' in the group name or are just called 'Decal Group'
+            else:  # Subtractors have either 'Subtractor' in the group name or are just called 'Decal Group'
                 color = group.inputs['Material Color'].links[0].from_socket
                 metallic = group.inputs['Material Metallic']
                 roughness = group.inputs['Material Roughness']
-            elif node.name == "Principled BSDF.001":
-                color = group.inputs['Subset Color'].links[0].from_socket
-                metallic = group.inputs['Subset Metallic']
-                roughness = group.inputs['Subset Roughness']
 
-        elif "Panel" in groupname:
-            if node.name == "Principled BSDF":
-                color = group.inputs['Material 1 Color'].links[0].from_socket
-                metallic = group.inputs['Material 1 Metallic']
-                roughness = group.inputs['Material 1 Roughness']
-            elif node.name == "Principled BSDF.001":
-                color = group.inputs['Material 2 Color'].links[0].from_socket
-                metallic = group.inputs['Material 2 Metallic']
-                roughness = group.inputs['Material 2 Roughness']
-
-        elif "Info" in groupname:
-            color = node.inputs[0]  # color is irrelevant for info decals, as it comes from an image, we just need it for the dict below
-            metallic = group.inputs['Info Metallic']
-            roughness = group.inputs['Info Roughness']
-
-        # Subtractors have either 'Subtractor' in the group name or are just called 'Decal Group'
-        else:  # Subtractors have either 'Subtractor' in the group name or are just called 'Decal Group'
-            color = group.inputs['Material Color'].links[0].from_socket
-            metallic = group.inputs['Material Metallic']
-            roughness = group.inputs['Material Roughness']
-
-    # Non-Decal Material
-    else:
-        groupname = ""
-        color = node.inputs[0]
-        metallic = node.inputs[4]
-        roughness = node.inputs[7]
-
-    # save render parameters
-    node["M3"] = {"color": color.default_value,
-                  "metallic": metallic.default_value,
-                  "roughness": roughness.default_value}
-
-    # print("Material: '%s', Node: '%s' - Set M3 ID Property" % (material.name, node.name))
-
-    # set viewport parameters
-    if mode == "278":  # this mode mirrors the look in 2.78, very rough and without metallic darkening
-        metallic.default_value = 0.5
-        roughness.default_value = 1
-    elif mode == "279":  # this mode lerps between render values and target values based on the metallic amount and color average
-
-        if "Info" in groupname:
-            metallic.default_value = m3.lerp(metallic.default_value, targetmetallic, metallic.default_value)
-            roughness.default_value = m3.lerp(roughness.default_value, targetroughness, metallic.default_value)
+        # Non-Decal Material
         else:
-            coloravg = (color.default_value[0] + color.default_value[1] + color.default_value[2]) / 3
+            groupname = ""
+            color = node.inputs[0]
+            metallic = node.inputs[4]
+            roughness = node.inputs[7]
 
-            metallic.default_value = m3.lerp(m3.lerp(metallic.default_value, targetmetallic, metallic.default_value), secondarytargetmetallic, coloravg)
-            roughness.default_value = m3.lerp(roughness.default_value, targetroughness, metallic.default_value)
+        # save render parameters
+        node["M3"] = {"color": color.default_value,
+                      "metallic": metallic.default_value,
+                      "roughness": roughness.default_value}
+
+        # print("Material: '%s', Node: '%s' - Set M3 ID Property" % (material.name, node.name))
+
+        # set viewport parameters
+        if mode == "278":  # this mode mirrors the look in 2.78, very rough and without metallic darkening
+            metallic.default_value = 0.5
+            roughness.default_value = 1
+        elif mode == "279":  # this mode lerps between render values and target values based on the metallic amount and color average
+
+            if "Info" in groupname:
+                metallic.default_value = m3.lerp(metallic.default_value, targetmetallic, metallic.default_value)
+                roughness.default_value = m3.lerp(roughness.default_value, targetroughness, metallic.default_value)
+            else:
+                coloravg = (color.default_value[0] + color.default_value[1] + color.default_value[2]) / 3
+
+                metallic.default_value = m3.lerp(m3.lerp(metallic.default_value, targetmetallic, metallic.default_value), secondarytargetmetallic, coloravg)
+                roughness.default_value = m3.lerp(roughness.default_value, targetroughness, metallic.default_value)
 
     if group:
-        if mode == "279" and alphafix:
+        if alphafix:
             transparent = group.node_tree.nodes.get("Transparent BSDF")
             transparent.inputs[0].default_value = (0, 0, 0, 1)

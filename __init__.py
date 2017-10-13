@@ -422,7 +422,8 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
                         row.prop(self, "targetmetallic")
                         row.prop(self, "secondarytargetmetallic")
                         row.prop(self, "targetroughness")
-                        column.prop(self, "alphafix")
+
+                column.prop(self, "alphafix")
 
                 column.separator()
                 column.separator()
