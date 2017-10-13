@@ -81,6 +81,15 @@ class ToggleWireframe(bpy.types.Operator):
 class ToggleRendered(bpy.types.Operator):
     bl_idname = "machin3.toggle_rendered"
     bl_label = "MACHIN3: Toggle Rendered"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        column.prop(m3.M3_prefs(), "viewportcompensation")
+        column.prop(m3.M3_prefs(), "alphafix")
 
     # shading = StringProperty(name="Shading", description="Toggle enum", maxlen=1024)
 
