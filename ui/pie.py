@@ -2063,6 +2063,10 @@ class PieObjectShading(Menu):
         # MACHIN3
         row = box.row(align=True)
         row.prop(view, "show_grease_pencil", text="Grease Pencil")
+        if view.show_grease_pencil:
+            row = box.row(align=True)
+            row.prop(bpy.data.grease_pencil[0].layers[0], "show_x_ray", text=" » GP X-Ray")
+
         row = box.row(align=True)
         row.prop(view, "show_relationship_lines", text="Relationship Lines")
         # /MACHIN3
