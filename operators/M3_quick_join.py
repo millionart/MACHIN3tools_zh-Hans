@@ -1,9 +1,11 @@
 import bpy
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, EnumProperty
 from .. import M3utils as m3
 
 
-# TODO: First not working
+joinorconnectchoice = [("JOIN", "Join", ""),
+                       ("CONNECT", "Connect", "")]
+
 
 class QuickJoinCenter(bpy.types.Operator):
     bl_idname = "machin3.quick_join_center"
@@ -23,7 +25,7 @@ class QuickJoinCenter(bpy.types.Operator):
         history = m3.get_selection_history()
 
         if len(history) > 3:
-            quick_join("CENTER", history, self.backtrace)
+            quick_join("CENTER", history, self.backtrace, "JOIN")
         else:
             bpy.ops.mesh.merge(type='CENTER')
 
@@ -36,11 +38,15 @@ class QuickJoinLast(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     backtrace = BoolProperty(name="Backtrace Selection", default=True)
+    joinorconnect = EnumProperty(name="Join or Connect", items=joinorconnectchoice, default="JOIN")
 
     def draw(self, context):
         layout = self.layout
 
         column = layout.column()
+
+        row = column.row()
+        row.prop(self, "joinorconnect", expand=True)
 
         column.prop(self, "backtrace")
 
@@ -48,30 +54,14 @@ class QuickJoinLast(bpy.types.Operator):
 
         history = m3.get_selection_history()
         if len(history) > 3:
-            quick_join("LAST", history, self.backtrace)
+            quick_join("LAST", history, self.backtrace, self.joinorconnect)
         else:
             bpy.ops.mesh.merge(type='LAST')
 
         return {'FINISHED'}
 
-"""
-class QuickJoinFirst(bpy.types.Operator):
-    bl_idname = "machin3.quick_join_first"
-    bl_label = "MACHIN3: Quick Join (First)"
 
-    def execute(self, context):
-
-        history = m3.get_selection_history()
-        if len(history) > 3:
-            quick_join("First", history)
-        else:
-            bpy.ops.mesh.merge(type='First')
-
-        return {'FINISHED'}
-"""
-
-
-def quick_join(string, selection, backtrace):
+def quick_join(string, selection, backtrace, joinorconnect):
     mergeswitched = False
     pivotswitched = False
     aborted = False
@@ -94,7 +84,7 @@ def quick_join(string, selection, backtrace):
 
     if not aborted:
         try:
-            join(string, path1, path2, backtrace)
+            join(string, path1, path2, backtrace, joinorconnect)
         except:
             print(m3.red("Results will be unpredictable."))
 
@@ -106,7 +96,7 @@ def quick_join(string, selection, backtrace):
         bpy.context.space_data.pivot_point = pivot
 
 
-def join(string, vertlist1, vertlist2, backtrace):  # joining by moving/scaling, as vertids would be changing when using the actual merge operator
+def join(string, vertlist1, vertlist2, backtrace, joinorconnect):  # joining by moving/scaling, as vertids would be changing when using the actual merge operator
     bpy.context.scene.tool_settings.use_mesh_automerge = False
     mesh = bpy.context.object.data
 
@@ -124,22 +114,24 @@ def join(string, vertlist1, vertlist2, backtrace):  # joining by moving/scaling,
 
         if string == "LAST":
             print("Moving: %d > %d." % (vert, vert2))
-            mesh.vertices[vert].co = mesh.vertices[vert2].co  # JOIN LAST
+            if joinorconnect == "JOIN":
+                mesh.vertices[vert].co = mesh.vertices[vert2].co  # JOIN LAST
             m3.set_mode("EDIT")
-        elif string == "FIRST":
-            print("Moving: %d > %d." % (vert2, vert))
-            mesh.vertices[vert2].co = mesh.vertices[vert].co  # JOIN FIRST
-            m3.set_mode("EDIT")
+            if joinorconnect == "CONNECT":
+                bpy.ops.mesh.vert_connect()
         elif string == "CENTER":
             m3.set_mode("EDIT")
             print("Moving: %d and %d to median location." % (vert, vert2))
             bpy.ops.transform.resize(value=(0, 0, 0), constraint_axis=(False, False, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
     m3.unselect_all("MESH")
-    m3.make_selection("VERT", vertlist1 + vertlist2)
-    m3.set_mode("EDIT")
+    if joinorconnect == "CONNECT":
+        m3.set_mode("EDIT")
+    elif joinorconnect == "JOIN":
+        m3.make_selection("VERT", vertlist1 + vertlist2)
+        m3.set_mode("EDIT")
 
-    bpy.ops.mesh.remove_doubles()
+        bpy.ops.mesh.remove_doubles()
 
 
 def pathify(verttuple):
