@@ -1520,9 +1520,22 @@ class PieObjectEditMode(Menu):
 
             elif ob.object.type == 'ARMATURE':
                 pie = layout.menu_pie()
+
+                # 4 - LEFT
                 pie.operator("object.editmode_toggle", text="Edit Mode", icon='OBJECT_DATAMODE')
+                # 6 - RIGHT
                 pie.operator("object.posemode_toggle", text="Pose", icon='POSE_HLT')
+                # 2 - BOTTOM
+                pie.separator()
+                # 8 - TOP
                 pie.operator("class.object", text="Object Mode", icon='OBJECT_DATAMODE')
+                # 7 - TOP - LEFT
+                pie.separator()
+                # 9 - TOP - RIGHT
+                pie.separator()
+                # 1 - BOTTOM - LEFT
+                pie.separator()
+                # 3 - BOTTOM - RIGHT
 
             elif ob.object.type == 'FONT':
                 pie = layout.menu_pie()
@@ -1532,19 +1545,11 @@ class PieObjectEditMode(Menu):
                 pie = layout.menu_pie()
                 pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 
-            elif ob.object.type == 'ARMATURE':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
             elif ob.object.type == 'META':
                 pie = layout.menu_pie()
                 pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 
             elif ob.object.type == 'LATTICE':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-            elif ob.object.type == 'ARMATURE':
                 pie = layout.menu_pie()
                 pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 

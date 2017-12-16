@@ -65,6 +65,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
 
     # MODULES
 
+    activate_Align = BoolProperty(name="Align", default=False)
     activate_ShadingSwitch = BoolProperty(name="Shading Switch", default=False)
     activate_RedMode = BoolProperty(name="Red Mode", default=False)
     activate_CenterCube = BoolProperty(name="Center Cube", default=False)
@@ -149,6 +150,13 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
 
         col.label("Activating modules requires saving user preferences and re-starting Blender.")
         col.separator()
+
+        # ALIGN
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_Align", toggle=True)
+        row.label("Wraps around ops.align(), but also allows to align to Bones and auto skin meshes.")
+        du.show_keymap(self.activate_Align, kc, "3D View", "machin3.align", col)
 
         # SHADING SWITCH
 
@@ -438,6 +446,8 @@ class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
 
         column = layout.column()
 
+        if m3.M3_prefs().activate_Align:
+            column.operator("machin3.align", text="Align")
         if m3.M3_prefs().activate_CleansUpGood:
             column.operator("machin3.clean_up", text="Cleans Up Good")
         if m3.M3_prefs().activate_CenterCube:
@@ -513,6 +523,13 @@ def object_menu_func(self, context):
 
 
 def register_MACHIN3_keys(wm, keymaps):
+    # ALIGN
+
+    if m3.M3_prefs().activate_Align:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
+        kmi = km.keymap_items.new("machin3.align", 'A', 'PRESS', alt=True)
+        MACHIN3_keymaps.append((km, kmi))
+
     # SHADING SWITCH
 
     if m3.M3_prefs().activate_ShadingSwitch:
