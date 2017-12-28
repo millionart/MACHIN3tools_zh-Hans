@@ -163,28 +163,58 @@ def mirror(self):
                         if self.DMmirrorV:
                             mirror.use_mirror_v = True
 
-                    # DECALmachine wstep.create_weighted_normals() support
+                    # DECALmachine custom normals, hard custom normals and surface fix support
                     if self.DMcustomNormals:
                         mod = obj.modifiers.get("M3_custom_normals")
                         if mod:
-                            showinviewport = mod.show_viewport
+                            src = mod.object
 
-                            active.select = False
-                            bpy.ops.machin3.wstep()  # needs to wstep, because we need to get the mirror also on the target, re-stepping seems be the easiest way to do it
-                            active.select = True
+                            srcmirror = src.modifiers.new(name="M3_mirror", type="MIRROR")
+                            srcmirror.use_x = self.axisx
+                            srcmirror.use_y = self.axisy
+                            srcmirror.use_z = self.axisz
+                            srcmirror.mirror_object = active
 
-                            # take the show_viewport parameter from the previous data_transfer (needs to be done through extra variable for some reason
-                            newmod = obj.modifiers.get("M3_custom_normals")
-                            newmod.show_viewport = showinviewport
+                            m3.make_active(obj)
+                            bpy.ops.object.modifier_move_up(modifier=mirror.name)
+                            m3.make_active(active)
 
-                    # DECALmachine wstep.copy_normals() support
+                        mod = obj.modifiers.get("M3_hard_custom_normals")
+                        if mod:
+                            src = mod.object
+
+                            srcmirror = src.modifiers.new(name="M3_mirror", type="MIRROR")
+                            srcmirror.use_x = self.axisx
+                            srcmirror.use_y = self.axisy
+                            srcmirror.use_z = self.axisz
+                            srcmirror.mirror_object = active
+
+                            m3.make_active(obj)
+                            bpy.ops.object.modifier_move_up(modifier=mirror.name)
+                            m3.make_active(active)
+
+                        mod = obj.modifiers.get("M3_surface_fix")
+                        if mod:
+                            src = mod.object
+
+                            srcmirror = src.modifiers.new(name="M3_mirror", type="MIRROR")
+                            srcmirror.use_x = self.axisx
+                            srcmirror.use_y = self.axisy
+                            srcmirror.use_z = self.axisz
+                            srcmirror.mirror_object = active
+
+                            m3.make_active(obj)
+                            bpy.ops.object.modifier_move_up(modifier=mirror.name)
+                            m3.make_active(active)
+
+                    # DECALmachine copied normals support
                     if self.DMcopiedNormals:
                         mod = obj.modifiers.get("M3_copied_normals")
                         if mod:
                             # making obj active for ops
                             m3.make_active(obj)
                             while obj.modifiers[-1].name != "M3_copied_normals":
-                                bpy.ops.object.modifier_move_down(modifier="M3_copied_normals")
+                                bpy.ops.object.modifier_move_down(modifier=mod.name)
                             # setting the original active back again
                             m3.make_active(active)
 

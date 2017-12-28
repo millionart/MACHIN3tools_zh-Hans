@@ -17,6 +17,7 @@ class Align(bpy.types.Operator):
     bl_label = "MACHIN3: Align"
     bl_options = {'REGISTER', 'UNDO'}
 
+    parent = BoolProperty(name="Parent")
     autoskin = BoolProperty(name="Auto Skin")
 
     highquality = BoolProperty(name="High Quality", default=True)
@@ -36,6 +37,7 @@ class Align(bpy.types.Operator):
         activetype = m3.get_active().type
 
         if activetype == "ARMATURE":
+            column.prop(self, "parent")
             column.prop(self, "autoskin")
         else:
             column.prop(self, "highquality")
@@ -62,8 +64,19 @@ class Align(bpy.types.Operator):
     def align_to_bone(self, active, activebone, selection):
         for obj in selection:
             print("Aligning '%s' to Bone '%s' of Armature '%s'." % (obj.name, activebone.name, active.name))
+
+            if self.parent:
+                if obj.parent:
+                    m3.make_active(obj)
+                    bpy.ops.object.parent_clear(type='CLEAR')
+                    m3.make_active(active)
+
             obj.matrix_local = activebone.matrix_local
             obj.data.update()
+
+            if self.parent:
+                    bpy.ops.object.parent_set(type='BONE')
+
             if self.autoskin:
                 armature = obj.modifiers.get("Armature")
                 if not armature:
