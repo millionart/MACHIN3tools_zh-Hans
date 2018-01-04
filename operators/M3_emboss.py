@@ -242,4 +242,12 @@ class Emboss(bpy.types.Operator):
         bpy.ops.object.material_slot_remove()
         m3.set_mode("EDIT")
         m3.set_mode("FACE")
+
+        # remove potential double verts
+        if self.outerinset == 0:
+            print("Removing duplicate verts at the outer insert.")
+            bpy.ops.mesh.select_more()
+            bpy.ops.mesh.select_more()
+            bpy.ops.mesh.remove_doubles()
+
         m3.unselect_all("MESH")
