@@ -1704,7 +1704,7 @@ class PieAreaViews(Menu):
 #Pie views numpad - Q
 class PieViewNumpad(Menu):
     bl_idname = "pie.viewnumpad"
-    bl_label = "Pie Views Ortho"
+    bl_label = "Pie Views Numpad"
 
     def draw(self, context):
         layout = self.layout
@@ -1714,6 +1714,8 @@ class PieViewNumpad(Menu):
         scene = context.scene
         rd = scene.render
 
+        align_active = bpy.context.scene.machin3.pieviewsalignactive
+
         #4 - LEFT
         pie.operator("view3d.viewnumpad", text="Left", icon='TRIA_LEFT').type='LEFT'
         #6 - RIGHT
@@ -1721,34 +1723,35 @@ class PieViewNumpad(Menu):
         #2 - BOTTOM
         pie.operator("view3d.viewnumpad", text="Bottom", icon='TRIA_DOWN').type='BOTTOM'
         #8 - TOP
-        pie.operator("view3d.viewnumpad", text="Top", icon='TRIA_UP').type='TOP'
+        op = pie.operator("view3d.viewnumpad", text="Top", icon='TRIA_UP')
+        op.type='TOP'
+        op.align_active = align_active
+
         #7 - TOP - LEFT
         pie.operator("view3d.viewnumpad", text="Front").type='FRONT'
         #9 - TOP - RIGHT
         pie.operator("view3d.viewnumpad", text="Back").type='BACK'
         #1 - BOTTOM - LEFT
-        box = pie.split().column()
-        row = box.row(align=True)
-        if context.space_data.lock_camera == False:
-            row.operator("wm.context_toggle", text="Lock Cam to View", icon='UNLOCKED').data_path = "space_data.lock_camera"
-        elif context.space_data.lock_camera == True:
-            row.operator("wm.context_toggle", text="Lock Cam to View", icon='LOCKED').data_path = "space_data.lock_camera"
+        box = pie.split()
+        column = box.column()
 
-        row = box.row(align=True)
+        # TODO: replace with MACHIN3 camera helper
+        if context.space_data.lock_camera is False:
+            column.operator("wm.context_toggle", text="Lock Cam to View", icon='UNLOCKED').data_path = "space_data.lock_camera"
+        elif context.space_data.lock_camera is True:
+            column.operator("wm.context_toggle", text="Lock Cam to View", icon='LOCKED').data_path = "space_data.lock_camera"
+
+        row = column.row(align=True)
         row.operator("view3d.viewnumpad", text="View Cam", icon='VISIBLE_IPO_ON').type='CAMERA'
-        row.operator("view3d.camera_to_view", text="Cam to view", icon = 'MAN_TRANS')
+        row.operator("view3d.camera_to_view", text="Cam to view", icon='MAN_TRANS')
 
-        if ob.lock_rotation[0] == False:
-            row = box.row(align=True)
-            row.operator("object.lockcameratransforms", text="Lock Transforms", icon = 'LOCKED')
-
-        elif  ob.lock_rotation[0] == True:
-            row = box.row(align=True)
-            row.operator("object.lockcameratransforms", text="UnLock Transforms", icon = 'UNLOCKED')
-        row = box.row(align=True)
-        row.prop(rd, "use_border", text="Border")
         #3 - BOTTOM - RIGHT
-        pie.operator("wm.call_menu_pie", text="View All/Sel/Glob...", icon='BBOX').name="pie.vieallselglobetc"
+        box = pie.split()
+        column = box.column()
+
+        column.prop(bpy.context.scene.machin3, "pieviewsalignactive")
+        column.operator("persp.orthoview", text="Persp/Ortho", icon='RESTRICT_VIEW_OFF')
+
 
 #Pie Sculp Pie Menus - W
 class PieSculptPie(Menu):

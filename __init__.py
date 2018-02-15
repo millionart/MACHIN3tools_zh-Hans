@@ -48,6 +48,8 @@ class MACHIN3Settings(bpy.types.PropertyGroup):
     pieobjecteditmodeshow = BoolProperty(name="Auto Reveal", default=False)
     pieobjecteditmodeshowunselect = BoolProperty(name="Unselect", default=False)
 
+    pieviewsalignactive = bpy.props.BoolProperty(name="Align Active", default=False)
+
 
 preferences_tabs = [("MODULES", "Modules", ""),
                     ("SPECIALMENUS", "Special Menus", ""),
@@ -664,6 +666,15 @@ def register_pie_keys(wm, keymaps):
         km = wm.keyconfigs.addon.keymaps.new(name='Object Non-modal')
         kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
         kmi.properties.name = "pie.objecteditmode"
+        kmi.active = True
+        keymaps.append((km, kmi))
+
+    # VIEWS
+
+    if m3.M3_prefs().activate_pie_Snapping:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS', alt=True)
+        kmi.properties.name = "pie.viewnumpad"
         kmi.active = True
         keymaps.append((km, kmi))
 
