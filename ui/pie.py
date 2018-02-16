@@ -1717,20 +1717,30 @@ class PieViewNumpad(Menu):
         align_active = bpy.context.scene.machin3.pieviewsalignactive
 
         #4 - LEFT
-        pie.operator("view3d.viewnumpad", text="Left", icon='TRIA_LEFT').type='LEFT'
+        op = pie.operator("view3d.viewnumpad", text="Left", icon='TRIA_LEFT')
+        op.type='LEFT'
+        op.align_active = align_active
         #6 - RIGHT
-        pie.operator("view3d.viewnumpad", text="Right", icon='TRIA_RIGHT').type='RIGHT'
+        op = pie.operator("view3d.viewnumpad", text="Right", icon='TRIA_RIGHT')
+        op.type='RIGHT'
+        op.align_active = align_active
         #2 - BOTTOM
-        pie.operator("view3d.viewnumpad", text="Bottom", icon='TRIA_DOWN').type='BOTTOM'
+        op = pie.operator("view3d.viewnumpad", text="Bottom", icon='TRIA_DOWN')
+        op.type='BOTTOM'
+        op.align_active = align_active
         #8 - TOP
         op = pie.operator("view3d.viewnumpad", text="Top", icon='TRIA_UP')
         op.type='TOP'
         op.align_active = align_active
-
         #7 - TOP - LEFT
-        pie.operator("view3d.viewnumpad", text="Front").type='FRONT'
+        op = pie.operator("view3d.viewnumpad", text="Front")
+        op.type='FRONT'
+        op.align_active = align_active
         #9 - TOP - RIGHT
-        pie.operator("view3d.viewnumpad", text="Back").type='BACK'
+        op = pie.operator("view3d.viewnumpad", text="Back")
+        op.type='BACK'
+        op.align_active = align_active
+
         #1 - BOTTOM - LEFT
         box = pie.split()
         column = box.column()
