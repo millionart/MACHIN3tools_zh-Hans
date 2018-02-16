@@ -103,6 +103,7 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
     # PIE MENUS
 
     activate_pie_SelectMode = BoolProperty(name="Select Mode", default=False)
+    activate_pie_ViewsNumpad = BoolProperty(name="Views Numpad", default=False)
     activate_pie_Layouts = BoolProperty(name="Layouts", default=False)
     activate_pie_Snapping = BoolProperty(name="Snapping", default=False)
     activate_pie_Orientations = BoolProperty(name="Orientations", default=False)
@@ -361,6 +362,13 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         row.prop(self, "activate_pie_SelectMode", toggle=True)
         row.label("Select Object and Edit Modes.")
         du.show_keymap(self.activate_pie_SelectMode, kc, "Object Non-modal", "wm.call_menu_pie", col, kmivalue="pie.objecteditmode", properties="name")
+
+        # VIEWS NUMPAD
+
+        row = col.split(percentage=0.2)
+        row.prop(self, "activate_pie_ViewsNumpad", toggle=True)
+        row.label("Select Views, useful when Numpad is not available.")
+        du.show_keymap(self.activate_pie_ViewsNumpad, kc, "3D View Generic", "wm.call_menu_pie", col, kmivalue="pie.viewnumpad", properties="name")
 
         # LAYOUTS
 
@@ -671,7 +679,7 @@ def register_pie_keys(wm, keymaps):
 
     # VIEWS
 
-    if m3.M3_prefs().activate_pie_Snapping:
+    if m3.M3_prefs().activate_pie_ViewsNumpad:
         km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
         kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS', alt=True)
         kmi.properties.name = "pie.viewnumpad"
