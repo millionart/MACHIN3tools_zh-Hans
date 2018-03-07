@@ -157,7 +157,7 @@ def mirror(self):
 
                 if m3.DM_check():
                     # DECALmachine support (u or v mirror for parallax and for info decals!)
-                    if "decal" in obj.name or "info" in obj.name:
+                    if obj.DM.isdecal and obj.DM.decaltype in ['SIMPLE', 'SUBSET', 'INFO']:
                         if self.DMmirrorU:
                             mirror.use_mirror_u = True
                         if self.DMmirrorV:

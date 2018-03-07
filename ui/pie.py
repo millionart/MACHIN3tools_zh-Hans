@@ -1,7 +1,7 @@
 import bpy
 import os
 from bpy.types import Menu
-from bpy.props import IntProperty
+from bpy.props import IntProperty, StringProperty, BoolProperty
 import bmesh
 from .. import M3utils as m3
 
@@ -1968,33 +1968,54 @@ class SnapTargetMenu(Menu):
         #1 - BOTTOM - LEFT
         #3 - BOTTOM - RIGHT
 
+
+class SwitchOrientation(bpy.types.Operator):
+    bl_idname = "machin3.switch_orientation"
+    bl_label = "MACHIN3: Switch Orientation"
+
+    orientation = StringProperty()
+
+    def execute(self, context):
+        if self.orientation == 'NORMAL':
+            bpy.context.space_data.transform_orientation=self.orientation
+            bpy.context.space_data.show_manipulator = False
+        elif self.orientation == 'LOCAL':
+            bpy.context.space_data.transform_orientation=self.orientation
+            bpy.context.space_data.show_manipulator = True
+        elif self.orientation == 'SELECTION':
+            bpy.ops.transform.create_orientation(use=True)
+            bpy.context.space_data.show_manipulator = True
+        return {'FINISHED'}
+
+
 #Pie Orientation - Alt + Space
 class PieOrientation(Menu):
     bl_idname = "pie.orientation"
     bl_label = "Pie Orientation"
 
     def draw(self, context):
-        layout = self.layout
-
         mode = m3.get_mode()
 
+        layout = self.layout
         pie = layout.menu_pie()
-        #4 - LEFT
-        pie.operator("object.orientationvariable", text="View").variable = 'VIEW'
-        #6 - RIGHT
-        pie.operator("object.orientationvariable", text="Local").variable = 'LOCAL'
-        #2 - BOTTOM
-        pie.operator("object.orientationvariable", text="Normal").variable = 'NORMAL'
-        #8 - TOP
-        pie.operator("object.orientationvariable", text="Global").variable = 'GLOBAL'
-        #7 - TOP - LEFT
-        pie.operator("object.orientationvariable", text="Gimbal").variable = 'GIMBAL'
-        #9 - TOP - RIGHT
+
+        # 4 - LEFT
+        pie.operator("machin3.switch_orientation", text="Normal").orientation = 'NORMAL'
+        # 6 - RIGHT
+        pie.operator("machin3.switch_orientation", text="Local").orientation = 'LOCAL'
+        # 2 - BOTTOM
+        pie.operator("machin3.switch_orientation", text=mode.capitalize()).orientation = 'SELECTION'
+        # 8 - TOP
+        # pie.operator("machin3.switch_orientation", text="Global").orientation = 'GLOBAL'
+        pie.prop(bpy.context.space_data, "show_manipulator")
+        # 7 - TOP - LEFT
         pie.separator()
-        #1 - BOTTOM - LEFT
+        # 9 - TOP - RIGHT
         pie.separator()
-        #3 - BOTTOM - RIGHT
-        pie.operator("transform.create_orientation", text=mode.capitalize()).use = True
+        # 1 - BOTTOM - LEFT
+        pie.separator()
+        # 3 - BOTTOM - RIGHT
+        pie.separator()
 
 #Pie Shading - Z
 class PieShadingView(Menu):
