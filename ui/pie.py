@@ -1717,24 +1717,24 @@ class PieViewNumpad(Menu):
         align_active = bpy.context.scene.machin3.pieviewsalignactive
 
         #4 - LEFT
-        op = pie.operator("view3d.viewnumpad", text="Left", icon='TRIA_LEFT')
-        op.type='LEFT'
+        op = pie.operator("view3d.viewnumpad", text="Front")
+        op.type='FRONT'
         op.align_active = align_active
         #6 - RIGHT
-        op = pie.operator("view3d.viewnumpad", text="Right", icon='TRIA_RIGHT')
+        op = pie.operator("view3d.viewnumpad", text="Right")
         op.type='RIGHT'
         op.align_active = align_active
         #2 - BOTTOM
-        op = pie.operator("view3d.viewnumpad", text="Bottom", icon='TRIA_DOWN')
-        op.type='BOTTOM'
-        op.align_active = align_active
-        #8 - TOP
-        op = pie.operator("view3d.viewnumpad", text="Top", icon='TRIA_UP')
+        op = pie.operator("view3d.viewnumpad", text="Top")
         op.type='TOP'
         op.align_active = align_active
+        #8 - TOP
+        op = pie.operator("view3d.viewnumpad", text="Bottom")
+        op.type='BOTTOM'
+        op.align_active = align_active
         #7 - TOP - LEFT
-        op = pie.operator("view3d.viewnumpad", text="Front")
-        op.type='FRONT'
+        op = pie.operator("view3d.viewnumpad", text="Left")
+        op.type='LEFT'
         op.align_active = align_active
         #9 - TOP - RIGHT
         op = pie.operator("view3d.viewnumpad", text="Back")
@@ -1976,6 +1976,8 @@ class PieOrientation(Menu):
     def draw(self, context):
         layout = self.layout
 
+        mode = m3.get_mode()
+
         pie = layout.menu_pie()
         #4 - LEFT
         pie.operator("object.orientationvariable", text="View").variable = 'VIEW'
@@ -1988,8 +1990,11 @@ class PieOrientation(Menu):
         #7 - TOP - LEFT
         pie.operator("object.orientationvariable", text="Gimbal").variable = 'GIMBAL'
         #9 - TOP - RIGHT
+        pie.separator()
         #1 - BOTTOM - LEFT
+        pie.separator()
         #3 - BOTTOM - RIGHT
+        pie.operator("transform.create_orientation", text=mode.capitalize()).use = True
 
 #Pie Shading - Z
 class PieShadingView(Menu):

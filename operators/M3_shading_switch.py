@@ -243,7 +243,7 @@ class AdjustPrincipledPBRnode(bpy.types.Operator):
                     node["M3"]
                 except:
                     adjust_principledpbr_node(mode, mat, node, decalgroup)
-                    print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
+                    print(" » Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
         else:
             node = mat.node_tree.nodes['Material Output'].inputs['Surface'].links[0].from_node
 
@@ -251,7 +251,7 @@ class AdjustPrincipledPBRnode(bpy.types.Operator):
                 node["M3"]
             except:
                 adjust_principledpbr_node(mode, mat, node)
-                print("Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
+                print(" » Material Viewport Compensation for Material: '%s', Node: '%s'" % (mat.name, node.name))
 
         return {'FINISHED'}
 
