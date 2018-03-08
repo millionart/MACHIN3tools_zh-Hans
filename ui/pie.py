@@ -1988,10 +1988,21 @@ class SwitchOrientation(bpy.types.Operator):
         return {'FINISHED'}
 
 
-#Pie Orientation - Alt + Space
-class PieOrientation(Menu):
-    bl_idname = "pie.orientation"
-    bl_label = "Pie Orientation"
+class ChangePivot(bpy.types.Operator):
+    bl_idname = "machin3.change_pivot"
+    bl_label = "MACHIN3: Change Pivot"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    pivot = StringProperty()
+
+    def execute(self, context):
+        bpy.context.space_data.pivot_point = self.pivot
+        return {'FINISHED'}
+
+
+class PieOrientationAndPivot(Menu):
+    bl_idname = "pie.orientation_and_pivot"
+    bl_label = "Pie Orientation and Pivot"
 
     def draw(self, context):
         mode = m3.get_mode()
@@ -2000,22 +2011,36 @@ class PieOrientation(Menu):
         pie = layout.menu_pie()
 
         # 4 - LEFT
-        pie.operator("machin3.switch_orientation", text="Normal").orientation = 'NORMAL'
+        icon = "PROP_ON" if bpy.context.space_data.transform_orientation == 'NORMAL' else 'BLANK1'
+        pie.operator("machin3.switch_orientation", text="Normal", icon=icon).orientation = 'NORMAL'
         # 6 - RIGHT
-        pie.operator("machin3.switch_orientation", text="Local").orientation = 'LOCAL'
+        icon = "PROP_ON" if bpy.context.space_data.transform_orientation == 'LOCAL' else 'BLANK1'
+        pie.operator("machin3.switch_orientation", text="Local", icon=icon).orientation = 'LOCAL'
         # 2 - BOTTOM
-        pie.operator("machin3.switch_orientation", text=mode.capitalize()).orientation = 'SELECTION'
+        icon = "PROP_ON" if bpy.context.space_data.transform_orientation not in ['NORMAL', 'LOCAL', 'GLOBAL', 'VIEW', 'GIMBAL'] else 'BLANK1'
+        pie.operator("machin3.switch_orientation", text=mode.capitalize(), icon=icon).orientation = 'SELECTION'
         # 8 - TOP
-        # pie.operator("machin3.switch_orientation", text="Global").orientation = 'GLOBAL'
         pie.prop(bpy.context.space_data, "show_manipulator")
         # 7 - TOP - LEFT
-        pie.separator()
+        column = pie.column()
+        column.scale_y = 1.5
+        icon = "SPACE3" if bpy.context.space_data.pivot_point == 'INDIVIDUAL_ORIGINS' else 'BLANK1'
+        column.operator("machin3.change_pivot", text="Individual", icon=icon).pivot = 'INDIVIDUAL_ORIGINS'
         # 9 - TOP - RIGHT
-        pie.separator()
+        column = pie.column()
+        column.scale_y = 1.5
+        icon = "SPACE3" if bpy.context.space_data.pivot_point == 'ACTIVE_ELEMENT' else 'BLANK1'
+        column.operator("machin3.change_pivot", text="Active", icon=icon).pivot = 'ACTIVE_ELEMENT'
         # 1 - BOTTOM - LEFT
-        pie.separator()
+        column = pie.column()
+        column.scale_y = 1.5
+        icon = "SPACE3" if bpy.context.space_data.pivot_point == 'MEDIAN_POINT' else 'BLANK1'
+        column.operator("machin3.change_pivot", text="Median", icon=icon).pivot = 'MEDIAN_POINT'
         # 3 - BOTTOM - RIGHT
-        pie.separator()
+        column = pie.column()
+        column.scale_y = 1.5
+        icon = "SPACE3" if bpy.context.space_data.pivot_point == 'CURSOR' else 'BLANK1'
+        column.operator("machin3.change_pivot", text="Cursor", icon=icon).pivot = 'CURSOR'
 
 #Pie Shading - Z
 class PieShadingView(Menu):

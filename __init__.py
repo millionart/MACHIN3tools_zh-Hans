@@ -388,8 +388,8 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
 
         row = col.split(percentage=0.2)
         row.prop(self, "activate_pie_Orientations", toggle=True)
-        row.label("Set Transform Orientations.")
-        du.show_keymap(self.activate_pie_Orientations, kc, "3D View Generic", "wm.call_menu_pie", col, kmivalue="pie.orientation", properties="name")
+        row.label("Set Transform Orientations and Pivots")
+        du.show_keymap(self.activate_pie_Orientations, kc, "3D View Generic", "wm.call_menu_pie", col, kmivalue="pie.orientation_and_pivot", properties="name")
 
         # OBJECT SHADING
 
@@ -709,7 +709,7 @@ def register_pie_keys(wm, keymaps):
     if m3.M3_prefs().activate_pie_Orientations:
         km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
         kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', alt=True)
-        kmi.properties.name = "pie.orientation"
+        kmi.properties.name = "pie.orientation_and_pivot"
         kmi.active = True
         keymaps.append((km, kmi))
 
