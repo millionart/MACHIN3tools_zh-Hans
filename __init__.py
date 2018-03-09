@@ -47,6 +47,7 @@ class MACHIN3Settings(bpy.types.PropertyGroup):
     pieobjecteditmodehide = BoolProperty(name="Auto Hide", default=False)
     pieobjecteditmodeshow = BoolProperty(name="Auto Reveal", default=False)
     pieobjecteditmodeshowunselect = BoolProperty(name="Unselect", default=False)
+    pieobjecteditmodetoggleao = BoolProperty(name="Toggle AO", default=False)
 
     pieviewsalignactive = bpy.props.BoolProperty(name="Align Active", default=False)
 

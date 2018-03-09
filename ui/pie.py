@@ -1,7 +1,7 @@
 import bpy
 import os
 from bpy.types import Menu
-from bpy.props import IntProperty, StringProperty, BoolProperty
+from bpy.props import IntProperty, StringProperty, BoolProperty, FloatProperty
 import bmesh
 from .. import M3utils as m3
 
@@ -448,6 +448,8 @@ class ClassObject(bpy.types.Operator):
                 m3.unhide_all("MESH")
                 if bpy.context.scene.machin3.pieobjecteditmodeshowunselect:
                     m3.unselect_all("MESH")
+            if bpy.context.scene.machin3.pieobjecteditmodetoggleao:
+                bpy.context.space_data.fx_settings.use_ssao = False
         else:
             if bpy.context.scene.machin3.pieobjecteditmodehide:
                 # TODO: why does this sometimes occur?
@@ -466,6 +468,8 @@ class ClassObject(bpy.types.Operator):
                 except:
                     pass
             bpy.ops.object.mode_set(mode="OBJECT")
+            if bpy.context.scene.machin3.pieobjecteditmodetoggleao:
+                bpy.context.space_data.fx_settings.use_ssao = True
         return {'FINISHED'}
 
 
@@ -484,6 +488,9 @@ class ClassVertex(bpy.types.Operator):
                     m3.unselect_all("MESH")
         if bpy.ops.mesh.select_mode != "EDGE, FACE":
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+
+        if bpy.context.scene.machin3.pieobjecteditmodetoggleao:
+            bpy.context.space_data.fx_settings.use_ssao = False
         return {'FINISHED'}
 
 
@@ -502,6 +509,9 @@ class ClassEdge(bpy.types.Operator):
                     m3.unselect_all("MESH")
         if bpy.ops.mesh.select_mode != "VERT, FACE":
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+
+        if bpy.context.scene.machin3.pieobjecteditmodetoggleao:
+            bpy.context.space_data.fx_settings.use_ssao = False
         return {'FINISHED'}
 
 
@@ -520,6 +530,9 @@ class ClassFace(bpy.types.Operator):
                     m3.unselect_all("MESH")
         if bpy.ops.mesh.select_mode != "VERT, EDGE":
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+
+        if bpy.context.scene.machin3.pieobjecteditmodetoggleao:
+            bpy.context.space_data.fx_settings.use_ssao = False
         return {'FINISHED'}
 
 ######################
@@ -1425,6 +1438,7 @@ class PieObjectEditMode(Menu):
     bl_idname = "pie.objecteditmode"
     bl_label = "Select Mode"
 
+
     def draw(self, context):
         layout = self.layout
         toolsettings = context.tool_settings
@@ -1483,6 +1497,7 @@ class PieObjectEditMode(Menu):
                 row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshow")
                 row.prop(bpy.context.scene.machin3, "pieobjecteditmodeshowunselect")
                 column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
+                column.prop(bpy.context.scene.machin3, "pieobjecteditmodetoggleao")
 
                 if m3.GP_check():
                     if len(bpy.context.scene.storedGroupSettings) > 0:
@@ -2068,7 +2083,24 @@ class PieShadingView(Menu):
         #3 - BOTTOM - RIGHT
         pie.operator("shading.flat", text="Shade Flat", icon='MESH_ICOSPHERE')
 
-#Pie Object Shading- Shift + Z
+
+class AOPreset(bpy.types.Operator):
+    bl_idname = "machin3.ao_preset"
+    bl_label = "MACHIN3: AO Preset"
+
+    strength = FloatProperty()
+
+    def execute(self, context):
+        fx_settings = context.space_data.fx_settings
+        fx_settings.ssao.factor = self.strength
+        if self.strength !=0:
+            fx_settings.use_ssao = True
+        else:
+            fx_settings.use_ssao = False
+
+        return {'FINISHED'}
+
+
 class PieObjectShading(Menu):
     bl_idname = "pie.objectshading"
     bl_label = "Pie Shading Object"
@@ -2099,72 +2131,50 @@ class PieObjectShading(Menu):
 
         #6 - RIGHT
         pie.operator("wire.selectedall", text="Wire", icon='WIRE')
-        #2 - BOTTOM
-        box = pie.split().column()
-        row = box.row(align=True)
 
+        #2 - BOTTOM
+        column = pie.column()
+
+        column.prop(view, "use_matcap", text="Matcaps")
+        column.prop(view, "show_only_render")
         if view.viewport_shade not in {'BOUNDBOX', 'WIREFRAME'}:
-            row = box.row(align=True)
-            row.prop(fx_settings, "use_dof")
-            row = box.row(align=True)
-            row.prop(fx_settings, "use_ssao", text="AO")
+            column.separator()
+            row = column.row(align=True)
+            row.operator("machin3.ao_preset", text="Off").strength = 0
+            row.operator("machin3.ao_preset", text="1").strength = 1
+            row.operator("machin3.ao_preset", text="3.5").strength = 3.5
             if fx_settings.use_ssao:
                 ssao_settings = fx_settings.ssao
-                row = box.row(align=True)
-                row.prop(ssao_settings, "factor")
-                row = box.row(align=True)
-                row.prop(ssao_settings, "distance_max")
-                row = box.row(align=True)
-                row.prop(ssao_settings, "attenuation")
-                row = box.row(align=True)
-                row.prop(ssao_settings, "samples")
-                row = box.row(align=True)
-                row.prop(ssao_settings, "color")
-        #8 - TOP
-        box = pie.split().column()
-        row = box.row(align=True)
-        row.prop(obj, "show_x_ray", text="X-Ray")
-        row = box.row(align=True)
-        row.prop(view, "show_occlude_wire", text="Hidden Wire")
-        row = box.row(align=True)
-        row.prop(view, "show_backface_culling", text="Backface Culling")
+                column.prop(ssao_settings, "distance_max")
 
-        # MACHIN3
-        row = box.row(align=True)
-        row.prop(view, "show_grease_pencil", text="Grease Pencil")
+        #8 - TOP
+        column = pie.column()
+        row = column.row(align=True)
+        row.prop(obj, "show_x_ray", text="X-Ray")
+        row.prop(view, "show_occlude_wire", text="Hidden Wire")
+        column.prop(view, "show_backface_culling", text="Backface Culling")
+        column.prop(view, "show_relationship_lines", text="Relationship Lines")
+        column.prop(view, "show_grease_pencil", text="Grease Pencil")
         if view.show_grease_pencil:
             try:
-                row = box.row(align=True)
-                row.prop(bpy.data.grease_pencil[0].layers[0], "show_x_ray", text=" » GP X-Ray")
-                row = box.row(align=True)
-                row.prop(bpy.data.grease_pencil[0].layers[0], "line_change", text="Thickness")
+                column.prop(bpy.data.grease_pencil[0].layers[0], "line_change", text="Thickness")
+                column.prop(bpy.data.grease_pencil[0].layers[0], "show_x_ray", text=" » GP X-Ray")
             except:
                 pass
-
-        row = box.row(align=True)
-        row.prop(view, "show_relationship_lines", text="Relationship Lines")
-        # /MACHIN3
+        column.separator()
 
         #7 - TOP - LEFT
         if m3.addon_check("measureit"):
             box = pie.split()
             column = box.column()
-            column.scale_x = 1.5
-            column.operator("measureit.runopenglbutton", text="Show/Hide Annotations", icon="TEXT")
+            column.scale_x = 1
+            column.operator("measureit.runopenglbutton", text="Toggle Annotations", icon="TEXT")
             column.prop(scene, "measureit_gl_txt", text="")
             column.operator("measureit.addnotebutton", text="Annotate", icon="NEW")
         else:
             pie.separator()
 
-        # box = pie.split().column()
-        # row = box.row(align=True)
-        # row.prop(mesh, "show_normal_face", text="Show Normals Faces", icon='FACESEL')
-        # row = box.row()
-        # row.menu("meshdisplay.overlays", text="Mesh display", icon='OBJECT_DATAMODE')
-
-        # #9 - TOP - RIGHT
-
-        # MACHIN3
+        # 9 - TOP - RIGHT
         box = pie.split()
         column = box.column()
 
@@ -2183,22 +2193,11 @@ class PieObjectShading(Menu):
             column.menu("meshdisplay.overlays", text="Mesh display", icon='OBJECT_DATAMODE')
         # /MACHIN3
 
-        #1 - BOTTOM - LEFT
-        box = pie.split().column()
-        row = box.row(align=True)
-        box.prop(view, "show_only_render")
-        row = box.row(align=True)
-        box.prop(view, "show_world")
-        row = box.row(align=True)
-        box.prop(view, "show_outline_selected")
+        # 1 - BOTTOM - LEFT
+        pie.separator()
 
-        #3 - BOTTOM - RIGHT
-        box = pie.split().column()
-        row = box.row(align=True)
-        row.prop(view, "use_matcap", text="Matcaps")
-        if view.use_matcap:
-            row = box.row(align=True)
-            row.menu("meshdisplay.matcaps", text="Choose Matcaps", icon='MATCAP_02')
+        # 3 - BOTTOM - RIGHT
+        pie.separator()
 
 #Overlays
 class MeshDisplayMatcaps(bpy.types.Menu):
