@@ -2035,7 +2035,15 @@ class PieOrientationAndPivot(Menu):
         icon = "PROP_ON" if bpy.context.space_data.transform_orientation not in ['NORMAL', 'LOCAL', 'GLOBAL', 'VIEW', 'GIMBAL'] else 'BLANK1'
         pie.operator("machin3.switch_orientation", text=mode.capitalize(), icon=icon).orientation = 'SELECTION'
         # 8 - TOP
-        pie.prop(bpy.context.space_data, "show_manipulator")
+        column = pie.column()
+        column.prop(bpy.context.space_data, "show_manipulator")
+        if mode =="OBJECT":
+            column.prop(bpy.context.scene.tool_settings, "use_proportional_edit_objects", text="Proportional Editing")
+            if bpy.context.scene.tool_settings.use_proportional_edit_objects:
+                column.prop(bpy.context.scene.tool_settings, "proportional_edit_falloff")
+        else:
+            column.prop(bpy.context.scene.tool_settings, "proportional_edit")
+
         # 7 - TOP - LEFT
         column = pie.column()
         column.scale_y = 1.5
@@ -2092,11 +2100,14 @@ class AOPreset(bpy.types.Operator):
 
     def execute(self, context):
         fx_settings = context.space_data.fx_settings
-        fx_settings.ssao.factor = self.strength
         if self.strength !=0:
             fx_settings.use_ssao = True
+            fx_settings.ssao.factor = self.strength
         else:
-            fx_settings.use_ssao = False
+            if fx_settings.use_ssao:
+                fx_settings.use_ssao = False
+            else:
+                fx_settings.use_ssao = True
 
         return {'FINISHED'}
 
@@ -2140,7 +2151,7 @@ class PieObjectShading(Menu):
         if view.viewport_shade not in {'BOUNDBOX', 'WIREFRAME'}:
             column.separator()
             row = column.row(align=True)
-            row.operator("machin3.ao_preset", text="Off").strength = 0
+            row.operator("machin3.ao_preset", text="AO Toggle").strength = 0
             row.operator("machin3.ao_preset", text="1").strength = 1
             row.operator("machin3.ao_preset", text="3.5").strength = 3.5
             if fx_settings.use_ssao:
