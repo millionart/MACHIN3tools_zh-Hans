@@ -21,51 +21,68 @@ class Align(bpy.types.Operator):
     bl_label = "MACHIN3: Align"
     bl_options = {'REGISTER', 'UNDO'}
 
+    location = BoolProperty(name="Align Location", default=True)
+    rotation = BoolProperty(name="Align Rotation", default=False)
+
     parent = BoolProperty(name="Parent")
     autoskin = BoolProperty(name="Auto Skin")
 
     mode = EnumProperty(name="Mode", items=modes, default="BBOX")
 
+    locaxisx = BoolProperty(name="X", default=True)
+    locaxisy = BoolProperty(name="Y", default=True)
+    locaxisz = BoolProperty(name="Z", default=True)
+
     alignmode = EnumProperty(name="Align Mode", items=bboxmodes, default="OPT_2")
     highquality = BoolProperty(name="High Quality", default=True)
     relativeto = EnumProperty(name="Relative To Mode", items=relatives, default="OPT_4")
 
-    axisx = BoolProperty(name="X", default=True)
-    axisy = BoolProperty(name="Y", default=True)
-    axisz = BoolProperty(name="Z", default=True)
+    rotaxisx = BoolProperty(name="X", default=True)
+    rotaxisy = BoolProperty(name="Y", default=True)
+    rotaxisz = BoolProperty(name="Z", default=True)
 
-    ignoremirror = BoolProperty(name="Ignore Mirror", default=False)
-    rotation = BoolProperty(name="Align Rotation", default=False)
+    ignoremirror = BoolProperty(name="Ignore Mirror Modifier", default=False)
 
     def draw(self, context):
         layout = self.layout
 
-        column = layout.column()
-
         activetype = m3.get_active().type
 
         if activetype == "ARMATURE":
+            box = layout.box()
+            column = box.column()
             column.prop(self, "parent")
             column.prop(self, "autoskin")
         else:
-            row = column.row(align=True)
-            row.prop(self, "axisx", toggle=True)
-            row.prop(self, "axisy", toggle=True)
-            row.prop(self, "axisz", toggle=True)
+            box = layout.box()
+            column = box.column()
+            column.prop(self, "location")
 
             row = column.row()
             row.prop(self, "mode", expand=True)
+
+            row = column.row(align=True)
+            row.prop(self, "locaxisx", toggle=True)
+            row.prop(self, "locaxisy", toggle=True)
+            row.prop(self, "locaxisz", toggle=True)
 
             split = column.split()
             split.separator()
             col = split.column()
             col.prop(self, "highquality")
+            col.prop(self, "ignoremirror")
 
             col.prop(self, "alignmode", text="")
             col.prop(self, "relativeto", text="")
 
+            box = layout.box()
+            column = box.column()
             column.prop(self, "rotation")
-            column.prop(self, "ignoremirror")
+
+            row = column.row(align=True)
+            row.prop(self, "rotaxisx", toggle=True)
+            row.prop(self, "rotaxisy", toggle=True)
+            row.prop(self, "rotaxisz", toggle=True)
 
     def execute(self, context):
         sel = m3.selected_objects()
@@ -126,27 +143,32 @@ class Align(bpy.types.Operator):
                     mod.show_viewport = not mod.show_viewport
 
     def align(self, active, selection):
-        axisset = set()
+        locaxisset = set()
 
-        if self.axisx:
-            axisset.add("X")
-        if self.axisy:
-            axisset.add("Y")
-        if self.axisz:
-            axisset.add("Z")
+        if self.locaxisx:
+            locaxisset.add("X")
+        if self.locaxisy:
+            locaxisset.add("Y")
+        if self.locaxisz:
+            locaxisset.add("Z")
 
-        # NOTE: doing the rotation first is important for the bbox mode.
-        if self.rotation:
-            # bpy.ops.transform.transform(mode='ALIGN', value=(0, 0, 0, 0), axis=(0, 0, 0), constraint_axis=(False, False, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=0.683013)
-            bpy.ops.transform.transform(mode='ALIGN')
-
-        if self.mode == "BBOX":
-            bpy.ops.object.align(bb_quality=self.highquality, align_mode=self.alignmode, relative_to=self.relativeto, align_axis=axisset)
-        elif self.mode == "SIMPLE":
+        if self.rotation:  # NOTE: doing the rotation first is important for the bbox mode.
             for obj in selection:
-                if self.axisx:
-                    obj.location[0] = active.location[0]
-                if self.axisy:
-                    obj.location[1] = active.location[1]
-                if self.axisz:
-                    obj.location[2] = active.location[2]
+                if self.rotaxisx:
+                    obj.rotation_euler[0] = active.rotation_euler[0]
+                if self.rotaxisy:
+                    obj.rotation_euler[1] = active.rotation_euler[1]
+                if self.rotaxisz:
+                    obj.rotation_euler[2] = active.rotation_euler[2]
+
+        if self.location:
+            if self.mode == "BBOX":
+                bpy.ops.object.align(bb_quality=self.highquality, align_mode=self.alignmode, relative_to=self.relativeto, align_axis=locaxisset)
+            elif self.mode == "SIMPLE":
+                for obj in selection:
+                    if self.locaxisx:
+                        obj.location[0] = active.location[0]
+                    if self.locaxisy:
+                        obj.location[1] = active.location[1]
+                    if self.locaxisz:
+                        obj.location[2] = active.location[2]
