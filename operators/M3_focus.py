@@ -26,6 +26,7 @@ class Focus(bpy.types.Operator):
             else:  # leaving focus mode(local view)
                 m3.unhide_all("OBJECT")
                 m3.select_all("OBJECT")
+
                 if self.mirror:
                     self.toggle_mirror()
                 # bpy.ops.view3d.localvie()
@@ -41,11 +42,12 @@ class Focus(bpy.types.Operator):
 
                 bpy.ops.view3d.view_selected(use_all_regions=False)
 
-                for z in range(self.zoomout):
-                    bpy.ops.view3d.zoom(delta=-1)
+                if len(sel) == 1:
+                    for z in range(self.zoomout):
+                        bpy.ops.view3d.zoom(delta=-1)
 
-                if len(sel) == 1 and self.mirror:
-                    self.toggle_mirror()
+                    if self.mirror:
+                        self.toggle_mirror()
             else:
                 bpy.ops.view3d.view_selected('INVOKE_DEFAULT', use_all_regions=False)
 

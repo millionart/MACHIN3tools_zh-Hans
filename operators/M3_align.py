@@ -2,9 +2,13 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty
 from .. import M3utils as m3
 
-modes = [("OPT_1", "Negative Sides", ""),
-         ("OPT_2", "Centers", ""),
-         ("OPT_3", "Positive Sides", "")]
+
+modes = [("SIMPLE", "Simple", ""),
+         ("BBOX", "Bounding Box", "")]
+
+bboxmodes = [("OPT_1", "Negative Sides", ""),
+             ("OPT_2", "Centers", ""),
+             ("OPT_3", "Positive Sides", "")]
 
 relatives = [("OPT_1", "Scene Origin", ""),
              ("OPT_2", "3D Cursor", ""),
@@ -20,14 +24,15 @@ class Align(bpy.types.Operator):
     parent = BoolProperty(name="Parent")
     autoskin = BoolProperty(name="Auto Skin")
 
-    highquality = BoolProperty(name="High Quality", default=True)
+    mode = EnumProperty(name="Mode", items=modes, default="BBOX")
 
-    alignmode = EnumProperty(name="Align Mode", items=modes, default="OPT_2")
+    alignmode = EnumProperty(name="Align Mode", items=bboxmodes, default="OPT_2")
+    highquality = BoolProperty(name="High Quality", default=True)
     relativeto = EnumProperty(name="Relative To Mode", items=relatives, default="OPT_4")
 
-    axisx = BoolProperty(name="X", default=False)
-    axisy = BoolProperty(name="Y", default=False)
-    axisz = BoolProperty(name="Z", default=False)
+    axisx = BoolProperty(name="X", default=True)
+    axisy = BoolProperty(name="Y", default=True)
+    axisz = BoolProperty(name="Z", default=True)
 
     ignoremirror = BoolProperty(name="Ignore Mirror", default=False)
     rotation = BoolProperty(name="Align Rotation", default=False)
@@ -43,17 +48,24 @@ class Align(bpy.types.Operator):
             column.prop(self, "parent")
             column.prop(self, "autoskin")
         else:
-            column.prop(self, "highquality")
-            column.prop(self, "alignmode")
-            column.prop(self, "relativeto")
-
             row = column.row(align=True)
             row.prop(self, "axisx", toggle=True)
             row.prop(self, "axisy", toggle=True)
             row.prop(self, "axisz", toggle=True)
 
-            column.prop(self, "ignoremirror")
+            row = column.row()
+            row.prop(self, "mode", expand=True)
+
+            split = column.split()
+            split.separator()
+            col = split.column()
+            col.prop(self, "highquality")
+
+            col.prop(self, "alignmode", text="")
+            col.prop(self, "relativeto", text="")
+
             column.prop(self, "rotation")
+            column.prop(self, "ignoremirror")
 
     def execute(self, context):
         sel = m3.selected_objects()
@@ -123,8 +135,18 @@ class Align(bpy.types.Operator):
         if self.axisz:
             axisset.add("Z")
 
-        bpy.ops.object.align(bb_quality=self.highquality, align_mode=self.alignmode, relative_to=self.relativeto, align_axis=axisset)
-
+        # NOTE: doing the rotation first is important for the bbox mode.
         if self.rotation:
             # bpy.ops.transform.transform(mode='ALIGN', value=(0, 0, 0, 0), axis=(0, 0, 0), constraint_axis=(False, False, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=0.683013)
             bpy.ops.transform.transform(mode='ALIGN')
+
+        if self.mode == "BBOX":
+            bpy.ops.object.align(bb_quality=self.highquality, align_mode=self.alignmode, relative_to=self.relativeto, align_axis=axisset)
+        elif self.mode == "SIMPLE":
+            for obj in selection:
+                if self.axisx:
+                    obj.location[0] = active.location[0]
+                if self.axisy:
+                    obj.location[1] = active.location[1]
+                if self.axisz:
+                    obj.location[2] = active.location[2]

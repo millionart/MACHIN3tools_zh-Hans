@@ -56,7 +56,7 @@ def hide_all(string):
 
 
 def unhide_all(string="OBJECT"):
-    if string == "OJBECT":
+    if string == "OBJECT":
         for obj in bpy.data.objects:
             obj.hide = False
     elif string == "MESH":
