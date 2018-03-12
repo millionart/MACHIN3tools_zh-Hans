@@ -580,7 +580,15 @@ def register_MACHIN3_keys(wm, keymaps):
     if m3.M3_prefs().activate_Focus:
         km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.focus", "F", "PRESS", ctrl=True)
+        setattr(kmi.properties, 'isolate', True)
         MACHIN3_keymaps.append((km, kmi))
+
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
+        kmi = km.keymap_items.new("machin3.focus", "F", "PRESS")
+        setattr(kmi.properties, 'isolate', False)
+        setattr(kmi.properties, 'mirror', True)
+        MACHIN3_keymaps.append((km, kmi))
+
 
     # THEME SWITCH
 

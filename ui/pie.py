@@ -1997,6 +1997,9 @@ class SwitchOrientation(bpy.types.Operator):
         elif self.orientation == 'LOCAL':
             bpy.context.space_data.transform_orientation=self.orientation
             bpy.context.space_data.show_manipulator = True
+        elif self.orientation == 'VIEW':
+            bpy.context.space_data.transform_orientation=self.orientation
+            bpy.context.space_data.show_manipulator = True
         elif self.orientation == 'SELECTION':
             bpy.ops.transform.create_orientation(use=True)
             bpy.context.space_data.show_manipulator = True
@@ -2043,6 +2046,8 @@ class PieOrientationAndPivot(Menu):
                 column.prop(bpy.context.scene.tool_settings, "proportional_edit_falloff")
         else:
             column.prop(bpy.context.scene.tool_settings, "proportional_edit")
+        icon = "PROP_ON" if bpy.context.space_data.transform_orientation == 'VIEW' else 'BLANK1'
+        column.operator("machin3.switch_orientation", text="View", icon=icon).orientation = 'VIEW'
 
         # 7 - TOP - LEFT
         column = pie.column()
@@ -2152,7 +2157,7 @@ class PieObjectShading(Menu):
             column.separator()
             row = column.row(align=True)
             row.operator("machin3.ao_preset", text="AO Toggle").strength = 0
-            row.operator("machin3.ao_preset", text="1").strength = 1
+            row.operator("machin3.ao_preset", text="1.5").strength = 1.5
             row.operator("machin3.ao_preset", text="3.5").strength = 3.5
             if fx_settings.use_ssao:
                 ssao_settings = fx_settings.ssao
