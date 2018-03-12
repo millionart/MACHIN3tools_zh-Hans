@@ -18,6 +18,7 @@ class Focus(bpy.types.Operator):
                 if self.mirror:
                     self.toggle_mirror()
                 bpy.ops.view3d.localview()
+                # bpy.ops.view3d.localview('INVOKE_DEFAULT')  # this has the animation, but won't do the zoomout
 
                 for z in range(self.zoomout):
                     bpy.ops.view3d.zoom(delta=-1)
@@ -27,7 +28,8 @@ class Focus(bpy.types.Operator):
                 m3.select_all("OBJECT")
                 if self.mirror:
                     self.toggle_mirror()
-                bpy.ops.view3d.localview()
+                # bpy.ops.view3d.localvie()
+                bpy.ops.view3d.localview('INVOKE_DEFAULT')
         else:
             mode = m3.get_mode()
 
@@ -45,7 +47,7 @@ class Focus(bpy.types.Operator):
                 if len(sel) == 1 and self.mirror:
                     self.toggle_mirror()
             else:
-                bpy.ops.view3d.view_selected(use_all_regions=False)
+                bpy.ops.view3d.view_selected('INVOKE_DEFAULT', use_all_regions=False)
 
         return {'FINISHED'}
 

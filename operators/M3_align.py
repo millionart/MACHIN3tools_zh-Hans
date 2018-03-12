@@ -29,6 +29,9 @@ class Align(bpy.types.Operator):
     axisy = BoolProperty(name="Y", default=False)
     axisz = BoolProperty(name="Z", default=False)
 
+    ignoremirror = BoolProperty(name="Ignore Mirror", default=False)
+    rotation = BoolProperty(name="Align Rotation", default=False)
+
     def draw(self, context):
         layout = self.layout
 
@@ -49,6 +52,9 @@ class Align(bpy.types.Operator):
             row.prop(self, "axisy", toggle=True)
             row.prop(self, "axisz", toggle=True)
 
+            column.prop(self, "ignoremirror")
+            column.prop(self, "rotation")
+
     def execute(self, context):
         sel = m3.selected_objects()
         active = m3.get_active()
@@ -57,7 +63,13 @@ class Align(bpy.types.Operator):
         if active.type == "ARMATURE":
             self.align_to_bone(active, bpy.context.active_bone, sel)
         else:
+            if self.ignoremirror:
+                self.toggle_mirror()
+
             self.align(active, sel)
+
+            if self.ignoremirror:
+                self.toggle_mirror()
 
         return {'FINISHED'}
 
@@ -95,6 +107,12 @@ class Align(bpy.types.Operator):
                 vids = [vid.index for vid in obj.data.vertices]
                 bonevgroup.add(vids, 1, "REPLACE")
 
+    def toggle_mirror(self):
+        for obj in bpy.context.selected_objects:
+            for mod in obj.modifiers:
+                if mod.type == "MIRROR":
+                    mod.show_viewport = not mod.show_viewport
+
     def align(self, active, selection):
         axisset = set()
 
@@ -106,3 +124,7 @@ class Align(bpy.types.Operator):
             axisset.add("Z")
 
         bpy.ops.object.align(bb_quality=self.highquality, align_mode=self.alignmode, relative_to=self.relativeto, align_axis=axisset)
+
+        if self.rotation:
+            # bpy.ops.transform.transform(mode='ALIGN', value=(0, 0, 0, 0), axis=(0, 0, 0), constraint_axis=(False, False, False), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=0.683013)
+            bpy.ops.transform.transform(mode='ALIGN')

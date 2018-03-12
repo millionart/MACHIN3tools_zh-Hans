@@ -2157,8 +2157,9 @@ class PieObjectShading(Menu):
             column.separator()
             row = column.row(align=True)
             row.operator("machin3.ao_preset", text="AO Toggle").strength = 0
-            row.operator("machin3.ao_preset", text="1.5").strength = 1.5
-            row.operator("machin3.ao_preset", text="3.5").strength = 3.5
+            row.operator("machin3.ao_preset", text="1").strength = 1.5
+            row.operator("machin3.ao_preset", text="2").strength = 2.5
+            row.operator("machin3.ao_preset", text="3").strength = 3.5
             if fx_settings.use_ssao:
                 ssao_settings = fx_settings.ssao
                 column.prop(ssao_settings, "distance_max")
