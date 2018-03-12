@@ -1,40 +1,51 @@
 import bpy
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, IntProperty
 from .. import M3utils as m3
 
 
 class Focus(bpy.types.Operator):
     bl_idname = "machin3.focus"
     bl_label = "MACHIN3: Focus"
-    bl_options = {'REGISTER', 'UNDO'}
 
     isolate = BoolProperty(name="Isolate (Local View)", default=False)
-    mirror = BoolProperty(name="Toggle Mirror", default=True)
-
-    def draw(self, context):
-        layout = self.layout
-        column = layout.column()
+    mirror = BoolProperty(name="Toggle Mirror", default=False)
+    zoomout = IntProperty(name="Zoom Out after Focus", default=0)
 
     def execute(self, context):
         if self.isolate:
             localview = self.get_localview()
             if not localview:  # entering focus mode(local view)
-                self.toggle_mirror()
+                if self.mirror:
+                    self.toggle_mirror()
                 bpy.ops.view3d.localview()
+
+                for z in range(self.zoomout):
+                    bpy.ops.view3d.zoom(delta=-1)
+
             else:  # leaving focus mode(local view)
+                m3.unhide_all("OBJECT")
                 m3.select_all("OBJECT")
-                self.toggle_mirror()
+                if self.mirror:
+                    self.toggle_mirror()
                 bpy.ops.view3d.localview()
         else:
-            sel = m3.selected_objects()
+            mode = m3.get_mode()
 
-            if len(sel) == 1 and self.mirror:
+            if mode == "OBJECT":
+                sel = m3.selected_objects()
+
+                if len(sel) == 1 and self.mirror:
+                        self.toggle_mirror()
+
+                bpy.ops.view3d.view_selected(use_all_regions=False)
+
+                for z in range(self.zoomout):
+                    bpy.ops.view3d.zoom(delta=-1)
+
+                if len(sel) == 1 and self.mirror:
                     self.toggle_mirror()
-
-            bpy.ops.view3d.view_selected(use_all_regions=False)
-
-            if len(sel) == 1 and self.mirror:
-                self.toggle_mirror()
+            else:
+                bpy.ops.view3d.view_selected(use_all_regions=False)
 
         return {'FINISHED'}
 

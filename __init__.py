@@ -581,12 +581,15 @@ def register_MACHIN3_keys(wm, keymaps):
         km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.focus", "F", "PRESS", ctrl=True)
         setattr(kmi.properties, 'isolate', True)
+        setattr(kmi.properties, 'mirror', True)
+        setattr(kmi.properties, 'zoomout', 2)
         MACHIN3_keymaps.append((km, kmi))
 
         km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
         kmi = km.keymap_items.new("machin3.focus", "F", "PRESS")
         setattr(kmi.properties, 'isolate', False)
         setattr(kmi.properties, 'mirror', True)
+        setattr(kmi.properties, 'zoomout', 2)
         MACHIN3_keymaps.append((km, kmi))
 
 
