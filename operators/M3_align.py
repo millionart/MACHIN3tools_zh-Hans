@@ -58,22 +58,23 @@ class Align(bpy.types.Operator):
             column = box.column()
             column.prop(self, "location")
 
-            row = column.row()
-            row.prop(self, "mode", expand=True)
-
             row = column.row(align=True)
             row.prop(self, "locaxisx", toggle=True)
             row.prop(self, "locaxisy", toggle=True)
             row.prop(self, "locaxisz", toggle=True)
 
+            row = column.row()
+            row.prop(self, "mode", expand=True)
+
             split = column.split()
             split.separator()
             col = split.column()
-            col.prop(self, "highquality")
-            col.prop(self, "ignoremirror")
 
             col.prop(self, "alignmode", text="")
             col.prop(self, "relativeto", text="")
+
+            col.prop(self, "highquality")
+            col.prop(self, "ignoremirror")
 
             box = layout.box()
             column = box.column()
@@ -153,7 +154,13 @@ class Align(bpy.types.Operator):
             locaxisset.add("Z")
 
         if self.rotation:  # NOTE: doing the rotation first is important for the bbox mode.
+            if active.rotation_mode != "XYZ":
+                active.rotation_mode = "XYZ"
+
             for obj in selection:
+                if obj.rotation_mode != "XYZ":
+                    obj.rotation_mode = "XYZ"
+
                 if self.rotaxisx:
                     obj.rotation_euler[0] = active.rotation_euler[0]
                 if self.rotaxisy:

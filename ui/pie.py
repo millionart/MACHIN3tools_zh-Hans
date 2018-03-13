@@ -2290,20 +2290,20 @@ class PieAlign(Menu):
     def draw(self, context):
         layout = self.layout
         pie = layout.menu_pie()
-        #4 - LEFT
+        # 4 - LEFT
         pie.operator("align.x", text="Align X", icon='TRIA_LEFT')
-        #6 - RIGHT
+        # 6 - RIGHT
         pie.operator("align.z", text="Align Z", icon='TRIA_DOWN')
-        #2 - BOTTOM
+        # 2 - BOTTOM
         pie.operator("align.y", text="Align Y", icon='PLUS')
-        #8 - TOP
+        # 8 - TOP
         pie.operator("align.2y0", text="Align To Y-0")
-        #7 - TOP - LEFT
+        # 7 - TOP - LEFT
         pie.operator("align.2x0", text="Align To X-0")
-        #9 - TOP - RIGHT
+        # 9 - TOP - RIGHT
         pie.operator("align.2z0", text="Align To Z-0")
-        #1 - BOTTOM - LEFT
-        #pie.menu("align.xyz")
+        # 1 - BOTTOM - LEFT
+        # pie.menu("align.xyz")
         box = pie.split().box().column()
         box.label("Align :")
         row = box.row(align=True)
@@ -2318,12 +2318,14 @@ class PieAlign(Menu):
         row.label("Z")
         row.operator("alignz.bottom", text="Neg")
         row.operator("alignz.top", text="Pos")
-        #3 - BOTTOM - RIGHT
-        box = pie.split().column()
-        row = box.row(align=True)
-        box.operator("mesh.vertex_align", icon='ALIGN', text="Align")
-        box.operator("retopo.space", icon='ALIGN', text="Distribute")
-        box.operator("mesh.vertex_inline", icon='ALIGN', text="Align & Distribute")
+        # 3 - BOTTOM - RIGHT
+        if m3.addon_check("rRMB"):
+            column = pie.column()
+            column.scale_y = 1.5
+            column.operator("object.ralign_orientation_to_selection")
+            column.operator("object.ralign_and_move_origin_to_selection")
+        else:
+            pie.separator()
 
 # Pie Delete - X
 class PieDelete(Menu):
