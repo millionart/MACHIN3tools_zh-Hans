@@ -67,22 +67,9 @@ class LoopMachine(bpy.types.Operator):
                         seldict[edge][vert]["loop"] = loop
                         loop.select = True
                     else:
-                        print("magic loop")
                         loop = self.magic_loop(bm, edge, vert, seldict[edge][vert]["connected"])
                         seldict[edge][vert]["loop"] = loop
                         loop.select = True
-
-                        # angle = self.check_angle(seldict[edge][vert]["connected"])
-                        # if angle < 180:
-                            # print("angle loop")
-                            # loop = self.angle_loop(bm, vert, seldict[edge][vert]["connected"])
-                            # seldict[edge][vert]["loop"] = loop
-                            # loop.select = True
-                            # print("magic loop")
-                            # loop = self.magic_loop(bm, edge, vert, seldict[edge][vert]["connected"])
-                        # else:
-                            # print("magic loop")
-                            # loop = self.magic_loop(bm, edge, vert, seldict[edge][vert]["connected"])
                 else:
                     print("undecided")
 
@@ -108,6 +95,13 @@ class LoopMachine(bpy.types.Operator):
         for loop in vert.link_loops:
             if loop.face not in edgefaces:
                 face = loop.face
+
+        if len(edgefaces) == 1:
+            faceedges = edgefaces[0].edges
+            for e in connected:
+                if e not in faceedges:
+                    print("magic loop, open bounds")
+                    return e
 
         # the 2 faces bordering the center edge
         f1 = edgefaces[0]
@@ -162,6 +156,7 @@ class LoopMachine(bpy.types.Operator):
 
         loop = bm.edges.new((vert, crossv))
 
+        print("magic loop")
         return loop
 
     def angle_loop(self, bm, vert, connected):
