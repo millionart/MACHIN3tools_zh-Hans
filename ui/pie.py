@@ -2151,8 +2151,8 @@ class PieObjectShading(Menu):
         #2 - BOTTOM
         column = pie.column()
 
-        column.prop(view, "use_matcap", text="Matcaps")
         column.prop(view, "show_only_render")
+        column.prop(view, "use_matcap", text="Matcaps")
         if view.viewport_shade not in {'BOUNDBOX', 'WIREFRAME'}:
             column.separator()
             row = column.row(align=True)
