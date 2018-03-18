@@ -12,7 +12,7 @@ class Fuse(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     segments = IntProperty(name="Segments", default=6, min=0, max=30)
-    strength = FloatProperty(name="Strength", default=1, min=0, max=2)
+    strength = FloatProperty(name="Strength", default=1, min=0.01, max=2)
 
     cyclic = BoolProperty(name="Cyclic", default=False)
     # capholes = BoolProperty(name="Cap Holes", default=False)
@@ -38,17 +38,17 @@ class Fuse(bpy.types.Operator):
         # get ring edges, create dict adn find/create rails
         if edges:
             seldict = self.init_dict(edges)
-            self.create_rails(bm, seldict)
+            self.create_rails(bm, seldict, debug=False)
 
-            self.create_handles(bm, seldict)
+            for v in bm.verts:
+                v.select = False
+
+            self.create_handles(bm, seldict, debug=False)
             # self.debug_dict(seldict)
             splineedges = self.create_splines(bm, seldict)
 
-            # remove originally selected face, see https://blender.stackexchange.com/a/1542/33919 for context enum details
-            # 1: DEL_VERTS, 2: DEL_EDGES, 3: DEL_ONLYFACES, 4: DEL_EDGESFACES, 5: DEL_FACES, 6: DEL_ALL, 7: DEL_ONLYTAGGED};
-            if self.segments > 0 and self.strength > 0:
-                faces = [f for f in bm.faces if f.index in selfaceids]
-                bmesh.ops.delete(bm, geom=faces, context=5)
+            # remove edges created by magic loop and the originally selected faces
+            self.clean_up(bm, seldict, selfaceids)
 
             if splineedges:
                 # NOTE: this op actually returns the faces it creates!
@@ -57,13 +57,33 @@ class Fuse(bpy.types.Operator):
         bm.to_mesh(mesh)
 
         m3.set_mode("EDIT")
+        # m3.set_mode("FACE")
+        # m3.set_mode("EDGE")
+        # m3.set_mode("VERT")
 
-        # m3.select_all("MESH")
-        # bpy.ops.mesh.remove_doubles()
-        # bpy.ops.mesh.normals_make_consistent(inside=False)
-        # m3.unselect_all("MESH")
+        m3.select_all("MESH")
+        bpy.ops.mesh.remove_doubles()
+        bpy.ops.mesh.normals_make_consistent(inside=False)
+        m3.unselect_all("MESH")
 
         return {'FINISHED'}
+
+    def clean_up(self, bm, seldict, selfaceids):
+        # remove the magic loops
+        magicloops = []
+        for edge in seldict:
+            for vert in seldict[edge]:
+                if seldict[edge][vert]["magicloop"]:
+                    magicloops.append(seldict[edge][vert]["loop"])
+
+        # 1: DEL_VERTS, 2: DEL_EDGES, 3: DEL_ONLYFACES, 4: DEL_EDGESFACES, 5: DEL_FACES, 6: DEL_ALL, 7: DEL_ONLYTAGGED};
+        # see https://blender.stackexchange.com/a/1542/33919 for context enum details
+        bmesh.ops.delete(bm, geom=magicloops, context=2)
+
+        # remove originally selected faces
+        if self.segments > 0:
+            faces = [f for f in bm.faces if f.index in selfaceids]
+            bmesh.ops.delete(bm, geom=faces, context=5)
 
     def create_splines(self, bm, seldict):
         splineedges = []
@@ -85,7 +105,7 @@ class Fuse(bpy.types.Operator):
                 splineverts.append(v)
             splineverts.append(verts[1])
 
-            if self.segments > 0 and self.strength > 0:
+            if self.segments > 0:
                 for idx, vert in enumerate(splineverts):
                     if idx == len(splineverts) - 1:
                         break
@@ -105,27 +125,87 @@ class Fuse(bpy.types.Operator):
 
             # vA1, vA2 = loops[0].verts
             # vB1, vB2 = loops[1].verts
-            vA1 = verts[0]
-            vA2 = loops[0].other_vert(vA1)
+            end1 = verts[0]
+            loopend1 = loops[0].other_vert(end1)
 
-            vB1 = verts[1]
-            vB2 = loops[1].other_vert(vB1)
+            end2 = verts[1]
+            loopend2 = loops[1].other_vert(end2)
 
             # tuple, the first item is the handle for the first edge, the second for the other
-            h = mathutils.geometry.intersect_line_line(vA1.co, vA2.co, vB1.co, vB2.co)
+            h = mathutils.geometry.intersect_line_line(end1.co, loopend1.co, end2.co, loopend2.co)
 
             if h is None:  # if the edge and both loop egdes are on the same line
-                middle = vA1.co + (vB1.co - vA1.co) * 0.5
+                middle = get_center_between_verts(end1, end2)
                 h = (middle, middle)
+                if debug:
+                    print("handles could not be determined via line-line instersection, falling back to center handle")
 
             # take the handles and and add in the strength
-            handle1 = verts[0].co + ((h[0] - verts[0].co) * self.strength)
-            handle2 = verts[1].co + ((h[1] - verts[1].co) * self.strength)
+            handle1 = end1.co + ((h[0] - end1.co) * self.strength)
+            handle2 = end2.co + ((h[1] - end2.co) * self.strength)
+
+            # check if the handle is going into the right direction, which is the direction of the loop edges, towards the center edge
+            dir1 = end1.co - loopend1.co
+            dir2 = end2.co - loopend2.co
+
+            handledir1 = handle1 - end1.co
+            handledir2 = handle2 - end2.co
+
+            dot1 = dir1.dot(handledir1)
+            dot2 = dir2.dot(handledir2)
+
+            # if necessary, create a new handle with the same length, but the propper direction
+            dir1 = end1.co - loopend1.co
+            if dot1 < 0:
+                handle1 = end1.co + dir1.normalized() * handledir1.length
+                handledir1 = handle1 - end1.co
+
+                # if debug:
+                    # print("flipped handle direction")
+
+            if dot2 < 0:
+                handle2 = end2.co + dir2.normalized() * handledir2.length
+                handledir2 = handle2 - end2.co
+                # if debug:
+                    # print("flipped handle direction")
+
+            # check handle length and correct if necessary
+            # the length ratio should never be above 1 for a strength of 1, in ideal cases it sits around 0.7 if the surface angle is 90 degrees
+            # it looks like the ideal ratio is strength / dirangle (radians)
+            # a good max ratio seems to be ideal ratio + strength
+
+            enddist = get_distance_between_points(end1.co, end2.co)
+
+            dist1 = get_distance_between_points(end1.co, handle1)
+            dist2 = get_distance_between_points(end2.co, handle2)
+
+            ratio1 = dist1 / enddist
+            ratio2 = dist2 / enddist
+
+            dirangle = handledir1.angle(handledir2)
+
+            ratioideal = self.strength / dirangle
+            ratiomax = self.strength + ratioideal
+
+            if ratio1 > ratiomax or ratio2 > ratiomax:
+                if debug:
+                    print("surface angle:", math.degrees(dirangle), dirangle)
+                    print("ideal ratio:", ratioideal, "max ratio:", ratiomax)
+
+                if ratio1 > ratiomax:
+                    handle1 = end1.co + dir1.normalized() * enddist * ratioideal * self.strength
+                    if debug:
+                        print("actual ratio:", ratio1)
+                        print("corrected handle overshoot")
+
+                if ratio2 > ratiomax:
+                    handle2 = end2.co + dir2.normalized() * enddist * ratioideal * self.strength
+                    if debug:
+                        print("actual ratio:", ratio2)
+                        print("corrected handle overshoot")
 
             seldict[edge][verts[0]]["handle"] = handle1
             seldict[edge][verts[1]]["handle"] = handle2
-
-            debug = True
 
             if debug:
                 v1 = bm.verts.new()
@@ -134,12 +214,8 @@ class Fuse(bpy.types.Operator):
                 v2 = bm.verts.new()
                 v2.co = handle2
 
-                h1 = bm.edges.new((vA1, v1))
-                h1.select = True
-
-                h2 = bm.edges.new((vB1, v2))
-                h2.select = True
-
+                h1 = bm.edges.new((end1, v1))
+                h2 = bm.edges.new((end2, v2))
 
     def get_ring_edges(self, mesh):
         selfaceids = [f.index for f in mesh.polygons if f.select]
@@ -165,24 +241,23 @@ class Fuse(bpy.types.Operator):
 
         return ringedgeids, selfaceids
 
-    def create_rails(self, bm, seldict):
+    def create_rails(self, bm, seldict, debug=False):
         # find/create loop edges
         for edge in seldict:
             for vert in seldict[edge]:
                 if len(seldict[edge][vert]["connected"]) >= 3:
-                    loop = self.simple_loop(seldict, edge, vert)
-                    seldict[edge][vert]["loop"] = loop
-                    # loop.select = True
+                    loop = self.simple_loop(seldict, edge, vert, debug=debug)
                 elif len(seldict[edge][vert]["connected"]) == 2:
                     ngon = self.check_ngon(edge)
                     if ngon:
-                        loop = self.ngon_loop(ngon, edge, vert)
-                        seldict[edge][vert]["loop"] = loop
-                        # loop.select = True
+                        loop = self.ngon_loop(ngon, edge, vert, debug=debug)
                     else:
-                        loop = self.magic_loop(bm, edge, vert, seldict[edge][vert]["connected"])
-                        seldict[edge][vert]["loop"] = loop
-                        # loop.select = True
+                        loop = self.magic_loop(bm, edge, vert, seldict[edge][vert]["connected"], debug=debug)
+                        seldict[edge][vert]["magicloop"] = True
+
+                seldict[edge][vert]["loop"] = loop
+                if debug:
+                    loop.select = True
 
     def init_dict(self, edges):
         # initialize dictionary
@@ -193,6 +268,7 @@ class Fuse(bpy.types.Operator):
                 seldict[e][vert] = {}
                 seldict[e][vert]["connected"] = []
                 seldict[e][vert]["loop"] = None
+                seldict[e][vert]["magicloop"] = False
                 seldict[e][vert]["handle"] = None
                 for edge in vert.link_edges:
                     if edge != e and edge not in seldict[e][vert]["connected"]:
@@ -278,7 +354,7 @@ class Fuse(bpy.types.Operator):
         vert2 = connected[1].other_vert(vert)
 
         v = bm.verts.new()
-        v.co = vert1.co + (vert2.co - vert1.co) * 0.5
+        v.co = get_center_between_verts(vert1, vert2)
 
         e = bm.edges.new((vert, v))
 
@@ -343,6 +419,7 @@ class Fuse(bpy.types.Operator):
                     for e in seldict[edge][vert]["connected"]:
                         print("   » edge:", e)
                 print("   » loop:", seldict[edge][vert]["loop"])
+                print("   » magic loop:", seldict[edge][vert]["magicloop"])
                 print("   » handle:", seldict[edge][vert]["handle"])
 
         print()
@@ -960,6 +1037,10 @@ def get_rails(allverts):
     return rails
 
 
+def get_center_between_verts(vert1, vert2):
+    return vert1.co + (vert2.co - vert1.co) * 0.5
+
+
 def get_angle_between_edges(edge1, edge2, radians=True):
     # check if edges share a vert, in which case we can properly set up the vectors and get a reliable angle
     # otherwise and angle could be either 2 or 178 depending on vert ids/order
@@ -979,6 +1060,10 @@ def get_angle_between_edges(edge1, edge2, radians=True):
         return vector1.angle(vector2)
     else:
         return math.degrees(vector1.angle(vector2))
+
+
+def get_distance_between_points(point1, point2):
+    return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2 + (point1[2] - point2[2]) ** 2)
 
 
 def get_distance_between_verts(vert1, vert2, getvectorlength=True):
