@@ -6,6 +6,348 @@ import math
 import mathutils
 
 
+class Fuse(bpy.types.Operator):
+    bl_idname = "machin3.fuse"
+    bl_label = "MACHIN3: Fuse"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    segments = IntProperty(name="Segments", default=6, min=0, max=30)
+    strength = FloatProperty(name="Strength", default=1, min=0, max=2)
+
+    cyclic = BoolProperty(name="Cyclic", default=False)
+    # capholes = BoolProperty(name="Cap Holes", default=False)
+    # captolerance = FloatProperty(name="Tolerance", default=0.01, min=0, max=0.2, precision=4, step=0.01)
+    # flip = BoolProperty(name="Flip", default=False)
+
+    def execute(self, context):
+        active = m3.get_active()
+        mesh = active.data
+
+        m3.set_mode("OBJECT")
+
+        # get ring edges from polygon selection
+        ringedgeids, selfaceids = self.get_ring_edges(mesh)
+
+        # create bmesh
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bm.normal_update()
+
+        edges = [e for e in bm.edges if e.index in ringedgeids]
+
+        # get ring edges, create dict adn find/create rails
+        if edges:
+            seldict = self.init_dict(edges)
+            self.create_rails(bm, seldict)
+
+            self.create_handles(bm, seldict)
+            # self.debug_dict(seldict)
+            splineedges = self.create_splines(bm, seldict)
+
+            # remove originally selected face, see https://blender.stackexchange.com/a/1542/33919 for context enum details
+            # 1: DEL_VERTS, 2: DEL_EDGES, 3: DEL_ONLYFACES, 4: DEL_EDGESFACES, 5: DEL_FACES, 6: DEL_ALL, 7: DEL_ONLYTAGGED};
+            if self.segments > 0 and self.strength > 0:
+                faces = [f for f in bm.faces if f.index in selfaceids]
+                bmesh.ops.delete(bm, geom=faces, context=5)
+
+            if splineedges:
+                # NOTE: this op actually returns the faces it creates!
+                bmesh.ops.bridge_loops(bm, edges=splineedges, use_cyclic=self.cyclic)
+
+        bm.to_mesh(mesh)
+
+        m3.set_mode("EDIT")
+
+        # m3.select_all("MESH")
+        # bpy.ops.mesh.remove_doubles()
+        # bpy.ops.mesh.normals_make_consistent(inside=False)
+        # m3.unselect_all("MESH")
+
+        return {'FINISHED'}
+
+    def create_splines(self, bm, seldict):
+        splineedges = []
+
+        for edge in seldict:
+            verts = []
+            handles= []
+            for vert in seldict[edge]:
+                verts.append(vert)
+                handles.append(seldict[edge][vert]["handle"])
+
+            bezierverts = mathutils.geometry.interpolate_bezier(verts[0].co, handles[0], handles[1], verts[1].co, self.segments + 2)[1:-1]
+
+            splineverts = []
+            splineverts.append(verts[0])
+            for vert in bezierverts:
+                v = bm.verts.new()
+                v.co = vert
+                splineverts.append(v)
+            splineverts.append(verts[1])
+
+            if self.segments > 0 and self.strength > 0:
+                for idx, vert in enumerate(splineverts):
+                    if idx == len(splineverts) - 1:
+                        break
+                    else:
+                        e = bm.edges.new((vert, splineverts[idx + 1]))
+                        splineedges.append(e)
+
+        return splineedges
+
+    def create_handles(self, bm, seldict, debug=False):
+        for edge in seldict:
+            loops = []
+            verts = []
+            for vert in seldict[edge]:
+                verts.append(vert)
+                loops.append(seldict[edge][vert]["loop"])
+
+            # vA1, vA2 = loops[0].verts
+            # vB1, vB2 = loops[1].verts
+            vA1 = verts[0]
+            vA2 = loops[0].other_vert(vA1)
+
+            vB1 = verts[1]
+            vB2 = loops[1].other_vert(vB1)
+
+            # tuple, the first item is the handle for the first edge, the second for the other
+            h = mathutils.geometry.intersect_line_line(vA1.co, vA2.co, vB1.co, vB2.co)
+
+            if h is None:  # if the edge and both loop egdes are on the same line
+                middle = vA1.co + (vB1.co - vA1.co) * 0.5
+                h = (middle, middle)
+
+            # take the handles and and add in the strength
+            handle1 = verts[0].co + ((h[0] - verts[0].co) * self.strength)
+            handle2 = verts[1].co + ((h[1] - verts[1].co) * self.strength)
+
+            seldict[edge][verts[0]]["handle"] = handle1
+            seldict[edge][verts[1]]["handle"] = handle2
+
+            debug = True
+
+            if debug:
+                v1 = bm.verts.new()
+                v1.co = handle1
+
+                v2 = bm.verts.new()
+                v2.co = handle2
+
+                h1 = bm.edges.new((vA1, v1))
+                h1.select = True
+
+                h2 = bm.edges.new((vB1, v2))
+                h2.select = True
+
+
+    def get_ring_edges(self, mesh):
+        selfaceids = [f.index for f in mesh.polygons if f.select]
+        seledgeids = [e.index for e in mesh.edges if e.select]
+
+        m3.set_mode("EDIT")
+        bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='EDGE')
+        bpy.ops.mesh.loop_multi_select(ring=True)
+        m3.set_mode("OBJECT")
+
+        ringedgeids = [e.index for e in mesh.edges if e.select and e.index in seledgeids]
+
+        # select only the ring edges
+        # for edge in mesh.edges:
+            # if edge.index in ringedgeids:
+                # edge.select = True
+            # else:
+                # edge.select = False
+
+        # deselect all
+        for edge in mesh.edges:
+                edge.select = False
+
+        return ringedgeids, selfaceids
+
+    def create_rails(self, bm, seldict):
+        # find/create loop edges
+        for edge in seldict:
+            for vert in seldict[edge]:
+                if len(seldict[edge][vert]["connected"]) >= 3:
+                    loop = self.simple_loop(seldict, edge, vert)
+                    seldict[edge][vert]["loop"] = loop
+                    # loop.select = True
+                elif len(seldict[edge][vert]["connected"]) == 2:
+                    ngon = self.check_ngon(edge)
+                    if ngon:
+                        loop = self.ngon_loop(ngon, edge, vert)
+                        seldict[edge][vert]["loop"] = loop
+                        # loop.select = True
+                    else:
+                        loop = self.magic_loop(bm, edge, vert, seldict[edge][vert]["connected"])
+                        seldict[edge][vert]["loop"] = loop
+                        # loop.select = True
+
+    def init_dict(self, edges):
+        # initialize dictionary
+        seldict = {}
+        for e in edges:
+            seldict[e] = {}
+            for vert in e.verts:
+                seldict[e][vert] = {}
+                seldict[e][vert]["connected"] = []
+                seldict[e][vert]["loop"] = None
+                seldict[e][vert]["handle"] = None
+                for edge in vert.link_edges:
+                    if edge != e and edge not in seldict[e][vert]["connected"]:
+                        seldict[e][vert]["connected"].append(edge)
+        return seldict
+
+    def magic_loop(self, bm, edge, vert, connected, debug=False):
+        # get "the face", that's not bordering the center edge
+        edgefaces = [f for f in edge.link_faces]
+
+        for loop in vert.link_loops:
+            if loop.face not in edgefaces:
+                face = loop.face
+
+        # open bounds edge case
+        if len(edgefaces) == 1:
+            faceedges = edgefaces[0].edges
+            for e in connected:
+                if e not in faceedges:
+                    if debug:
+                        print("magic loop, open bounds")
+                    return e
+
+        # the 2 faces bordering the center edge
+        f1 = edgefaces[0]
+        f2 = edgefaces[1]
+
+        # face median centers
+        m1co = f1.calc_center_median()  # NOTE: there's also calc_center_median_weighted()
+        m2co = f2.calc_center_median()
+
+        if debug:
+            m1 = bm.verts.new()
+            m1.co = m1co
+
+            m2 = bm.verts.new()
+            m2.co = m2co
+
+        # points where face normals intersect "the face"
+        i1co = mathutils.geometry.intersect_line_plane(m1co, m1co + f1.normal, vert.co, face.normal)
+        i2co = mathutils.geometry.intersect_line_plane(m2co, m2co + f2.normal, vert.co, face.normal)
+
+        if debug:
+            i1 = bm.verts.new()
+            i1.co = i1co
+
+            i2 = bm.verts.new()
+            i2.co = i2co
+
+            i1edge = bm.edges.new((m1, i1))
+            i2edge = bm.edges.new((m2, i2))
+
+        # projecting the intersection points across the centeredge endpoint vert, "the vert"
+        crossv1co = vert.co + (vert.co - i1co)
+        crossv2co = vert.co + (vert.co - i2co)
+
+        if debug:
+            crossv1 = bm.verts.new()
+            crossv1.co = crossv1co
+
+            crossv2 = bm.verts.new()
+            crossv2.co = crossv2co
+
+            cross1edge = bm.edges.new((crossv1, i1))
+            cross2edge = bm.edges.new((crossv2, i2))
+
+            crossedge = bm.edges.new((crossv1, crossv2))
+
+        # point orthogonal to the crossedge in the direction of "the vert"( = the closest point on that vector to "the vert")
+        crossvco, distance = mathutils.geometry.intersect_point_line(vert.co, crossv1co, crossv2co)
+
+        crossv = bm.verts.new()
+        crossv.co = crossvco
+
+        loop = bm.edges.new((vert, crossv))
+
+        if debug:
+            print("magic loop")
+        return loop
+
+    def angle_loop(self, bm, vert, connected, debug=False):
+        vert1 = connected[0].other_vert(vert)
+        vert2 = connected[1].other_vert(vert)
+
+        v = bm.verts.new()
+        v.co = vert1.co + (vert2.co - vert1.co) * 0.5
+
+        e = bm.edges.new((vert, v))
+
+        if debug:
+            print("angle loop")
+        return e
+
+    def check_angle(self, edges):
+        angle = get_angle_between_edges(edges[0], edges[1], radians=False)
+        return angle
+
+    def ngon_loop(self, ngon, edge, vert, debug=False):
+        for e in ngon.edges:
+            if e != edge and vert in e.verts:
+                if debug:
+                    print("ngon loop")
+                return e
+
+    def check_ngon(self, edge):
+        for f in edge.link_faces:
+            if len(f.verts) > 4:
+                return f
+        return False
+
+    def simple_loop(self, seldict, edge, vert, debug=False):
+        connected = seldict[edge][vert]["connected"]
+
+        # exclude the edges that share a face with the selected edge
+        exclude = []
+        for loop in edge.link_loops:
+            l1 = loop.link_loop_next
+            l2 = loop.link_loop_prev
+
+            if l1.edge in connected:
+                exclude.append(l1.edge)
+            if l2.edge in connected:
+                exclude.append(l2.edge)
+
+        edges = list(set(connected) - set(exclude))
+
+        if len(edges) == 1:  # standard behaviour
+            if debug:
+                print("simple loop")
+            return edges[0]
+        else:  # take the edge with the biggest angle  to the center edge
+            angle = 0
+            for e in edges:
+                a = get_angle_between_edges(edge, e, radians=False)
+                if a > angle:
+                    angle = a
+                    loop = e
+            if debug:
+                print("simple loop, biggest angle")
+            return loop
+
+    def debug_dict(self, seldict, showedges=False):
+        for edge in seldict:
+            print("edge:", edge)
+            for vert in seldict[edge]:
+                print(" » vert:", vert)
+                if showedges:
+                    for e in seldict[edge][vert]["connected"]:
+                        print("   » edge:", e)
+                print("   » loop:", seldict[edge][vert]["loop"])
+                print("   » handle:", seldict[edge][vert]["handle"])
+
+        print()
+
+
 class LoopMachine(bpy.types.Operator):
     bl_idname = "machin3.loop_machine"
     bl_label = "MACHIN3: Loop Machine"
@@ -21,19 +363,16 @@ class LoopMachine(bpy.types.Operator):
         bm.from_mesh(mesh)
         bm.normal_update()
 
-        bVerts = bm.verts
+        # bVerts = bm.verts
         bEdges = bm.edges
-        bFaces = bm.faces
+        # bFaces = bm.faces
 
         # verts = [v for v in bVerts if v.select]
         edges = [e for e in bEdges if e.select]
         # faces = [f for f in bFaces if f.select]
 
-        m3.clear()
-
         # initialize dictionary
         seldict = {}
-        # for e in edges[0:1]:
         for e in edges:
             seldict[e] = {}
             for vert in e.verts:
@@ -44,16 +383,7 @@ class LoopMachine(bpy.types.Operator):
                     if edge != e and edge not in seldict[e][vert]["connected"]:
                         seldict[e][vert]["connected"].append(edge)
 
-        for edge in seldict:
-            print("edge:", edge)
-            for vert in seldict[edge]:
-                print(" » vert:", vert)
-                for e in seldict[edge][vert]["connected"]:
-                    print("   » edge:", e)
-                print("   » loop:", seldict[edge][vert]["loop"])
-
-        print()
-
+        # find/create loop edges
         for edge in seldict:
             for vert in seldict[edge]:
                 if len(seldict[edge][vert]["connected"]) >= 3:
@@ -70,17 +400,8 @@ class LoopMachine(bpy.types.Operator):
                         loop = self.magic_loop(bm, edge, vert, seldict[edge][vert]["connected"])
                         seldict[edge][vert]["loop"] = loop
                         loop.select = True
-                else:
-                    print("undecided")
 
-        for edge in seldict:
-            print("edge:", edge)
-            for vert in seldict[edge]:
-                print(" » vert:", vert)
-                print("   » edges:")
-                for e in seldict[edge][vert]["connected"]:
-                    print("     »", e)
-                print("   » loop:", seldict[edge][vert]["loop"])
+        self.debug_dict(seldict)
 
         bm.to_mesh(mesh)
 
@@ -100,7 +421,8 @@ class LoopMachine(bpy.types.Operator):
             faceedges = edgefaces[0].edges
             for e in connected:
                 if e not in faceedges:
-                    print("magic loop, open bounds")
+                    if debug:
+                        print("magic loop, open bounds")
                     return e
 
         # the 2 faces bordering the center edge
@@ -156,10 +478,11 @@ class LoopMachine(bpy.types.Operator):
 
         loop = bm.edges.new((vert, crossv))
 
-        print("magic loop")
+        if debug:
+            print("magic loop")
         return loop
 
-    def angle_loop(self, bm, vert, connected):
+    def angle_loop(self, bm, vert, connected, debug=False):
         vert1 = connected[0].other_vert(vert)
         vert2 = connected[1].other_vert(vert)
 
@@ -168,16 +491,19 @@ class LoopMachine(bpy.types.Operator):
 
         e = bm.edges.new((vert, v))
 
+        if debug:
+            print("angle loop")
         return e
 
     def check_angle(self, edges):
         angle = get_angle_between_edges(edges[0], edges[1], radians=False)
         return angle
 
-    def ngon_loop(self, ngon, edge, vert):
+    def ngon_loop(self, ngon, edge, vert, debug=False):
         for e in ngon.edges:
             if e != edge and vert in e.verts:
-                print("ngon loop")
+                if debug:
+                    print("ngon loop")
                 return e
 
     def check_ngon(self, edge):
@@ -186,7 +512,7 @@ class LoopMachine(bpy.types.Operator):
                 return f
         return False
 
-    def simple_loop(self, seldict, edge, vert):
+    def simple_loop(self, seldict, edge, vert, debug=False):
         connected = seldict[edge][vert]["connected"]
 
         # exclude the edges that share a face with the selected edge
@@ -203,7 +529,8 @@ class LoopMachine(bpy.types.Operator):
         edges = list(set(connected) - set(exclude))
 
         if len(edges) == 1:  # standard behaviour
-            print("simple loop")
+            if debug:
+                print("simple loop")
             return edges[0]
         else:  # take the edge with the biggest angle  to the center edge
             angle = 0
@@ -212,8 +539,21 @@ class LoopMachine(bpy.types.Operator):
                 if a > angle:
                     angle = a
                     loop = e
-            print("simple loop, biggest angle")
+            if debug:
+                print("simple loop, biggest angle")
             return loop
+
+    def debug_dict(self, seldict, showedges=False):
+        for edge in seldict:
+            print("edge:", edge)
+            for vert in seldict[edge]:
+                print(" » vert:", vert)
+                if showedges:
+                    for e in seldict[edge][vert]["connected"]:
+                        print("   » edge:", e)
+                print("   » loop:", seldict[edge][vert]["loop"])
+
+        print()
 
 
 class LoopMan(bpy.types.Operator):
