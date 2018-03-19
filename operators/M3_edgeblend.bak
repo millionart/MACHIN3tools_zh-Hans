@@ -5,11 +5,139 @@ from .. import M3utils as m3
 import math
 import mathutils
 
-# TODO: get the initial outer boder edges and determine cyclicity by doing it
+
+# TODO: make it work if the end verts have 3 connecting verts, in which case you use the simple loop method to find the remote verts
+
+
+class Unfuck(bpy.types.Operator):
+    bl_idname = "machin3.unfuck"
+    bl_label = "MACHIN3: Unf*ck"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    width = FloatProperty(name="Width", default=1, min=0.01, step=0.1)
+    tension = FloatProperty(name="Tension", default=1, min=0.01, max=2, step=0.1)
+
+    def execute(self, context):
+        active = m3.get_active()
+        mesh = active.data
+
+        # debug
+        # bpy.app.debug = True
+        # mesh.show_extra_indices = True
+
+        m3.set_mode("OBJECT")
+
+        # create bmesh
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bm.normal_update()
+        bm.verts.ensure_lookup_table()
+
+        verts = [v for v in bm.verts if v.select]
+        mg = self.build_mesh_graph(bm)
+
+        # create vert sequence, starting at one of the ends
+        seq = self.get_vert_sequence(bm, mg, verts)
+
+        if len(seq) >= 3:
+            # get two pairs of (endpoint, remotepoint)
+            endpairs = self.get_end_verts(bm, mg, seq)
+            self.align_seq_to_bezier(bm, seq, endpairs, debug=False)
+
+        bm.to_mesh(mesh)
+        m3.set_mode("EDIT")
+
+        return {'FINISHED'}
+
+    def align_seq_to_bezier(self, bm, seq, endpairs, debug=False):
+        end1 = endpairs[0][0]
+        remote1 = endpairs[0][1]
+
+        end2 = endpairs[1][0]
+        remote2 = endpairs[1][1]
+
+        # create starting point of bezier, this is an offset of the end points in essence and is controlled by the width prop
+        start1co = remote1.co + (end1.co - remote1.co) / self.width
+        start2co = remote2.co + (end2.co - remote2.co) / self.width
+
+        if debug:
+            s1 = bm.verts.new()
+            s1.co = start1co
+
+            s2 = bm.verts.new()
+            s2.co = start2co
+
+        # create handle for bezier
+        h = mathutils.geometry.intersect_line_line(end1.co, remote1.co, end2.co, remote2.co)
+
+        handle1co = end1.co + (h[0] - end1.co) * self.tension
+        handle2co = end2.co + (h[1] - end2.co) * self.tension
+
+        if debug:
+            h1 = bm.verts.new()
+            h1.co = handle1co
+
+            h2 = bm.verts.new()
+            h2.co = handle2co
+
+        bezierverts = mathutils.geometry.interpolate_bezier(start1co, handle1co, handle2co, start2co, len(seq))
+
+        for idx, vert in enumerate(seq):
+            vert.co = bezierverts[idx]
+
+    def get_end_verts(self, bm, mg, seq):
+        end_pairs = []
+        # iterate over two pairs of (endpoint, firstpoint), where firstpoint if the first point in the seqence after the endpoint)
+        for end, first in [(seq[0], seq[1]), (seq[-1], seq[-2])]:
+            # get verts connected to the endpoint, that are not part of the sequence
+            remotecandidates = [bm.verts[idx] for idx, select in mg[end.index] if bm.verts[idx] not in seq]
+            # get the vert connected to the firstpoint, thats not selected(not part of the seq)
+            firstcon = [bm.verts[idx] for idx, select in mg[first.index] if select is False][0]
+            # get the verts connected to the firstcon
+            firstconcon = [bm.verts[idx] for idx, select in mg[firstcon.index] if bm.verts[idx] not in seq]
+            # check which of these is a remotecandiate, which is then exluded
+            remote = [r for r in remotecandidates if r not in firstconcon][0]
+            end_pairs.append((end, remote))
+
+        return end_pairs
+
+    def get_vert_sequence(self, bm, mg, verts):
+        seq = []
+        if len(verts) > 2:
+            # find the endpoints
+            end = [v for v in verts if sum([select for _, select in mg[v.index]]) == 1][0]
+            seq.append(end)
+
+            for v in verts:
+                if v == seq[-1]:
+                    # get connected vert, that is selected and not already in the sequence
+                    connected = [bm.verts[idx] for idx, select in mg[v.index] if select and bm.verts[idx] not in seq]
+                    if connected:
+                        seq.append(connected[0])
+                    else:
+                        break
+        return seq
+
+    def build_mesh_graph(self, bm):
+        # crete meshgraph {idx: [(idx, select), ...]}
+        mesh_graph = {}
+        for v in bm.verts:
+            mesh_graph[v.index] = []
+
+        for edge in bm.edges:
+            mesh_graph[edge.verts[0].index].append((edge.verts[1].index, edge.verts[1].select))
+            mesh_graph[edge.verts[1].index].append((edge.verts[0].index, edge.verts[0].select))
+
+        return mesh_graph
+
+
+# TODO: create mesh graph and find your ring selection that way
+# TODO: do your own surfacing
 # TODO: force magic loop option, even for simple loops?
 # TODO: tri based center vert movement?
 # TODO: auto select edges/polys if they weren't dissolved?
 # TODO: modal?
+# TODO: sharps
 
 
 class Fuse(bpy.types.Operator):
@@ -18,16 +146,16 @@ class Fuse(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     segments = IntProperty(name="Segments", default=6, min=0, max=30)
-    tension = FloatProperty(name="Tension", default=1, min=0.01, max=2)
+    tension = FloatProperty(name="Tension", default=1, min=0.01, max=2, step=0.1)
     # tension = FloatProperty(name="Tension", default=0.7, min=0.01, max=2)
 
     strict = BoolProperty(name="Strict", default=True)
 
     cyclic = BoolProperty(name="Cyclic", default=False)
 
-    capholes = BoolProperty(name="Cap Holes", default=True)
-    capdissolveangle = IntProperty(name="Angle", default=10)
+    capholes = BoolProperty(name="Cap", default=True)
     capdissolveforce = BoolProperty(name="Force Dissolve", default=True)
+    capdissolveangle = IntProperty(name="Angle", default=10)
 
     # captolerance = FloatProperty(name="Tolerance", default=0.01, min=0, max=0.2, precision=4, step=0.01)
     # flip = BoolProperty(name="Flip", default=False)
@@ -42,10 +170,10 @@ class Fuse(bpy.types.Operator):
 
         column.prop(self, "strict")
 
-        row = column.row()
+        row = column.row().split(percentage=0.2)
         row.prop(self, "capholes")
-        row.prop(self, "capdissolveangle")
         row.prop(self, "capdissolveforce")
+        row.prop(self, "capdissolveangle")
 
     def execute(self, context):
         active = m3.get_active()
@@ -146,7 +274,6 @@ class Fuse(bpy.types.Operator):
                     if angle2 < self.capdissolveangle:
                         bmesh.ops.dissolve_edges(bm, edges=[edge2])
 
-
     def clean_up(self, bm, seldict, selfaceids, magicloop=True, initialfaces=True):
         # remove the magic loops
         if magicloop:
@@ -197,6 +324,7 @@ class Fuse(bpy.types.Operator):
         return splineedges
 
     def create_handles(self, bm, seldict, debug=False):
+        debug = True
         for edge in seldict:
             loops = []
             verts = []
@@ -523,12 +651,21 @@ class Fuse(bpy.types.Operator):
         seledgeids = [e.index for e in mesh.edges if e.select]
 
         m3.set_mode("EDIT")
-
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='EDGE')
 
-        # TODO: you can easily get the outer boder edges here
-        # and if there arent't any, you know it#s cyclic
-        # the outer border edhes could be used to sort the ring edges, which may be needed for better surface generation
+        m3.set_mode("OBJECT")
+        inneredgeis = [e.index for e in mesh.edges if e.select]
+        m3.set_mode("EDIT")
+
+        if len(inneredgeis) == len(selfaceids):
+            self.cyclic = True
+        else:
+            self.cyclic = False
+
+        # NOTE: you could aslo get the outer border edges here
+        # they could then be used to sort the ring edges, which may be needed for better surface generation
+        # TODO: if those outer border edges, are sharp, they should also become sharp after the surface has been created
+
         bpy.ops.mesh.loop_multi_select(ring=True)
         m3.set_mode("OBJECT")
 
@@ -542,8 +679,8 @@ class Fuse(bpy.types.Operator):
                 # edge.select = False
 
         # deselect all
-        for edge in mesh.edges:
-                edge.select = False
+        # for edge in mesh.edges:
+                # edge.select = False
 
         return ringedgeids, selfaceids
 
