@@ -5,8 +5,11 @@ from .. import M3utils as m3
 import math
 import mathutils
 
-#TODO: force magic loop option, even for simple loops?
-#TODO: tri based center vert movement?
+# TODO: get the initial outer boder edges and determine cyclicity by doing it
+# TODO: force magic loop option, even for simple loops?
+# TODO: tri based center vert movement?
+# TODO: auto select edges/polys if they weren't dissolved?
+# TODO: modal?
 
 
 class Fuse(bpy.types.Operator):
@@ -21,9 +24,28 @@ class Fuse(bpy.types.Operator):
     strict = BoolProperty(name="Strict", default=True)
 
     cyclic = BoolProperty(name="Cyclic", default=False)
-    # capholes = BoolProperty(name="Cap Holes", default=False)
+
+    capholes = BoolProperty(name="Cap Holes", default=True)
+    capdissolveangle = IntProperty(name="Angle", default=10)
+    capdissolveforce = BoolProperty(name="Force Dissolve", default=True)
+
     # captolerance = FloatProperty(name="Tolerance", default=0.01, min=0, max=0.2, precision=4, step=0.01)
     # flip = BoolProperty(name="Flip", default=False)
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        column.prop(self, "segments")
+        column.prop(self, "tension")
+
+        column.prop(self, "strict")
+
+        row = column.row()
+        row.prop(self, "capholes")
+        row.prop(self, "capdissolveangle")
+        row.prop(self, "capdissolveforce")
 
     def execute(self, context):
         active = m3.get_active()
@@ -57,9 +79,7 @@ class Fuse(bpy.types.Operator):
             # remove edges created by magic loop and the originally selected faces
             self.clean_up(bm, seldict, selfaceids, magicloop=True, initialfaces=True)
 
-            if splineedges:
-                # NOTE: this op actually returns the faces it creates!
-                bmesh.ops.bridge_loops(bm, edges=splineedges, use_cyclic=self.cyclic)
+            self.create_surface(bm, splineedges)
 
         bm.to_mesh(mesh)
         m3.set_mode("EDIT")
@@ -78,6 +98,54 @@ class Fuse(bpy.types.Operator):
         bpy.ops.mesh.remove_doubles()
         bpy.ops.mesh.normals_make_consistent(inside=False)
         m3.unselect_all("MESH")
+
+    def create_surface(self, bm, splineedges):
+        if splineedges:
+            geo = bmesh.ops.bridge_loops(bm, edges=splineedges, use_cyclic=self.cyclic)
+
+            if self.capholes and not self.cyclic:
+                # get border spline edges
+                bordersplineedges = [e for e in splineedges if e.is_boundary]
+
+                # separate them in two lists
+                border1 = []
+                border2 = []
+
+                border = border1
+                while bordersplineedges:
+                    walk = [bordersplineedges[0]]
+                    while walk:
+                        e = walk[0]
+                        border.append(e)
+                        walk.remove(e)
+                        bordersplineedges.remove(e)
+                        for v in e.verts:
+                            for nextedge in v.link_edges:
+                                if nextedge in bordersplineedges:
+                                    walk.append(nextedge)
+                    border = border2
+
+                # cap the openings
+                geo1 = bmesh.ops.contextual_create(bm, geom=border1)
+                geo2 = bmesh.ops.contextual_create(bm, geom=border2)
+
+                # get the remote edges
+                edge1 = [e for e in geo1["faces"][0].edges if e not in border1][0]
+                edge2 = [e for e in geo2["faces"][0].edges if e not in border2][0]
+
+                if self.capdissolveforce:
+                    bmesh.ops.dissolve_edges(bm, edges=[edge1, edge2])
+                else:
+                    # get the face angle of these edges
+                    angle1 = math.degrees(edge1.calc_face_angle())
+                    angle2 = math.degrees(edge2.calc_face_angle())
+
+                    if angle1 < self.capdissolveangle:
+                        bmesh.ops.dissolve_edges(bm, edges=[edge1])
+
+                    if angle2 < self.capdissolveangle:
+                        bmesh.ops.dissolve_edges(bm, edges=[edge2])
+
 
     def clean_up(self, bm, seldict, selfaceids, magicloop=True, initialfaces=True):
         # remove the magic loops
@@ -457,6 +525,10 @@ class Fuse(bpy.types.Operator):
         m3.set_mode("EDIT")
 
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='EDGE')
+
+        # TODO: you can easily get the outer boder edges here
+        # and if there arent't any, you know it#s cyclic
+        # the outer border edhes could be used to sort the ring edges, which may be needed for better surface generation
         bpy.ops.mesh.loop_multi_select(ring=True)
         m3.set_mode("OBJECT")
 
