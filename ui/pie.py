@@ -1766,9 +1766,12 @@ class PieViewNumpad(Menu):
         elif context.space_data.lock_camera is True:
             column.operator("wm.context_toggle", text="Lock Cam to View", icon='LOCKED').data_path = "space_data.lock_camera"
 
+        column.prop(scene, "camera")
         row = column.row(align=True)
         row.operator("view3d.viewnumpad", text="View Cam", icon='VISIBLE_IPO_ON').type='CAMERA'
         row.operator("view3d.camera_to_view", text="Cam to view", icon='MAN_TRANS')
+
+
 
         #3 - BOTTOM - RIGHT
         box = pie.split()
