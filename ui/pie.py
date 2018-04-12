@@ -1,7 +1,7 @@
 import bpy
 import os
 from bpy.types import Menu
-from bpy.props import IntProperty, StringProperty, BoolProperty, FloatProperty
+from bpy.props import IntProperty, StringProperty, BoolProperty, FloatProperty, EnumProperty
 import bmesh
 from .. import M3utils as m3
 
@@ -2502,6 +2502,112 @@ class PieAnimation(Menu):
         #3 - BOTTOM - RIGHT
         pie.operator("screen.keyframe_jump", text="Next FR", icon='NEXT_KEYFRAME').next = True
 
+
+class MACHIN3Append(bpy.types.Operator):
+    bl_idname = "machin3.m3_append"
+    bl_label = "MACHIN3: Append"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    appendtype = EnumProperty(name="Append Type", items=[("MATERIAL", "Material", ""),
+                                                         ("WORLD", "World", "")], default="MATERIAL")
+
+    appendname = StringProperty(name="Append Name")
+
+    applymaterial = BoolProperty(name="Apply Material to Selection", default=True)
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        if self.appendtype == "MATERIAL":
+            column.prop(self, "applymaterial")
+
+    def execute(self, context):
+        blendpath = "/home/x/TEMP/blender/Rendering/Materials6.blend"
+
+        fullpath = "%s/%s" % (blendpath, self.appendtype.capitalize())
+
+        # the append ops also unselects for some reason, so we need to get the selection before
+        if self.appendtype == "MATERIAL" and self.applymaterial and self.appendname != "ALL":
+            sel = m3.selected_objects()
+
+        if self.appendtype == "WORLD":
+            bpy.ops.wm.append(directory=fullpath, filename=self.appendname)
+
+            bpy.context.scene.cycles.film_transparent = False
+
+            world = bpy.data.worlds.get(self.appendname)
+
+            bpy.context.scene.world = world
+
+        elif self.appendtype == "MATERIAL":
+            if self.appendname == "ALL":
+                for name in m3_material_names:
+                    if name not in ["", "ALL"]:
+                        bpy.ops.wm.append(directory=fullpath, filename=name)
+            else:
+                bpy.ops.wm.append(directory=fullpath, filename=self.appendname)
+
+                if self.applymaterial:
+                    m3.select(sel)
+                    bpy.ops.object.apply_material(mat_to_assign=self.appendname)
+
+
+        return {'FINISHED'}
+
+
+
+m3_material_names = ["ALL",
+                     "base.black",
+                     "base.mid",
+                     "base.orange",
+                     "base.white",
+                     "",
+                     "carbon_fiber",
+                     "",
+                     "metal.chrome",
+                     "metal.dark",
+                     "metal.dark.shiny",
+                     "metal.mid",
+                     "metal.muted.blue",
+                     "metal.muted.yellow",
+                     "",
+                     "painted.mid",
+                     "painted.orange.knurling",
+                     "painted.white",
+                     "",
+                     "rubber.black.knurling",
+                     "rubber.mid.knurling",
+                     "rubber.white.knurling",
+                     "",
+                     "TEMPLATE"]
+
+
+
+class MACHIN3MaterialMenu(bpy.types.Menu):
+    bl_idname = "machin3.material_menu"
+    bl_label = "Append Marials"
+
+    def draw(self, context):
+        layout = self.layout
+
+        for name in m3_material_names:
+            if name:
+                if name == "ALL":
+                    op = layout.operator("machin3.m3_append", text=name, icon="MATERIAL_DATA")
+                else:
+                    # icon = "MATERIAL_DATA" if bpy.data.materials.get(name) else "BLANK1"
+                    mat = bpy.data.materials.get(name)
+                    icon_val = layout.icon(mat) if mat else 0
+
+                    op = layout.operator("machin3.m3_append", text=name, icon_value=icon_val)
+                op.appendtype = "MATERIAL"
+                op.appendname = name
+            else:
+                layout.separator()
+
+
 #Pie Save/Open
 class PieSaveOpen(Menu):
     bl_idname = "pie.saveopen"
@@ -2517,8 +2623,8 @@ class PieSaveOpen(Menu):
         #2 - BOTTOM
         box = pie.split().column()
         row = box.row(align=True)
-        box.operator("import_scene.obj", text="Import OBJ", icon='IMPORT')
-        box.operator("export_scene.obj", text="Export OBJ", icon='EXPORT')
+        # box.operator("import_scene.obj", text="Import OBJ", icon='IMPORT')
+        # box.operator("export_scene.obj", text="Export OBJ", icon='EXPORT')
         box.separator()
         box.operator("import_scene.fbx", text="Import FBX", icon='IMPORT')
         box.operator("export_scene.fbx", text="Export FBX", icon='EXPORT')
@@ -2537,11 +2643,20 @@ class PieSaveOpen(Menu):
         box.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
         box.operator("wm.revert_mainfile", text="Revert", icon='FILE_REFRESH')
         #3 - BOTTOM - RIGHT
-        box = pie.split().column()
-        row = box.row(align=True)
-        box.operator("wm.link", text="Link", icon='LINK_BLEND')
-        box.operator("wm.append", text="Append", icon='APPEND_BLEND')
-        box.menu("external.data", text="External Data", icon='EXTERNAL_DATA')
+        box = pie.split()
+        column = box.column()
+        column.operator("wm.link", text="Link", icon='LINK_BLEND')
+        column.operator("wm.append", text="Append", icon='APPEND_BLEND')
+        column.menu("external.data", text="External Data", icon='EXTERNAL_DATA')
+
+
+        column = box.column()
+        op = column.operator("machin3.m3_append", text="World", icon='WORLD')
+        op.appendtype = "WORLD"
+        op.appendname = "MACHIN3"
+
+        op = column.operator("wm.call_menu", text="Material", icon="MATERIAL_DATA")
+        op.name = "machin3.material_menu"
 
 
 
