@@ -687,6 +687,8 @@ class LayoutSwitch(bpy.types.Operator):
     bl_idname = "machin3.layout_switch"
     bl_label = "Layout_Switch"
     bl_options = {'REGISTER', 'UNDO'}
+
+
     variable = bpy.props.StringProperty()
 
     @classmethod
@@ -695,6 +697,10 @@ class LayoutSwitch(bpy.types.Operator):
 
     def execute(self, context):
         bpy.context.window.screen=bpy.data.screens[self.variable]
+
+        if self.variable == "M3 compositing":
+            context.scene.render.use_compositing = True
+
         return {'FINISHED'}
 # /MACHIN3
 
@@ -1702,10 +1708,11 @@ class PieAreaViews(Menu):
         # 7 - TOP - LEFT
         pie.operator("machin3.layout_switch", text="UVs", icon='GROUP_UVS').variable="M3 UVs"
         # 9 - TOP - RIGHT
-        box = pie.split()
-        row = box.row(align=True)
-        row.operator("machin3.layout_switch", text="Lighting", icon='IMAGE_COL').variable="M3 lighting"
-        row.operator("machin3.layout_switch", text="Baking", icon='MOD_UVPROJECT').variable="M3 baking"
+        pie.operator("machin3.layout_switch", text="Lighting", icon='IMAGE_COL').variable="M3 lighting"
+        # box = pie.split()
+        # row = box.row(align=True)
+        # row.operator("machin3.layout_switch", text="Lighting", icon='IMAGE_COL').variable="M3 lighting"
+        # row.operator("machin3.layout_switch", text="Baking", icon='MOD_UVPROJECT').variable="M3 baking"
         # 1 - BOTTOM - LEFT
         box = pie.split()
         row = box.row(align=True)
@@ -1714,7 +1721,91 @@ class PieAreaViews(Menu):
         # 3 - BOTTOM - RIGHT
         pie.operator("machin3.layout_switch", text="Video Editing", icon='RENDER_ANIMATION').variable="M3 video"
 
-# /MACHIN3
+# /MACHIN3A
+
+
+
+class SetFinal(bpy.types.Operator):
+    bl_idname = "machin3.set_final"
+    bl_label = "MACHIN3: Set Final"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        print("\nSetting up for Rendering ")
+
+        context.scene.cycles.film_transparent = True
+        print(" » turned ON transparancy")
+
+        context.scene.render.layers["bg"].use = True
+        print(" » turned ON render layer 'bg'")
+
+        context.scene.render.use_compositing = True
+        print(" » turned ON compositing")
+
+        world = context.scene.world
+        for node in world.node_tree.nodes:
+            if node.type == "GROUP":
+                if node.label == "environment":
+                    blur = node.inputs['Blur']
+                    blur.default_value = 0
+
+                    print(" » turned OFF environment blur")
+                    break
+
+        context.scene.render.resolution_percentage = context.scene.machin3.final_percentage
+        print(" » set render percentage to %d%%" % context.scene.machin3.final_percentage)
+
+        bpy.context.scene.cycles.samples = context.scene.machin3.final_samples
+        print(" » set cycles (render) samples to %d" % context.scene.machin3.final_samples)
+
+        bpy.context.scene.render.image_settings.file_format = 'OPEN_EXR_MULTILAYER'
+        bpy.context.scene.render.image_settings.color_depth = '32'
+        bpy.context.scene.render.image_settings.color_mode = 'RGBA'
+        print(" » set file format to Open EXR Multilayer, 32bit, RGBA")
+
+        bpy.context.scene.cycles.device = 'CPU'
+        print(" » set render device to CPU")
+
+        return {'FINISHED'}
+
+
+class SetPreview(bpy.types.Operator):
+    bl_idname = "machin3.set_preview"
+    bl_label = "MACHIN3: Set Preview"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        print("\nSetting up for Testing")
+
+        context.scene.cycles.film_transparent = False
+        print(" » turned OFF transparancy")
+
+        context.scene.render.layers["bg"].use = False
+        print(" » turned OFF render layer 'bg'")
+
+        context.scene.render.use_compositing = False
+        print(" » turned OFF compositing")
+
+        world = context.scene.world
+        for node in world.node_tree.nodes:
+            if node.type == "GROUP":
+                if node.label == "environment":
+                    blur = node.inputs['Blur']
+                    blur.default_value = 0.5
+
+                    print(" » turned ON environment blur")
+                    break
+
+        context.scene.render.resolution_percentage = context.scene.machin3.preview_percentage
+        print(" » set render percentage to %d%%" % context.scene.machin3.preview_percentage)
+
+        bpy.context.scene.cycles.samples = context.scene.machin3.preview_samples
+        print(" » set cycles (render) samples to %d" % context.scene.machin3.preview_samples)
+
+        bpy.context.scene.cycles.device = 'GPU'
+        print(" » set render device to GPU")
+
+        return {'FINISHED'}
 
 #Pie views numpad - Q
 class PieViewNumpad(Menu):
@@ -1744,33 +1835,64 @@ class PieViewNumpad(Menu):
         op.type='TOP'
         op.align_active = align_active
         #8 - TOP
-        op = pie.operator("view3d.viewnumpad", text="Bottom")
+        box = pie.split()
+        column = box.column()
+
+        op = column.operator("view3d.viewnumpad", text="Bottom")
         op.type='BOTTOM'
         op.align_active = align_active
-        #7 - TOP - LEFT
-        op = pie.operator("view3d.viewnumpad", text="Left")
+
+        row = column.row(align=True)
+        op = row.operator("view3d.viewnumpad", text="Left")
         op.type='LEFT'
         op.align_active = align_active
-        #9 - TOP - RIGHT
-        op = pie.operator("view3d.viewnumpad", text="Back")
+        op = row.operator("view3d.viewnumpad", text="Back")
         op.type='BACK'
         op.align_active = align_active
+
+        #7 - TOP - LEFT
+        pie.separator()
+        #9 - TOP - RIGHT
+        box = pie.split()
+        column = box.column()
+        column.scale_x = 0.8
+
+
+        row = column.row()
+        row.label("Resolution")
+        row.prop(context.scene.machin3, "preview_percentage", text="")
+        row.prop(context.scene.machin3, "final_percentage", text="")
+
+        row = column.row()
+        row.label("Samples")
+        row.prop(context.scene.machin3, "preview_samples", text="")
+        row.prop(context.scene.machin3, "final_samples", text="")
+
+        row = column.row(align=True)
+        row.label("Set")
+        row.operator("machin3.set_preview", text="Preview")
+        row.operator("machin3.set_final", text="Final")
+
+        column.separator()
+        column.operator("machin3.pack_images", text="Pack Images")
+        column.separator()
+        column.separator()
+        column.separator()
+
 
         #1 - BOTTOM - LEFT
         box = pie.split()
         column = box.column()
 
-        # TODO: replace with MACHIN3 camera helper
-        if context.space_data.lock_camera is False:
-            column.operator("wm.context_toggle", text="Lock Cam to View", icon='UNLOCKED').data_path = "space_data.lock_camera"
-        elif context.space_data.lock_camera is True:
-            column.operator("wm.context_toggle", text="Lock Cam to View", icon='LOCKED').data_path = "space_data.lock_camera"
-
-        column.prop(scene, "camera")
+        column.prop(scene, "camera", text="Active")
         row = column.row(align=True)
         row.operator("view3d.viewnumpad", text="View Cam", icon='VISIBLE_IPO_ON').type='CAMERA'
         row.operator("view3d.camera_to_view", text="Cam to view", icon='MAN_TRANS')
 
+        if context.space_data.lock_camera is False:
+            column.operator("wm.context_toggle", text="Lock Cam to View", icon='UNLOCKED').data_path = "space_data.lock_camera"
+        elif context.space_data.lock_camera is True:
+            column.operator("wm.context_toggle", text="Lock Cam to View", icon='LOCKED').data_path = "space_data.lock_camera"
 
 
         #3 - BOTTOM - RIGHT
@@ -2524,7 +2646,7 @@ class MACHIN3Append(bpy.types.Operator):
             column.prop(self, "applymaterial")
 
     def execute(self, context):
-        blendpath = "/home/x/TEMP/blender/Rendering/Materials6.blend"
+        blendpath = "/home/x/TEMP/blender/Rendering/Materials7.blend"
 
         fullpath = "%s/%s" % (blendpath, self.appendtype.capitalize())
 
@@ -2567,9 +2689,11 @@ m3_material_names = ["ALL",
                      "carbon_fiber",
                      "",
                      "metal.chrome",
+                     "metal.chrome.oxidized",
                      "metal.dark",
                      "metal.dark.shiny",
                      "metal.mid",
+                     "metal.mid.knurling",
                      "metal.muted.blue",
                      "metal.muted.yellow",
                      "",

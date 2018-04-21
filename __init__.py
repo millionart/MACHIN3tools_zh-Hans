@@ -30,7 +30,7 @@ bl_info = {
 
 
 import bpy
-from bpy.props import BoolProperty, EnumProperty, FloatProperty
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty
 from . import developer_utils as du
 from . import M3utils as m3
 
@@ -50,6 +50,13 @@ class MACHIN3Settings(bpy.types.PropertyGroup):
     pieobjecteditmodetoggleao = BoolProperty(name="Toggle AO", default=False)
 
     pieviewsalignactive = bpy.props.BoolProperty(name="Align Active", default=False)
+
+    preview_percentage = IntProperty(name="Preview Percentage", default=100, min=10, max=100, subtype="PERCENTAGE")
+    final_percentage = IntProperty(name="Final Percentage", default=250, min=100, max=1000, subtype="PERCENTAGE")
+
+    preview_samples = IntProperty(name="Preview Percentage", default=32, min=12, max=64)
+    final_samples = IntProperty(name="Final Percentage", default=256, min=64, max=2048)
+
 
 
 preferences_tabs = [("MODULES", "Modules", ""),
@@ -449,78 +456,6 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
                 column.separator()
 
 
-class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
-    bl_label = "(W)MACHIN3tools"
-
-    def draw(self, context):
-        layout = self.layout
-
-        column = layout.column()
-
-        if m3.M3_prefs().activate_Align:
-            column.operator("machin3.align", text="Align")
-        if m3.M3_prefs().activate_CleansUpGood:
-            column.operator("machin3.clean_up", text="Cleans Up Good")
-        if m3.M3_prefs().activate_CenterCube:
-            column.operator("machin3.center_cube", text="Center Cube")
-        if m3.M3_prefs().activate_CleanoutMaterials:
-            column.operator("machin3.cleanout_materials", text="Cleanout Materials")
-        if m3.M3_prefs().activate_CleanoutUVs:
-            column.operator("machin3.cleanout_uvs", text="Cleanout UVs")
-        if m3.M3_prefs().activate_CleanoutTransforms:
-            column.operator("machin3.cleanout_transforms", text="Cleanout Transforms")
-        if m3.M3_prefs().activate_LockItAll:
-            column.operator("machin3.lock_it_all", text="Lock It All")
-        if m3.M3_prefs().activate_HideMeshes:
-            column.operator("machin3.hide_meshes", text="Hide Meshes")
-        if m3.M3_prefs().activate_ModMachine:
-            column.operator("machin3.mod_machine", text="Mod Machine")
-        if m3.M3_prefs().activate_CameraHelper:
-            column.operator("machin3.camera_helper", text="Camera Helper")
-        if m3.M3_prefs().activate_Hierarch:
-            column.operator("machin3.hierarch", text="Hierarch")
-        if m3.M3_prefs().activate_FlipNormals:
-            column.operator("machin3.flip_normals", text="Flip Normals")
-        if m3.M3_prefs().activate_SymmetrizeGPencil:
-            if context.gpencil_data:
-                column.operator("machin3.symmetrize_gpencil", text="Symmetrize GPencil")
-
-
-class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
-    bl_label = "(W)MACHIN3tools"
-
-    # TODO: comp mode availability check
-
-    def draw(self, context):
-        mode = m3.get_mode()
-        layout = self.layout
-
-        column = layout.column()
-
-        if m3.M3_prefs().activate_QuickJoin:
-            column.operator("machin3.quick_join_last", text="Quick Join (Last)")
-        if m3.M3_prefs().activate_QuickJoin:
-            column.operator("machin3.quick_join_center", text="Quick Join (Center)")
-        if m3.M3_prefs().activate_SmartModes:
-            column.operator("machin3.smart_modes", text="Smart Modes")
-        if m3.M3_prefs().activate_StarConnect:
-            column.operator("machin3.star_connect", text="Star Connect")
-        if m3.M3_prefs().activate_CleansUpGood:
-            column.operator("machin3.clean_up", text="Cleans Up Good")
-        if m3.M3_prefs().activate_MoreSmartModes:
-            column.operator("machin3.more_smart_modes", text="More Smart Modes")
-        if m3.M3_prefs().activate_CleanoutTransforms:
-            column.operator("machin3.cleanout_transforms", text="Cleanout Transforms")
-        if m3.M3_prefs().activate_SlideExtend:
-            if mode == "VERT":
-                column.operator("machin3.slide_extend", text="Slide Extend")
-        if m3.M3_prefs().activate_SurfaceSlide:
-            column.operator("machin3.surface_slide", text="Surface Slide")
-        if m3.M3_prefs().activate_EdgeLength:
-            column.operator("machin3.edge_length", text="Edge Length")
-        if m3.M3_prefs().activate_Emboss:
-            if mode == "FACE":
-                column.operator("machin3.emboss", text="Emboss")
 
 
 def edit_menu_func(self, context):
@@ -589,7 +524,7 @@ def register_MACHIN3_keys(wm, keymaps):
         kmi = km.keymap_items.new("machin3.focus", "F", "PRESS")
         setattr(kmi.properties, 'isolate', False)
         setattr(kmi.properties, 'mirror', True)
-        setattr(kmi.properties, 'zoomout', 2)
+        setattr(kmi.properties, 'zoomout', 1)
         MACHIN3_keymaps.append((km, kmi))
 
 
