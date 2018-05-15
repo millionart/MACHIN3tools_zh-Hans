@@ -2646,7 +2646,7 @@ class MACHIN3Append(bpy.types.Operator):
             column.prop(self, "applymaterial")
 
     def execute(self, context):
-        blendpath = "/home/x/TEMP/blender/Rendering/Materials7.blend"
+        blendpath = "/home/x/TEMP/blender/Rendering/Materials9.blend"
 
         fullpath = "%s/%s" % (blendpath, self.appendtype.capitalize())
 
@@ -2686,7 +2686,9 @@ m3_material_names = ["ALL",
                      "base.orange",
                      "base.white",
                      "",
-                     "carbon_fiber",
+                     "clear.carbon_fiber",
+                     "clear.carbon_fiber.hex",
+                     "clear.hex",
                      "",
                      "metal.chrome",
                      "metal.chrome.oxidized",

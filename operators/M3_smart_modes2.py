@@ -9,6 +9,7 @@ class MoreSmartModes(bpy.types.Operator):
 
     def execute(self, context):
         mode = m3.get_comp_mode()
+        active = m3.get_active()
 
         if mode in ["VERT", "EDGE"]:  # F2
             bpy.ops.mesh.f2('INVOKE_DEFAULT')
@@ -20,4 +21,13 @@ class MoreSmartModes(bpy.types.Operator):
             else:  # DUPLICATE and SEPARATE
                 bpy.ops.mesh.duplicate()
                 bpy.ops.mesh.separate(type='SELECTED')
+
+                m3.set_mode("OBJECT")
+                sel = m3.selected_objects()
+                sel.remove(active)
+                active.select = False
+                m3.make_active(sel[0])
+                m3.set_mode("EDIT")
+                m3.set_mode("FACE")
+
         return {'FINISHED'}
