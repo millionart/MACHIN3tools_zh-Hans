@@ -2305,7 +2305,7 @@ class PieObjectShading(Menu):
                 pass
         column.separator()
 
-        #7 - TOP - LEFT
+        # 7 - TOP - LEFT
         if m3.addon_check("measureit"):
             box = pie.split()
             column = box.column()
@@ -2324,9 +2324,13 @@ class PieObjectShading(Menu):
             row = column.row(align=True)
             row.operator("object.shade_smooth", text="Smooth", icon="TEXT")
             row.operator("object.shade_flat", text="Flat", icon="TEXT")
+
         column.prop(mesh, "use_auto_smooth")
-        if mesh.use_auto_smooth:
+        if mesh.has_custom_normals:
+            column.operator("mesh.customdata_custom_splitnormals_clear", text="Clear Custom Normals")
+        elif mesh.use_auto_smooth:
             column.prop(mesh, "auto_smooth_angle", text="Angle")
+
         if bpy.context.object.mode == "EDIT":
             row = column.row(align=True)
             row.prop(mesh, "show_normal_vertex", text=" ", icon='VERTEXSEL')
@@ -2341,7 +2345,7 @@ class PieObjectShading(Menu):
         # 3 - BOTTOM - RIGHT
         pie.separator()
 
-#Overlays
+# Overlays
 class MeshDisplayMatcaps(bpy.types.Menu):
     bl_idname = "meshdisplay.matcaps"
     bl_label = "Mesh Display Matcaps"
