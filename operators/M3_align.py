@@ -27,7 +27,7 @@ class Align(bpy.types.Operator):
     parent = BoolProperty(name="Parent")
     autoskin = BoolProperty(name="Auto Skin")
 
-    mode = EnumProperty(name="Mode", items=modes, default="BBOX")
+    mode = EnumProperty(name="Mode", items=modes, default="SIMPLE")
 
     locaxisx = BoolProperty(name="X", default=True)
     locaxisy = BoolProperty(name="Y", default=True)
