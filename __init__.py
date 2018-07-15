@@ -107,7 +107,7 @@ def register_pie_keys(wm, keymaps):
 
 def get_classes():
     from . ui.pie import PieSelectMode
-    from . ui.operators.select_modes import SelectVertexMode, SelectEdgeMode, SelectFaceMode, SelectEditObjectMode
+    from . ui.operators.select_modes import ToggleEditMode, SelectVertexMode, SelectEdgeMode, SelectFaceMode
 
 
     classes = []
@@ -118,7 +118,7 @@ def get_classes():
     classes.append(SelectVertexMode)
     classes.append(SelectEdgeMode)
     classes.append(SelectFaceMode)
-    classes.append(SelectEditObjectMode)
+    classes.append(ToggleEditMode)
 
     return classes
 

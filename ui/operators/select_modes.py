@@ -2,9 +2,9 @@ import bpy
 from ... utils import MACHIN3 as m3
 
 
-class SelectEditObjectMode(bpy.types.Operator):
-    bl_idname = "machin3.select_edit_object_mode"
-    bl_label = "Class Object"
+class ToggleEditMode(bpy.types.Operator):
+    bl_idname = "machin3.toggle_edit_mode"
+    bl_label = "Toggle Edit Mode"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -49,7 +49,7 @@ class SelectEditObjectMode(bpy.types.Operator):
 
 class SelectVertexMode(bpy.types.Operator):
     bl_idname = "machin3.select_vertex_mode"
-    bl_label = "Class Vertex"
+    bl_label = "Vertex Mode"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -73,7 +73,7 @@ class SelectVertexMode(bpy.types.Operator):
 
 class SelectEdgeMode(bpy.types.Operator):
     bl_idname = "machin3.select_edge_mode"
-    bl_label = "Class Edge"
+    bl_label = "Edge Mode"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -97,7 +97,7 @@ class SelectEdgeMode(bpy.types.Operator):
 
 class SelectFaceMode(bpy.types.Operator):
     bl_idname = "machin3.select_face_mode"
-    bl_label = "Class Face"
+    bl_label = "Face Mode"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):

@@ -1362,15 +1362,30 @@ class PieSelectMode(Menu):
                 # 2 - BOTTOM
                 pie.operator("machin3.select_edge_mode", text="Edge", icon='EDGESEL')
                 # 8 - TOP
-                pie.operator("machin3.select_edit_object_mode", text="Edit/Object", icon='OBJECT_DATAMODE')
+                if bpy.context.object.mode == "OBJECT":
+                    text = "Edit"
+                    icon = "EDITMODE_HLT"
+                elif bpy.context.object.mode == "EDIT":
+                    text = "Object"
+                    icon = "OBJECT_DATAMODE"
+                pie.operator("machin3.toggle_edit_mode", text=text, icon=icon)
                 # 7 - TOP - LEFT
-                pie.separator()
+                if bpy.context.object.mode == "EDIT":
+                    pie.prop(bpy.context.space_data, "use_occlude_geometry", text="Occlude")
+                else:
+                    pie.separator()
+
                 # 9 - TOP - RIGHT
                 pie.separator()
                 # 1 - BOTTOM - LEFT
                 pie.separator()
                 # 3 - BOTTOM - RIGHT
-                pie.separator()
+                if bpy.context.object.mode == "EDIT":
+                    box = pie.split()
+                    column = box.column()
+                    column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
+                else:
+                    pie.separator()
 
             elif ob.object.type == 'EMPTY':
                 pass
