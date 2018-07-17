@@ -16,15 +16,18 @@ class ShadeSolid(bpy.types.Operator):
     def execute(self, context):
         global solid_show_overlays
 
-        # toggle overlays
-        if context.space_data.shading.type == 'SOLID':
-            solid_show_overlays = not solid_show_overlays
-            bpy.context.space_data.overlay.show_overlays = solid_show_overlays
+        overlay = context.space_data.overlay
+        shading = context.space_data.shading
 
-        # change shading to SOLID 
+        # toggle overlays
+        if shading.type == 'SOLID':
+            solid_show_overlays = not solid_show_overlays
+            overlay.show_overlays = solid_show_overlays
+
+        # change shading to SOLID
         else:
-            context.space_data.shading.type = 'SOLID'
-            bpy.context.space_data.overlay.show_overlays = solid_show_overlays
+            shading.type = 'SOLID'
+            overlay.show_overlays = solid_show_overlays
 
         return {'FINISHED'}
 
@@ -37,15 +40,18 @@ class ShadeMaterial(bpy.types.Operator):
     def execute(self, context):
         global material_show_overlays
 
+        overlay = context.space_data.overlay
+        shading = context.space_data.shading
+
         # toggle overlays
-        if context.space_data.shading.type == 'MATERIAL':
+        if shading.type == 'MATERIAL':
             material_show_overlays = not material_show_overlays
-            bpy.context.space_data.overlay.show_overlays = material_show_overlays
+            overlay.show_overlays = material_show_overlays
 
         # change shading to MATERIAL
         else:
-            context.space_data.shading.type = 'MATERIAL'
-            bpy.context.space_data.overlay.show_overlays = material_show_overlays
+            shading.type = 'MATERIAL'
+            overlay.show_overlays = material_show_overlays
 
         return {'FINISHED'}
 
@@ -58,14 +64,17 @@ class ShadeRendered(bpy.types.Operator):
     def execute(self, context):
         global rendered_show_overlays
 
+        overlay = context.space_data.overlay
+        shading = context.space_data.shading
+
         # toggle overlays
-        if context.space_data.shading.type == 'RENDERED':
+        if shading.type == 'RENDERED':
             rendered_show_overlays = not rendered_show_overlays
-            bpy.context.space_data.overlay.show_overlays = rendered_show_overlays
+            overlay.show_overlays = rendered_show_overlays
 
         # change shading to RENDERED
         else:
-            context.space_data.shading.type = 'RENDERED'
-            bpy.context.space_data.overlay.show_overlays = rendered_show_overlays
+            shading.type = 'RENDERED'
+            overlay.show_overlays = rendered_show_overlays
 
         return {'FINISHED'}

@@ -8,9 +8,8 @@ class ToggleEditMode(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        shading = context.space_data.shading
 
-        if bpy.context.object.mode == "OBJECT":
+        if context.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="EDIT")
 
             # if bpy.context.scene.machin3.pieobjecteditmodeshow:
@@ -20,8 +19,10 @@ class ToggleEditMode(bpy.types.Operator):
             # if bpy.context.scene.machin3.pieobjecteditmodetoggleao:
                 # bpy.context.space_data.fx_settings.use_ssao = False
 
-        else:
+        elif context.mode == "EDIT_MESH":
+            shading = context.space_data.shading
             shading.show_xray = False
+
             bpy.ops.object.mode_set(mode="OBJECT")
 
         """

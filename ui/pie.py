@@ -1829,13 +1829,8 @@ class PieChangeShading(Menu):
     def draw(self, context):
         layout = self.layout
 
-        # toolsettings = context.tool_settings
         view = context.space_data
-        # active = context.active_object
-        # mesh = active.data
-        # scene = context.scene
 
-        # fx_settings = view.fx_settings
 
         pie = layout.menu_pie()
 
@@ -1856,20 +1851,16 @@ class PieChangeShading(Menu):
         # box = pie.box().split()
 
         # b = box.box()
-
-        # b = box.box()
         column = box.column()
         self.draw_left_column(context, view, column)
 
+        # b = box.box()
         column = box.column()
         self.draw_center_column(view, column)
 
-
-        b = box.box()
-        column = b.column()
-        column.label("test2")
-        column.label("test2")
-        column.label("test2")
+        # b = box.box()
+        column = box.column()
+        self.draw_right_column(view, column)
 
 
         # 7 - TOP - LEFT
@@ -1896,7 +1887,7 @@ class PieChangeShading(Menu):
         r.prop(view.overlay, "show_axis_y", text="Y", toggle=True)
         r.prop(view.overlay, "show_axis_z", text="Z", toggle=True)
 
-        col.separator()
+        # col.separator()
         row = col.split(percentage=0.45)
         row.operator("machin3.toggle_wireframe", text="Wire Toggle", icon="WIRE")
         r = row.split().row()
@@ -1907,11 +1898,19 @@ class PieChangeShading(Menu):
             r.active = view.shading.show_xray
             r.prop(view.shading, "xray_alpha", text="X-Ray")
 
-
+        if context.active_object:
+            col.separator()
+            row = col.split(percentage=0.55)
+            r = row.split().row(align=True)
+            r.operator("machin3.shade_smooth", text="Smooth", icon="MATSPHERE")
+            r.operator("machin3.shade_flat", text="Flat", icon="MATCUBE")
+            row.prop(context.active_object.data, "use_auto_smooth")
+            if context.active_object.data.use_auto_smooth:
+                col.prop(context.active_object.data, "auto_smooth_angle")
 
 
     def draw_center_column(self, view, col):
-        col.scale_x = 2
+        col.scale_x = 1.5
 
         # row = col.row()
         # row.prop(view.overlay, "show_text", text="Text Info")
@@ -1936,6 +1935,31 @@ class PieChangeShading(Menu):
         row.prop(view.overlay, "show_backface_culling")
         row.prop(view.overlay, "show_face_orientation")
         col.prop(view.overlay, "show_relationship_lines")
+
+    def draw_right_column(self, view, col):
+        col.scale_x = 0.5
+
+        if view.shading.type == "SOLID":
+
+            # light type
+            row = col.row(align=True)
+            row.prop(view.shading, "light", expand=True)
+            if view.shading.light == "MATCAP":
+                row.operator('VIEW3D_OT_toggle_matcap_flip', text=" ", icon='ARROW_LEFTRIGHT')
+
+            # studio / matcap selection
+            if view.shading.light in ["STUDIO", "MATCAP"]:
+                row = col.row()
+                row.scale_y = 0.6
+                row.template_icon_view(view.shading, "studio_light", show_labels=True, scale=3)
+
+            # color type
+            row = col.row(align=True)
+            row.prop(view.shading, "color_type", expand=True)
+
+            # single color
+            if view.shading.color_type == 'SINGLE':
+                col.prop(view.shading, "single_color", text="")
 
 
 

@@ -105,7 +105,7 @@ def register_pie_keys(wm, keymaps):
     # CHANGE SHADING
 
     km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'Q', 'PRESS', alt=True)
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'PAGE_UP', 'PRESS')
     kmi.properties.name = "VIEW3D_MT_MACHIN3_change_shading"
     kmi.active = True
     keymaps.append((km, kmi))
@@ -115,9 +115,8 @@ def get_classes():
     from . ui.pie import PieSelectMode, PieChangeShading
     from . ui.operators.select_mode import ToggleEditMode, SelectVertexMode, SelectEdgeMode, SelectFaceMode
     from . ui.operators.change_shading import ShadeSolid, ShadeMaterial, ShadeRendered
-    from . ui.operators.toggle_grid import ToggleGrid
-    from . ui.operators.toggle_wireframe import ToggleWireframe
-
+    from . ui.operators.toggle_grid_wire import ToggleGrid, ToggleWireframe
+    from . ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
 
     classes = []
 
@@ -132,11 +131,9 @@ def get_classes():
 
     # CHANGE SHADING
     classes.append(PieChangeShading)
-    classes.append(ShadeSolid)
-    classes.append(ShadeMaterial)
-    classes.append(ShadeRendered)
-    classes.append(ToggleGrid)
-    classes.append(ToggleWireframe)
+    classes.extend([ShadeSolid, ShadeMaterial, ShadeRendered])
+    classes.extend([ToggleGrid, ToggleWireframe])
+    classes.extend([ShadeSmooth, ShadeFlat])
 
     return classes
 
