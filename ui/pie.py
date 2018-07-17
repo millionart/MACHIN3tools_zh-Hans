@@ -1350,6 +1350,7 @@ class PieSelectMode(Menu):
     def draw(self, context):
         layout = self.layout
         toolsettings = context.tool_settings
+
         ob = context
 
         if ob.object is not None:
@@ -1802,108 +1803,141 @@ class AOPreset(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class PieObjectShading(Menu):
-    bl_idname = "pie.objectshading"
-    bl_label = "Pie Shading Object"
+class PieChangeShading(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_change_shading"
+    bl_label = "Change Shading"
+
+
+    def get_text_icon(self, context, shading):
+        if context.space_data.shading.type == shading:
+            text = "Toggle Overlays"
+            icon = "WIRE"
+        else:
+            if shading == "SOLID":
+                text = "Solid"
+                icon = "SOLID"
+            elif shading == "MATERIAL":
+                text = "LookDev"
+                icon = "MATERIAL"
+            elif shading == "RENDERED":
+                text = "Rendered"
+                icon = "SMOOTH"
+
+        return text, icon
+
 
     def draw(self, context):
         layout = self.layout
 
-        toolsettings = context.tool_settings
+        # toolsettings = context.tool_settings
         view = context.space_data
-        obj = context.object
-        mesh = context.active_object.data
-        fx_settings = view.fx_settings
-        scene = context.scene
+        # active = context.active_object
+        # mesh = active.data
+        # scene = context.scene
+
+        # fx_settings = view.fx_settings
 
         pie = layout.menu_pie()
-        #4 - LEFT
 
-        # MACHIN3
+        # 4 - LEFT
+        text, icon = self.get_text_icon(context, "SOLID")
+        pie.operator("machin3.shade_solid", text=text, icon=icon)
+
+        # 6 - RIGHT
+        text, icon = self.get_text_icon(context, "MATERIAL")
+        pie.operator("machin3.shade_material", text=text, icon=icon)
+
+        # 2 - BOTTOM
+        text, icon = self.get_text_icon(context, "RENDERED")
+        pie.operator("machin3.shade_rendered", text=text, icon=icon)
+
+        # 8 - TOP
         box = pie.split()
+        # box = pie.box().split()
+
+        # b = box.box()
+
+        # b = box.box()
+        column = box.column()
+        self.draw_left_column(context, view, column)
 
         column = box.column()
-        column.operator("scene.togglegridaxis", text="Grid Toggle", icon="MESH_GRID")
-        row = column.row(align=True)
-        row.prop(context.space_data, "show_axis_x", text="X")
-        row.prop(context.space_data, "show_axis_y", text="Y")
-        row.prop(context.space_data, "show_axis_z", text="Z")
-        # /MACHIN3
+        self.draw_center_column(view, column)
 
-        #6 - RIGHT
-        pie.operator("wire.selectedall", text="Wire", icon='WIRE')
 
-        #2 - BOTTOM
-        column = pie.column()
+        b = box.box()
+        column = b.column()
+        column.label("test2")
+        column.label("test2")
+        column.label("test2")
 
-        column.prop(view, "show_only_render")
-        column.prop(view, "use_matcap", text="Matcaps")
-        if view.viewport_shade not in {'BOUNDBOX', 'WIREFRAME'}:
-            column.separator()
-            row = column.row(align=True)
-            row.operator("machin3.ao_preset", text="AO Toggle").strength = 0
-            row.operator("machin3.ao_preset", text="1").strength = 1.5
-            row.operator("machin3.ao_preset", text="2").strength = 2.5
-            row.operator("machin3.ao_preset", text="3").strength = 3.5
-            if fx_settings.use_ssao:
-                ssao_settings = fx_settings.ssao
-                column.prop(ssao_settings, "distance_max")
-
-        #8 - TOP
-        column = pie.column()
-        row = column.row(align=True)
-        row.prop(obj, "show_x_ray", text="X-Ray")
-        row.prop(view, "show_occlude_wire", text="Hidden Wire")
-        column.prop(view, "show_backface_culling", text="Backface Culling")
-        column.prop(view, "show_relationship_lines", text="Relationship Lines")
-        column.prop(view, "show_grease_pencil", text="Grease Pencil")
-        if view.show_grease_pencil:
-            try:
-                column.prop(bpy.data.grease_pencil[0].layers[0], "line_change", text="Thickness")
-                column.prop(bpy.data.grease_pencil[0].layers[0], "show_x_ray", text=" » GP X-Ray")
-            except:
-                pass
-        column.separator()
 
         # 7 - TOP - LEFT
-        if m3.addon_check("measureit"):
-            box = pie.split()
-            column = box.column()
-            column.scale_x = 1
-            column.operator("measureit.runopenglbutton", text="Toggle Annotations", icon="TEXT")
-            column.prop(scene, "measureit_gl_txt", text="")
-            column.operator("measureit.addnotebutton", text="Annotate", icon="NEW")
-        else:
-            pie.separator()
+        pie.separator()
 
         # 9 - TOP - RIGHT
-        box = pie.split()
-        column = box.column()
-
-        if bpy.context.object.mode == "OBJECT":
-            row = column.row(align=True)
-            row.operator("object.shade_smooth", text="Smooth", icon="TEXT")
-            row.operator("object.shade_flat", text="Flat", icon="TEXT")
-
-        column.prop(mesh, "use_auto_smooth")
-        if mesh.has_custom_normals:
-            column.operator("mesh.customdata_custom_splitnormals_clear", text="Clear Custom Normals")
-        elif mesh.use_auto_smooth:
-            column.prop(mesh, "auto_smooth_angle", text="Angle")
-
-        if bpy.context.object.mode == "EDIT":
-            row = column.row(align=True)
-            row.prop(mesh, "show_normal_vertex", text=" ", icon='VERTEXSEL')
-            row.prop(mesh, "show_normal_loop", text=" ", icon='LOOPSEL')
-            row.prop(mesh, "show_normal_face", text=" ", icon='FACESEL')
-            column.menu("meshdisplay.overlays", text="Mesh display", icon='OBJECT_DATAMODE')
-        # /MACHIN3
+        pie.separator()
 
         # 1 - BOTTOM - LEFT
         pie.separator()
 
         # 3 - BOTTOM - RIGHT
         pie.separator()
+
+
+    def draw_left_column(self, context, view, col):
+        col.scale_x = 0.5
+
+        row = col.split()
+        row.operator("machin3.toggle_grid", text="Grid Toggle", icon="GRID")
+        r = row.split().row(align=True)
+        r.active = view.overlay.show_floor
+        r.prop(view.overlay, "show_axis_x", text="X", toggle=True)
+        r.prop(view.overlay, "show_axis_y", text="Y", toggle=True)
+        r.prop(view.overlay, "show_axis_z", text="Z", toggle=True)
+
+        col.separator()
+        row = col.split(percentage=0.45)
+        row.operator("machin3.toggle_wireframe", text="Wire Toggle", icon="WIRE")
+        r = row.split().row()
+        if context.mode == "OBJECT":
+            r.active = view.overlay.show_wireframes
+            r.prop(view.overlay, "wireframe_threshold", text="Wireframe")
+        elif context.mode == "EDIT_MESH":
+            r.active = view.shading.show_xray
+            r.prop(view.shading, "xray_alpha", text="X-Ray")
+
+
+
+
+    def draw_center_column(self, view, col):
+        col.scale_x = 2
+
+        # row = col.row()
+        # row.prop(view.overlay, "show_text", text="Text Info")
+        # row.prop(view, "show_gizmo")
+
+        # if view.show_gizmo:
+            # row = col.row(align=True)
+            # # row.active = view.show_gizmo
+            # row.prop(view, "show_gizmo_navigate", text="Navigate", toggle=True)
+            # row.prop(view, "show_gizmo_context", text="Object", toggle=True)
+            # row.prop(view, "show_gizmo_tool", text="Tools", toggle=True)
+
+        # col.separator()
+        row = col.split(percentage=0.42)
+        row.prop(view.overlay, "show_cursor", text="3D Cursor")
+        r = row.split().row(align=True)
+        r.prop(view.overlay, "show_object_origins", text="Origins")
+        r.prop(view.overlay, "show_object_origins_all", text="All")
+
+        col.separator()
+        row = col.row()
+        row.prop(view.overlay, "show_backface_culling")
+        row.prop(view.overlay, "show_face_orientation")
+        col.prop(view.overlay, "show_relationship_lines")
+
+
 
 class PieAlign(Menu):
     bl_idname = "pie.align"

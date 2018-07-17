@@ -8,6 +8,8 @@ class ToggleEditMode(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
+        shading = context.space_data.shading
+
         if bpy.context.object.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="EDIT")
 
@@ -19,6 +21,7 @@ class ToggleEditMode(bpy.types.Operator):
                 # bpy.context.space_data.fx_settings.use_ssao = False
 
         else:
+            shading.show_xray = False
             bpy.ops.object.mode_set(mode="OBJECT")
 
         """

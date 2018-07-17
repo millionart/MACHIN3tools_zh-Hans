@@ -102,23 +102,41 @@ def register_pie_keys(wm, keymaps):
     kmi.active = True
     keymaps.append((km, kmi))
 
+    # CHANGE SHADING
 
+    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'Q', 'PRESS', alt=True)
+    kmi.properties.name = "VIEW3D_MT_MACHIN3_change_shading"
+    kmi.active = True
+    keymaps.append((km, kmi))
 
 
 def get_classes():
-    from . ui.pie import PieSelectMode
-    from . ui.operators.select_modes import ToggleEditMode, SelectVertexMode, SelectEdgeMode, SelectFaceMode
+    from . ui.pie import PieSelectMode, PieChangeShading
+    from . ui.operators.select_mode import ToggleEditMode, SelectVertexMode, SelectEdgeMode, SelectFaceMode
+    from . ui.operators.change_shading import ShadeSolid, ShadeMaterial, ShadeRendered
+    from . ui.operators.toggle_grid import ToggleGrid
+    from . ui.operators.toggle_wireframe import ToggleWireframe
 
 
     classes = []
 
     # pie menus
 
+    # SELECT MODE
     classes.append(PieSelectMode)
     classes.append(SelectVertexMode)
     classes.append(SelectEdgeMode)
     classes.append(SelectFaceMode)
     classes.append(ToggleEditMode)
+
+    # CHANGE SHADING
+    classes.append(PieChangeShading)
+    classes.append(ShadeSolid)
+    classes.append(ShadeMaterial)
+    classes.append(ShadeRendered)
+    classes.append(ToggleGrid)
+    classes.append(ToggleWireframe)
 
     return classes
 
