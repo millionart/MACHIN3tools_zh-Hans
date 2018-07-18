@@ -1850,18 +1850,17 @@ class PieChangeShading(Menu):
         box = pie.split()
         # box = pie.box().split()
 
-        # b = box.box()
-        column = box.column()
+        b = box.box()
+        column = b.column()
         self.draw_left_column(context, view, column)
 
-        # b = box.box()
-        column = box.column()
+        b = box.box()
+        column = b.column()
         self.draw_center_column(view, column)
 
-        # b = box.box()
-        column = box.column()
+        b = box.box()
+        column = b.column()
         self.draw_right_column(view, column)
-
 
         # 7 - TOP - LEFT
         pie.separator()
@@ -1879,7 +1878,7 @@ class PieChangeShading(Menu):
     def draw_left_column(self, context, view, col):
         col.scale_x = 0.5
 
-        row = col.split()
+        row = col.split(percentage=0.45)
         row.operator("machin3.toggle_grid", text="Grid Toggle", icon="GRID")
         r = row.split().row(align=True)
         r.active = view.overlay.show_floor
@@ -1899,15 +1898,15 @@ class PieChangeShading(Menu):
             r.prop(view.shading, "xray_alpha", text="X-Ray")
 
         if context.active_object:
-            col.separator()
-            row = col.split(percentage=0.55)
-            r = row.split().row(align=True)
-            r.operator("machin3.shade_smooth", text="Smooth", icon="MATSPHERE")
-            r.operator("machin3.shade_flat", text="Flat", icon="MATCUBE")
-            row.prop(context.active_object.data, "use_auto_smooth")
-            if context.active_object.data.use_auto_smooth:
-                col.prop(context.active_object.data, "auto_smooth_angle")
-
+            if context.active_object.type == "MESH":
+                col.separator()
+                row = col.split(percentage=0.55)
+                r = row.split().row(align=True)
+                r.operator("machin3.shade_smooth", text="Smooth", icon="MATSPHERE")
+                r.operator("machin3.shade_flat", text="Flat", icon="MATCUBE")
+                row.prop(context.active_object.data, "use_auto_smooth")
+                if context.active_object.data.use_auto_smooth:
+                    col.prop(context.active_object.data, "auto_smooth_angle")
 
     def draw_center_column(self, view, col):
         col.scale_x = 1.5
@@ -1960,6 +1959,8 @@ class PieChangeShading(Menu):
             # single color
             if view.shading.color_type == 'SINGLE':
                 col.prop(view.shading, "single_color", text="")
+            elif view.shading.color_type == 'MATERIAL':
+                col.operator("machin3.colorize_materials", icon='MATERIAL')
 
 
 

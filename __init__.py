@@ -117,6 +117,7 @@ def get_classes():
     from . ui.operators.change_shading import ShadeSolid, ShadeMaterial, ShadeRendered
     from . ui.operators.toggle_grid_wire import ToggleGrid, ToggleWireframe
     from . ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
+    from . ui.operators.colorize_materials import ColorizeMaterials
 
     classes = []
 
@@ -134,6 +135,7 @@ def get_classes():
     classes.extend([ShadeSolid, ShadeMaterial, ShadeRendered])
     classes.extend([ToggleGrid, ToggleWireframe])
     classes.extend([ShadeSmooth, ShadeFlat])
+    classes.append(ColorizeMaterials)
 
     return classes
 
