@@ -1895,16 +1895,52 @@ class PieChangeShading(Menu):
             r.active = view.shading.show_xray
             r.prop(view.shading, "xray_alpha", text="X-Ray")
 
-        if context.active_object:
-            if context.active_object.type == "MESH":
+        active = context.active_object
+
+        if active:
+            if active.type == "MESH":
+                mesh = active.data
+
                 col.separator()
                 row = col.split(percentage=0.55)
                 r = row.split().row(align=True)
                 r.operator("machin3.shade_smooth", text="Smooth", icon="MATSPHERE")
                 r.operator("machin3.shade_flat", text="Flat", icon="MATCUBE")
-                row.prop(context.active_object.data, "use_auto_smooth")
-                if context.active_object.data.use_auto_smooth:
-                    col.prop(context.active_object.data, "auto_smooth_angle")
+                row.prop(mesh, "use_auto_smooth")
+                if mesh.use_auto_smooth:
+                    if mesh.has_custom_normals:
+                        col.operator("mesh.customdata_custom_splitnormals_clear", text="Clear Custom Normals")
+                    else:
+                        col.prop(mesh, "auto_smooth_angle")
+
+                if context.mode == "EDIT_MESH":
+                    row = col.row(align=True)
+                    row.prop(view.overlay, "show_vertex_normals", text="", icon='VERTEXSEL')
+                    row.prop(view.overlay, "show_split_normals", text="", icon='LOOPSEL')
+                    row.prop(view.overlay, "show_face_normals", text="", icon='FACESEL')
+
+                    r = row.row(align=True)
+                    r.active = view.overlay.show_vertex_normals or view.overlay.show_face_normals or view.overlay.show_split_normals
+                    r.prop(view.overlay, "normals_length", text="Size")
+
+
+        if context.mode == "EDIT_MESH":
+            col.separator()
+            # row = col.row()
+            # row.prop(mesh, "show_edges", text="Edges")
+            # row.prop(mesh, "show_faces", text="Faces")
+
+            row = col.row(align=True)
+            row.prop(mesh, "show_edge_crease", text="Creases", toggle=True)
+            row.prop(mesh, "show_edge_sharp", text="Sharp", toggle=True)
+            row.prop(mesh, "show_edge_bevel_weight", text="Bevel", toggle=True)
+
+            if not bpy.app.build_options.freestyle:
+                row.prop(mesh, "show_edge_seams", text="Seams", toggle=True)
+
+
+
+
 
     def draw_center_column(self, view, col):
         row = col.split(percentage=0.42)
