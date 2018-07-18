@@ -1563,7 +1563,8 @@ class PieViewsAndCams(Menu):
         # ob = bpy.context.object
         # obj = context.object
         scene = context.scene
-        r3d = context.space_data.region_3d
+        view = context.space_data
+        r3d = view.region_3d
         # rd = scene.render
 
         # align_active = bpy.context.scene.machin3.pieviewsalignactive
@@ -1633,11 +1634,8 @@ class PieViewsAndCams(Menu):
         row.operator("view3d.view_camera", text="View Cam", icon='VISIBLE_IPO_ON')
         row.operator("view3d.camera_to_view", text="Cam to view", icon='MAN_TRANS')
 
-        if context.space_data.lock_camera is False:
-            column.operator("wm.context_toggle", text="Lock Cam to View", icon='UNLOCKED').data_path = "space_data.lock_camera"
-        elif context.space_data.lock_camera is True:
-            column.operator("wm.context_toggle", text="Lock Cam to View", icon='LOCKED').data_path = "space_data.lock_camera"
-
+        text, icon = ("Unlock Cam from View", "UNLOCKED") if view.lock_camera else ("Lock Camera to View", "LOCKED")
+        column.operator("wm.context_toggle", text=text, icon=icon).data_path = "space_data.lock_camera"
 
         # 3 - BOTTOM - RIGHT
         box = pie.split()
@@ -1645,6 +1643,8 @@ class PieViewsAndCams(Menu):
 
         text, icon = ("Orthographic", "MESH_CUBE") if r3d.is_perspective else ("Perspective", "VIEW3D")
         column.operator("view3d.view_persportho", text=text, icon=icon)
+
+
 
 
 class PieSnaping(Menu):
