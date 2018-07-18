@@ -11,6 +11,7 @@ rendered_show_overlays = False
 class ShadeSolid(bpy.types.Operator):
     bl_idname = "machin3.shade_solid"
     bl_label = "Shade Solid"
+    bl_description = "Switch to SOLID shading\nIn SOLID shading mode: Toggle Overlays"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -35,6 +36,7 @@ class ShadeSolid(bpy.types.Operator):
 class ShadeMaterial(bpy.types.Operator):
     bl_idname = "machin3.shade_material"
     bl_label = "Shade Material"
+    bl_description = "Switch to MATERIAL shading\nIn MATERIAL shading mode: Toggle Overlays"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -59,6 +61,7 @@ class ShadeMaterial(bpy.types.Operator):
 class ShadeRendered(bpy.types.Operator):
     bl_idname = "machin3.shade_rendered"
     bl_label = "Shade Rendered"
+    bl_description = "Switch to RENDERED shading\nIn RENDERED shading mode: Toggle Overlays"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):

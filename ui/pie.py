@@ -1580,22 +1580,30 @@ class PieViewsAndCams(Menu):
         op = pie.operator("machin3.view_axis", text="Top")
         op.axis='TOP'
         # 8 - TOP
+
         box = pie.split()
-        column = box.column()
+        # box = pie.box().split()
 
-        op = column.operator("machin3.view_axis", text="Bottom")
-        op.axis='BOTTOM'
+        b = box.box()
+        column = b.column()
+        self.draw_left_column(scene, view, column)
 
-        row = column.row(align=True)
-        op = row.operator("machin3.view_axis", text="Left")
-        op.axis='LEFT'
+        b = box.box()
+        column = b.column()
+        self.draw_center_column(column)
 
-        op = row.operator("machin3.view_axis", text="Back")
-        op.axis='BACK'
+        b = box.box()
+        column = b.column()
+        self.draw_right_column(r3d, column)
+
 
         # 7 - TOP - LEFT
         pie.separator()
+
         # 9 - TOP - RIGHT
+        pie.separator()
+
+
         """
         box = pie.split()
         column = box.column()
@@ -1623,28 +1631,40 @@ class PieViewsAndCams(Menu):
         column.separator()
         column.separator()
         # """
-        pie.separator()
 
         # 1 - BOTTOM - LEFT
-        box = pie.split()
-        column = box.column()
+        pie.separator()
 
-        column.prop(scene, "camera", text="Active")
-        row = column.row(align=True)
+        # 3 - BOTTOM - RIGHT
+        pie.separator()
+
+    def draw_left_column(self, scene, view, col):
+        col.scale_x = 1.7
+
+        col.prop(scene, "camera", text="Active")
+        row = col.row(align=True)
         row.operator("view3d.view_camera", text="View Cam", icon='VISIBLE_IPO_ON')
         row.operator("view3d.camera_to_view", text="Cam to view", icon='MAN_TRANS')
 
         text, icon = ("Unlock Cam from View", "UNLOCKED") if view.lock_camera else ("Lock Camera to View", "LOCKED")
-        column.operator("wm.context_toggle", text=text, icon=icon).data_path = "space_data.lock_camera"
+        col.operator("wm.context_toggle", text=text, icon=icon).data_path = "space_data.lock_camera"
 
-        # 3 - BOTTOM - RIGHT
-        box = pie.split()
-        column = box.column()
 
+
+    def draw_center_column(self, col):
+        op = col.operator("machin3.view_axis", text="Bottom")
+        op.axis='BOTTOM'
+
+        row = col.row(align=True)
+        op = row.operator("machin3.view_axis", text="Left")
+        op.axis='LEFT'
+
+        op = row.operator("machin3.view_axis", text="Back")
+        op.axis='BACK'
+
+    def draw_right_column(self, r3d, col):
         text, icon = ("Orthographic", "MESH_CUBE") if r3d.is_perspective else ("Perspective", "VIEW3D")
-        column.operator("view3d.view_persportho", text=text, icon=icon)
-
-
+        col.operator("view3d.view_persportho", text=text, icon=icon)
 
 
 class PieSnaping(Menu):
@@ -1807,25 +1827,6 @@ class PieChangeShading(Menu):
     bl_idname = "VIEW3D_MT_MACHIN3_change_shading"
     bl_label = "Change Shading"
 
-
-    def get_text_icon(self, context, shading):
-        if context.space_data.shading.type == shading:
-            text = "Toggle Overlays"
-            icon = "WIRE"
-        else:
-            if shading == "SOLID":
-                text = "Solid"
-                icon = "SOLID"
-            elif shading == "MATERIAL":
-                text = "LookDev"
-                icon = "MATERIAL"
-            elif shading == "RENDERED":
-                text = "Rendered"
-                icon = "SMOOTH"
-
-        return text, icon
-
-
     def draw(self, context):
         layout = self.layout
 
@@ -1874,10 +1875,7 @@ class PieChangeShading(Menu):
         # 3 - BOTTOM - RIGHT
         pie.separator()
 
-
     def draw_left_column(self, context, view, col):
-        col.scale_x = 0.5
-
         row = col.split(percentage=0.45)
         row.operator("machin3.toggle_grid", text="Grid Toggle", icon="GRID")
         r = row.split().row(align=True)
@@ -1909,20 +1907,6 @@ class PieChangeShading(Menu):
                     col.prop(context.active_object.data, "auto_smooth_angle")
 
     def draw_center_column(self, view, col):
-        col.scale_x = 1.5
-
-        # row = col.row()
-        # row.prop(view.overlay, "show_text", text="Text Info")
-        # row.prop(view, "show_gizmo")
-
-        # if view.show_gizmo:
-            # row = col.row(align=True)
-            # # row.active = view.show_gizmo
-            # row.prop(view, "show_gizmo_navigate", text="Navigate", toggle=True)
-            # row.prop(view, "show_gizmo_context", text="Object", toggle=True)
-            # row.prop(view, "show_gizmo_tool", text="Tools", toggle=True)
-
-        # col.separator()
         row = col.split(percentage=0.42)
         row.prop(view.overlay, "show_cursor", text="3D Cursor")
         r = row.split().row(align=True)
@@ -1936,8 +1920,6 @@ class PieChangeShading(Menu):
         col.prop(view.overlay, "show_relationship_lines")
 
     def draw_right_column(self, view, col):
-        col.scale_x = 0.5
-
         if view.shading.type == "SOLID":
 
             # light type
@@ -1962,6 +1944,26 @@ class PieChangeShading(Menu):
             elif view.shading.color_type == 'MATERIAL':
                 col.operator("machin3.colorize_materials", icon='MATERIAL')
 
+        elif view.shading.type == "MATERIAL":
+                col.prop(view.shading, "use_scene_lights")
+                col.prop(view.shading, "use_scene_world")
+
+    def get_text_icon(self, context, shading):
+        if context.space_data.shading.type == shading:
+            text = "Toggle Overlays"
+            icon = "WIRE"
+        else:
+            if shading == "SOLID":
+                text = "Solid"
+                icon = "SOLID"
+            elif shading == "MATERIAL":
+                text = "LookDev"
+                icon = "MATERIAL"
+            elif shading == "RENDERED":
+                text = "Rendered"
+                icon = "SMOOTH"
+
+        return text, icon
 
 
 class PieAlign(Menu):
