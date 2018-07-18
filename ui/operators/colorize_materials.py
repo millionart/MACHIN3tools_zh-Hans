@@ -13,10 +13,10 @@ class ColorizeMaterials(bpy.types.Operator):
                 tree = mat.node_tree
                 output = tree.nodes.get("Material Output")
                 if output:
-                    i = output.inputs.get("Surface")
-                    if i:
-                        if i.links:
-                            node = i.links[0].from_node
+                    surf = output.inputs.get("Surface")
+                    if surf:
+                        if surf.links:
+                            node = surf.links[0].from_node
 
                             if node:
                                 color = node.inputs.get("Base Color")

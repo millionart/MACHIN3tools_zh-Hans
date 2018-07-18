@@ -110,14 +110,23 @@ def register_pie_keys(wm, keymaps):
     kmi.active = True
     keymaps.append((km, kmi))
 
+    # VIEWS and CAMS
+
+    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'PAGE_DOWN', 'PRESS')
+    kmi.properties.name = "VIEW3D_MT_MACHIN3_views_and_cams"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
 
 def get_classes():
-    from . ui.pie import PieSelectMode, PieChangeShading
+    from . ui.pie import PieSelectMode, PieChangeShading, PieViewsAndCams
     from . ui.operators.select_mode import ToggleEditMode, SelectVertexMode, SelectEdgeMode, SelectFaceMode
     from . ui.operators.change_shading import ShadeSolid, ShadeMaterial, ShadeRendered
     from . ui.operators.toggle_grid_wire import ToggleGrid, ToggleWireframe
     from . ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
     from . ui.operators.colorize_materials import ColorizeMaterials
+    from . ui.operators.view_axis import ViewAxis
 
     classes = []
 
@@ -136,6 +145,10 @@ def get_classes():
     classes.extend([ToggleGrid, ToggleWireframe])
     classes.extend([ShadeSmooth, ShadeFlat])
     classes.append(ColorizeMaterials)
+
+    # VIEWS and CAMS
+    classes.append(PieViewsAndCams)
+    classes.append(ViewAxis)
 
     return classes
 

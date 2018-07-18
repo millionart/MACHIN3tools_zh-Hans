@@ -1552,51 +1552,50 @@ class SetPreview(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class PieViewNumpad(Menu):
-    bl_idname = "pie.viewnumpad"
-    bl_label = "Pie Views Numpad"
+class PieViewsAndCams(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_views_and_cams"
+    bl_label = "Views and Cams"
 
     def draw(self, context):
         layout = self.layout
-        ob = bpy.context.object
-        obj = context.object
         pie = layout.menu_pie()
+
+        # ob = bpy.context.object
+        # obj = context.object
         scene = context.scene
-        rd = scene.render
+        r3d = context.space_data.region_3d
+        # rd = scene.render
 
-        align_active = bpy.context.scene.machin3.pieviewsalignactive
+        # align_active = bpy.context.scene.machin3.pieviewsalignactive
 
-        #4 - LEFT
-        op = pie.operator("view3d.viewnumpad", text="Front")
-        op.type='FRONT'
-        op.align_active = align_active
-        #6 - RIGHT
-        op = pie.operator("view3d.viewnumpad", text="Right")
-        op.type='RIGHT'
-        op.align_active = align_active
-        #2 - BOTTOM
-        op = pie.operator("view3d.viewnumpad", text="Top")
-        op.type='TOP'
-        op.align_active = align_active
-        #8 - TOP
+        # 4 - LEFT
+        op = pie.operator("machin3.view_axis", text="Front")
+        op.axis='FRONT'
+
+        # 6 - RIGHT
+        op = pie.operator("machin3.view_axis", text="Right")
+        op.axis='RIGHT'
+        # 2 - BOTTOM
+        op = pie.operator("machin3.view_axis", text="Top")
+        op.axis='TOP'
+        # 8 - TOP
         box = pie.split()
         column = box.column()
 
-        op = column.operator("view3d.viewnumpad", text="Bottom")
-        op.type='BOTTOM'
-        op.align_active = align_active
+        op = column.operator("machin3.view_axis", text="Bottom")
+        op.axis='BOTTOM'
 
         row = column.row(align=True)
-        op = row.operator("view3d.viewnumpad", text="Left")
-        op.type='LEFT'
-        op.align_active = align_active
-        op = row.operator("view3d.viewnumpad", text="Back")
-        op.type='BACK'
-        op.align_active = align_active
+        op = row.operator("machin3.view_axis", text="Left")
+        op.axis='LEFT'
 
-        #7 - TOP - LEFT
+        op = row.operator("machin3.view_axis", text="Back")
+        op.axis='BACK'
+
+        # 7 - TOP - LEFT
         pie.separator()
-        #9 - TOP - RIGHT
+        # 9 - TOP - RIGHT
+        """
         box = pie.split()
         column = box.column()
         column.scale_x = 0.8
@@ -1622,15 +1621,16 @@ class PieViewNumpad(Menu):
         column.separator()
         column.separator()
         column.separator()
+        # """
+        pie.separator()
 
-
-        #1 - BOTTOM - LEFT
+        # 1 - BOTTOM - LEFT
         box = pie.split()
         column = box.column()
 
         column.prop(scene, "camera", text="Active")
         row = column.row(align=True)
-        row.operator("view3d.viewnumpad", text="View Cam", icon='VISIBLE_IPO_ON').type='CAMERA'
+        row.operator("view3d.view_camera", text="View Cam", icon='VISIBLE_IPO_ON')
         row.operator("view3d.camera_to_view", text="Cam to view", icon='MAN_TRANS')
 
         if context.space_data.lock_camera is False:
@@ -1639,12 +1639,12 @@ class PieViewNumpad(Menu):
             column.operator("wm.context_toggle", text="Lock Cam to View", icon='LOCKED').data_path = "space_data.lock_camera"
 
 
-        #3 - BOTTOM - RIGHT
+        # 3 - BOTTOM - RIGHT
         box = pie.split()
         column = box.column()
 
-        column.prop(bpy.context.scene.machin3, "pieviewsalignactive")
-        column.operator("persp.orthoview", text="Persp/Ortho", icon='RESTRICT_VIEW_OFF')
+        text, icon = ("Orthographic", "MESH_CUBE") if r3d.is_perspective else ("Perspective", "VIEW3D")
+        column.operator("view3d.view_persportho", text=text, icon=icon)
 
 
 class PieSnaping(Menu):
@@ -2217,50 +2217,3 @@ class PIE_IMAGE_MT_uvs_select_mode(Menu):
             props = pie.operator("wm.context_set_string", text="Island", icon='UV_ISLANDSEL')
             props.value = 'ISLAND'
             props.data_path = "tool_settings.uv_select_mode"
-
-
-#Pie UV's Weld/Align
-class Pie_UV_W(Menu):
-    bl_idname = "pie.uvsweldalign"
-    bl_label = "Pie UV's Welde/Align"
-
-    def draw(self, context):
-        layout = self.layout
-        pie = layout.menu_pie()
-        #4 - LEFT
-        pie.operator("uv.align", text="Align X").axis = 'ALIGN_X'
-        #6 - RIGHT
-        pie.operator("uv.align", text="Align Y").axis = 'ALIGN_Y'
-        #2 - BOTTOM
-        pie.operator("uv.align", text="Straighten").axis = 'ALIGN_S'
-        #8 - TOP
-        pie.operator("uv.align", text="Align Auto").axis = 'ALIGN_AUTO'
-        #7 - TOP - LEFT
-        pie.operator("uv.weld", text="Weld", icon='AUTOMERGE_ON')
-        #9 - TOP - RIGHT
-        pie.operator("uv.remove_doubles", text="Remouve doubles")
-        #1 - BOTTOM - LEFT
-        pie.operator("uv.align", text="Straighten X").axis = 'ALIGN_T'
-        #3 - BOTTOM - RIGHT
-        pie.operator("uv.align", text="Straighten Y").axis = 'ALIGN_U'
-
-#Pie Texture Paint Pie Menu - W
-class PieTexturePainttPie(Menu):
-    bl_idname = "pie.texturepaint"
-    bl_label = "Pie Texture Paint"
-
-    def draw(self, context):
-        layout = self.layout
-        pie = layout.menu_pie()
-        #4 - LEFT
-        pie.operator("paint.brush_select", text="Fill", icon='BRUSH_TEXFILL').texture_paint_tool='FILL'
-        #6 - RIGHT
-        pie.operator("paint.brush_select", text="Draw", icon='BRUSH_TEXDRAW').texture_paint_tool='DRAW'
-        #2 - BOTTOM
-        pie.operator("paint.brush_select", text='Soften', icon='BRUSH_SOFTEN').texture_paint_tool='SOFTEN'
-        #8 - TOP
-        pie.operator("paint.brush_select", text='Mask', icon='BRUSH_TEXMASK').texture_paint_tool='MASK'
-        #7 - TOP - LEFT
-        pie.operator("paint.brush_select", text='Smear', icon='BRUSH_SMEAR').texture_paint_tool='SMEAR'
-        #9 - TOP - RIGHT
-        pie.operator("paint.brush_select", text='Clone', icon='BRUSH_CLONE').texture_paint_tool='CLONE'
