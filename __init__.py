@@ -123,7 +123,7 @@ def get_classes():
     from . ui.pie import PieSelectMode, PieChangeShading, PieViewsAndCams
     from . ui.operators.select_mode import ToggleEditMode, SelectVertexMode, SelectEdgeMode, SelectFaceMode
     from . ui.operators.change_shading import ShadeSolid, ShadeMaterial, ShadeRendered
-    from . ui.operators.toggle_grid_wire import ToggleGrid, ToggleWireframe
+    from . ui.operators.toggle_grid_wire_outline import ToggleGrid, ToggleWireframe, ToggleOutline
     from . ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
     from . ui.operators.colorize_materials import ColorizeMaterials
     from . ui.operators.view_axis import ViewAxis
@@ -142,7 +142,7 @@ def get_classes():
     # CHANGE SHADING
     classes.append(PieChangeShading)
     classes.extend([ShadeSolid, ShadeMaterial, ShadeRendered])
-    classes.extend([ToggleGrid, ToggleWireframe])
+    classes.extend([ToggleGrid, ToggleWireframe, ToggleOutline])
     classes.extend([ShadeSmooth, ShadeFlat])
     classes.append(ColorizeMaterials)
 

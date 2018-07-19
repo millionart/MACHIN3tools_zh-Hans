@@ -3,6 +3,8 @@ from bpy.props import FloatProperty
 from ... utils import MACHIN3 as m3
 
 
+# TODO: unique pres-set colors for decal types
+
 class ColorizeMaterials(bpy.types.Operator):
     bl_idname = "machin3.colorize_materials"
     bl_label = "Colorize Materials"

@@ -61,3 +61,15 @@ class ToggleWireframe(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
+class ToggleOutline(bpy.types.Operator):
+    bl_idname = "machin3.toggle_outline"
+    bl_label = "Toggle Outline"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        shading = context.space_data.shading
+
+        shading.show_object_outline = not shading.show_object_outline
+
+        return {'FINISHED'}

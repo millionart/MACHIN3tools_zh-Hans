@@ -1594,7 +1594,7 @@ class PieViewsAndCams(Menu):
 
         b = box.box()
         column = b.column()
-        self.draw_right_column(r3d, column)
+        self.draw_right_column(view, r3d, column)
 
 
         # 7 - TOP - LEFT
@@ -1649,8 +1649,6 @@ class PieViewsAndCams(Menu):
         text, icon = ("Unlock Cam from View", "UNLOCKED") if view.lock_camera else ("Lock Camera to View", "LOCKED")
         col.operator("wm.context_toggle", text=text, icon=icon).data_path = "space_data.lock_camera"
 
-
-
     def draw_center_column(self, col):
         op = col.operator("machin3.view_axis", text="Bottom")
         op.axis='BOTTOM'
@@ -1662,9 +1660,10 @@ class PieViewsAndCams(Menu):
         op = row.operator("machin3.view_axis", text="Back")
         op.axis='BACK'
 
-    def draw_right_column(self, r3d, col):
+    def draw_right_column(self, view, r3d, col):
         text, icon = ("Orthographic", "MESH_CUBE") if r3d.is_perspective else ("Perspective", "VIEW3D")
         col.operator("view3d.view_persportho", text=text, icon=icon)
+        col.prop(view, "lens")
 
 
 class PieSnaping(Menu):
@@ -1861,7 +1860,7 @@ class PieChangeShading(Menu):
 
         b = box.box()
         column = b.column()
-        self.draw_right_column(view, column)
+        self.draw_right_column(context, view, column)
 
         # 7 - TOP - LEFT
         pie.separator()
@@ -1895,8 +1894,11 @@ class PieChangeShading(Menu):
             r.active = view.shading.show_xray
             r.prop(view.shading, "xray_alpha", text="X-Ray")
 
-        active = context.active_object
+        row = col.split(percentage=0.45)
+        row.operator("machin3.toggle_outline", text="(Q) Outline Toggle")
+        row.prop(view.shading, "object_outline_color", text="")
 
+        active = context.active_object
         if active:
             if active.type == "MESH":
                 mesh = active.data
@@ -1938,10 +1940,6 @@ class PieChangeShading(Menu):
             if not bpy.app.build_options.freestyle:
                 row.prop(mesh, "show_edge_seams", text="Seams", toggle=True)
 
-
-
-
-
     def draw_center_column(self, view, col):
         row = col.split(percentage=0.42)
         row.prop(view.overlay, "show_cursor", text="3D Cursor")
@@ -1955,7 +1953,7 @@ class PieChangeShading(Menu):
         row.prop(view.overlay, "show_face_orientation")
         col.prop(view.overlay, "show_relationship_lines")
 
-    def draw_right_column(self, view, col):
+    def draw_right_column(self, context, view, col):
         if view.shading.type == "SOLID":
 
             # light type
@@ -1981,8 +1979,82 @@ class PieChangeShading(Menu):
                 col.operator("machin3.colorize_materials", icon='MATERIAL')
 
         elif view.shading.type == "MATERIAL":
-                col.prop(view.shading, "use_scene_lights")
-                col.prop(view.shading, "use_scene_world")
+
+            # use scene lights and world
+            studio_worlds = [w for w in context.user_preferences.studio_lights if "datafiles/studiolights/world" in w.path]
+
+            if any([bpy.data.lights, studio_worlds]):
+                row = col.row()
+                if bpy.data.lights:
+                    row.prop(view.shading, "use_scene_lights")
+
+                if studio_worlds:
+                    row.prop(view.shading, "use_scene_world")
+
+                    # world hdri selection and manipulation
+                    if not view.shading.use_scene_world:
+                            row = col.row()
+                            row.scale_y = 0.6
+                            row.template_icon_view(view.shading, "studio_light")
+
+                            col.prop(view.shading, "studiolight_rotate_z", text="Rotation")
+                            col.prop(view.shading, "studiolight_background_alpha")
+
+                if view.shading.use_scene_world or not studio_worlds:
+                    if context.scene.world:
+                        tree = context.scene.world.node_tree
+
+                        output = tree.nodes.get("World Output")
+
+                        if output:
+                            input_surf = output.inputs.get("Surface")
+
+                            if input_surf:
+                                if input_surf.links:
+                                    node = input_surf.links[0].from_node
+
+                                    if node.type == "BACKGROUND":
+                                        color = node.inputs['Color']
+                                        strength = node.inputs['Strength']
+
+                                        if color.links:
+                                            col.prop(strength, "default_value", text="Background Strength")
+                                        else:
+                                            row = col.split(percentage=0.7)
+                                            row.prop(strength, "default_value", text="Background Strength")
+                                            row.prop(color, "default_value", text="")
+
+                col.separator()
+
+            # eevee settings
+
+            icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
+            col.prop(context.scene.eevee, "use_ssr", icon=icon)
+            if context.scene.eevee.use_ssr:
+                col.prop(context.scene.eevee, "ssr_thickness")
+
+            icon = "TRIA_DOWN" if context.scene.eevee.use_gtao else "TRIA_RIGHT"
+            col.prop(context.scene.eevee, "use_gtao", icon=icon)
+            if context.scene.eevee.use_gtao:
+                row = col.row(align=True)
+                row.prop(context.scene.eevee, "gtao_distance")
+                row.prop(context.scene.eevee, "gtao_factor")
+
+            icon = "TRIA_DOWN" if context.scene.eevee.use_bloom else "TRIA_RIGHT"
+            col.prop(context.scene.eevee, "use_bloom", icon=icon)
+            if context.scene.eevee.use_bloom:
+                row = col.row(align=True)
+                row.prop(context.scene.eevee, "bloom_threshold")
+                row.prop(context.scene.eevee, "bloom_radius")
+
+            icon = "TRIA_DOWN" if context.scene.eevee.use_volumetric else "TRIA_RIGHT"
+            col.prop(context.scene.eevee, "use_volumetric", icon=icon)
+            if context.scene.eevee.use_volumetric:
+                row = col.row(align=True)
+                row.prop(context.scene.eevee, "volumetric_start")
+                row.prop(context.scene.eevee, "volumetric_end")
+
+
 
     def get_text_icon(self, context, shading):
         if context.space_data.shading.type == shading:
