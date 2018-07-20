@@ -30,8 +30,9 @@ bl_info = {
 
 
 import bpy
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, StringProperty, CollectionProperty
 from bpy.utils import register_class, unregister_class
+from . properties import AppendMatsCollection, AppendMatsUIList
 from . utils import MACHIN3 as m3
 
 
@@ -63,26 +64,34 @@ preferences_tabs = [("MODULES", "Modules", ""),
                     ("CUSTOMKEYS", "Custom Keys", "")]
 
 
-class MACHIN3Preferences(bpy.types.AddonPreferences):
+
+
+class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
     M3path = __path__[0]
 
+    appendmats = CollectionProperty(type=AppendMatsCollection)
+    appendmatsIDX = IntProperty()
+    newappendmatname = StringProperty()
+
     # TABS
 
-    tabs = EnumProperty(name="Tabs", items=preferences_tabs, default="MODULES")
+    # tabs = EnumProperty(name="Tabs", items=preferences_tabs, default="MODULES")
 
 
     def draw(self, context):
         layout=self.layout
 
-        wm = bpy.context.window_manager
-        kc = wm.keyconfigs.user
+        # wm = bpy.context.window_manager
+        # kc = wm.keyconfigs.user
 
-        column = layout.column(align=True)
-        row = column.row()
-        row.prop(self, "tabs", expand=True)
 
-        box = column.box()
+        # column = layout.column(align=True)
+        # row = column.row()
+        # row.prop(self, "tabs", expand=True)
+
+        # box = column.box()
+
 
         # if self.tabs == "MODULES":
             # self.draw_modules(box, kc)
@@ -91,6 +100,31 @@ class MACHIN3Preferences(bpy.types.AddonPreferences):
         # elif self.tabs == "PIEMENUS":
             # self.draw_pies(box, kc)
 
+
+        box = layout.box()
+
+        column = box.column()
+
+        row = column.row()
+        rows = len(self.appendmats) if len(self.appendmats) > 6 else 6
+        row.template_list("AppendMatsUIList", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
+
+
+        c = row.column(align=True)
+        c.operator("machin3.move_appendmat", text="", icon="TRIA_UP").direction = "UP"
+        c.operator("machin3.move_appendmat", text="", icon="TRIA_DOWN").direction = "DOWN"
+
+        c.separator()
+        c.separator()
+        c.operator("machin3.rename_appendmat", text="", icon="OUTLINER_DATA_FONT")
+        c.separator()
+        c.separator()
+        c.operator("machin3.clear_appendmats", text="", icon="LOOP_BACK")
+        c.operator("machin3.remove_appendmat", text="", icon="CANCEL")
+
+        row = column.row()
+        row.prop(self, "newappendmatname")
+        row.operator("machin3.add_appendmat", text="", icon="ZOOMIN")
 
 
 def register_pie_keys(wm, keymaps):
@@ -118,19 +152,40 @@ def register_pie_keys(wm, keymaps):
     kmi.active = True
     keymaps.append((km, kmi))
 
+    # SAVE, OPEN, APPEND
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Window')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'S', 'PRESS', ctrl=True)
+    kmi.properties.name = "VIEW3D_MT_MACHIN3_save_open_append"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
 
 def get_classes():
-    from . ui.pie import PieSelectMode, PieChangeShading, PieViewsAndCams
+    from . ui.pie import PieSelectMode, PieChangeShading, PieViewsAndCams, PieSaveOpenAppend
+    from . ui.menu import MenuAppendMaterials
     from . ui.operators.select_mode import ToggleEditMode, SelectVertexMode, SelectEdgeMode, SelectFaceMode
     from . ui.operators.change_shading import ShadeSolid, ShadeMaterial, ShadeRendered
     from . ui.operators.toggle_grid_wire_outline import ToggleGrid, ToggleWireframe, ToggleOutline
     from . ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
     from . ui.operators.colorize_materials import ColorizeMaterials
     from . ui.operators.view_axis import ViewAxis
+    from . ui.operators.save_load_append import SaveIncremental, LoadMostRecent, AppendWorld, AppendMaterial
+    from . ui.operators.appendmats import Add, Move, Rename, Clear, Remove
 
     classes = []
 
-    # pie menus
+    # ui lists
+    classes.append(AppendMatsUIList)
+
+    # collections and property groups
+    classes.append(AppendMatsCollection)
+
+    # addon preferences
+    classes.append(MACHIN3toolsPreferences)
+
+
+    # menus and their operators
 
     # SELECT MODE
     classes.append(PieSelectMode)
@@ -149,6 +204,14 @@ def get_classes():
     # VIEWS and CAMS
     classes.append(PieViewsAndCams)
     classes.append(ViewAxis)
+
+    # SAVE, OPEN, Append
+    classes.append(PieSaveOpenAppend)
+    classes.append(MenuAppendMaterials)
+    classes.extend([SaveIncremental, LoadMostRecent])
+    classes.extend([AppendWorld, AppendMaterial])
+    classes.extend([Add, Move, Rename, Clear, Remove])
+
 
     return classes
 

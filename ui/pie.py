@@ -1081,7 +1081,7 @@ class ClearAll(bpy.types.Operator):
 #    Open/Save/...     #
 ########################
 
-#External Data
+#ExtVernal Data
 class ExternalData(bpy.types.Menu):
     bl_idname = "external.data"
     bl_label = "External Data"
@@ -1099,53 +1099,6 @@ class ExternalData(bpy.types.Menu):
         layout.operator("file.report_missing_files", text="Report Missing Files")
         layout.operator("file.find_missing_files", text="Find Missing Files")
 
-#Save Incremental
-class FileIncrementalSave(bpy.types.Operator):
-    bl_idname = "file.save_incremental"
-    bl_label = "Save Incremental"
-    bl_options = {"REGISTER"}
-
-    def execute(self, context):
-        f_path = bpy.data.filepath
-        if f_path.find("_") != -1:
-            str_nb = f_path.rpartition("_")[-1].rpartition(".blend")[0]
-            int_nb = int(str_nb)
-            new_nb = str_nb.replace(str(int_nb),str(int_nb+1))
-            output = f_path.replace(str_nb,new_nb)
-
-            i = 1
-            while os.path.isfile(output):
-                str_nb = f_path.rpartition("_")[-1].rpartition(".blend")[0]
-                i += 1
-                new_nb = str_nb.replace(str(int_nb),str(int_nb+i))
-                output = f_path.replace(str_nb,new_nb)
-        else:
-            output = f_path.rpartition(".blend")[0]+"_001"+".blend"
-
-        bpy.ops.wm.save_as_mainfile(filepath=output)
-        self.report({'INFO'}, "File: {0} - Created at: {1}".format(output[len(bpy.path.abspath("//")):], output[:len(bpy.path.abspath("//"))]))
-        return {'FINISHED'}
-
-
-# Load Most Recent
-class LoadMostRecent(bpy.types.Operator):
-    bl_idname = "machin3.load_most_recent"
-    bl_label = "Load Most Recent"
-    bl_options = {"REGISTER"}
-
-    def execute(self, context):
-        recent_path = bpy.utils.user_resource('CONFIG', "recent-files.txt")
-
-        try:
-            with open(recent_path) as file:
-                recent_files = file.read().splitlines()
-        except (IOError, OSError, FileNotFoundError):
-            recent_files = []
-
-        most_recent = recent_files[0]
-
-        bpy.ops.wm.open_mainfile(filepath=most_recent)
-        return {'FINISHED'}
 
 ######################
 #    Views Ortho     #
@@ -2000,34 +1953,34 @@ class PieChangeShading(Menu):
                             col.prop(view.shading, "studiolight_rotate_z", text="Rotation")
                             col.prop(view.shading, "studiolight_background_alpha")
 
-                if view.shading.use_scene_world or not studio_worlds:
-                    if context.scene.world:
-                        tree = context.scene.world.node_tree
+            # world background node props
 
-                        output = tree.nodes.get("World Output")
+            if view.shading.use_scene_world or not studio_worlds:
+                if context.scene.world:
+                    tree = context.scene.world.node_tree
+                    output = tree.nodes.get("World Output")
 
-                        if output:
-                            input_surf = output.inputs.get("Surface")
+                    if output:
+                        input_surf = output.inputs.get("Surface")
 
-                            if input_surf:
-                                if input_surf.links:
-                                    node = input_surf.links[0].from_node
+                        if input_surf:
+                            if input_surf.links:
+                                node = input_surf.links[0].from_node
 
-                                    if node.type == "BACKGROUND":
-                                        color = node.inputs['Color']
-                                        strength = node.inputs['Strength']
+                                if node.type == "BACKGROUND":
+                                    color = node.inputs['Color']
+                                    strength = node.inputs['Strength']
 
-                                        if color.links:
-                                            col.prop(strength, "default_value", text="Background Strength")
-                                        else:
-                                            row = col.split(percentage=0.7)
-                                            row.prop(strength, "default_value", text="Background Strength")
-                                            row.prop(color, "default_value", text="")
+                                    if color.links:
+                                        col.prop(strength, "default_value", text="Background Strength")
+                                    else:
+                                        row = col.split(percentage=0.7)
+                                        row.prop(strength, "default_value", text="Background Strength")
+                                        row.prop(color, "default_value", text="")
 
                 col.separator()
 
             # eevee settings
-
             icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
             col.prop(context.scene.eevee, "use_ssr", icon=icon)
             if context.scene.eevee.use_ssr:
@@ -2120,171 +2073,93 @@ class PieAlign(Menu):
 
 
 
-class MACHIN3Append(bpy.types.Operator):
-    bl_idname = "machin3.m3_append"
-    bl_label = "MACHIN3: Append"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    appendtype = EnumProperty(name="Append Type", items=[("MATERIAL", "Material", ""),
-                                                         ("WORLD", "World", "")], default="MATERIAL")
-
-    appendname = StringProperty(name="Append Name")
-
-    applymaterial = BoolProperty(name="Apply Material to Selection", default=True)
-
-    def draw(self, context):
-        layout = self.layout
-
-        column = layout.column()
-
-        if self.appendtype == "MATERIAL":
-            column.prop(self, "applymaterial")
-
-    def execute(self, context):
-        blendpath = "/home/x/TEMP/blender/Rendering/Materials9.blend"
-
-        fullpath = "%s/%s" % (blendpath, self.appendtype.capitalize())
-
-        # the append ops also unselects for some reason, so we need to get the selection before
-        if self.appendtype == "MATERIAL" and self.applymaterial and self.appendname != "ALL":
-            sel = m3.selected_objects()
-
-        if self.appendtype == "WORLD":
-            bpy.ops.wm.append(directory=fullpath, filename=self.appendname)
-
-            bpy.context.scene.cycles.film_transparent = False
-
-            world = bpy.data.worlds.get(self.appendname)
-
-            bpy.context.scene.world = world
-
-        elif self.appendtype == "MATERIAL":
-            if self.appendname == "ALL":
-                for name in m3_material_names:
-                    if name not in ["", "ALL"]:
-                        bpy.ops.wm.append(directory=fullpath, filename=name)
-            else:
-                bpy.ops.wm.append(directory=fullpath, filename=self.appendname)
-
-                if self.applymaterial:
-                    m3.select(sel)
-                    bpy.ops.object.apply_material(mat_to_assign=self.appendname)
-
-
-        return {'FINISHED'}
-
-
-
-m3_material_names = ["ALL",
-                     "base.black",
-                     "base.mid",
-                     "base.orange",
-                     "base.white",
-                     "",
-                     "clear.carbon_fiber",
-                     "clear.carbon_fiber.hex",
-                     "clear.hex",
-                     "",
-                     "metal.chrome",
-                     "metal.chrome.oxidized",
-                     "metal.dark",
-                     "metal.dark.shiny",
-                     "metal.mid",
-                     "metal.mid.knurling",
-                     "metal.muted.blue",
-                     "metal.muted.yellow",
-                     "",
-                     "painted.mid",
-                     "painted.orange.knurling",
-                     "painted.white",
-                     "",
-                     "plastic.mid",
-                     "plastic.red",
-                     "",
-                     "rubber.black.knurling",
-                     "rubber.mid.knurling",
-                     "rubber.white.knurling",
-                     "",
-                     "TEMPLATE"]
-
-
-
-class MACHIN3MaterialMenu(bpy.types.Menu):
-    bl_idname = "machin3.material_menu"
-    bl_label = "Append Marials"
-
-    def draw(self, context):
-        layout = self.layout
-
-        for name in m3_material_names:
-            if name:
-                if name == "ALL":
-                    op = layout.operator("machin3.m3_append", text=name, icon="MATERIAL_DATA")
-                else:
-                    # icon = "MATERIAL_DATA" if bpy.data.materials.get(name) else "BLANK1"
-                    mat = bpy.data.materials.get(name)
-                    icon_val = layout.icon(mat) if mat else 0
-
-                    op = layout.operator("machin3.m3_append", text=name, icon_value=icon_val)
-                op.appendtype = "MATERIAL"
-                op.appendname = name
-            else:
-                layout.separator()
-
-
-#Pie Save/Open
-class PieSaveOpen(Menu):
-    bl_idname = "pie.saveopen"
-    bl_label = "Pie Save/Open"
+class PieSaveOpenAppend(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_save_open_append"
+    bl_label = "Save, Open, Append"
 
     def draw(self, context):
         layout = self.layout
         pie = layout.menu_pie()
-        #4 - LEFT
+
+        # 4 - LEFT
         pie.operator("wm.read_homefile", text="New", icon='NEW')
-        #6 - RIGHT
-        pie.operator("file.save_incremental", text="Incremental Save", icon='SAVE_COPY')
-        #2 - BOTTOM
-        box = pie.split().column()
-        row = box.row(align=True)
-        # box.operator("import_scene.obj", text="Import OBJ", icon='IMPORT')
-        # box.operator("export_scene.obj", text="Export OBJ", icon='EXPORT')
-        box.separator()
-        box.operator("import_scene.fbx", text="Import FBX", icon='IMPORT')
-        box.operator("export_scene.fbx", text="Export FBX", icon='EXPORT')
-        #8 - TOP
-        pie.operator("wm.save_mainfile", text="Save", icon='FILE_TICK')
-        #7 - TOP - LEFT
-        pie.operator("wm.open_mainfile", text="Open file", icon='FILE_FOLDER')
-        #9 - TOP - RIGHT
+
+        # 6 - RIGHT
         pie.operator("wm.save_as_mainfile", text="Save As...", icon='SAVE_AS')
-        #1 - BOTTOM - LEFT
-        box = pie.split().column()
-        row = box.row(align=True)
-        box.operator("machin3.load_most_recent", text="(R) Load Most Recent", icon='FILE_FOLDER')
-        box.separator()
-        box.operator("wm.recover_auto_save", text="Recover Auto Save...", icon='RECOVER_AUTO')
-        box.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
-        box.operator("wm.revert_mainfile", text="Revert", icon='FILE_REFRESH')
-        #3 - BOTTOM - RIGHT
+
+        # 2 - BOTTOM
+
+        pie.operator_context = 'EXEC_DEFAULT'
+        pie.operator("wm.save_mainfile", text="Save", icon='FILE_TICK')
+        pie.operator_context = 'INVOKE_DEFAULT'
+
+        # 8 - TOP
         box = pie.split()
-        column = box.column()
-        column.operator("wm.link", text="Link", icon='LINK_BLEND')
-        column.operator("wm.append", text="Append", icon='APPEND_BLEND')
-        column.menu("external.data", text="External Data", icon='EXTERNAL_DATA')
+        # box = pie.box().split()
+
+        b = box.box()
+        column = b.column()
+        self.draw_left_column(column)
+
+        b = box.box()
+        column = b.column()
+        self.draw_center_column(column)
+
+        b = box.box()
+        column = b.column()
+        self.draw_right_column(column)
+
+        # 7 - TOP - LEFT
+        pie.separator()
+
+        # 9 - TOP - RIGHT
+        pie.separator()
+
+        # 1 - BOTTOM - LEFT
+        pie.operator("wm.open_mainfile", text="Open file", icon='FILE_FOLDER')
+
+        # 3 - BOTTOM - RIGHT
+        pie.operator("machin3.save_incremental", text="Incremental Save", icon='SAVE_COPY')
 
 
-        column = box.column()
-        op = column.operator("machin3.m3_append", text="World", icon='WORLD')
-        op.appendtype = "WORLD"
-        op.appendname = "MACHIN3"
+    def draw_left_column(self, col):
+        col.scale_x = 1.1
 
-        op = column.operator("wm.call_menu", text="Material", icon="MATERIAL_DATA")
-        op.name = "machin3.material_menu"
+        row = col.row()
+        row.operator("machin3.load_most_recent", text="(R) Most Recent", icon='FILE_FOLDER')
+        row.operator("wm.call_menu", text="All Recent", icon='FILE_FOLDER').name = "INFO_MT_file_open_recent"
+
+        col.separator()
+        col.operator("wm.recover_auto_save", text="Recover Auto Save...", icon='RECOVER_AUTO')
+        # col.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
+        col.operator("wm.revert_mainfile", text="Revert", icon='FILE_REFRESH')
+
+    def draw_center_column(self, col):
+        row = col.split(percentage=0.25)
+        row.label("Alembic")
+        r = row.row(align=True)
+        r.operator("wm.alembic_import", text="Import", icon='IMPORT')
+        r.operator("wm.alembic_export", text="Export", icon='EXPORT')
+
+        row = col.split(percentage=0.25)
+        row.label("Collada")
+        r = row.row(align=True)
+        r.operator("wm.collada_import", text="Import", icon='IMPORT')
+        r.operator("wm.collada_export", text="Export", icon='EXPORT')
+
+    def draw_right_column(self, col):
+        row = col.row()
+        r = row.row(align=True)
+        r.operator("wm.link", text="Link", icon='LINK_BLEND')
+        r.operator("wm.append", text="Append", icon='APPEND_BLEND')
+        row.operator("wm.call_menu", text="", icon='EXTERNAL_DATA').name = "INFO_MT_file_external_data"
+
+        col.separator()
+
+        col.operator("machin3.append_world", text="World", icon='WORLD')
+        col.operator("wm.call_menu", text="Material", icon='MATERIAL').name = "VIEW3D_MT_MACHIN3_append_materials"
 
 
-
-#Pie UV's Select Mode
 class PIE_IMAGE_MT_uvs_select_mode(Menu):
     bl_label = "UV Select Mode"
     bl_idname = "pie.uvsselectmode"

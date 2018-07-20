@@ -1,5 +1,5 @@
 import bpy
-from .. import M3utils as m3
+from ..utils import MACHIN3 as m3
 
 
 class VIEW3D_MT_edit_mesh_machin3tools(bpy.types.Menu):
@@ -74,3 +74,35 @@ class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
         if m3.M3_prefs().activate_SymmetrizeGPencil:
             if context.gpencil_data:
                 column.operator("machin3.symmetrize_gpencil", text="Symmetrize GPencil")
+
+
+class MenuAppendMaterials(bpy.types.Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_append_materials"
+    bl_label = "Append Marials"
+
+    def draw(self, context):
+        layout = self.layout
+
+        names = [mat.name for mat in m3.M3_prefs().appendmats]
+
+        if names:
+            names.insert(0, "ALL")
+        else:
+            layout.label("No Materials added yet!", icon="ERROR")
+            layout.label("Check MACHIN3tools prefs.", icon="INFO")
+
+
+        for name in names:
+            n = name.replace("-", "")
+            if name == "ALL":
+                op = layout.operator("machin3.append_material", text=name, icon="MATERIAL_DATA")
+                layout.separator()
+            else:
+                mat = bpy.data.materials.get(n)
+                icon_val = layout.icon(mat) if mat else 0
+
+                op = layout.operator("machin3.append_material", text=n, icon_value=icon_val)
+            op.name = n
+
+            if name.endswith("-"):
+                layout.separator()
