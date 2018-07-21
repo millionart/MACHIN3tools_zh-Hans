@@ -170,7 +170,7 @@ def get_classes():
     from . ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
     from . ui.operators.colorize_materials import ColorizeMaterials
     from . ui.operators.view_axis import ViewAxis
-    from . ui.operators.save_load_append import SaveIncremental, LoadMostRecent, AppendWorld, AppendMaterial
+    from . ui.operators.save_load_append import Save, SaveIncremental, LoadMostRecent, AppendWorld, AppendMaterial
     from . ui.operators.appendmats import Add, Move, Rename, Clear, Remove
 
     classes = []
@@ -208,7 +208,7 @@ def get_classes():
     # SAVE, OPEN, Append
     classes.append(PieSaveOpenAppend)
     classes.append(MenuAppendMaterials)
-    classes.extend([SaveIncremental, LoadMostRecent])
+    classes.extend([Save, SaveIncremental, LoadMostRecent])
     classes.extend([AppendWorld, AppendMaterial])
     classes.extend([Add, Move, Rename, Clear, Remove])
 

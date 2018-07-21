@@ -1,6 +1,26 @@
 import bpy
 from bpy.props import StringProperty, BoolProperty
+import os
+import re
 from ... utils import MACHIN3 as m3
+
+
+class Save(bpy.types.Operator):
+    bl_idname = "machin3.save"
+    bl_label = "Save"
+    bl_description = "Save"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        currentblend = bpy.data.filepath
+
+        if currentblend:
+            bpy.ops.wm.save_mainfile()
+            print("Saved blend:", currentblend)
+        else:
+            bpy.ops.wm.save_mainfile('INVOKE_DEFAULT')
+
+        return {'FINISHED'}
 
 
 class SaveIncremental(bpy.types.Operator):
@@ -9,11 +29,52 @@ class SaveIncremental(bpy.types.Operator):
     bl_description = "Save Incremental"
     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
 
-        print("hello")
+    def execute(self, context):
+        currentblend = bpy.data.filepath
+
+        if currentblend:
+            incrblend = self.get_incremented_path(currentblend)
+
+            if os.path.exists(incrblend):
+                self.report({'ERROR'}, "File '%s' exists already!\nBlend has NOT been saved incrementally!" % (incrblend))
+            else:
+                bpy.ops.wm.save_as_mainfile(filepath=incrblend)
+                print("Saved blend incrementally:", incrblend)
+        else:
+            bpy.ops.wm.save_mainfile('INVOKE_DEFAULT')
 
         return {'FINISHED'}
+
+
+    def get_incremented_path(self, currentblend):
+        path = os.path.dirname(currentblend)
+        filename = os.path.basename(currentblend)
+
+        filenameRegex = re.compile(r"(.+)\.blend\d*$")
+
+        mo = filenameRegex.match(filename)
+
+        if mo:
+            name = mo.group(1)
+            numberendRegex = re.compile(r"(.*?)(\d+)$")
+
+            mo = numberendRegex.match(name)
+
+            if mo:
+                basename = mo.group(1)
+                numberstr = mo.group(2)
+            else:
+                basename = name + "_"
+                numberstr = "000"
+
+            number = int(numberstr)
+
+            incr = number + 1
+            incrstr = str(incr).zfill(len(numberstr))
+            incrname = basename + incrstr + ".blend"
+
+            return os.path.join(path, incrname)
 
 
 class LoadMostRecent(bpy.types.Operator):
@@ -30,9 +91,10 @@ class LoadMostRecent(bpy.types.Operator):
         except (IOError, OSError, FileNotFoundError):
             recent_files = []
 
-        most_recent = recent_files[0]
+        if recent_files:
+            most_recent = recent_files[0]
 
-        bpy.ops.wm.open_mainfile(filepath=most_recent)
+            bpy.ops.wm.open_mainfile(filepath=most_recent, load_ui=True)
 
         return {'FINISHED'}
 

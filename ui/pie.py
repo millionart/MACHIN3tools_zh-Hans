@@ -1603,6 +1603,7 @@ class PieViewsAndCams(Menu):
         col.operator("wm.context_toggle", text=text, icon=icon).data_path = "space_data.lock_camera"
 
     def draw_center_column(self, col):
+        col.scale_y = 1.5
         op = col.operator("machin3.view_axis", text="Bottom")
         op.axis='BOTTOM'
 
@@ -2082,16 +2083,14 @@ class PieSaveOpenAppend(Menu):
         pie = layout.menu_pie()
 
         # 4 - LEFT
-        pie.operator("wm.read_homefile", text="New", icon='NEW')
+        pie.operator("wm.open_mainfile", text="Open file", icon='FILE_FOLDER')
 
         # 6 - RIGHT
         pie.operator("wm.save_as_mainfile", text="Save As...", icon='SAVE_AS')
 
         # 2 - BOTTOM
 
-        pie.operator_context = 'EXEC_DEFAULT'
-        pie.operator("wm.save_mainfile", text="Save", icon='FILE_TICK')
-        pie.operator_context = 'INVOKE_DEFAULT'
+        pie.operator("machin3.save", text="Save", icon='FILE_TICK')
 
         # 8 - TOP
         box = pie.split()
@@ -2116,7 +2115,7 @@ class PieSaveOpenAppend(Menu):
         pie.separator()
 
         # 1 - BOTTOM - LEFT
-        pie.operator("wm.open_mainfile", text="Open file", icon='FILE_FOLDER')
+        pie.operator("wm.read_homefile", text="New", icon='NEW')
 
         # 3 - BOTTOM - RIGHT
         pie.operator("machin3.save_incremental", text="Incremental Save", icon='SAVE_COPY')
@@ -2126,6 +2125,7 @@ class PieSaveOpenAppend(Menu):
         col.scale_x = 1.1
 
         row = col.row()
+        row.scale_y = 1.5
         row.operator("machin3.load_most_recent", text="(R) Most Recent", icon='FILE_FOLDER')
         row.operator("wm.call_menu", text="All Recent", icon='FILE_FOLDER').name = "INFO_MT_file_open_recent"
 
@@ -2156,8 +2156,15 @@ class PieSaveOpenAppend(Menu):
 
         col.separator()
 
-        col.operator("machin3.append_world", text="World", icon='WORLD')
-        col.operator("wm.call_menu", text="Material", icon='MATERIAL').name = "VIEW3D_MT_MACHIN3_append_materials"
+        row = col.split(percentage=0.8)
+        row.scale_y = 1.5
+        row.operator("machin3.append_world", text="World", icon='WORLD')
+        row.operator("wm.open_mainfile", text="", icon='FILE_FOLDER')
+
+        row = col.split(percentage=0.8)
+        row.scale_y = 1.5
+        row.operator("wm.call_menu", text="Material", icon='MATERIAL').name = "VIEW3D_MT_MACHIN3_append_materials"
+        row.operator("wm.open_mainfile", text="", icon='FILE_FOLDER')
 
 
 class PIE_IMAGE_MT_uvs_select_mode(Menu):
