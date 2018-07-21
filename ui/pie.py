@@ -583,28 +583,7 @@ class ViewMenu(bpy.types.Operator):
         bpy.context.area.type=self.variable
         return {'FINISHED'}
 
-# MACHIN3
-class LayoutSwitch(bpy.types.Operator):
-    """Menu to switch screen layouts"""
-    bl_idname = "machin3.layout_switch"
-    bl_label = "Layout_Switch"
-    bl_options = {'REGISTER', 'UNDO'}
 
-
-    variable = bpy.props.StringProperty()
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-        bpy.context.window.screen=bpy.data.screens[self.variable]
-
-        if self.variable == "M3 compositing":
-            context.scene.render.use_compositing = True
-
-        return {'FINISHED'}
-# /MACHIN3
 
 # MACHIN3
 class DissolveGroupPro(bpy.types.Operator):
@@ -1387,39 +1366,56 @@ class PieSelectMode(Menu):
                 pass
 
 
-class PieLayoutSwitch(Menu):
-    bl_idname = "pie.layout_swtich"
+class PieSwitchWorkspace(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_switch_workspace"
     bl_label = "Layout Switch"
 
     def draw(self, context):
         layout = self.layout
         pie = layout.menu_pie()
+
         # 4 - LEFT
-        pie.operator("machin3.layout_switch", text="MACHIN3", icon='VIEW3D').variable="M3"
+        pie.operator("machin3.switch_workspace", text="MACHIN3", icon='VIEW3D').name="General"
+
         # 6 - RIGHT
-        pie.operator("machin3.layout_switch", text="Compositing", icon='NODETREE').variable="M3 compositing"
+        pie.separator()
+        # pie.operator("machin3.layout_switch", text="Compositing", icon='NODETREE').variable="M3 compositing"
+
         # 2 - BOTTOM
+        pie.separator()
+        """
         box = pie.split()
         column = box.column(align=True)
         column.operator("machin3.layout_switch", text="Animation", icon='ACTION_TWEAK').variable="M3 animation"
         column.operator("machin3.layout_switch", text="Drivers", icon='UI').variable="M3 drivers"
+        # """
+
         # 8 - TOP
-        pie.operator("machin3.layout_switch", text="Materials", icon='MATERIAL_DATA').variable="M3 materials"
+        pie.operator("machin3.switch_workspace", text="Material", icon='MATERIAL_DATA').name="Material"
+
         # 7 - TOP - LEFT
-        pie.operator("machin3.layout_switch", text="UVs", icon='GROUP_UVS').variable="M3 UVs"
+        pie.operator("machin3.switch_workspace", text="UVs", icon='GROUP_UVS').name="UVs"
+
         # 9 - TOP - RIGHT
-        pie.operator("machin3.layout_switch", text="Lighting", icon='IMAGE_COL').variable="M3 lighting"
+        pie.operator("machin3.switch_workspace", text="World", icon='WORLD').name="World"
+
         # box = pie.split()
         # row = box.row(align=True)
         # row.operator("machin3.layout_switch", text="Lighting", icon='IMAGE_COL').variable="M3 lighting"
         # row.operator("machin3.layout_switch", text="Baking", icon='MOD_UVPROJECT').variable="M3 baking"
+
         # 1 - BOTTOM - LEFT
+        pie.operator("machin3.switch_workspace", text="Scripting", icon='CONSOLE').name="Scripting"
+        """
         box = pie.split()
         row = box.row(align=True)
         row.operator("machin3.layout_switch", text="Scripting", icon='SCRIPT').variable="M3 scripting"
         row.operator("machin3.layout_switch", text="Console", icon='CONSOLE').variable="M3 console"
+        # """
+
         # 3 - BOTTOM - RIGHT
-        pie.operator("machin3.layout_switch", text="Video Editing", icon='RENDER_ANIMATION').variable="M3 video"
+        # pie.operator("machin3.layout_switch", text="Video Editing", icon='RENDER_ANIMATION').variable="M3 video"
+        pie.separator()
 
 
 class SetFinal(bpy.types.Operator):

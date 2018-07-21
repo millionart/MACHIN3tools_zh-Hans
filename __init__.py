@@ -170,8 +170,20 @@ def register_pie_keys(wm, keymaps):
     keymaps.append((km, kmi))
 
 
+    # Switch Workspace
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Window')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'PAUSE', 'PRESS')
+    kmi.properties.name = "VIEW3D_MT_MACHIN3_switch_workspace"
+    kmi.active = True
+    keymaps.append((km, kmi))
+
+
+
+
+
 def get_classes():
-    from . ui.pie import PieSelectMode, PieChangeShading, PieViewsAndCams, PieSaveOpenAppend
+    from . ui.pie import PieSelectMode, PieChangeShading, PieViewsAndCams, PieSaveOpenAppend, PieSwitchWorkspace
     from . ui.menu import MenuAppendMaterials
     from . ui.operators.select_mode import ToggleEditMode, SelectVertexMode, SelectEdgeMode, SelectFaceMode
     from . ui.operators.change_shading import ShadeSolid, ShadeMaterial, ShadeRendered
@@ -182,6 +194,7 @@ def get_classes():
     from . ui.operators.save_load_append import Save, SaveIncremental, LoadMostRecent
     from . ui.operators.save_load_append import AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource
     from . ui.operators.appendmats import Add, Move, Rename, Clear, Remove
+    from . ui.operators.switch_workspace import SwitchWorkspace
 
     classes = []
 
@@ -222,6 +235,9 @@ def get_classes():
     classes.extend([AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource])
     classes.extend([Add, Move, Rename, Clear, Remove])
 
+    # SWITCH WORKSPACE
+    classes.append(PieSwitchWorkspace)
+    classes.append(SwitchWorkspace)
 
     return classes
 
