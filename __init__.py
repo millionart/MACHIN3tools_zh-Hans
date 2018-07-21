@@ -36,6 +36,7 @@ from . properties import AppendMatsCollection, AppendMatsUIList
 from . utils import MACHIN3 as m3
 
 
+
 # TODO: add automatic custom blender keymaps option
 # TODO: OSD feedback, so you dont have to check into the op props to verify a tool did what you want it to do
 
@@ -70,14 +71,17 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
     M3path = __path__[0]
 
-    appendmats = CollectionProperty(type=AppendMatsCollection)
-    appendmatsIDX = IntProperty()
-    newappendmatname = StringProperty()
+    appendworldpath: StringProperty(name="Append World from", subtype='FILE_PATH')
+    appendworldname: StringProperty()
+
+    appendmatspath: StringProperty(name="Append Materials from", subtype='FILE_PATH')
+    appendmats: CollectionProperty(type=AppendMatsCollection)
+    appendmatsIDX: IntProperty()
+    appendmatsname: StringProperty()
 
     # TABS
 
     # tabs = EnumProperty(name="Tabs", items=preferences_tabs, default="MODULES")
-
 
     def draw(self, context):
         layout=self.layout
@@ -105,10 +109,15 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         column = box.column()
 
+        column.prop(self, "appendworldpath")
+        column.prop(self, "appendworldname")
+        column.separator()
+
+        column.prop(self, "appendmatspath")
+
         row = column.row()
         rows = len(self.appendmats) if len(self.appendmats) > 6 else 6
         row.template_list("AppendMatsUIList", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
-
 
         c = row.column(align=True)
         c.operator("machin3.move_appendmat", text="", icon="TRIA_UP").direction = "UP"
@@ -123,7 +132,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         c.operator("machin3.remove_appendmat", text="", icon="CANCEL")
 
         row = column.row()
-        row.prop(self, "newappendmatname")
+        row.prop(self, "appendmatsname")
         row.operator("machin3.add_appendmat", text="", icon="ZOOMIN")
 
 
@@ -170,7 +179,8 @@ def get_classes():
     from . ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
     from . ui.operators.colorize_materials import ColorizeMaterials
     from . ui.operators.view_axis import ViewAxis
-    from . ui.operators.save_load_append import Save, SaveIncremental, LoadMostRecent, AppendWorld, AppendMaterial
+    from . ui.operators.save_load_append import Save, SaveIncremental, LoadMostRecent
+    from . ui.operators.save_load_append import AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource
     from . ui.operators.appendmats import Add, Move, Rename, Clear, Remove
 
     classes = []
@@ -209,7 +219,7 @@ def get_classes():
     classes.append(PieSaveOpenAppend)
     classes.append(MenuAppendMaterials)
     classes.extend([Save, SaveIncremental, LoadMostRecent])
-    classes.extend([AppendWorld, AppendMaterial])
+    classes.extend([AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource])
     classes.extend([Add, Move, Rename, Clear, Remove])
 
 

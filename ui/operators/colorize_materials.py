@@ -10,7 +10,7 @@ class ColorizeMaterials(bpy.types.Operator):
     bl_label = "Colorize Materials"
     bl_options = {'REGISTER', 'UNDO'}
 
-    lighten_amount = FloatProperty(name="Lighten", default=0.05, min=0, max=1)
+    lighten_amount: FloatProperty(name="Lighten", default=0.05, min=0, max=1)
 
     @classmethod
     def poll(cls, context):

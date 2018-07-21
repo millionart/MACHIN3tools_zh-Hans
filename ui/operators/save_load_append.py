@@ -25,8 +25,8 @@ class Save(bpy.types.Operator):
 
 class SaveIncremental(bpy.types.Operator):
     bl_idname = "machin3.save_incremental"
-    bl_label = "Save Incremental"
-    bl_description = "Save Incremental"
+    bl_label = "Incremental Save"
+    bl_description = "Incremental Save"
     bl_options = {'REGISTER', 'UNDO'}
 
 
@@ -104,47 +104,39 @@ class AppendWorld(bpy.types.Operator):
     bl_label = "Append World"
     bl_options = {'REGISTER', 'UNDO'}
 
+    @classmethod
+    def poll(cls, context):
+        return m3.M3_prefs().appendworldpath and m3.M3_prefs().appendworldname
+
     def draw(self, context):
         layout = self.layout
 
         column = layout.column()
 
-
     def execute(self, context):
+        path = m3.M3_prefs().appendworldpath
+        name = m3.M3_prefs().appendworldname
 
-        print("appending world")
+        fullpath = "%s/%s" % (path, "World")
 
-        """
-        blendpath = "/home/x/TEMP/blender/Rendering/Materials9.blend"
+        sel = context.selected_objects
+        active = context.active_object
 
-        fullpath = "%s/%s" % (blendpath, self.appendtype.capitalize())
+        bpy.ops.wm.append(directory=fullpath, filename=name)
+        # bpy.context.scene.cycles.film_transparent = False
 
-        # the append ops also unselects for some reason, so we need to get the selection before
-        if self.appendtype == "MATERIAL" and self.applymaterial and self.appendname != "ALL":
-            sel = m3.selected_objects()
+        world = bpy.data.worlds.get(name)
 
-        if self.appendtype == "WORLD":
-            bpy.ops.wm.append(directory=fullpath, filename=self.appendname)
-
-            bpy.context.scene.cycles.film_transparent = False
-
-            world = bpy.data.worlds.get(self.appendname)
-
+        if world:
             bpy.context.scene.world = world
+        else:
+            self.report({'ERROR'}, "World '%s' could not be appended.\nMake sure a world of that name exists in the world source file." % (name))
 
-        elif self.appendtype == "MATERIAL":
-            if self.appendname == "ALL":
-                for name in m3_material_names:
-                    if name not in ["", "ALL"]:
-                        bpy.ops.wm.append(directory=fullpath, filename=name)
-            else:
-                bpy.ops.wm.append(directory=fullpath, filename=self.appendname)
+        # resetting original selection and active which is lost after the append op
+        for obj in sel:
+            obj.select_set('SELECT')
 
-                if self.applymaterial:
-                    m3.select(sel)
-                    bpy.ops.object.apply_material(mat_to_assign=self.appendname)
-        """
-
+        bpy.context.view_layer.objects.active = active
 
         return {'FINISHED'}
 
@@ -154,42 +146,101 @@ class AppendMaterial(bpy.types.Operator):
     bl_label = "Append Material"
     bl_options = {'REGISTER', 'UNDO'}
 
-    name = StringProperty(name="Append Name")
+    name: StringProperty(name="Append Name")
 
-    applymaterial = BoolProperty(name="Apply Material to Selection", default=True)
+    applymaterial: BoolProperty(name="Apply Material to Selection", default=True)
+
+
+    @classmethod
+    def poll(cls, context):
+        return m3.M3_prefs().appendmatspath
 
     def draw(self, context):
         layout = self.layout
 
         column = layout.column()
 
-        if self.appendtype == "MATERIAL":
-            column.prop(self, "applymaterial")
+        column.prop(self, "applymaterial")
 
     def execute(self, context):
+        path = m3.M3_prefs().appendmatspath
+        name = self.name
 
-        print("appending material:", self.name)
+        fullpath = "%s/%s" % (path, "Material")
 
-        """
-        blendpath = "/home/x/TEMP/blender/Rendering/Materials9.blend"
+        sel = context.selected_objects
+        active = context.active_object
 
-        fullpath = "%s/%s" % (blendpath, self.appendtype.capitalize())
+        if name == "ALL":
+            all_names = [mat.name for mat in m3.M3_prefs().appendmats]
 
-        # the append ops also unselects for some reason, so we need to get the selection before
-        if self.appendtype == "MATERIAL" and self.applymaterial and self.appendname != "ALL":
-            sel = m3.selected_objects()
-
-        if self.appendname == "ALL":
-            for name in m3_material_names:
-                if name not in ["", "ALL"]:
-                    bpy.ops.wm.append(directory=fullpath, filename=name)
+            for name in all_names:
+                n = name.replace("-", "")
+                bpy.ops.wm.append(directory=fullpath, filename=n)
         else:
-            bpy.ops.wm.append(directory=fullpath, filename=self.appendname)
+            n = name.replace("-", "")
+            bpy.ops.wm.append(directory=fullpath, filename=n)
 
-            if self.applymaterial:
-                m3.select(sel)
-                bpy.ops.object.apply_material(mat_to_assign=self.appendname)
-        """
+            mat = bpy.data.materials.get(name)
 
+            for obj in sel:
+                obj.select_set('SELECT')
+
+                if self.applymaterial:
+                    if mat:
+                        if not obj.material_slots:
+                            bpy.context.view_layer.objects.active = obj
+                            bpy.ops.object.material_slot_add()
+
+                        obj.material_slots[0].material = mat
+                    else:
+                        self.report({'ERROR'}, "Material '%s' could not be appended.\nMake sure a material of that name exists in the material source file." % (n))
+
+
+        bpy.context.view_layer.objects.active = active
+
+        return {'FINISHED'}
+
+
+class LoadWorldSource(bpy.types.Operator):
+    bl_idname = "machin3.load_world_source"
+    bl_label = "Load World Source"
+    bl_description = "Load World Source File"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return m3.M3_prefs().appendworldpath
+
+
+    def execute(self, context):
+        appendworldpath = m3.M3_prefs().appendworldpath
+
+        if os.path.exists(appendworldpath):
+            bpy.ops.wm.open_mainfile(filepath=appendworldpath, load_ui=True)
+
+        return {'FINISHED'}
+
+
+class LoadMaterialsSource(bpy.types.Operator):
+    bl_idname = "machin3.load_materials_source"
+    bl_label = "Load Materials Source"
+    bl_description = "Load Materials Source File"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return m3.M3_prefs().appendmatspath
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+    def execute(self, context):
+        appendmatspath = m3.M3_prefs().appendmatspath
+
+        if os.path.exists(appendmatspath):
+            bpy.ops.wm.open_mainfile(filepath=appendmatspath, load_ui=True)
 
         return {'FINISHED'}

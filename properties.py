@@ -18,5 +18,5 @@ class AppendMatsUIList(bpy.types.UIList):
 
 
 class AppendMatsCollection(bpy.types.PropertyGroup):
-    name = StringProperty()
-    # index = IntProperty()
+    name: StringProperty()
+    # index: IntProperty()

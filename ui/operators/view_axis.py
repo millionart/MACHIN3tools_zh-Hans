@@ -11,14 +11,13 @@ axisitems = [("FRONT", "Front", ""),
              ("BOTTOM", "Bottom", "")]
 
 
-
 class ViewAxis(bpy.types.Operator):
     bl_idname = "machin3.view_axis"
     bl_label = "View Axis"
     bl_description = "Click: Align View\nALT + Click: Align View to Active"
     bl_options = {'REGISTER', 'UNDO'}
 
-    axis = EnumProperty(name="Axis", items=axisitems, default="FRONT")
+    axis: EnumProperty(name="Axis", items=axisitems, default="FRONT")
 
 
     def invoke(self, context, event):

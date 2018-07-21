@@ -18,20 +18,20 @@ class Add(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        name = m3.M3_prefs().newappendmatname
+        name = m3.M3_prefs().appendmatsname
         appendmats = m3.M3_prefs().appendmats
 
         return name and name not in appendmats
 
     def execute(self, context):
-        name = m3.M3_prefs().newappendmatname
+        name = m3.M3_prefs().appendmatsname
         appendmats = m3.M3_prefs().appendmats
 
         if name not in appendmats:
             am = appendmats.add()
             am.name = name
 
-            appendmats = m3.M3_prefs().newappendmatname = ""
+            appendmats = m3.M3_prefs().appendmatsname = ""
 
         return {'FINISHED'}
 
@@ -42,7 +42,7 @@ class Move(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Move Material Name up or down.\nThis controls the position in the Append Material Menu.\nSave prefs to remember."
 
-    direction = EnumProperty(items=[("UP", "Up", ""),
+    direction: EnumProperty(items=[("UP", "Up", ""),
                                     ("DOWN", "Down", "")])
 
     def execute(self, context):
@@ -64,7 +64,7 @@ class Rename(bpy.types.Operator):
     bl_label = "Rename Material Name"
     bl_description = "Rename the selected Material Name"
 
-    newmatname = StringProperty(name="New Name")
+    newmatname: StringProperty(name="New Name")
 
     def check(self, context):
         return True

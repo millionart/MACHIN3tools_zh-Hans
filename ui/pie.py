@@ -1912,9 +1912,10 @@ class PieChangeShading(Menu):
 
             # light type
             row = col.row(align=True)
+            row.scale_y = 1.5
             row.prop(view.shading, "light", expand=True)
             if view.shading.light == "MATCAP":
-                row.operator('VIEW3D_OT_toggle_matcap_flip', text=" ", icon='ARROW_LEFTRIGHT')
+                row.operator('VIEW3D_OT_toggle_matcap_flip', text="", icon='ARROW_LEFTRIGHT')
 
             # studio / matcap selection
             if view.shading.light in ["STUDIO", "MATCAP"]:
@@ -1979,7 +1980,7 @@ class PieChangeShading(Menu):
                                         row.prop(strength, "default_value", text="Background Strength")
                                         row.prop(color, "default_value", text="")
 
-                col.separator()
+                                    col.separator()
 
             # eevee settings
             icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
@@ -2007,8 +2008,6 @@ class PieChangeShading(Menu):
                 row = col.row(align=True)
                 row.prop(context.scene.eevee, "volumetric_start")
                 row.prop(context.scene.eevee, "volumetric_end")
-
-
 
     def get_text_icon(self, context, shading):
         if context.space_data.shading.type == shading:
@@ -2120,7 +2119,6 @@ class PieSaveOpenAppend(Menu):
         # 3 - BOTTOM - RIGHT
         pie.operator("machin3.save_incremental", text="Incremental Save", icon='SAVE_COPY')
 
-
     def draw_left_column(self, col):
         col.scale_x = 1.1
 
@@ -2154,17 +2152,26 @@ class PieSaveOpenAppend(Menu):
         r.operator("wm.append", text="Append", icon='APPEND_BLEND')
         row.operator("wm.call_menu", text="", icon='EXTERNAL_DATA').name = "INFO_MT_file_external_data"
 
-        col.separator()
 
-        row = col.split(percentage=0.8)
-        row.scale_y = 1.5
-        row.operator("machin3.append_world", text="World", icon='WORLD')
-        row.operator("wm.open_mainfile", text="", icon='FILE_FOLDER')
+        # append world and materials
 
-        row = col.split(percentage=0.8)
-        row.scale_y = 1.5
-        row.operator("wm.call_menu", text="Material", icon='MATERIAL').name = "VIEW3D_MT_MACHIN3_append_materials"
-        row.operator("wm.open_mainfile", text="", icon='FILE_FOLDER')
+        appendworldpath = m3.M3_prefs().appendworldpath
+        appendmatspath = m3.M3_prefs().appendmatspath
+
+        if any([appendworldpath, appendmatspath]):
+            col.separator()
+
+            if appendworldpath:
+                row = col.split(percentage=0.8)
+                row.scale_y = 1.5
+                row.operator("machin3.append_world", text="World", icon='WORLD')
+                row.operator("machin3.load_world_source", text="", icon='FILE_FOLDER')
+
+            if appendmatspath:
+                row = col.split(percentage=0.8)
+                row.scale_y = 1.5
+                row.operator("wm.call_menu", text="Material", icon='MATERIAL').name = "VIEW3D_MT_MACHIN3_append_materials"
+                row.operator("machin3.load_materials_source", text="", icon='FILE_FOLDER')
 
 
 class PIE_IMAGE_MT_uvs_select_mode(Menu):
