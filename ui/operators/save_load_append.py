@@ -2,8 +2,11 @@ import bpy
 from bpy.props import StringProperty, BoolProperty
 import os
 import re
+import time
 from ... utils import MACHIN3 as m3
 
+
+# TODO: file size output
 
 class Save(bpy.types.Operator):
     bl_idname = "machin3.save"
@@ -16,7 +19,11 @@ class Save(bpy.types.Operator):
 
         if currentblend:
             bpy.ops.wm.save_mainfile()
-            print("Saved blend:", currentblend)
+
+            t = time.time()
+            localt = time.strftime('%H:%M:%S', time.localtime(t))
+
+            print("%s | Saved blend: %s" % (localt, currentblend))
         else:
             bpy.ops.wm.save_mainfile('INVOKE_DEFAULT')
 
@@ -94,6 +101,7 @@ class LoadMostRecent(bpy.types.Operator):
         if recent_files:
             most_recent = recent_files[0]
 
+            # load_ui ensures the the viewport location/angle is loaded as well
             bpy.ops.wm.open_mainfile(filepath=most_recent, load_ui=True)
 
         return {'FINISHED'}
@@ -184,17 +192,18 @@ class AppendMaterial(bpy.types.Operator):
             mat = bpy.data.materials.get(name)
 
             for obj in sel:
-                obj.select_set('SELECT')
+                if obj.type == "MESH":
+                    obj.select_set('SELECT')
 
-                if self.applymaterial:
-                    if mat:
-                        if not obj.material_slots:
-                            bpy.context.view_layer.objects.active = obj
-                            bpy.ops.object.material_slot_add()
+                    if self.applymaterial:
+                        if mat:
+                            if not obj.material_slots:
+                                bpy.context.view_layer.objects.active = obj
+                                bpy.ops.object.material_slot_add()
 
-                        obj.material_slots[0].material = mat
-                    else:
-                        self.report({'ERROR'}, "Material '%s' could not be appended.\nMake sure a material of that name exists in the material source file." % (n))
+                            obj.material_slots[0].material = mat
+                        else:
+                            self.report({'ERROR'}, "Material '%s' could not be appended.\nMake sure a material of that name exists in the material source file." % (n))
 
 
         bpy.context.view_layer.objects.active = active

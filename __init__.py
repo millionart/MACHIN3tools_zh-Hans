@@ -190,7 +190,7 @@ def get_classes():
     from . ui.operators.toggle_grid_wire_outline import ToggleGrid, ToggleWireframe, ToggleOutline
     from . ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
     from . ui.operators.colorize_materials import ColorizeMaterials
-    from . ui.operators.view_axis import ViewAxis
+    from . ui.operators.views_and_cams import ViewAxis, MakeCamActive, SmartViewCam
     from . ui.operators.save_load_append import Save, SaveIncremental, LoadMostRecent
     from . ui.operators.save_load_append import AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource
     from . ui.operators.appendmats import Add, Move, Rename, Clear, Remove
@@ -226,7 +226,7 @@ def get_classes():
 
     # VIEWS and CAMS
     classes.append(PieViewsAndCams)
-    classes.append(ViewAxis)
+    classes.extend([ViewAxis, MakeCamActive, SmartViewCam])
 
     # SAVE, OPEN, Append
     classes.append(PieSaveOpenAppend)

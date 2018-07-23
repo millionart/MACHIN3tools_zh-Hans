@@ -1382,12 +1382,13 @@ class PieSwitchWorkspace(Menu):
         # pie.operator("machin3.layout_switch", text="Compositing", icon='NODETREE').variable="M3 compositing"
 
         # 2 - BOTTOM
-        pie.separator()
+        pie.operator("machin3.switch_workspace", text="Scripting", icon='CONSOLE').name="Scripting"
+
         """
         box = pie.split()
-        column = box.column(align=True)
-        column.operator("machin3.layout_switch", text="Animation", icon='ACTION_TWEAK').variable="M3 animation"
-        column.operator("machin3.layout_switch", text="Drivers", icon='UI').variable="M3 drivers"
+        row = box.row(align=True)
+        row.operator("machin3.layout_switch", text="Scripting", icon='SCRIPT').variable="M3 scripting"
+        row.operator("machin3.layout_switch", text="Console", icon='CONSOLE').variable="M3 console"
         # """
 
         # 8 - TOP
@@ -1405,17 +1406,18 @@ class PieSwitchWorkspace(Menu):
         # row.operator("machin3.layout_switch", text="Baking", icon='MOD_UVPROJECT').variable="M3 baking"
 
         # 1 - BOTTOM - LEFT
-        pie.operator("machin3.switch_workspace", text="Scripting", icon='CONSOLE').name="Scripting"
+        pie.separator()
+
         """
         box = pie.split()
-        row = box.row(align=True)
-        row.operator("machin3.layout_switch", text="Scripting", icon='SCRIPT').variable="M3 scripting"
-        row.operator("machin3.layout_switch", text="Console", icon='CONSOLE').variable="M3 console"
+        column = box.column(align=True)
+        column.operator("machin3.layout_switch", text="Animation", icon='ACTION_TWEAK').variable="M3 animation"
+        column.operator("machin3.layout_switch", text="Drivers", icon='UI').variable="M3 drivers"
         # """
 
         # 3 - BOTTOM - RIGHT
-        # pie.operator("machin3.layout_switch", text="Video Editing", icon='RENDER_ANIMATION').variable="M3 video"
         pie.separator()
+        # pie.operator("machin3.layout_switch", text="Video Editing", icon='RENDER_ANIMATION').variable="M3 video"
 
 
 class SetFinal(bpy.types.Operator):
@@ -1590,13 +1592,21 @@ class PieViewsAndCams(Menu):
     def draw_left_column(self, scene, view, col):
         col.scale_x = 1.7
 
-        col.prop(scene, "camera", text="Active")
-        row = col.row(align=True)
-        row.operator("view3d.view_camera", text="View Cam", icon='VISIBLE_IPO_ON')
+        row = col.row()
+        row.scale_y = 1.5
+        row.operator("machin3.smart_view_cam", text="Smart View Cam", icon='VISIBLE_IPO_ON')
+
+
+        row = col.split()
+        row.operator("machin3.make_cam_active")
+        row.prop(scene, "camera", text="")
+
+
+        row = col.split()
         row.operator("view3d.camera_to_view", text="Cam to view", icon='MAN_TRANS')
 
-        text, icon = ("Unlock Cam from View", "UNLOCKED") if view.lock_camera else ("Lock Camera to View", "LOCKED")
-        col.operator("wm.context_toggle", text=text, icon=icon).data_path = "space_data.lock_camera"
+        text, icon = ("Unlock from View", "UNLOCKED") if view.lock_camera else ("Lock to View", "LOCKED")
+        row.operator("wm.context_toggle", text=text, icon=icon).data_path = "space_data.lock_camera"
 
     def draw_center_column(self, col):
         col.scale_y = 1.5
@@ -1708,6 +1718,20 @@ class PieOrientationAndPivot(Menu):
 
         layout = self.layout
         pie = layout.menu_pie()
+
+        # TODO
+
+        # for d in dir(context.space_data):
+            # print(d)
+
+        # bpy.ops.wm.tool_set_by_name(name="Cursor")
+        # bpy.ops.wm.tool_set_by_name(name="Grab")
+
+        # if bpy.context.space_data.show_manipulator == (False) :
+            # bpy.context.space_data.show_manipulator = True
+            # bpy.context.space_data.transform_manipulators = {'TRANSLATE'}
+        # if bpy.context.space_data.transform_manipulators != {'TRANSLATE'}:
+            # bpy.context.space_data.transform_manipulators = {'TRANSLATE'}
 
         # 4 - LEFT
         icon = "PROP_ON" if bpy.context.space_data.transform_orientation == 'NORMAL' else 'BLANK1'
@@ -2068,7 +2092,6 @@ class PieAlign(Menu):
             pie.separator()
 
 
-
 class PieSaveOpenAppend(Menu):
     bl_idname = "VIEW3D_MT_MACHIN3_save_open_append"
     bl_label = "Save, Open, Append"
@@ -2081,11 +2104,10 @@ class PieSaveOpenAppend(Menu):
         pie.operator("wm.open_mainfile", text="Open file", icon='FILE_FOLDER')
 
         # 6 - RIGHT
-        pie.operator("wm.save_as_mainfile", text="Save As...", icon='SAVE_AS')
+        pie.operator("machin3.save", text="Save", icon='FILE_TICK')
 
         # 2 - BOTTOM
-
-        pie.operator("machin3.save", text="Save", icon='FILE_TICK')
+        pie.operator("wm.save_as_mainfile", text="Save As...", icon='SAVE_AS')
 
         # 8 - TOP
         box = pie.split()
@@ -2144,10 +2166,9 @@ class PieSaveOpenAppend(Menu):
     def draw_right_column(self, col):
         row = col.row()
         r = row.row(align=True)
-        r.operator("wm.link", text="Link", icon='LINK_BLEND')
         r.operator("wm.append", text="Append", icon='APPEND_BLEND')
+        r.operator("wm.link", text="Link", icon='LINK_BLEND')
         row.operator("wm.call_menu", text="", icon='EXTERNAL_DATA').name = "INFO_MT_file_external_data"
-
 
         # append world and materials
 
