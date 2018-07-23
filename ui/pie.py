@@ -2117,9 +2117,13 @@ class PieSaveOpenAppend(Menu):
         column = b.column()
         self.draw_left_column(column)
 
-        b = box.box()
-        column = b.column()
-        self.draw_center_column(column)
+        column = box.column()
+        b = column.box()
+        self.draw_center_column_top(b)
+
+        if bpy.data.filepath:
+            b = column.box()
+            self.draw_center_column_bottom(b)
 
         b = box.box()
         column = b.column()
@@ -2150,7 +2154,7 @@ class PieSaveOpenAppend(Menu):
         # col.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
         col.operator("wm.revert_mainfile", text="Revert", icon='FILE_REFRESH')
 
-    def draw_center_column(self, col):
+    def draw_center_column_top(self, col):
         row = col.split(percentage=0.25)
         row.label("Alembic")
         r = row.row(align=True)
@@ -2162,6 +2166,13 @@ class PieSaveOpenAppend(Menu):
         r = row.row(align=True)
         r.operator("wm.collada_import", text="Import", icon='IMPORT')
         r.operator("wm.collada_export", text="Export", icon='EXPORT')
+
+    def draw_center_column_bottom(self, col):
+        row = col.split(percentage=0.5)
+        row.scale_y = 1.25
+        row.operator("machin3.load_previous", text="Previous", icon='FILE_FOLDER')
+        row.operator("machin3.load_next", text="Next", icon='FILE_FOLDER')
+
 
     def draw_right_column(self, col):
         row = col.row()

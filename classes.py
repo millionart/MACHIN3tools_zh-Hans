@@ -15,17 +15,14 @@ def get_ui_classes(classes):
     from . ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
     from . ui.operators.colorize_materials import ColorizeMaterials
     from . ui.operators.views_and_cams import ViewAxis, MakeCamActive, SmartViewCam
-    from . ui.operators.save_load_append import Save, SaveIncremental, LoadMostRecent
+    from . ui.operators.save_load_append import Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext
     from . ui.operators.save_load_append import AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource
     from . ui.operators.appendmats import Add, Move, Rename, Clear, Remove
     from . ui.operators.switch_workspace import SwitchWorkspace
 
     # SELECT MODE
     classes.append(PieSelectMode)
-    classes.append(SelectVertexMode)
-    classes.append(SelectEdgeMode)
-    classes.append(SelectFaceMode)
-    classes.append(ToggleEditMode)
+    classes.extend([SelectVertexMode, SelectEdgeMode, SelectFaceMode, ToggleEditMode])
 
     # CHANGE SHADING
     classes.append(PieChangeShading)
@@ -41,7 +38,7 @@ def get_ui_classes(classes):
     # SAVE, OPEN, Append
     classes.append(PieSaveOpenAppend)
     classes.append(MenuAppendMaterials)
-    classes.extend([Save, SaveIncremental, LoadMostRecent])
+    classes.extend([Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext])
     classes.extend([AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource])
     classes.extend([Add, Move, Rename, Clear, Remove])
 

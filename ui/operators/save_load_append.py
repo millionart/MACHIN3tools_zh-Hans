@@ -253,3 +253,83 @@ class LoadMaterialsSource(bpy.types.Operator):
             bpy.ops.wm.open_mainfile(filepath=appendmatspath, load_ui=True)
 
         return {'FINISHED'}
+
+
+class LoadPrevious(bpy.types.Operator):
+    bl_idname = "machin3.load_previous"
+    bl_label = "Load Previous"
+    bl_description = "Load Previous Blend File in Current Folder"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return bpy.data.filepath
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+    def execute(self, context):
+        filepath = bpy.data.filepath
+
+        if filepath:
+            currentpath = os.path.dirname(filepath)
+            currentblend = os.path.basename(filepath)
+
+            blendfiles = [f for f in sorted(os.listdir(currentpath)) if f.endswith(".blend")]
+
+            index = blendfiles.index(currentblend)
+
+            previousidx = index - 1
+
+            if previousidx >= 0:
+                previousblend = blendfiles[previousidx]
+
+                print("Loading blend file %d/%d: %s" % (previousidx + 1, len(blendfiles), previousblend))
+
+                bpy.ops.wm.open_mainfile(filepath=os.path.join(currentpath, previousblend), load_ui=True)
+            else:
+                self.report({'ERROR'}, "You've reached the first file in the current foler: %s." % (currentpath))
+
+        return {'FINISHED'}
+
+
+class LoadNext(bpy.types.Operator):
+    bl_idname = "machin3.load_next"
+    bl_label = "Load Next"
+    bl_description = "Load Next Blend File in Current Folder"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return bpy.data.filepath
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+    def execute(self, context):
+        filepath = bpy.data.filepath
+
+        if filepath:
+            currentpath = os.path.dirname(filepath)
+            currentblend = os.path.basename(filepath)
+
+            blendfiles = [f for f in sorted(os.listdir(currentpath)) if f.endswith(".blend")]
+
+            index = blendfiles.index(currentblend)
+
+            nextidx = index + 1
+
+            if nextidx < len(blendfiles):
+                nextblend = blendfiles[nextidx]
+
+                print("Loading blend file %d/%d: %s" % (nextidx + 1, len(blendfiles), nextblend))
+
+                bpy.ops.wm.open_mainfile(filepath=os.path.join(currentpath, nextblend), load_ui=True)
+            else:
+                self.report({'ERROR'}, "You've reached the last file in the current foler: %s." % (currentpath))
+
+        return {'FINISHED'}
