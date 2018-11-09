@@ -35,6 +35,7 @@ from bpy.utils import register_class, unregister_class
 from . classes import get_classes
 from . keymaps import register_keymaps
 from . properties import AppendMatsCollection, AppendMatsUIList
+from . icons import register_icons, unregister_icons
 
 
 # TODO: OSD feedback, so you dont have to check into the op props to verify a tool did what you want it to do
@@ -131,6 +132,8 @@ def register():
     # KEYMAPS
 
     keymaps = register_keymaps()
+
+    register_icons()
 
 
 def unregister():

@@ -2,6 +2,9 @@ import bpy
 from ... utils import MACHIN3 as m3
 
 
+# TODO: ctrl clicks for expanding of the selection
+
+
 class ToggleEditMode(bpy.types.Operator):
     bl_idname = "machin3.toggle_edit_mode"
     bl_label = "Toggle Edit Mode"
@@ -54,68 +57,49 @@ class ToggleEditMode(bpy.types.Operator):
 class SelectVertexMode(bpy.types.Operator):
     bl_idname = "machin3.select_vertex_mode"
     bl_label = "Vertex Mode"
+    bl_description = "Vertex Select\nCTRL + Click: Expand Selection"
     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
+    def invoke(self, context, event):
         if bpy.context.object.mode != "EDIT":
             bpy.ops.object.mode_set(mode="EDIT")
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
 
-            # if bpy.context.scene.machin3.pieobjecteditmodeshow:
-                # m3.unhide_all("MESH")
+        expand = True if event.ctrl else False
 
-                # if bpy.context.scene.machin3.pieobjecteditmodeshowunselect:
-                    # m3.unselect_all("MESH")
+        bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='VERT')
 
-        if bpy.ops.mesh.select_mode != "EDGE, FACE":
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-
-        # if bpy.context.scene.machin3.pieobjecteditmodetoggleao:
-            # bpy.context.space_data.fx_settings.use_ssao = False
         return {'FINISHED'}
 
 
 class SelectEdgeMode(bpy.types.Operator):
     bl_idname = "machin3.select_edge_mode"
     bl_label = "Edge Mode"
+    bl_description = "Edge Select\nCTRL + Click: Expand Selection"
     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
+    def invoke(self, context, event):
         if bpy.context.object.mode != "EDIT":
             bpy.ops.object.mode_set(mode="EDIT")
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
 
-            # if bpy.context.scene.machin3.pieobjecteditmodeshow:
-                # m3.unhide_all("MESH")
+        expand = True if event.ctrl else False
 
-                # if bpy.context.scene.machin3.pieobjecteditmodeshowunselect:
-                    # m3.unselect_all("MESH")
+        bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='EDGE')
 
-        if bpy.ops.mesh.select_mode != "VERT, FACE":
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
-
-        # if bpy.context.scene.machin3.pieobjecteditmodetoggleao:
-            # bpy.context.space_data.fx_settings.use_ssao = False
         return {'FINISHED'}
 
 
 class SelectFaceMode(bpy.types.Operator):
     bl_idname = "machin3.select_face_mode"
     bl_label = "Face Mode"
+    bl_description = "Face Select\nCTRL + Click: Expand Selection"
     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
+    def invoke(self, context, event):
         if bpy.context.object.mode != "EDIT":
             bpy.ops.object.mode_set(mode="EDIT")
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
 
-            # if bpy.context.scene.machin3.pieobjecteditmodeshow:
-                # m3.unhide_all("MESH")
-                # if bpy.context.scene.machin3.pieobjecteditmodeshowunselect:
-                    # m3.unselect_all("MESH")
-        if bpy.ops.mesh.select_mode != "VERT, EDGE":
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+        expand = True if event.ctrl else False
 
-        # if bpy.context.scene.machin3.pieobjecteditmodetoggleao:
-            # bpy.context.space_data.fx_settings.use_ssao = False
+        bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='FACE')
+
         return {'FINISHED'}
