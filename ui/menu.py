@@ -93,16 +93,16 @@ class MenuAppendMaterials(bpy.types.Menu):
 
 
         for name in names:
-            n = name.replace("-", "")
+
             if name == "ALL":
-                op = layout.operator("machin3.append_material", text=name, icon="MATERIAL_DATA")
+                layout.operator("machin3.append_material", text=name, icon="MATERIAL_DATA").name = name
                 layout.separator()
             else:
+                n = name.replace("-", "")
                 mat = bpy.data.materials.get(n)
                 icon_val = layout.icon(mat) if mat else 0
 
-                op = layout.operator("machin3.append_material", text=n, icon_value=icon_val)
-            op.name = n
+                layout.operator("machin3.append_material", text=n, icon_value=icon_val).name = n
 
             if name.endswith("-"):
                 layout.separator()

@@ -52,12 +52,20 @@ class ToggleWireframe(bpy.types.Operator):
 
     def execute(self, context):
         overlay = context.space_data.overlay
-        shading = context.space_data.shading
 
         if context.mode == "OBJECT":
-            overlay.show_wireframes = not overlay.show_wireframes
+            sel = context.selected_objects
+
+            if sel:
+                for obj in sel:
+                    obj.show_wire = not obj.show_wire
+                    obj.show_all_edges = obj.show_wire
+            else:
+                overlay.show_wireframes = not overlay.show_wireframes
+
+
         elif context.mode == "EDIT_MESH":
-            shading.show_xray = not shading.show_xray
+            context.scene.M3.show_edit_mesh_wire = not context.scene.M3.show_edit_mesh_wire
 
         return {'FINISHED'}
 

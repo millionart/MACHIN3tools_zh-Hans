@@ -30,12 +30,13 @@ bl_info = {
 
 
 import bpy
-from bpy.props import IntProperty, StringProperty, CollectionProperty
+from bpy.props import IntProperty, StringProperty, CollectionProperty, PointerProperty, BoolProperty
 from bpy.utils import register_class, unregister_class
 from . classes import get_classes
 from . keymaps import register_keymaps
-from . properties import AppendMatsCollection, AppendMatsUIList
-from . icons import register_icons, unregister_icons
+from . properties import AppendMatsCollection, AppendMatsUIList, M3SceneProperties
+from . icons import register_icons, unregister_icons, get_icon
+
 
 
 # TODO: OSD feedback, so you dont have to check into the op props to verify a tool did what you want it to do
@@ -52,12 +53,41 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     M3path = __path__[0]
 
     appendworldpath: StringProperty(name="Append World from", subtype='FILE_PATH')
-    appendworldname: StringProperty()
+    appendworldname: StringProperty(name="Name of World to append")
 
     appendmatspath: StringProperty(name="Append Materials from", subtype='FILE_PATH')
     appendmats: CollectionProperty(type=AppendMatsCollection)
     appendmatsIDX: IntProperty()
     appendmatsname: StringProperty()
+
+
+    def update_switchmatcap1(self, context):
+        if self.avoid_update:
+            self.avoid_update = False
+            return
+
+        matcaps = [mc.name for mc in context.user_preferences.studio_lights if "datafiles/studiolights/matcap" in mc.path]
+        if self.switchmatcap1 not in matcaps:
+            self.avoid_update = True
+            self.switchmatcap1 = "NOT FOUND"
+
+    def update_switchmatcap2(self, context):
+        if self.avoid_update:
+            self.avoid_update = False
+            return
+
+        matcaps = [mc.name for mc in context.user_preferences.studio_lights if "datafiles/studiolights/matcap" in mc.path]
+        if self.switchmatcap2 not in matcaps:
+            self.avoid_update = True
+            self.switchmatcap2 = "NOT FOUND"
+
+    switchmatcap1: StringProperty(name="Matcap 1", update=update_switchmatcap1)
+    switchmatcap2: StringProperty(name="Matcap 2", update=update_switchmatcap2)
+
+    # hidden
+
+    avoid_update: BoolProperty(default=False)
+
 
     # TABS
 
@@ -86,8 +116,12 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
 
         box = layout.box()
+        split = box.split()
 
-        column = box.column()
+        # APPEND WORLD AND MATERIALS
+
+        b = split.box()
+        column = b.column()
 
         column.prop(self, "appendworldpath")
         column.prop(self, "appendworldname")
@@ -95,28 +129,43 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         column.prop(self, "appendmatspath")
 
+
+        column = b.column()
+
         row = column.row()
         rows = len(self.appendmats) if len(self.appendmats) > 6 else 6
         row.template_list("AppendMatsUIList", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
 
         c = row.column(align=True)
-        c.operator("machin3.move_appendmat", text="", icon="TRIA_UP").direction = "UP"
-        c.operator("machin3.move_appendmat", text="", icon="TRIA_DOWN").direction = "DOWN"
+        c.operator("machin3.move_appendmat", text="", icon='TRIA_UP').direction = "UP"
+        c.operator("machin3.move_appendmat", text="", icon='TRIA_DOWN').direction = "DOWN"
 
         c.separator()
         c.separator()
-        c.operator("machin3.rename_appendmat", text="", icon="OUTLINER_DATA_FONT")
+        c.operator("machin3.rename_appendmat", text="", icon='OUTLINER_DATA_FONT')
         c.separator()
         c.separator()
-        c.operator("machin3.clear_appendmats", text="", icon="LOOP_BACK")
-        c.operator("machin3.remove_appendmat", text="", icon="CANCEL")
+        c.operator("machin3.clear_appendmats", text="", icon='LOOP_BACK')
+        c.operator("machin3.remove_appendmat", text="", icon_value=get_icon('cancel'))
 
         row = column.row()
         row.prop(self, "appendmatsname")
-        row.operator("machin3.add_appendmat", text="", icon="ZOOMIN")
+        row.operator("machin3.add_appendmat", text="", icon_value=get_icon('plus'))
 
 
-classes = [AppendMatsUIList, AppendMatsCollection, MACHIN3toolsPreferences]
+        b = split.box()
+
+        # MATCAP SWITCH
+
+        column = b.column()
+        row = column.row()
+
+        row.prop(self, "switchmatcap1")
+        row.prop(self, "switchmatcap2")
+
+
+
+classes = [AppendMatsUIList, AppendMatsCollection, MACHIN3toolsPreferences, M3SceneProperties]
 
 
 def register():
@@ -128,6 +177,11 @@ def register():
 
     for c in classes:
         register_class(c)
+
+    # PROPERTIES
+
+    bpy.types.Scene.M3 = PointerProperty(type=M3SceneProperties)
+
 
     # KEYMAPS
 

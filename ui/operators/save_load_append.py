@@ -6,6 +6,26 @@ import time
 from ... utils import MACHIN3 as m3
 
 
+
+class New(bpy.types.Operator):
+    bl_idname = "machin3.new"
+    bl_label = "Current file is unsaved. Start a new file anyway?"
+    bl_options = {'REGISTER', 'UNDO'}
+
+
+    def execute(self, context):
+        bpy.ops.wm.read_homefile(app_template="")
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        if bpy.data.is_dirty:
+            return context.window_manager.invoke_confirm(self, event)
+        else:
+            bpy.ops.wm.read_homefile(app_template="")
+            return {'FINISHED'}
+
+
 # TODO: file size output
 
 class Save(bpy.types.Operator):
@@ -131,7 +151,6 @@ class AppendWorld(bpy.types.Operator):
         active = context.active_object
 
         bpy.ops.wm.append(directory=fullpath, filename=name)
-        # bpy.context.scene.cycles.film_transparent = False
 
         world = bpy.data.worlds.get(name)
 
@@ -142,7 +161,7 @@ class AppendWorld(bpy.types.Operator):
 
         # resetting original selection and active which is lost after the append op
         for obj in sel:
-            obj.select_set('SELECT')
+            obj.select_set(True)
 
         bpy.context.view_layer.objects.active = active
 
@@ -186,14 +205,13 @@ class AppendMaterial(bpy.types.Operator):
                 n = name.replace("-", "")
                 bpy.ops.wm.append(directory=fullpath, filename=n)
         else:
-            n = name.replace("-", "")
-            bpy.ops.wm.append(directory=fullpath, filename=n)
+            bpy.ops.wm.append(directory=fullpath, filename=name)
 
             mat = bpy.data.materials.get(name)
 
             for obj in sel:
                 if obj.type == "MESH":
-                    obj.select_set('SELECT')
+                    obj.select_set(True)
 
                     if self.applymaterial:
                         if mat:
@@ -203,7 +221,7 @@ class AppendMaterial(bpy.types.Operator):
 
                             obj.material_slots[0].material = mat
                         else:
-                            self.report({'ERROR'}, "Material '%s' could not be appended.\nMake sure a material of that name exists in the material source file." % (n))
+                            self.report({'ERROR'}, "Material '%s' could not be appended.\nMake sure a material of that name exists in the material source file." % (name))
 
 
         bpy.context.view_layer.objects.active = active

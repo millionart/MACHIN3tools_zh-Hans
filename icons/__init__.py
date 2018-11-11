@@ -6,7 +6,7 @@ iconsCOL = None
 path = os.path.dirname(__file__)
 
 
-def get_icon_id(name):
+def get_icon(name):
     return iconsCOL[name].icon_id
 
 
@@ -20,7 +20,6 @@ def register_icons():
             filepath = os.path.join(path, i)
 
             iconsCOL.load(iconname, filepath, 'IMAGE')
-
 
 
 def unregister_icons():

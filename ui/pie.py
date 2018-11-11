@@ -4,7 +4,7 @@ from bpy.types import Menu
 import bmesh
 import os
 from .. utils import MACHIN3 as m3
-from .. icons import get_icon_id
+from .. icons import get_icon
 
 
 class PieSaveOpenAppend(Menu):
@@ -16,13 +16,13 @@ class PieSaveOpenAppend(Menu):
         pie = layout.menu_pie()
 
         # 4 - LEFT
-        pie.operator("wm.open_mainfile", text="Open...", icon_value=get_icon_id('open'))
+        pie.operator("wm.open_mainfile", text="Open...", icon_value=get_icon('open'))
 
         # 6 - RIGHT
-        pie.operator("machin3.save", text="Save", icon_value=get_icon_id('save'))
+        pie.operator("machin3.save", text="Save", icon_value=get_icon('save'))
 
         # 2 - BOTTOM
-        pie.operator("wm.save_as_mainfile", text="Save As..", icon_value=get_icon_id('save_as'))
+        pie.operator("wm.save_as_mainfile", text="Save As..", icon_value=get_icon('save_as'))
 
         # 8 - TOP
         box = pie.split()
@@ -51,50 +51,50 @@ class PieSaveOpenAppend(Menu):
         pie.separator()
 
         # 1 - BOTTOM - LEFT
-        pie.operator("wm.read_homefile", text="New", icon_value=get_icon_id('new'))
+        pie.operator("machin3.new", text="New", icon_value=get_icon('new'))
 
         # 3 - BOTTOM - RIGHT
-        pie.operator("machin3.save_incremental", text="Incremental Save", icon_value=get_icon_id('save_incremental'))
+        pie.operator("machin3.save_incremental", text="Incremental Save", icon_value=get_icon('save_incremental'))
 
     def draw_left_column(self, col):
         col.scale_x = 1.1
 
         row = col.row()
         row.scale_y = 1.5
-        row.operator("machin3.load_most_recent", text="(R) Most Recent", icon_value=get_icon_id('open_recent'))
-        # row.operator("wm.call_menu", text="All Recent", icon_value=get_icon_id('open_recent')).name = "INFO_MT_file_open_recent"
-        row.operator("wm.call_menu", text="All Recent", icon_value=get_icon_id('open_recent')).name = "TOPBAR_MT_file_open_recent"
+        row.operator("machin3.load_most_recent", text="(R) Most Recent", icon_value=get_icon('open_recent'))
+        # row.operator("wm.call_menu", text="All Recent", icon_value=get_icon('open_recent')).name = "INFO_MT_file_open_recent"
+        row.operator("wm.call_menu", text="All Recent", icon_value=get_icon('open_recent')).name = "TOPBAR_MT_file_open_recent"
 
         col.separator()
-        col.operator("wm.recover_auto_save", text="Recover Auto Save...", icon_value=get_icon_id('recover_auto_save'))
+        col.operator("wm.recover_auto_save", text="Recover Auto Save...", icon_value=get_icon('recover_auto_save'))
         # col.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
-        col.operator("wm.revert_mainfile", text="Revert", icon_value=get_icon_id('revert'))
+        col.operator("wm.revert_mainfile", text="Revert", icon_value=get_icon('revert'))
 
     def draw_center_column_top(self, col):
         row = col.split(factor=0.25)
         row.label(text="Alembic")
         r = row.row(align=True)
-        r.operator("wm.alembic_import", text="Import", icon_value=get_icon_id('import'))
-        r.operator("wm.alembic_export", text="Export", icon_value=get_icon_id('export'))
+        r.operator("wm.alembic_import", text="Import", icon_value=get_icon('import'))
+        r.operator("wm.alembic_export", text="Export", icon_value=get_icon('export'))
 
         row = col.split(factor=0.25)
         row.label(text="Collada")
         r = row.row(align=True)
-        r.operator("wm.collada_import", text="Import", icon_value=get_icon_id('import'))
-        r.operator("wm.collada_export", text="Export", icon_value=get_icon_id('export'))
+        r.operator("wm.collada_import", text="Import", icon_value=get_icon('import'))
+        r.operator("wm.collada_export", text="Export", icon_value=get_icon('export'))
 
     def draw_center_column_bottom(self, col):
         row = col.split(factor=0.5)
         row.scale_y = 1.25
-        row.operator("machin3.load_previous", text="Previous", icon_value=get_icon_id('open_previous'))
-        row.operator("machin3.load_next", text="Next", icon_value=get_icon_id('open_next'))
+        row.operator("machin3.load_previous", text="Previous", icon_value=get_icon('open_previous'))
+        row.operator("machin3.load_next", text="Next", icon_value=get_icon('open_next'))
 
     def draw_right_column(self, col):
         row = col.row()
         r = row.row(align=True)
-        r.operator("wm.append", text="Append", icon_value=get_icon_id('append'))
-        r.operator("wm.link", text="Link", icon_value=get_icon_id('link'))
-        row.operator("wm.call_menu", text="", icon_value=get_icon_id('external_data')).name = "TOPBAR_MT_file_external_data"
+        r.operator("wm.append", text="Append", icon_value=get_icon('append'))
+        r.operator("wm.link", text="Link", icon_value=get_icon('link'))
+        row.operator("wm.call_menu", text="", icon_value=get_icon('external_data')).name = "TOPBAR_MT_file_external_data"
 
         # append world and materials
 
@@ -107,14 +107,14 @@ class PieSaveOpenAppend(Menu):
             if appendworldpath:
                 row = col.split(factor=0.8)
                 row.scale_y = 1.5
-                row.operator("machin3.append_world", text="World", icon_value=get_icon_id('world'))
-                row.operator("machin3.load_world_source", text="", icon_value=get_icon_id('open_world'))
+                row.operator("machin3.append_world", text="World", icon_value=get_icon('world'))
+                row.operator("machin3.load_world_source", text="", icon_value=get_icon('open_world'))
 
             if appendmatspath:
                 row = col.split(factor=0.8)
                 row.scale_y = 1.5
-                row.operator("wm.call_menu", text="Material", icon_value=get_icon_id('material')).name = "VIEW3D_MT_MACHIN3_append_materials"
-                row.operator("machin3.load_materials_source", text="", icon_value=get_icon_id('open_material'))
+                row.operator("wm.call_menu", text="Material", icon_value=get_icon('material')).name = "VIEW3D_MT_MACHIN3_append_materials"
+                row.operator("machin3.load_materials_source", text="", icon_value=get_icon('open_material'))
 
 
 class PieChangeShading(Menu):
@@ -125,7 +125,6 @@ class PieChangeShading(Menu):
         layout = self.layout
 
         view = context.space_data
-
 
         pie = layout.menu_pie()
 
@@ -151,7 +150,7 @@ class PieChangeShading(Menu):
 
         b = box.box()
         column = b.column()
-        self.draw_center_column(view, column)
+        self.draw_center_column(context, view, column)
 
         b = box.box()
         column = b.column()
@@ -170,7 +169,7 @@ class PieChangeShading(Menu):
         pie.separator()
 
     def draw_left_column(self, context, view, col):
-        row = col.split(percentage=0.45)
+        row = col.split(factor=0.45)
         row.operator("machin3.toggle_grid", text="Grid Toggle", icon="GRID")
         r = row.split().row(align=True)
         r.active = view.overlay.show_floor
@@ -179,8 +178,11 @@ class PieChangeShading(Menu):
         r.prop(view.overlay, "show_axis_z", text="Z", toggle=True)
 
         # col.separator()
-        row = col.split(percentage=0.45)
-        row.operator("machin3.toggle_wireframe", text="Wire Toggle", icon="WIRE")
+        row = col.split(factor=0.45)
+
+        icon = get_icon('wireframe_overlay') if view.overlay.show_wireframes else get_icon('wireframe')
+        row.operator("machin3.toggle_wireframe", text="Wire Toggle", icon_value=icon)
+
         r = row.split().row()
         if context.mode == "OBJECT":
             r.active = view.overlay.show_wireframes
@@ -189,7 +191,7 @@ class PieChangeShading(Menu):
             r.active = view.shading.show_xray
             r.prop(view.shading, "xray_alpha", text="X-Ray")
 
-        row = col.split(percentage=0.45)
+        row = col.split(factor=0.45)
         row.operator("machin3.toggle_outline", text="(Q) Outline Toggle")
         row.prop(view.shading, "object_outline_color", text="")
 
@@ -199,10 +201,10 @@ class PieChangeShading(Menu):
                 mesh = active.data
 
                 col.separator()
-                row = col.split(percentage=0.55)
+                row = col.split(factor=0.55)
                 r = row.split().row(align=True)
-                r.operator("machin3.shade_smooth", text="Smooth", icon="MATSPHERE")
-                r.operator("machin3.shade_flat", text="Flat", icon="MATCUBE")
+                r.operator("machin3.shade_smooth", text="Smooth", icon_value=get_icon('smooth'))
+                r.operator("machin3.shade_flat", text="Flat", icon_value=get_icon('flat'))
                 row.prop(mesh, "use_auto_smooth")
                 if mesh.use_auto_smooth:
                     if mesh.has_custom_normals:
@@ -212,9 +214,9 @@ class PieChangeShading(Menu):
 
                 if context.mode == "EDIT_MESH":
                     row = col.row(align=True)
-                    row.prop(view.overlay, "show_vertex_normals", text="", icon='VERTEXSEL')
-                    row.prop(view.overlay, "show_split_normals", text="", icon='LOOPSEL')
-                    row.prop(view.overlay, "show_face_normals", text="", icon='FACESEL')
+                    row.prop(view.overlay, "show_vertex_normals", text="", icon='NORMALS_VERTEX')
+                    row.prop(view.overlay, "show_split_normals", text="", icon='NORMALS_VERTEX_FACE')
+                    row.prop(view.overlay, "show_face_normals", text="", icon='NORMALS_FACE')
 
                     r = row.row(align=True)
                     r.active = view.overlay.show_vertex_normals or view.overlay.show_face_normals or view.overlay.show_split_normals
@@ -228,15 +230,15 @@ class PieChangeShading(Menu):
             # row.prop(mesh, "show_faces", text="Faces")
 
             row = col.row(align=True)
-            row.prop(mesh, "show_edge_crease", text="Creases", toggle=True)
-            row.prop(mesh, "show_edge_sharp", text="Sharp", toggle=True)
-            row.prop(mesh, "show_edge_bevel_weight", text="Bevel", toggle=True)
+            row.prop(view.overlay, "show_edge_crease", text="Creases", toggle=True)
+            row.prop(view.overlay, "show_edge_sharp", text="Sharp", toggle=True)
+            row.prop(view.overlay, "show_edge_bevel_weight", text="Bevel", toggle=True)
 
             if not bpy.app.build_options.freestyle:
-                row.prop(mesh, "show_edge_seams", text="Seams", toggle=True)
+                row.prop(view.overlay, "show_edge_seams", text="Seams", toggle=True)
 
-    def draw_center_column(self, view, col):
-        row = col.split(percentage=0.42)
+    def draw_center_column(self, context, view, col):
+        row = col.split(factor=0.42)
         row.prop(view.overlay, "show_cursor", text="3D Cursor")
         r = row.split().row(align=True)
         r.prop(view.overlay, "show_object_origins", text="Origins")
@@ -248,21 +250,38 @@ class PieChangeShading(Menu):
         row.prop(view.overlay, "show_face_orientation")
         col.prop(view.overlay, "show_relationship_lines")
 
+        active = context.active_object
+
+        if active:
+            col.separator()
+            row = col.row()
+            row.prop(active, "name", text="")
+            row.prop(active, "display_type", text="")
+
+            row = col.row()
+            row.prop(active, "show_name", text="Name")
+            row.prop(active, "show_axis", text="Axis")
+            row.prop(active, "show_in_front", text="In Front")
+
     def draw_right_column(self, context, view, col):
         if view.shading.type == "SOLID":
 
             # light type
             row = col.row(align=True)
-            row.scale_y = 1.5
+            # row.scale_y = 1.5
             row.prop(view.shading, "light", expand=True)
-            if view.shading.light == "MATCAP":
-                row.operator('VIEW3D_OT_toggle_matcap_flip', text="", icon='ARROW_LEFTRIGHT')
 
             # studio / matcap selection
             if view.shading.light in ["STUDIO", "MATCAP"]:
                 row = col.row()
                 row.scale_y = 0.6
                 row.template_icon_view(view.shading, "studio_light", show_labels=True, scale=3)
+
+            # switch matcap
+            if view.shading.light == "MATCAP":
+                row = col.row()
+                row.operator("machin3.matcap_switch", text="(X) Matcap Switch")
+                row.operator('VIEW3D_OT_toggle_matcap_flip', text="Matcap Flip", icon='ARROW_LEFTRIGHT')
 
             # color type
             row = col.row(align=True)
@@ -319,17 +338,21 @@ class PieChangeShading(Menu):
                                         if color.links:
                                             col.prop(strength, "default_value", text="Background Strength")
                                         else:
-                                            row = col.split(percentage=0.7)
+                                            row = col.split(factor=0.7)
                                             row.prop(strength, "default_value", text="Background Strength")
                                             row.prop(color, "default_value", text="")
 
                                         col.separator()
 
             # eevee settings
+
             icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
             col.prop(context.scene.eevee, "use_ssr", icon=icon)
             if context.scene.eevee.use_ssr:
-                col.prop(context.scene.eevee, "ssr_thickness")
+                row = col.row(align=True)
+                row.prop(context.scene.eevee, "ssr_thickness")
+                row.prop(context.scene.eevee, "use_ssr_halfres")
+
 
             icon = "TRIA_DOWN" if context.scene.eevee.use_gtao else "TRIA_RIGHT"
             col.prop(context.scene.eevee, "use_gtao", icon=icon)
@@ -352,20 +375,25 @@ class PieChangeShading(Menu):
                 row.prop(context.scene.eevee, "volumetric_start")
                 row.prop(context.scene.eevee, "volumetric_end")
 
+
+        elif view.shading.type == "RENDERED":
+            col.label(text='TODO: render setting presets')
+            col.label(text='TODO: pack images op')
+
     def get_text_icon(self, context, shading):
         if context.space_data.shading.type == shading:
             text = "Toggle Overlays"
-            icon = "WIRE"
+            icon = "OVERLAY"
         else:
             if shading == "SOLID":
                 text = "Solid"
-                icon = "SOLID"
+                icon = "SHADING_SOLID"
             elif shading == "MATERIAL":
                 text = "LookDev"
-                icon = "MATERIAL"
+                icon = "SHADING_TEXTURE"
             elif shading == "RENDERED":
                 text = "Rendered"
-                icon = "SMOOTH"
+                icon = "SHADING_RENDERED"
 
         return text, icon
 
@@ -501,28 +529,28 @@ class PieSelectMode(Menu):
         layout = self.layout
         toolsettings = context.tool_settings
 
-        ob = context
+        active = context.active_object
 
-        if ob.object is not None:
-            if ob.object.type == 'MESH':
+        if active:
+            if active.type == 'MESH':
                 pie = layout.menu_pie()
                 # 4 - LEFT
-                pie.operator("machin3.select_vertex_mode", text="Vertex", icon='VERTEXSEL')
+                pie.operator("machin3.select_vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
                 # 6 - RIGHT
-                pie.operator("machin3.select_face_mode", text="Face", icon='FACESEL')
+                pie.operator("machin3.select_face_mode", text="Face", icon_value=get_icon('face'))
                 # 2 - BOTTOM
-                pie.operator("machin3.select_edge_mode", text="Edge", icon='EDGESEL')
+                pie.operator("machin3.select_edge_mode", text="Edge", icon_value=get_icon('edge'))
                 # 8 - TOP
                 if bpy.context.object.mode == "OBJECT":
                     text = "Edit"
-                    icon = "EDITMODE_HLT"
+                    icon = get_icon('edit_mesh')
                 elif bpy.context.object.mode == "EDIT":
                     text = "Object"
-                    icon = "OBJECT_DATAMODE"
-                pie.operator("machin3.toggle_edit_mode", text=text, icon=icon)
+                    icon = get_icon('object')
+                pie.operator("machin3.toggle_edit_mode", text=text, icon_value=icon)
                 # 7 - TOP - LEFT
                 if bpy.context.object.mode == "EDIT":
-                    pie.prop(bpy.context.space_data, "use_occlude_geometry", text="Occlude")
+                    pie.prop(context.scene.M3, "occlude_geometry", text="Occlude", icon="XRAY")
                 else:
                     pie.separator()
 
@@ -537,6 +565,8 @@ class PieSelectMode(Menu):
                     column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
                 else:
                     pie.separator()
+
+            """
 
             elif ob.object.type == 'EMPTY':
                 pass
@@ -582,6 +612,8 @@ class PieSelectMode(Menu):
 
             else:
                 pass
+
+            """
 
 
 class PieSwitchWorkspace(Menu):
