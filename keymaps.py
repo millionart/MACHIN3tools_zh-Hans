@@ -94,4 +94,11 @@ def register_op_keymaps(keys):
     kmi = km.keymap_items.new("machin3.smart_face", "FOUR", "PRESS")
     keys.append((km, kmi))
 
+
+    # CLEAN UP
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.clean_up", "THREE", "PRESS")
+    keys.append((km, kmi))
+
     return keys

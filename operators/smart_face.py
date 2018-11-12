@@ -1,4 +1,5 @@
 import bpy
+from bpy.props import FloatProperty, BoolProperty
 import bmesh
 from .. utils import MACHIN3 as m3
 
@@ -7,6 +8,10 @@ class SmartFace(bpy.types.Operator):
     bl_idname = "machin3.smart_face"
     bl_label = "MACHIN3: Smart Face"
     bl_options = {'REGISTER', 'UNDO'}
+
+    merge: BoolProperty(name="Merge close-by Verts", default=False)
+    # distance: FloatProperty(name="Merge Distance", default=0.01, min=0, step=0.1, precision=4)
+    distance: FloatProperty(name="Merge Distance", default=0.035, min=0, step=0.1, precision=4)
 
     @classmethod
     def poll(cls, context):
@@ -87,15 +92,19 @@ class SmartFace(bpy.types.Operator):
 
                 # if any of the other two verts has 4 edges, select it. first come first serve
                 if any([len(v1_other.link_edges) == 4, len(v2_other.link_edges) == 4]):
-                    if len(v1_other.link_edges) == 4:
+                    if len(v1_other.link_edges) == 4 and any([e for e in v1_other.link_edges if not e.is_manifold]):
                         v.select = False
                         v1_other.select = True
                         v = v1_other
 
-                    elif len(v2_other.link_edges) == 4:
+                    elif len(v2_other.link_edges) == 4 and any([e for e in v2_other.link_edges if not e.is_manifold]):
                         v.select = False
                         v2_other.select = True
                         v = v2_other
+                    else:
+                        v.select = False
+                        bm.select_flush(False)
+
 
                     bm.select_flush(False)
 
@@ -107,6 +116,17 @@ class SmartFace(bpy.types.Operator):
                         second_v.select = True
 
                         bm.select_flush(True)
+
+                else:
+                    v.select = False
+                    # v_new.select = True  # it's better to not have anything selected, than select a vert that's only useful in some circumstances
+
+                    bm.select_flush(False)
+
+                # remove dounbles, for new verts close the existing ones
+                if self.merge:
+                    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=self.distance)
+
 
         if len(verts) == 2:
             v1 = verts[0]
@@ -132,11 +152,11 @@ class SmartFace(bpy.types.Operator):
                 v1.select = False
                 v2.select = False
 
-                # only select the new verts if they have 4 edges
-                if len(v1_other.link_edges) == 4:
+                # only select the new verts if they have 4 edges and some of them a re non manifold
+                if len(v1_other.link_edges) == 4 and any([e for e in v1_other.link_edges if not e.is_manifold]):
                     v1_other.select = True
 
-                if len(v2_other.link_edges) == 4:
+                if len(v2_other.link_edges) == 4 and any([e for e in v2_other.link_edges if not e.is_manifold]):
                     v2_other.select = True
 
                 bm.select_flush(False)
@@ -161,5 +181,9 @@ class SmartFace(bpy.types.Operator):
                         second_v.select = True
 
                 bm.select_flush(True)
+
+
+
+
 
         bmesh.update_edit_mesh(active.data)

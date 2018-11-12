@@ -57,6 +57,7 @@ def get_op_classes(classes):
     from . operators.smart_vert import SmartVert
     from . operators.smart_edge import SmartEdge
     from . operators.smart_face import SmartFace
+    from . operators.clean_up import CleanUp
 
     # SMART VERT
     classes.append(SmartVert)
@@ -66,5 +67,8 @@ def get_op_classes(classes):
 
     # SMART EDGE
     classes.append(SmartFace)
+
+    # CLEAN UP
+    classes.append(CleanUp)
 
     return classes

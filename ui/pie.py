@@ -637,13 +637,6 @@ class PieSwitchWorkspace(Menu):
         # 2 - BOTTOM
         pie.operator("machin3.switch_workspace", text="Scripting", icon='CONSOLE').name="Scripting"
 
-        """
-        box = pie.split()
-        row = box.row(align=True)
-        row.operator("machin3.layout_switch", text="Scripting", icon='SCRIPT').variable="M3 scripting"
-        row.operator("machin3.layout_switch", text="Console", icon='CONSOLE').variable="M3 console"
-        # """
-
         # 8 - TOP
         pie.operator("machin3.switch_workspace", text="Material", icon='MATERIAL_DATA').name="Material"
 
