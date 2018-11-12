@@ -1,3 +1,6 @@
+from . utils import MACHIN3 as m3
+
+
 def get_classes(classes):
     classes = get_ui_classes(classes)
 
@@ -51,4 +54,17 @@ def get_ui_classes(classes):
 
 
 def get_op_classes(classes):
+    from . operators.smart_vert import SmartVert
+    from . operators.smart_edge import SmartEdge
+    from . operators.smart_face import SmartFace
+
+    # SMART VERT
+    classes.append(SmartVert)
+
+    # SMART EDGE
+    classes.append(SmartEdge)
+
+    # SMART EDGE
+    classes.append(SmartFace)
+
     return classes

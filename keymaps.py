@@ -49,7 +49,7 @@ def register_ui_keymaps(keys):
     keys.append((km, kmi))
 
 
-    # Switch Workspace
+    # SWITCH WORKSPACE
 
     km = wm.keyconfigs.addon.keymaps.new(name='Window')
     kmi = km.keymap_items.new('wm.call_menu_pie', 'PAUSE', 'PRESS')
@@ -61,4 +61,37 @@ def register_ui_keymaps(keys):
 
 
 def register_op_keymaps(keys):
+    wm = bpy.context.window_manager
+
+    # SMART VERT
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.smart_vert", "ONE", "PRESS")
+    kmi.properties.type = "LAST"
+    keys.append((km, kmi))
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.smart_vert", "ONE", "PRESS", shift=True)
+    kmi.properties.type = "CENTER"
+    keys.append((km, kmi))
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.smart_vert", "ONE", "PRESS", alt=True)
+    kmi.properties.type = "SMART"
+    keys.append((km, kmi))
+
+
+    # SMART EDGE
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.smart_edge", "TWO", "PRESS")
+    keys.append((km, kmi))
+
+
+    # SMART FACE
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.smart_face", "FOUR", "PRESS")
+    keys.append((km, kmi))
+
     return keys

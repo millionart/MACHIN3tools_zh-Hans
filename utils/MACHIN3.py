@@ -7,20 +7,13 @@ def clear():
     os.system("clear")
 
 
-def red(string):
-    colored = "\033[91m" + str(string) + "\033[0m"
-    return colored
-
-
-def make_active(object, silent=True):
-    bpy.context.scene.objects.active = object
-    if not silent:
-        print("Made %s active." % object.name)
-    return bpy.context.scene.objects.active
-
-
 def get_active():
-    return bpy.context.scene.objects.active
+    return bpy.context.active_object
+
+
+def make_active(obj):
+    bpy.context.view_layer.objects.active = obj
+    return obj
 
 
 def selected_objects():
@@ -64,28 +57,23 @@ def unhide_all(string="OBJECT"):
 
 
 def get_mode():
-    objmode = bpy.context.active_object.mode
+    mode = bpy.context.mode
 
-    if objmode == "OBJECT":
-        # print("object mode")
+    if mode == "OBJECT":
         return "OBJECT"
-    elif objmode == "EDIT":
-        return get_comp_mode()
+    elif mode == "EDIT_MESH":
+        return get_mesh_select_mode()
 
 
-def get_comp_mode():
-    subobjtuple = tuple(bpy.context.scene.tool_settings.mesh_select_mode)
-    if subobjtuple == (True, False, False):
-        # print("edit mode: vertex")
+def get_mesh_select_mode():
+    mode = tuple(bpy.context.scene.tool_settings.mesh_select_mode)
+    if mode == (True, False, False):
         return "VERT"
-    elif subobjtuple == (False, True, False):
-        # print("edit mode: edge")
+    elif mode == (False, True, False):
         return "EDGE"
-    elif subobjtuple == (False, False, True):
-        # print("edit mode: face")
+    elif mode == (False, False, True):
         return "FACE"
     else:
-        # print("Unsopported multi sub-object mode")
         return None
 
 
@@ -97,36 +85,6 @@ def set_mode(string, extend=False, expand=False):
     elif string in ["VERT", "EDGE", "FACE"]:
         bpy.ops.mesh.select_mode(use_extend=extend, use_expand=expand, type=string)
 
-
-def set_layer(layertuple):
-    bpy.ops.object.move_to_layer(layers=layertuple)
-
-
-def get_active_layer(string):
-    if string == "INT":
-        return bpy.context.scene.active_layer
-    if string == "TUPLE":
-        layer = bpy.context.scene.active_layer
-        layertuple = ()
-        for i in range(20):
-            if i == layer:
-                layertuple += (True,)
-            else:
-                layertuple += (False,)
-        return layertuple
-
-
-def show_all_layers():
-    for i in range(20):
-        bpy.context.scene.layers[i] = True
-
-
-def show_only_layer(layerint):
-    for i in range(20):
-        if i == layerint:
-            bpy.context.scene.layers[i] = True
-        else:
-            bpy.context.scene.layers[i] = False
 
 
 def change_context(string):
@@ -143,38 +101,24 @@ def change_pivot(string):
     return old_type
 
 
-def set_timestamp(object, timestamp=None, silent=True):
-    if timestamp is None:
-        import time
-        timestamp = time.time()
-    object["timestamp"] = timestamp
-    if not silent:
-        print("Set '%s' timestamp to '%f'." % (object.name, timestamp))
-    return timestamp
-
-
-def get_timestamp(object):
-    try:
-        timestamp = object["timestamp"]
-    except:
-        timestamp = None
-    return timestamp
-
-
-def get_AM_library_path():
-    addons = bpy.context.user_preferences.addons
-
-    for addonname in addons.keys():
-        if "asset_management" in addonname:
-            return addons[addonname].preferences.asset_M_library_path
-
-
 def DM_check():
     return addon_check("DECALmachine")
 
 
+def MM_check():
+    return addon_check("MESHmachine")
+
+
+def RM_check():
+    return addon_check("RIGmachine")
+
+
 def HOps_check():
     return addon_check("HOps")
+
+
+def BC_check():
+    return addon_check("BoxCutter")
 
 
 def AM_check():
@@ -237,6 +181,14 @@ def DM_prefs():
     return bpy.context.user_preferences.addons["DECALmachine"].preferences
 
 
+def MM_prefs():
+    return bpy.context.user_preferences.addons["MESHmachine"].preferences
+
+
+def RM_prefs():
+    return bpy.context.user_preferences.addons["RIGmachine"].preferences
+
+
 def M3_prefs():
     return bpy.context.user_preferences.addons["MACHIN3tools"].preferences
 
@@ -257,16 +209,15 @@ def make_selection(string, idlist):
 
 
 def get_selection(string):
-    mesh = bpy.context.object.data
-    set_mode('OBJECT')
+    active = bpy.context.active_object
+    active.update_from_editmode()
+
     if string == "VERT":
-        idlist = [v.index for v in mesh.vertices if v.select]
+        return [v.index for v in active.data.vertices if v.select]
     if string == "EDGE":
-        idlist = [e.index for e in mesh.edges if e.select]
+        return [e.index for e in active.data.edges if e.select]
     if string == "FACE":
-        idlist = [f.index for f in mesh.polygons if f.select]
-    set_mode('EDIT')
-    return idlist
+        return [f.index for f in active.data.polygons if f.select]
 
 
 def get_selection_history():

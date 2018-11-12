@@ -52,15 +52,6 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
     M3path = __path__[0]
 
-    appendworldpath: StringProperty(name="Append World from", subtype='FILE_PATH')
-    appendworldname: StringProperty(name="Name of World to append")
-
-    appendmatspath: StringProperty(name="Append Materials from", subtype='FILE_PATH')
-    appendmats: CollectionProperty(type=AppendMatsCollection)
-    appendmatsIDX: IntProperty()
-    appendmatsname: StringProperty()
-
-
     def update_switchmatcap1(self, context):
         if self.avoid_update:
             self.avoid_update = False
@@ -81,8 +72,25 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.avoid_update = True
             self.switchmatcap2 = "NOT FOUND"
 
+
+    # MACHIN3pies
+
+    appendworldpath: StringProperty(name="Append World from", subtype='FILE_PATH')
+    appendworldname: StringProperty(name="Name of World to append")
+
+    appendmatspath: StringProperty(name="Append Materials from", subtype='FILE_PATH')
+    appendmats: CollectionProperty(type=AppendMatsCollection)
+    appendmatsIDX: IntProperty()
+    appendmatsname: StringProperty()
+
+
     switchmatcap1: StringProperty(name="Matcap 1", update=update_switchmatcap1)
     switchmatcap2: StringProperty(name="Matcap 2", update=update_switchmatcap2)
+
+
+    # MACHIN3tools
+
+    activate_smart_vert: BoolProperty(name="Activate Smart Vert", default=False)
 
     # hidden
 
@@ -153,15 +161,22 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row.operator("machin3.add_appendmat", text="", icon_value=get_icon('plus'))
 
 
-        b = split.box()
-
         # MATCAP SWITCH
 
-        column = b.column()
+        column.separator()
         row = column.row()
 
         row.prop(self, "switchmatcap1")
         row.prop(self, "switchmatcap2")
+
+
+        b = split.box()
+
+        # MACHIN3tools
+
+        column = b.column()
+
+        column.prop(self, "activate_smart_vert")
 
 
 
