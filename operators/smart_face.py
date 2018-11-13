@@ -79,7 +79,7 @@ class SmartFace(bpy.types.Operator):
 
             if faces and len(open_edges) == 2:
 
-                # find the locatino of the new vert
+                # calculate the location of the new vert
                 e1 = open_edges[0]
                 e2 = open_edges[1]
 
@@ -100,14 +100,14 @@ class SmartFace(bpy.types.Operator):
                 # recalc the face normal
                 bmesh.ops.recalc_face_normals(bm, faces=[f])
 
-                # if any of the other two verts has 4 edges, select it. first come first serve
+                # if any of the other two verts has 4 edges, at least one of them non-manifold, select it. first come first serve.
                 if any([len(v1_other.link_edges) == 4, len(v2_other.link_edges) == 4]):
-                    if len(v1_other.link_edges) == 4 and any([e for e in v1_other.link_edges if not e.is_manifold]):
+                    if len(v1_other.link_edges) == 4 and any([not e.is_manifold for e in v1_other.link_edges]):
                         v.select = False
                         v1_other.select = True
                         v = v1_other
 
-                    elif len(v2_other.link_edges) == 4 and any([e for e in v2_other.link_edges if not e.is_manifold]):
+                    elif len(v2_other.link_edges) == 4 and any([not e.is_manifold for e in v2_other.link_edges]):
                         v.select = False
                         v2_other.select = True
                         v = v2_other
@@ -162,11 +162,11 @@ class SmartFace(bpy.types.Operator):
                 v1.select = False
                 v2.select = False
 
-                # only select the new verts if they have 4 edges and some of them a re non manifold
-                if len(v1_other.link_edges) == 4 and any([e for e in v1_other.link_edges if not e.is_manifold]):
+                # only select the new verts if they have 4 edges and at least one of them non manifold
+                if len(v1_other.link_edges) == 4 and any([not e.is_manifold for e in v1_other.link_edges]):
                     v1_other.select = True
 
-                if len(v2_other.link_edges) == 4 and any([e for e in v2_other.link_edges if not e.is_manifold]):
+                if len(v2_other.link_edges) == 4 and any([not e.is_manifold for e in v2_other.link_edges]):
                     v2_other.select = True
 
                 bm.select_flush(False)
@@ -191,9 +191,6 @@ class SmartFace(bpy.types.Operator):
                         second_v.select = True
 
                 bm.select_flush(True)
-
-
-
 
 
         bmesh.update_edit_mesh(active.data)

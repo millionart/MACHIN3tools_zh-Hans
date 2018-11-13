@@ -125,7 +125,6 @@ def register_op_keymaps(keys):
     kmi.properties.use_z = False
     keys.append((km, kmi))
 
-
     km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
     kmi = km.keymap_items.new("machin3.mirror", "Y", "PRESS", alt=True, shift=True)
     kmi.properties.use_x = False
@@ -133,12 +132,18 @@ def register_op_keymaps(keys):
     kmi.properties.use_z = False
     keys.append((km, kmi))
 
-
     km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
     kmi = km.keymap_items.new("machin3.mirror", "Z", "PRESS", alt=True, shift=True)
     kmi.properties.use_x = False
     kmi.properties.use_y = False
     kmi.properties.use_z = True
+    keys.append((km, kmi))
+
+
+    # ALIGN
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.align", "A", "PRESS", alt=True)
     keys.append((km, kmi))
 
 

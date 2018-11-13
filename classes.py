@@ -61,6 +61,7 @@ def get_op_classes(classes):
     from . operators.clipping_toggle import ClippingToggle
     from . operators.focus import Focus
     from . operators.mirror import Mirror
+    from . operators.align import Align
 
     # SMART VERT
     classes.append(SmartVert)
@@ -82,5 +83,8 @@ def get_op_classes(classes):
 
     # MIRROR
     classes.append(Mirror)
+
+    # ALIGN
+    classes.append(Align)
 
     return classes
