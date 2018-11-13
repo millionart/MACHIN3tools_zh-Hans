@@ -8,6 +8,8 @@ mergetypeitems = [("LAST", "Last", ""),
                   ("CENTER", "Center", ""),
                   ("SMART", "Smart", "")]
 
+# TODO: for LAST and SMART, protect against box/circle selections
+
 
 class SmartVert(bpy.types.Operator):
     bl_idname = "machin3.smart_vert"
@@ -18,10 +20,6 @@ class SmartVert(bpy.types.Operator):
 
     # hidden
     wrongsmartselection = False
-
-    @classmethod
-    def poll(cls, context):
-        return m3.get_mode() == "VERT"
 
     def draw(self, context):
         layout = self.layout
@@ -38,6 +36,10 @@ class SmartVert(bpy.types.Operator):
 
                 row.separator()
                 row.label(text="You need to select exactly 4 vertices.", icon="INFO")
+
+    @classmethod
+    def poll(cls, context):
+        return m3.get_mode() == "VERT"
 
 
     def execute(self, context):
@@ -78,7 +80,6 @@ class SmartVert(bpy.types.Operator):
 
             else:
                 self.wrongsmartselection = True
-
 
         return {'FINISHED'}
 

@@ -102,7 +102,7 @@ def register_op_keymaps(keys):
     keys.append((km, kmi))
 
 
-    # CLIPPGIN TOGGLE
+    # CLIPPING TOGGLE
 
     km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
     kmi = km.keymap_items.new("machin3.clipping_toggle", "BUTTON5MOUSE", "PRESS")
@@ -113,6 +113,32 @@ def register_op_keymaps(keys):
 
     km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
     kmi = km.keymap_items.new("machin3.focus", "F", "PRESS", ctrl=True)
+    keys.append((km, kmi))
+
+
+    # MIRROR
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.mirror", "X", "PRESS", alt=True, shift=True)
+    kmi.properties.use_x = True
+    kmi.properties.use_y = False
+    kmi.properties.use_z = False
+    keys.append((km, kmi))
+
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.mirror", "Y", "PRESS", alt=True, shift=True)
+    kmi.properties.use_x = False
+    kmi.properties.use_y = True
+    kmi.properties.use_z = False
+    keys.append((km, kmi))
+
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.mirror", "Z", "PRESS", alt=True, shift=True)
+    kmi.properties.use_x = False
+    kmi.properties.use_y = False
+    kmi.properties.use_z = True
     keys.append((km, kmi))
 
 

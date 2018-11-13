@@ -12,10 +12,6 @@ class SmartFace(bpy.types.Operator):
     merge: BoolProperty(name="Merge close-by Verts", default=True)
     distance: FloatProperty(name="Merge Distance", default=0.01, min=0, step=0.1, precision=4)
 
-    @classmethod
-    def poll(cls, context):
-        return m3.get_mode() in ["VERT", "EDGE", "FACE"]
-
     def draw(self, context):
         layout = self.layout
 
@@ -26,6 +22,10 @@ class SmartFace(bpy.types.Operator):
         r = row.row()
         r.active = self.merge
         r.prop(self, "distance", text="Distance")
+
+    @classmethod
+    def poll(cls, context):
+        return m3.get_mode() in ["VERT", "EDGE", "FACE"]
 
     def execute(self, context):
         mode = m3.get_mode()

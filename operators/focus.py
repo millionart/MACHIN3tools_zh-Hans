@@ -20,6 +20,9 @@ class Focus(bpy.types.Operator):
         row.prop(self, "view_selected")
         row.prop(self, "unmirror")
 
+    @classmethod
+    def poll(cls, context):
+        return context.mode == "OBJECT"
 
     def execute(self, context):
         history = context.scene.M3.focus_history
@@ -34,7 +37,7 @@ class Focus(bpy.types.Operator):
             self.unfocus(context, history)
 
         # for epoch in history:
-            # print(epoch.name, ": ", [obj.name for obj in epoch.objects])
+            # print(epoch.name, ", hidden: ", [obj.name for obj in epoch.objects], ", unmirrored: ", [obj.name for obj in epoch.unmirrored])
 
         return {'FINISHED'}
 
