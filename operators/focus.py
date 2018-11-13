@@ -1,4 +1,5 @@
 import bpy
+from bpy.props import BoolProperty
 from .. utils import MACHIN3 as m3
 
 
@@ -9,6 +10,15 @@ class Focus(bpy.types.Operator):
     bl_label = "MACHIN3: Focus"
     bl_options = {'REGISTER', 'UNDO'}
 
+    view_selected: BoolProperty(name="View Selcted", default=True)
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        column.prop(self, "view_selected")
+
     def execute(self, context):
         history = context.scene.M3.focus_history
 
@@ -16,6 +26,7 @@ class Focus(bpy.types.Operator):
 
         if sel:
             self.focus(context, sel, history)
+
 
         elif history:
             self.unfocus(context, history)
@@ -42,13 +53,33 @@ class Focus(bpy.types.Operator):
                 entry.obj = obj
                 entry.name = obj.name
 
+        if self.view_selected:
+            bpy.ops.view3d.view_selected()
 
     def unfocus(self, context, history):
+        if self.view_selected:
+            selected = []
+
+            for obj in context.view_layer.objects:
+                if not obj.hide_viewport:
+                    obj.select_set(True)
+                    selected.append(obj)
+
         last_epoch = history[-1]
 
         for entry in last_epoch.objects:
             entry.obj.hide_viewport = False
 
+            if self.view_selected:
+                entry.obj.select_set(True)
+                selected.append(entry.obj)
+
         idx = history.keys().index(last_epoch.name)
 
         history.remove(idx)
+
+        if self.view_selected:
+            bpy.ops.view3d.view_selected()
+
+            for obj in selected:
+                obj.select_set(False)
