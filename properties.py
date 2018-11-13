@@ -8,10 +8,15 @@ class M3HistoryObjectEntry(bpy.types.PropertyGroup):
     obj: PointerProperty(name="History Object", type=bpy.types.Object)
 
 
-class M3HistoryEntry(bpy.types.PropertyGroup):
+class M3HistoryUnmirrorEntry(bpy.types.PropertyGroup):
+    name: StringProperty()
+    obj: PointerProperty(name="History Unmirror", type=bpy.types.Object)
+
+
+class M3HistoryEpoch(bpy.types.PropertyGroup):
     name: StringProperty()
     objects: CollectionProperty(type=M3HistoryObjectEntry)
-
+    unmirrored: CollectionProperty(type=M3HistoryUnmirrorEntry)
 
 
 class M3SceneProperties(bpy.types.PropertyGroup):
@@ -31,7 +36,7 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     occlude_geometry: BoolProperty(name="Occlude Geometry", default=False, update=update_occlude_geometry)
     show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_show_edit_mesh_wire)
 
-    focus_history: CollectionProperty(type=M3HistoryEntry)
+    focus_history: CollectionProperty(type=M3HistoryEpoch)
 
 
 

@@ -34,7 +34,7 @@ from bpy.props import IntProperty, StringProperty, CollectionProperty, PointerPr
 from bpy.utils import register_class, unregister_class
 from . classes import get_classes
 from . keymaps import register_keymaps
-from . properties import AppendMatsCollection, AppendMatsUIList, M3SceneProperties, M3HistoryEntry, M3HistoryObjectEntry
+from . properties import AppendMatsCollection, AppendMatsUIList, M3SceneProperties, M3HistoryEpoch, M3HistoryObjectEntry, M3HistoryUnmirrorEntry
 from . icons import register_icons, unregister_icons, get_icon
 
 
@@ -180,7 +180,13 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
 
 
-classes = [AppendMatsUIList, AppendMatsCollection, MACHIN3toolsPreferences, M3HistoryObjectEntry, M3HistoryEntry, M3SceneProperties]
+classes = [AppendMatsUIList,
+           AppendMatsCollection,
+           MACHIN3toolsPreferences,
+           M3HistoryObjectEntry,
+           M3HistoryUnmirrorEntry,
+           M3HistoryEpoch,
+           M3SceneProperties]
 
 
 def register():
@@ -192,6 +198,7 @@ def register():
 
     for c in classes:
         register_class(c)
+
 
     # PROPERTIES
 
