@@ -101,4 +101,19 @@ def register_op_keymaps(keys):
     kmi = km.keymap_items.new("machin3.clean_up", "THREE", "PRESS")
     keys.append((km, kmi))
 
+
+    # CLIPPGIN TOGGLE
+
+    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+    kmi = km.keymap_items.new("machin3.clipping_toggle", "BUTTON5MOUSE", "PRESS")
+    keys.append((km, kmi))
+
+
+    # FOCUS
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.focus", "F", "PRESS", ctrl=True)
+    keys.append((km, kmi))
+
+
     return keys

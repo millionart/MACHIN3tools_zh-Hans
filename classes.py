@@ -58,6 +58,8 @@ def get_op_classes(classes):
     from . operators.smart_edge import SmartEdge
     from . operators.smart_face import SmartFace
     from . operators.clean_up import CleanUp
+    from . operators.clipping_toggle import ClippingToggle
+    from . operators.focus import Focus
 
     # SMART VERT
     classes.append(SmartVert)
@@ -70,5 +72,11 @@ def get_op_classes(classes):
 
     # CLEAN UP
     classes.append(CleanUp)
+
+    # CLIPPING TOGGLE
+    classes.append(ClippingToggle)
+
+    # FOCUS
+    classes.append(Focus)
 
     return classes

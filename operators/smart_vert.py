@@ -16,9 +16,29 @@ class SmartVert(bpy.types.Operator):
 
     type: EnumProperty(name="Merge Type", items=mergetypeitems, default="LAST")
 
+    # hidden
+    wrongsmartselection = False
+
     @classmethod
     def poll(cls, context):
         return m3.get_mode() == "VERT"
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        row = column.row()
+        row.label(text="Merge")
+        row.prop(self, "type", expand=True)
+
+        if self.type == "SMART":
+            if self.wrongsmartselection:
+                row = column.split(factor=0.25)
+
+                row.separator()
+                row.label(text="You need to select exactly 4 vertices.", icon="INFO")
+
 
     def execute(self, context):
         active = context.active_object
@@ -36,6 +56,8 @@ class SmartVert(bpy.types.Operator):
         elif self.type == "SMART":
 
             if len(selverts) == 4:
+                self.wrongsmartselection = False
+
                 # get path starting and end vert ids
                 # also prepare the selection history for the shortest path op
                 path1, path2 = self.get_path_ids(active)
@@ -53,6 +75,9 @@ class SmartVert(bpy.types.Operator):
                 path2 = self.get_full_path(active, path2[1], path2[0])
 
                 self.weld(active, path1, path2)
+
+            else:
+                self.wrongsmartselection = True
 
 
         return {'FINISHED'}

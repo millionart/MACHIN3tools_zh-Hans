@@ -9,13 +9,23 @@ class SmartFace(bpy.types.Operator):
     bl_label = "MACHIN3: Smart Face"
     bl_options = {'REGISTER', 'UNDO'}
 
-    merge: BoolProperty(name="Merge close-by Verts", default=False)
-    # distance: FloatProperty(name="Merge Distance", default=0.01, min=0, step=0.1, precision=4)
-    distance: FloatProperty(name="Merge Distance", default=0.035, min=0, step=0.1, precision=4)
+    merge: BoolProperty(name="Merge close-by Verts", default=True)
+    distance: FloatProperty(name="Merge Distance", default=0.01, min=0, step=0.1, precision=4)
 
     @classmethod
     def poll(cls, context):
         return m3.get_mode() in ["VERT", "EDGE", "FACE"]
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+        row = column.row()
+        row.prop(self, "merge")
+        r = row.row()
+        r.active = self.merge
+        r.prop(self, "distance", text="Distance")
 
     def execute(self, context):
         mode = m3.get_mode()

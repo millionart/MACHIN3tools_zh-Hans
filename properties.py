@@ -1,26 +1,20 @@
 import bpy
-from bpy.props import StringProperty, IntProperty, BoolProperty
+from bpy.props import StringProperty, IntProperty, BoolProperty, CollectionProperty, PointerProperty
+
+
+
+class M3HistoryObjectEntry(bpy.types.PropertyGroup):
+    name: StringProperty()
+    obj: PointerProperty(name="History Object", type=bpy.types.Object)
+
+
+class M3HistoryEntry(bpy.types.PropertyGroup):
+    name: StringProperty()
+    objects: CollectionProperty(type=M3HistoryObjectEntry)
+
 
 
 class M3SceneProperties(bpy.types.PropertyGroup):
-    """
-    debugmode = BoolProperty(name="Debug Mode", default=False)
-
-    pieobjecteditmodehide = BoolProperty(name="Auto Hide", default=False)
-    pieobjecteditmodeshow = BoolProperty(name="Auto Reveal", default=False)
-    pieobjecteditmodeshowunselect = BoolProperty(name="Unselect", default=False)
-    pieobjecteditmodetoggleao = BoolProperty(name="Toggle AO", default=False)
-
-    pieviewsalignactive = bpy.props.BoolProperty(name="Align Active", default=False)
-
-    preview_percentage = IntProperty(name="Preview Percentage", default=100, min=10, max=100, subtype="PERCENTAGE")
-    final_percentage = IntProperty(name="Final Percentage", default=250, min=100, max=1000, subtype="PERCENTAGE")
-
-    preview_samples = IntProperty(name="Preview Percentage", default=32, min=12, max=64)
-    final_samples = IntProperty(name="Final Percentage", default=256, min=64, max=2048)
-
-    """
-
     def update_occlude_geometry(self, context):
         shading = context.space_data.shading
 
@@ -36,6 +30,9 @@ class M3SceneProperties(bpy.types.PropertyGroup):
 
     occlude_geometry: BoolProperty(name="Occlude Geometry", default=False, update=update_occlude_geometry)
     show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_show_edit_mesh_wire)
+
+    focus_history: CollectionProperty(type=M3HistoryEntry)
+
 
 
 class AppendMatsUIList(bpy.types.UIList):
