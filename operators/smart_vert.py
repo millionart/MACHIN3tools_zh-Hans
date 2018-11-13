@@ -76,6 +76,7 @@ class SmartVert(bpy.types.Operator):
                 # get full path2 ids
                 path2 = self.get_full_path(active, path2[1], path2[0])
 
+                # merge the verts
                 self.weld(active, path1, path2)
 
             else:
