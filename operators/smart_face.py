@@ -51,7 +51,7 @@ class SmartFace(bpy.types.Operator):
 
             # DUPLICATE and SEPARATE
 
-            if len(selfaces) >= 1:
+            if selfaces:
                 bpy.ops.mesh.duplicate()
                 bpy.ops.mesh.separate(type='SELECTED')
 

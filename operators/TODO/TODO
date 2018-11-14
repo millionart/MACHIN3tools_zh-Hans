@@ -1,0 +1,7 @@
+create batch tool, that can:
+* cleanout_materials
+* cleanout uvs
+* find disabled mods
+* hide/unhide meshes
+* lock/unlock objects
+* batch mod stuff

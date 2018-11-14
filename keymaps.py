@@ -68,16 +68,24 @@ def register_op_keymaps(keys):
     km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
     kmi = km.keymap_items.new("machin3.smart_vert", "ONE", "PRESS")
     kmi.properties.type = "LAST"
+    kmi.properties.slide_override = False
     keys.append((km, kmi))
 
     km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
     kmi = km.keymap_items.new("machin3.smart_vert", "ONE", "PRESS", shift=True)
     kmi.properties.type = "CENTER"
+    kmi.properties.slide_override = False
     keys.append((km, kmi))
 
     km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
     kmi = km.keymap_items.new("machin3.smart_vert", "ONE", "PRESS", alt=True)
     kmi.properties.type = "SMART"
+    kmi.properties.slide_override = False
+    keys.append((km, kmi))
+
+    km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+    kmi = km.keymap_items.new("machin3.smart_vert", "ONE", "PRESS", shift=True, alt=True)
+    kmi.properties.slide_override = True
     keys.append((km, kmi))
 
 

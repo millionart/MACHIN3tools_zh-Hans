@@ -1,14 +1,17 @@
 import bpy
 import bmesh
-from bpy.props import EnumProperty
+from bpy.props import EnumProperty, BoolProperty
 from .. utils import MACHIN3 as m3
+
+
+
+# TODO. the slide tool is a great candidate for testing custom drawnig in 2.8
+# TODO: i's also great candidate for testing an improved modal bmesh approach
 
 
 mergetypeitems = [("LAST", "Last", ""),
                   ("CENTER", "Center", ""),
                   ("SMART", "Smart", "")]
-
-# TODO: for LAST and SMART, protect against box/circle selections
 
 
 class SmartVert(bpy.types.Operator):
@@ -17,6 +20,7 @@ class SmartVert(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     type: EnumProperty(name="Merge Type", items=mergetypeitems, default="LAST")
+    slide_override: BoolProperty(name="Slid Override", default=False)
 
     # hidden
     wrongsmartselection = False
@@ -31,11 +35,14 @@ class SmartVert(bpy.types.Operator):
         row.prop(self, "type", expand=True)
 
         if self.type == "SMART":
-            if self.wrongsmartselection:
+            if self.wrongselection:
                 row = column.split(factor=0.25)
 
                 row.separator()
                 row.label(text="You need to select exactly 4 vertices.", icon="INFO")
+
+        # NOTE: the slide isn't drawn, even if we wanted, likely due to the transform tool invokation
+
 
     @classmethod
     def poll(cls, context):
@@ -45,44 +52,63 @@ class SmartVert(bpy.types.Operator):
     def execute(self, context):
         active = context.active_object
 
-        selverts = m3.get_selection("VERT")
+        # SLIDE aka slide extend aka invisible slide
 
-        if self.type == "LAST":
-            if len(selverts) >= 2:
-                bpy.ops.mesh.merge(type='LAST')
+        if self.slide_override:
+            self.slide(context)
 
-        elif self.type == "CENTER":
-            if len(selverts) >= 2:
-                bpy.ops.mesh.merge(type='CENTER')
 
-        elif self.type == "SMART":
+        # MERGE
 
-            if len(selverts) == 4:
-                self.wrongsmartselection = False
+        else:
+            selverts = m3.get_selection("VERT")
 
-                # get path starting and end vert ids
-                # also prepare the selection history for the shortest path op
-                path1, path2 = self.get_path_ids(active)
+            if self.type == "LAST":
+                if len(selverts) >= 2:
+                    if self.has_valid_select_history(active):
+                        bpy.ops.mesh.merge(type='LAST')
 
-                # select the shortest path 1
-                bpy.ops.mesh.shortest_path_select()
+            elif self.type == "CENTER":
+                if len(selverts) >= 2:
+                    bpy.ops.mesh.merge(type='CENTER')
 
-                # get full path1 ids
-                path1 = self.get_full_path(active, path1[0], path1[1], deselect=True)
+            elif self.type == "SMART":
+                if len(selverts) == 4:
+                    if self.has_valid_select_history(active):
+                        self.wrongselection = False
 
-                # select the shortest path 2
-                self.select_shortest_path_2(active, path2)
+                        # get path starting and end vert ids
+                        # also prepare the selection history for the shortest path op
+                        path1, path2 = self.get_path_ids(active)
 
-                # get full path2 ids
-                path2 = self.get_full_path(active, path2[1], path2[0])
+                        # select the shortest path 1
+                        bpy.ops.mesh.shortest_path_select()
 
-                # merge the verts
-                self.weld(active, path1, path2)
+                        # get full path1 ids
+                        path1 = self.get_full_path(active, path1[0], path1[1], deselect=True)
 
-            else:
-                self.wrongsmartselection = True
+                        # select the shortest path 2
+                        self.select_shortest_path_2(active, path2)
+
+                        # get full path2 ids
+                        path2 = self.get_full_path(active, path2[1], path2[0])
+
+                        # merge the verts
+                        self.weld(active, path1, path2)
+
+                else:
+                    self.wrongselection = True
 
         return {'FINISHED'}
+
+    def has_valid_select_history(self, active):
+        bm = bmesh.from_edit_mesh(active.data)
+        bm.verts.ensure_lookup_table()
+
+        verts = [v for v in bm.verts if v.select]
+        history = list(bm.select_history)
+
+        return len(verts) == len(history)
 
     def get_path_ids(self, active):
         bm = bmesh.from_edit_mesh(active.data)
@@ -164,3 +190,45 @@ class SmartVert(bpy.types.Operator):
         bmesh.ops.weld_verts(bm, targetmap=targetmap)
 
         bmesh.update_edit_mesh(active.data)
+
+    def slide(self, context):
+        tool_settings = context.scene.tool_settings
+
+        # turn snapping off
+        if tool_settings.use_snap:
+            tool_settings.use_snap = False
+
+        active = context.active_object
+
+        # find remove vert to establish the direction
+        bm = bmesh.from_edit_mesh(active.data)
+        bm.verts.ensure_lookup_table()
+
+        history = bm.select_history
+
+        if history and len(history) == 2:
+            v_remote = history[1].index
+
+            # remember previosu transform orientatino
+            old_orientation = context.scene.transform_orientation
+
+            # establish direction by creation new transform orientation based on 2 selected vertices
+            bpy.ops.transform.create_orientation(name="SlideExtend", use=True, overwrite=True)
+
+            # deselect the remote vert, so we can move only the active
+            bm = bmesh.from_edit_mesh(active.data)
+            bm.verts.ensure_lookup_table()
+
+            bm.verts[v_remote].select = False
+            bm.select_flush(False)
+
+            bmesh.update_edit_mesh(active.data)
+
+            # initiate transformation
+            bpy.ops.transform.translate('INVOKE_DEFAULT', constraint_orientation='SlideExtend', constraint_axis=(False, True, False), release_confirm=True)
+
+            # ugly, delete the transform orientation
+            bpy.ops.transform.delete_orientation()
+
+            # change the orientation back to what is was before
+            context.scene.transform_orientation = old_orientation
