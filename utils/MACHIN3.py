@@ -1,9 +1,12 @@
 import bpy
+import bmesh
 import os
+import sys
+import platform
+import subprocess
 
 
 def clear():
-    import os
     os.system("clear")
 
 
@@ -161,8 +164,6 @@ def lock(obj, location=True, rotation=True, scale=True):
 
 
 def open_folder(pathstring):
-    import platform
-    import subprocess
 
     if platform.system() == "Windows":
         os.startfile(pathstring)
@@ -221,7 +222,6 @@ def get_selection(string):
 
 
 def get_selection_history():
-    import bmesh
     mesh = bpy.context.object.data
     bm = bmesh.from_edit_mesh(mesh)
     vertlist = [elem.index for elem in bm.select_history if isinstance(elem, bmesh.types.BMVert)]
@@ -280,7 +280,6 @@ class ShortestPath():
 
     def dijkstra_algorithm(self, Q, s, t):
         unknownverts = []  # [(shortest dist from s (start vert) to vert, vert)]
-        import sys
         infinity = sys.maxsize
 
         d = dict.fromkeys(Q.keys(), infinity)  # {vert: shortest dist from s to vert}

@@ -56,6 +56,7 @@ class SmartViewCam(bpy.types.Operator):
 
     def invoke(self, context, event):
         scene_cams = [obj for obj in context.scene.objects if obj.type == "CAMERA"]
+        view = context.space_data
 
         # create camera from view
         if not scene_cams or event.alt:
@@ -69,7 +70,12 @@ class SmartViewCam(bpy.types.Operator):
 
             if active:
                 if active in context.selected_objects and active.type == "CAMERA":
-                    context.scene.camera = context.active_object
+                    context.scene.camera = active
+
+            # if the viewport is already aligned to a camera, toggle two times perspective/ortho. If you stay in cammera mode, the view camera op below will throw an exception. Two times, so you dont swich from perp to ortho
+            if view.region_3d.view_perspective == 'CAMERA':
+                bpy.ops.view3d.view_persportho()
+                bpy.ops.view3d.view_persportho()
 
             bpy.ops.view3d.view_camera()
             bpy.ops.view3d.view_center_camera()
