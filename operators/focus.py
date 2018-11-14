@@ -46,12 +46,12 @@ class Focus(bpy.types.Operator):
 
         # hide objects not in the selection (and not already hidden)
 
-        for obj in context.view_layer.objects:
-            if not obj.hide_viewport and obj not in sel:
+        for obj in context.visible_objects:
+            if obj not in sel:
                 hidden.append(obj)
                 obj.hide_viewport = True
 
-        # create new epoch, if there are objects to hide
+        # create new epoch, if objects were hidden
 
         if hidden:
             epoch = history.add()
@@ -89,10 +89,9 @@ class Focus(bpy.types.Operator):
 
         if self.view_selected:
 
-            for obj in context.view_layer.objects:
-                if not obj.hide_viewport:
-                    obj.select_set(True)
-                    selected.append(obj)
+            for obj in context.visible_objects:
+                obj.select_set(True)
+                selected.append(obj)
 
         last_epoch = history[-1]
 
