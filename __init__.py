@@ -23,7 +23,7 @@ bl_info = {
     "version": (0, 3),
     "blender": (2, 80, 0),
     "location": "",
-    "description": "A collection of Blender tools and Pie menues.",
+    "description": "Streamlining Blender.",
     "warning": "",
     "wiki_url": "https://github.com/machin3io/MACHIN3tools",
     "category": "Mesh"}
@@ -32,15 +32,13 @@ bl_info = {
 import bpy
 from bpy.props import PointerProperty
 from . properties import M3SceneProperties
-from . utils.registration import register_classes, unregister_classes, get_core, get_pie_menus, get_tools, get_keymaps, register_keymaps
-from . icons import register_icons, unregister_icons
-
+from . utils.registration import get_core, get_tools, get_pie_menus, register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons
 
 
 def register():
-    global core_classes, ui_classes, op_classes, ui_keys, op_keys
+    global classes, keymaps, icons
 
-    # CORE CLASSES
+    # CORE
 
     core_classes = register_classes(get_core())
 
@@ -50,33 +48,25 @@ def register():
     bpy.types.Scene.M3 = PointerProperty(type=M3SceneProperties)
 
 
-    # ADDITIONAL CLASSES
+    # TOOLS, PIE MENUS, KEYMAPS
 
-    op_classes = register_classes(get_tools())
-    ui_classes = register_classes(get_pie_menus())
+    tool_classes, tool_keymaps = get_tools()
+    pie_classes, pie_keymaps = get_pie_menus()
 
-
-    # KEYMAPS
-
-    # ui_keys = register_ui_keymaps()
-    # op_keys = register_op_keymaps()
-
-    keys = get_keymaps()
-
-    register_keymaps(keys)
+    classes = register_classes(tool_classes + pie_classes) + core_classes
+    keymaps = register_keymaps(tool_keymaps + pie_keymaps)
 
 
+    # ICONS
 
-    register_icons()
-
+    icons = register_icons()
 
 
 def unregister():
-    global core_lasses, ui_keys
+    global classes, keymaps, icons
 
-    # CORE CLASSES
-
-    unregister_classes(core_classes)
+    unregister_keymaps(keymaps)
+    unregister_classes(classes)
 
 
     # PROPERTIES
@@ -84,14 +74,6 @@ def unregister():
     del bpy.types.Scene.M3
 
 
-    # ADDITIONAL CLASSES
+    # ICONS
 
-
-
-
-    # KEYMAPS
-
-    # for km, kmi in keymaps:
-        # km.keymap_items.remove(kmi)
-
-    # keymaps.clear()
+    unregister_icons(icons)

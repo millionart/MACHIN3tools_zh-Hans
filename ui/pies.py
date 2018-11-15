@@ -2,12 +2,12 @@ import bpy
 from bpy.props import EnumProperty
 from bpy.types import Menu
 from .. utils import MACHIN3 as m3
-from .. icons import get_icon
+from .. utils.ui import get_icon
 
 
 class PieModes(Menu):
     bl_idname = "VIEW3D_MT_MACHIN3_modes"
-    bl_label = "Select Mode"
+    bl_label = "Modes"
 
     def draw(self, context):
         layout = self.layout
@@ -210,11 +210,9 @@ class PieSave(Menu):
                 row.operator("machin3.load_materials_source", text="", icon_value=get_icon('open_material'))
 
 
-
-
 class PieShading(Menu):
     bl_idname = "VIEW3D_MT_MACHIN3_shading"
-    bl_label = "Change Shading"
+    bl_label = "Shading and Overlays"
 
     def draw(self, context):
         layout = self.layout
@@ -623,7 +621,7 @@ class PieViews(Menu):
 
 class PieWorkspace(Menu):
     bl_idname = "VIEW3D_MT_MACHIN3_workspace"
-    bl_label = "Layout Switch"
+    bl_label = "Workspaces"
 
     def draw(self, context):
         layout = self.layout
@@ -648,20 +646,8 @@ class PieWorkspace(Menu):
         # 9 - TOP - RIGHT
         pie.operator("machin3.switch_workspace", text="World", icon='WORLD').name="World"
 
-        # box = pie.split()
-        # row = box.row(align=True)
-        # row.operator("machin3.layout_switch", text="Lighting", icon='IMAGE_COL').variable="M3 lighting"
-        # row.operator("machin3.layout_switch", text="Baking", icon='MOD_UVPROJECT').variable="M3 baking"
-
         # 1 - BOTTOM - LEFT
         pie.separator()
-
-        """
-        box = pie.split()
-        column = box.column(align=True)
-        column.operator("machin3.layout_switch", text="Animation", icon='ACTION_TWEAK').variable="M3 animation"
-        column.operator("machin3.layout_switch", text="Drivers", icon='UI').variable="M3 drivers"
-        # """
 
         # 3 - BOTTOM - RIGHT
         pie.separator()

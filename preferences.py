@@ -1,10 +1,9 @@
 import bpy
-from bpy.props import IntProperty, StringProperty, CollectionProperty, PointerProperty, BoolProperty, EnumProperty
+from bpy.props import IntProperty, StringProperty, CollectionProperty, BoolProperty, EnumProperty
 import os
 import rna_keymap_ui
 from . properties import AppendMatsCollection
-from . ui.UILists import AppendMatsUIList
-from . icons import get_icon
+from . utils.ui import get_icon
 
 
 
@@ -14,7 +13,8 @@ preferences_tabs = [("GENERAL", "General", ""),
 
 
 class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
-    bl_idname = os.path.basename(os.path.dirname(os.path.realpath(__file__)))
+    path = os.path.dirname(os.path.realpath(__file__))
+    bl_idname = os.path.basename(path)
 
     def update_switchmatcap1(self, context):
         if self.avoid_update:
@@ -69,7 +69,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_pie_save: BoolProperty(name="Save Pie", default=True)
     activate_pie_shading: BoolProperty(name="Shading Pie", default=True)
     activate_pie_views: BoolProperty(name="Views Pie", default=True)
-    activate_pie_workspace: BoolProperty(name="Workspace Pie", default=True)
+    activate_pie_workspace: BoolProperty(name="Workspace Pie", default=False)
 
 
     # hidden
@@ -100,7 +100,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.draw_general(box)
 
     def draw_general(self, box):
-        split = box.split ()
+        split = box.split()
 
         b = split.box()
         b.label(text="Activate")
@@ -171,7 +171,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_pie_workspace", toggle=True)
-        row.label(text="Switch workspaces.")
+        r = row.split(factor=0.4)
+        r.label(text="Switch workspaces.")
+        r.label(text="If enabled, customize it in ui/pies.py", icon="INFO")
 
 
         b = split.box()
@@ -315,7 +317,6 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     def draw_about(self, box):
         pass
-        # TODO
 
     def draw_keymap_item(self, layout, label, kc, keymap, idname, properties=[], multiple=False):
         """
