@@ -1,4 +1,5 @@
 import bpy
+from bpy.props import EnumProperty
 from bpy.types import Menu
 from .. utils import MACHIN3 as m3
 from .. icons import get_icon
@@ -207,6 +208,8 @@ class PieSave(Menu):
                 row.scale_y = 1.5
                 row.operator("wm.call_menu", text="Material", icon_value=get_icon('material')).name = "VIEW3D_MT_MACHIN3_append_materials"
                 row.operator("machin3.load_materials_source", text="", icon_value=get_icon('open_material'))
+
+
 
 
 class PieShading(Menu):
@@ -469,9 +472,10 @@ class PieShading(Menu):
 
 
         elif view.shading.type == "RENDERED":
-            col.label(text='TODO: render switch expanded enum')
+            col.prop(context.scene.render, "engine")
+
             col.label(text='TODO: render setting presets')
-            col.label(text='TODO: pack images op')
+            col.label(text='TODO: pack images op?')
 
     def get_text_icon(self, context, shading):
         if context.space_data.shading.type == shading:

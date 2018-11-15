@@ -47,17 +47,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     appendmatsIDX: IntProperty()
     appendmatsname: StringProperty(name="Name of Material to appand")
 
-
     switchmatcap1: StringProperty(name="Matcap 1", update=update_switchmatcap1)
     switchmatcap2: StringProperty(name="Matcap 2", update=update_switchmatcap2)
 
-    # MACHIN3pies
-
-    activate_pie_modes: BoolProperty(name="Modes Pie", default=True)
-    activate_pie_save: BoolProperty(name="Save Pie", default=True)
-    activate_pie_shading: BoolProperty(name="Shading Pie", default=True)
-    activate_pie_views: BoolProperty(name="Views Pie", default=True)
-    activate_pie_workspace: BoolProperty(name="Workspace Pie", default=True)
 
     # MACHIN3tools
 
@@ -69,6 +61,16 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_focus: BoolProperty(name="Focus", default=True)
     activate_mirror: BoolProperty(name="Mirror", default=True)
     activate_align: BoolProperty(name="Align", default=True)
+
+
+    # MACHIN3pies
+
+    activate_pie_modes: BoolProperty(name="Modes Pie", default=True)
+    activate_pie_save: BoolProperty(name="Save Pie", default=True)
+    activate_pie_shading: BoolProperty(name="Shading Pie", default=True)
+    activate_pie_views: BoolProperty(name="Views Pie", default=True)
+    activate_pie_workspace: BoolProperty(name="Workspace Pie", default=True)
+
 
     # hidden
 
@@ -97,9 +99,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         elif self.tabs == "ABOUT":
             self.draw_general(box)
 
-
     def draw_general(self, box):
-        split = box.split()
+        split = box.split ()
 
         b = split.box()
         b.label(text="Activate")
@@ -269,6 +270,19 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.draw_keymap_item(b, "Align", kc, "Object Mode", "machin3.align")
 
 
+        tools = [self.activate_smart_vert,
+                 self.activate_smart_edge,
+                 self.activate_smart_face,
+                 self.activate_clean_up,
+                 self.activate_clipping_toggle,
+                 self.activate_focus,
+                 self.activate_mirror,
+                 self.activate_align]
+
+        if not any(tools):
+            b.label(text="No keymappings available, because none the tools have been activated.")
+
+
         b = split.box()
         b.label(text="Pie Menus")
 
@@ -287,8 +301,21 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         if self.activate_pie_workspace:
             self.draw_keymap_item(b, "Workspace", kc, "Window", "wm.call_menu_pie", properties=[("name", "VIEW3D_MT_MACHIN3_workspace")])
 
+
+        pies = [self.activate_pie_modes,
+                self.activate_pie_save,
+                self.activate_pie_shading,
+                self.activate_pie_views,
+                self.activate_pie_workspace,
+                ]
+
+
+        if not any(pies):
+            b.label(text="No keymappings created, because none the pies have been activated.")
+
     def draw_about(self, box):
         pass
+        # TODO
 
     def draw_keymap_item(self, layout, label, kc, keymap, idname, properties=[], multiple=False):
         """

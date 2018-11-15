@@ -1,5 +1,5 @@
 import bpy
-from bpy.props import StringProperty, IntProperty, BoolProperty, CollectionProperty, PointerProperty
+from bpy.props import StringProperty, IntProperty, BoolProperty, CollectionProperty, PointerProperty, EnumProperty
 
 
 # COLLECTIONS
@@ -26,6 +26,7 @@ class HistoryEpochCollection(bpy.types.PropertyGroup):
 
 # SCENE PROPERTIES
 
+
 class M3SceneProperties(bpy.types.PropertyGroup):
     def update_pass_through(self, context):
         shading = context.space_data.shading
@@ -38,7 +39,6 @@ class M3SceneProperties(bpy.types.PropertyGroup):
 
         shading.show_xray = self.show_edit_mesh_wire
         shading.xray_alpha = 0.1
-
 
     pass_through: BoolProperty(name="Pass Through", default=False, update=update_pass_through)
     show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_show_edit_mesh_wire)

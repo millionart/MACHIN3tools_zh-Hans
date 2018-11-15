@@ -2,64 +2,6 @@ import bpy
 from . utils import MACHIN3 as m3
 
 
-
-def register_ui_keymaps():
-    keys = []
-
-    wm = bpy.context.window_manager
-
-    # MODES
-
-    if m3.M3_prefs().activate_pie_modes:
-        km = wm.keyconfigs.addon.keymaps.new(name='Object Non-modal')
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
-        kmi.properties.name = "VIEW3D_MT_MACHIN3_modes"
-        kmi.active = True
-        keys.append((km, kmi))
-
-
-    # SAVE
-
-    if m3.M3_prefs().activate_pie_save:
-        km = wm.keyconfigs.addon.keymaps.new(name='Window')
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'S', 'PRESS', ctrl=True)
-        kmi.properties.name = "VIEW3D_MT_MACHIN3_save"
-        kmi.active = True
-        keys.append((km, kmi))
-
-
-    # SHADING
-
-    if m3.M3_prefs().activate_pie_shading:
-        km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'PAGE_UP', 'PRESS')
-        kmi.properties.name = "VIEW3D_MT_MACHIN3_shading"
-        kmi.active = True
-        keys.append((km, kmi))
-
-
-    # VIEWS
-
-    if m3.M3_prefs().activate_pie_views:
-        km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'PAGE_DOWN', 'PRESS')
-        kmi.properties.name = "VIEW3D_MT_MACHIN3_views"
-        kmi.active = True
-        keys.append((km, kmi))
-
-
-    # WORKSPACE
-
-    if m3.M3_prefs().activate_pie_workspace:
-        km = wm.keyconfigs.addon.keymaps.new(name='Window')
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'PAUSE', 'PRESS')
-        kmi.properties.name = "VIEW3D_MT_MACHIN3_workspace"
-        kmi.active = True
-        keys.append((km, kmi))
-
-    return keys
-
-
 def register_op_keymaps():
     keys = []
 
@@ -161,6 +103,58 @@ def register_op_keymaps():
     if m3.M3_prefs().activate_align:
         km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
         kmi = km.keymap_items.new("machin3.align", "A", "PRESS", alt=True)
+        keys.append((km, kmi))
+
+    return keys
+
+
+def register_ui_keymaps():
+    keys = []
+
+    wm = bpy.context.window_manager
+
+    # MODES
+
+    if m3.M3_prefs().activate_pie_modes:
+        km = wm.keyconfigs.addon.keymaps.new(name='Object Non-modal')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
+        kmi.properties.name = "VIEW3D_MT_MACHIN3_modes"
+        keys.append((km, kmi))
+
+
+    # SAVE
+
+    if m3.M3_prefs().activate_pie_save:
+        km = wm.keyconfigs.addon.keymaps.new(name='Window')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'S', 'PRESS', ctrl=True)
+        kmi.properties.name = "VIEW3D_MT_MACHIN3_save"
+        keys.append((km, kmi))
+
+
+    # SHADING
+
+    if m3.M3_prefs().activate_pie_shading:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'PAGE_UP', 'PRESS')
+        kmi.properties.name = "VIEW3D_MT_MACHIN3_shading"
+        keys.append((km, kmi))
+
+
+    # VIEWS
+
+    if m3.M3_prefs().activate_pie_views:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'PAGE_DOWN', 'PRESS')
+        kmi.properties.name = "VIEW3D_MT_MACHIN3_views"
+        keys.append((km, kmi))
+
+
+    # WORKSPACE
+
+    if m3.M3_prefs().activate_pie_workspace:
+        km = wm.keyconfigs.addon.keymaps.new(name='Window')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'PAUSE', 'PRESS')
+        kmi.properties.name = "VIEW3D_MT_MACHIN3_workspace"
         keys.append((km, kmi))
 
     return keys

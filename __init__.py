@@ -23,7 +23,7 @@ bl_info = {
     "version": (0, 3),
     "blender": (2, 80, 0),
     "location": "",
-    "description": "A collection of useful Blender tools and Pie menues.",
+    "description": "A collection of Blender tools and Pie menues.",
     "warning": "",
     "wiki_url": "https://github.com/machin3io/MACHIN3tools",
     "category": "Mesh"}
