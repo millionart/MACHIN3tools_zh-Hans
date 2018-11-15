@@ -135,7 +135,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_focus", toggle=True)
-        row.label(text="Object isolatino with history.")
+        row.label(text="Object isolation with history.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_mirror", toggle=True)
@@ -236,128 +236,101 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         wm = bpy.context.window_manager
         kc = wm.keyconfigs.addon
 
+        from . keys import keys
 
         split = box.split()
 
         b = split.box()
         b.label(text="Tools")
 
-        if self.activate_smart_vert:
-            bb = b.box()
-            bb.label(text="Smart Vert")
-            self.draw_keymap_item(bb, "Merge Last", kc, "Mesh", "machin3.smart_vert", properties=[("type", "LAST"), ("slide_override", False)], multiple=True)
-            self.draw_keymap_item(bb, "Merge Center", kc, "Mesh", "machin3.smart_vert", properties=[("type", "CENTER"), ("slide_override", False)], multiple=True)
-            self.draw_keymap_item(bb, "Merge Smart", kc, "Mesh", "machin3.smart_vert", properties=[("type", "SMART"), ("slide_override", False)], multiple=True)
-            self.draw_keymap_item(bb, "Slide Extend", kc, "Mesh", "machin3.smart_vert", properties=[("slide_override", True)], multiple=True)
-
-        if self.activate_smart_edge:
-            self.draw_keymap_item(b, "Smart Edge", kc, "Mesh", "machin3.smart_edge")
-
-        if self.activate_smart_face:
-            self.draw_keymap_item(b, "Smart Face", kc, "Mesh", "machin3.smart_face")
-
-        if self.activate_clean_up:
-            self.draw_keymap_item(b, "Clean Up", kc, "Mesh", "machin3.clean_up")
-
-        if self.activate_clipping_toggle:
-            self.draw_keymap_item(b, "Clipping Toggle", kc, "3D View Generic", "machin3.clipping_toggle")
-
-        if self.activate_focus:
-            self.draw_keymap_item(b, "Focus", kc, "Object Mode", "machin3.focus")
-
-        if self.activate_mirror:
-            bb = b.box()
-            bb.label(text="Mirror")
-            self.draw_keymap_item(bb, "X Axis", kc, "Object Mode", "machin3.mirror", properties=[("use_x", True)], multiple=True)
-            self.draw_keymap_item(bb, "Y Axis", kc, "Object Mode", "machin3.mirror", properties=[("use_y", True)], multiple=True)
-            self.draw_keymap_item(bb, "Z Axis", kc, "Object Mode", "machin3.mirror", properties=[("use_z", True)], multiple=True)
-
-        if self.activate_align:
-            self.draw_keymap_item(b, "Align", kc, "Object Mode", "machin3.align")
-
-
-        tools = [self.activate_smart_vert,
-                 self.activate_smart_edge,
-                 self.activate_smart_face,
-                 self.activate_clean_up,
-                 self.activate_clipping_toggle,
-                 self.activate_focus,
-                 self.activate_mirror,
-                 self.activate_align]
-
-        if not any(tools):
+        if not self.draw_tool_keymaps(kc, keys, b):
             b.label(text="No keymappings available, because none the tools have been activated.")
 
 
         b = split.box()
         b.label(text="Pie Menus")
 
-        if self.activate_pie_modes:
-            self.draw_keymap_item(b, "Modes", kc, "Object Non-modal", "wm.call_menu_pie", properties=[("name", "VIEW3D_MT_MACHIN3_modes")])
-
-        if self.activate_pie_save:
-            self.draw_keymap_item(b, "Save", kc, "Window", "wm.call_menu_pie", properties=[("name", "VIEW3D_MT_MACHIN3_save")])
-
-        if self.activate_pie_shading:
-            self.draw_keymap_item(b, "Shading", kc, "3D View Generic", "wm.call_menu_pie", properties=[("name", "VIEW3D_MT_MACHIN3_shading")])
-
-        if self.activate_pie_views:
-            self.draw_keymap_item(b, "Views", kc, "3D View Generic", "wm.call_menu_pie", properties=[("name", "VIEW3D_MT_MACHIN3_views")])
-
-        if self.activate_pie_workspace:
-            self.draw_keymap_item(b, "Workspace", kc, "Window", "wm.call_menu_pie", properties=[("name", "VIEW3D_MT_MACHIN3_workspace")])
-
-
-        pies = [self.activate_pie_modes,
-                self.activate_pie_save,
-                self.activate_pie_shading,
-                self.activate_pie_views,
-                self.activate_pie_workspace,
-                ]
-
-
-        if not any(pies):
+        if not self.draw_pie_keymaps(kc, keys, b):
             b.label(text="No keymappings created, because none the pies have been activated.")
+
 
     def draw_about(self, box):
         pass
 
-    def draw_keymap_item(self, layout, label, kc, keymap, idname, properties=[], multiple=False):
-        """
-        keymap = "Mesh"
-        idname = "machin3.smart_vert"
-        properties = [("type", "LAST"), ("slide_override", False)]
-        """
 
-        km = kc.keymaps.get(keymap)
+    def draw_tool_keymaps(self, kc, keys, layout):
+        drawn = False
 
-        kmi = None
-        if km:
-            for item in km.keymap_items:
-                if item.idname == idname:
-                    if properties:
-                        if all([getattr(item.properties, attr, None) == value for attr, value in properties]):
-                            kmi = item
-                            break
+        for title in keys:
+            items = keys.get(title)
 
+            if "PIE" not in title:
+                if self.draw_keymap_items(kc, title, items, layout):
+                    drawn = True
+
+        return drawn
+
+
+    def draw_pie_keymaps(self, kc, keys, layout):
+        drawn = False
+        for title in keys:
+            items = keys.get(title)
+
+            if "PIE" in title:
+                if self.draw_keymap_items(kc, title, items, layout):
+                    drawn = True
+
+        return drawn
+
+
+    def draw_keymap_items(self, kc, title, items, layout):
+        drawn = False
+        for idx, item in enumerate(items):
+            keymap = item.get("keymap")
+
+            if keymap:
+                km = kc.keymaps.get(keymap)
+
+                kmi = None
+                if km:
+                    idname = item.get("idname")
+
+                    for kmitem in km.keymap_items:
+                        if kmitem.idname == idname:
+                            properties = item.get("properties")
+
+                            if properties:
+                                if all([getattr(kmitem.properties, name, None) == value for name, value in properties]):
+                                    kmi = kmitem
+                                    break
+
+                            else:
+                                kmi = kmitem
+                                break
+
+                # draw keymap item
+
+                if kmi:
+                    # multi kmi tools, will only have a single box, created for the first kmi
+                    if idx == 0:
+                        box = layout.box()
+
+                    # single kmi tools, get their label from the title
+                    if len(items) == 1:
+                        label = title.title()
+
+                    # multi kmi tools, get it from the label tag, while the title is printed once, before the first item
                     else:
-                        kmi = item
-                        break
+                        if idx == 0:
+                            box.label(text=title.title())
 
-        if multiple:
-            # don't create a box, it's created outside instead and covers multiple items
-            row = layout.split(factor=0.15)
+                        label = item.get("label")
 
-        else:
-            # create a box
-            box = layout.box()
-            row = box.split(factor=0.15)
+                    row = box.split(factor=0.15)
+                    row.label(text=label)
 
-        row.label(text=label)
+                    # layout.context_pointer_set("keymap", km)
+                    rna_keymap_ui.draw_kmi([], kc, km, kmi, row, 0)
 
-        if kmi:
-            # layout.context_pointer_set("keymap", km)
-            rna_keymap_ui.draw_kmi([], kc, km, kmi, row, 0)
-
-        else:
-            row.label(text="Keymapping not found for this item!")
+                    drawn = True
+        return drawn

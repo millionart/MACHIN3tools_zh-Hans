@@ -96,6 +96,7 @@ def get_core():
 def get_tools():
     classes = []
     keymaps = []
+    count = 0
 
 
     # SMART VERT
@@ -105,6 +106,7 @@ def get_tools():
 
         classes.append(SmartVert)
         keymaps.append(keys["SMART VERT"])
+        count +=1
 
 
     # SMART EDGE
@@ -114,6 +116,7 @@ def get_tools():
 
         classes.append(SmartEdge)
         keymaps.append(keys["SMART EDGE"])
+        count +=1
 
 
     # SMART FACE
@@ -123,6 +126,7 @@ def get_tools():
 
         classes.append(SmartFace)
         keymaps.append(keys["SMART FACE"])
+        count +=1
 
 
     # CLEAN UP
@@ -132,6 +136,7 @@ def get_tools():
 
         classes.append(CleanUp)
         keymaps.append(keys["CLEAN UP"])
+        count +=1
 
 
     # CLIPPING TOGGLE
@@ -141,6 +146,7 @@ def get_tools():
 
         classes.append(ClippingToggle)
         keymaps.append(keys["CLIPPING TOGGLE"])
+        count +=1
 
 
     # FOCUS
@@ -150,6 +156,7 @@ def get_tools():
 
         classes.append(Focus)
         keymaps.append(keys["FOCUS"])
+        count +=1
 
 
     # MIRROR
@@ -159,6 +166,7 @@ def get_tools():
 
         classes.append(Mirror)
         keymaps.append(keys["MIRROR"])
+        count +=1
 
 
     # ALIGN
@@ -168,13 +176,15 @@ def get_tools():
 
         classes.append(Align)
         keymaps.append(keys["ALIGN"])
+        count +=1
 
-    return classes, keymaps
+    return classes, keymaps, count
 
 
 def get_pie_menus():
     classes = []
     keymaps = []
+    count = 0
 
     # MODES
 
@@ -184,7 +194,8 @@ def get_pie_menus():
 
         classes.append(PieModes)
         classes.extend([SelectVertexMode, SelectEdgeMode, SelectFaceMode, ToggleEditMode])
-        keymaps.append(keys["PIE MODES"])
+        keymaps.append(keys["MODES PIE"])
+        count += 1
 
 
     # SAVE
@@ -201,7 +212,8 @@ def get_pie_menus():
         classes.extend([New, Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext])
         classes.extend([AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource])
         classes.extend([Add, Move, Rename, Clear, Remove])
-        keymaps.append(keys["PIE SAVE"])
+        keymaps.append(keys["SAVE PIE"])
+        count += 1
 
 
     # SHADING
@@ -219,7 +231,8 @@ def get_pie_menus():
         classes.extend([ToggleGrid, ToggleWireframe, ToggleOutline])
         classes.extend([ShadeSmooth, ShadeFlat])
         classes.extend([ColorizeMaterials, MatcapSwitch])
-        keymaps.append(keys["PIE SHADING"])
+        keymaps.append(keys["SHADING PIE"])
+        count += 1
 
     # VIEWS
 
@@ -229,7 +242,8 @@ def get_pie_menus():
 
         classes.append(PieViews)
         classes.extend([ViewAxis, MakeCamActive, SmartViewCam])
-        keymaps.append(keys["PIE VIEWS"])
+        keymaps.append(keys["VIEWS PIE"])
+        count += 1
 
 
     # WORKSPACE
@@ -240,6 +254,7 @@ def get_pie_menus():
 
         classes.append(PieWorkspace)
         classes.append(SwitchWorkspace)
-        keymaps.append(keys["PIE WORKSPACE"])
+        keymaps.append(keys["WORKSPACE PIE"])
+        count += 1
 
-    return classes, keymaps
+    return classes, keymaps, count
