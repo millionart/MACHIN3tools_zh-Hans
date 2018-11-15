@@ -179,7 +179,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         b = split.box()
         b.label(text="Settings")
 
-        # APPEND WORLD AND MATERIALS
+        # PIE SAVE
 
         if self.activate_pie_save:
             bb = b.box()
@@ -219,7 +219,11 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
             # MATCAP SWITCH
 
-            column.separator()
+            bb = b.box()
+            bb.label(text="Matcap Switch")
+
+            column = bb.column()
+
             row = column.row()
 
             row.prop(self, "switchmatcap1")
