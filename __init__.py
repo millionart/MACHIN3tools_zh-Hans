@@ -1,5 +1,5 @@
 '''
-Copyright (C) 2017 MACHIN3, machin3.io, support@machin3.io
+Copyright (C) 2018 MACHIN3, machin3.io, support@machin3.io
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,181 +23,27 @@ bl_info = {
     "version": (0, 3),
     "blender": (2, 80, 0),
     "location": "",
-    "description": "A collection of blender python scripts.",
+    "description": "A collection of useful Blender tools and Pie menues.",
     "warning": "",
     "wiki_url": "https://github.com/machin3io/MACHIN3tools",
     "category": "Mesh"}
 
 
 import bpy
-from bpy.props import IntProperty, StringProperty, CollectionProperty, PointerProperty, BoolProperty
-from bpy.utils import register_class, unregister_class
-from . classes import get_classes
-from . keymaps import register_keymaps
-from . properties import AppendMatsCollection, AppendMatsUIList, M3SceneProperties, M3HistoryEpoch, M3HistoryObjectEntry, M3HistoryUnmirrorEntry
-from . icons import register_icons, unregister_icons, get_icon
+from bpy.props import PointerProperty
+from . properties import M3SceneProperties
+from . utils.registration import register_classes, unregister_classes, get_core_classes, get_ui_classes, get_op_classes
+from . keymaps import register_ui_keymaps, register_op_keymaps
+from . icons import register_icons, unregister_icons
 
-
-
-# TODO: OSD feedback, so you dont have to check into the op props to verify a tool did what you want it to do
-
-
-preferences_tabs = [("MODULES", "Modules", ""),
-                    ("SPECIALMENUS", "Special Menus", ""),
-                    ("PIEMENUS", "Pie Menus", ""),
-                    ("CUSTOMKEYS", "Custom Keys", "")]
-
-
-class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
-    bl_idname = __name__
-    M3path = __path__[0]
-
-    def update_switchmatcap1(self, context):
-        if self.avoid_update:
-            self.avoid_update = False
-            return
-
-        matcaps = [mc.name for mc in context.user_preferences.studio_lights if "datafiles/studiolights/matcap" in mc.path]
-        if self.switchmatcap1 not in matcaps:
-            self.avoid_update = True
-            self.switchmatcap1 = "NOT FOUND"
-
-    def update_switchmatcap2(self, context):
-        if self.avoid_update:
-            self.avoid_update = False
-            return
-
-        matcaps = [mc.name for mc in context.user_preferences.studio_lights if "datafiles/studiolights/matcap" in mc.path]
-        if self.switchmatcap2 not in matcaps:
-            self.avoid_update = True
-            self.switchmatcap2 = "NOT FOUND"
-
-
-    # MACHIN3pies
-
-    appendworldpath: StringProperty(name="Append World from", subtype='FILE_PATH')
-    appendworldname: StringProperty(name="Name of World to append")
-
-    appendmatspath: StringProperty(name="Append Materials from", subtype='FILE_PATH')
-    appendmats: CollectionProperty(type=AppendMatsCollection)
-    appendmatsIDX: IntProperty()
-    appendmatsname: StringProperty()
-
-
-    switchmatcap1: StringProperty(name="Matcap 1", update=update_switchmatcap1)
-    switchmatcap2: StringProperty(name="Matcap 2", update=update_switchmatcap2)
-
-
-    # MACHIN3tools
-
-    activate_smart_vert: BoolProperty(name="Activate Smart Vert", default=False)
-
-    # hidden
-
-    avoid_update: BoolProperty(default=False)
-
-
-    # TABS
-
-    # tabs = EnumProperty(name="Tabs", items=preferences_tabs, default="MODULES")
-
-    def draw(self, context):
-        layout=self.layout
-
-        # wm = bpy.context.window_manager
-        # kc = wm.keyconfigs.user
-
-
-        # column = layout.column(align=True)
-        # row = column.row()
-        # row.prop(self, "tabs", expand=True)
-
-        # box = column.box()
-
-
-        # if self.tabs == "MODULES":
-            # self.draw_modules(box, kc)
-        # elif self.tabs == "SPECIALMENUS":
-            # self.draw_special(box, kc)
-        # elif self.tabs == "PIEMENUS":
-            # self.draw_pies(box, kc)
-
-
-        box = layout.box()
-        split = box.split()
-
-        # APPEND WORLD AND MATERIALS
-
-        b = split.box()
-        column = b.column()
-
-        column.prop(self, "appendworldpath")
-        column.prop(self, "appendworldname")
-        column.separator()
-
-        column.prop(self, "appendmatspath")
-
-
-        column = b.column()
-
-        row = column.row()
-        rows = len(self.appendmats) if len(self.appendmats) > 6 else 6
-        row.template_list("AppendMatsUIList", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
-
-        c = row.column(align=True)
-        c.operator("machin3.move_appendmat", text="", icon='TRIA_UP').direction = "UP"
-        c.operator("machin3.move_appendmat", text="", icon='TRIA_DOWN').direction = "DOWN"
-
-        c.separator()
-        c.separator()
-        c.operator("machin3.rename_appendmat", text="", icon='OUTLINER_DATA_FONT')
-        c.separator()
-        c.separator()
-        c.operator("machin3.clear_appendmats", text="", icon='LOOP_BACK')
-        c.operator("machin3.remove_appendmat", text="", icon_value=get_icon('cancel'))
-
-        row = column.row()
-        row.prop(self, "appendmatsname")
-        row.operator("machin3.add_appendmat", text="", icon_value=get_icon('plus'))
-
-
-        # MATCAP SWITCH
-
-        column.separator()
-        row = column.row()
-
-        row.prop(self, "switchmatcap1")
-        row.prop(self, "switchmatcap2")
-
-
-        b = split.box()
-
-        # MACHIN3tools
-
-        column = b.column()
-
-        column.prop(self, "activate_smart_vert")
-
-
-
-classes = [AppendMatsUIList,
-           AppendMatsCollection,
-           MACHIN3toolsPreferences,
-           M3HistoryObjectEntry,
-           M3HistoryUnmirrorEntry,
-           M3HistoryEpoch,
-           M3SceneProperties]
 
 
 def register():
-    global classes, keymaps
+    global core_classes, ui_classes, op_classes, ui_keys, op_keys
 
-    classes = get_classes(classes)
+    # CORE CLASSES
 
-    # CLASSES
-
-    for c in classes:
-        register_class(c)
+    core_classes = register_classes(get_core_classes())
 
 
     # PROPERTIES
@@ -205,24 +51,42 @@ def register():
     bpy.types.Scene.M3 = PointerProperty(type=M3SceneProperties)
 
 
+    # ADDITIONAL CLASSES
+
+    ui_classes = register_classes(get_ui_classes())
+    op_classes = register_classes(get_op_classes())
+
+
     # KEYMAPS
 
-    keymaps = register_keymaps()
+    ui_keys = register_ui_keymaps()
+    op_keys = register_op_keymaps()
 
     register_icons()
 
 
+
 def unregister():
-    global classes, keymaps
+    global core_lasses, ui_keys
 
-    # CLASSES
+    # CORE CLASSES
 
-    for c in classes:
-        unregister_class(c)
+    unregister_classes(core_classes)
+
+
+    # PROPERTIES
+
+    del bpy.types.Scene.M3
+
+
+    # ADDITIONAL CLASSES
+
+
+
 
     # KEYMAPS
 
-    for km, kmi in keymaps:
-        km.keymap_items.remove(kmi)
+    # for km, kmi in keymaps:
+        # km.keymap_items.remove(kmi)
 
-    keymaps.clear()
+    # keymaps.clear()

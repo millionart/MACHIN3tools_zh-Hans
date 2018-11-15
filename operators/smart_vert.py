@@ -20,7 +20,7 @@ class SmartVert(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     type: EnumProperty(name="Merge Type", items=mergetypeitems, default="LAST")
-    slide_override: BoolProperty(name="Slid Override", default=False)
+    slide_override: BoolProperty(name="Slide Override", default=False)
 
     # hidden
     wrongsmartselection = False
@@ -204,7 +204,7 @@ class SmartVert(bpy.types.Operator):
         bm = bmesh.from_edit_mesh(active.data)
         bm.verts.ensure_lookup_table()
 
-        history = bm.select_history
+        history = list(bm.select_history)
 
         if history and len(history) == 2:
             v_remote = history[1].index

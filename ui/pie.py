@@ -1,14 +1,106 @@
 import bpy
-from bpy.props import IntProperty, StringProperty, BoolProperty, FloatProperty, EnumProperty
 from bpy.types import Menu
-import bmesh
-import os
 from .. utils import MACHIN3 as m3
 from .. icons import get_icon
 
 
-class PieSaveOpenAppend(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_save_open_append"
+class PieModes(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_modes"
+    bl_label = "Select Mode"
+
+    def draw(self, context):
+        layout = self.layout
+        toolsettings = context.tool_settings
+
+        active = context.active_object
+
+        if active:
+            if active.type == 'MESH':
+                pie = layout.menu_pie()
+                # 4 - LEFT
+                pie.operator("machin3.select_vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
+                # 6 - RIGHT
+                pie.operator("machin3.select_face_mode", text="Face", icon_value=get_icon('face'))
+                # 2 - BOTTOM
+                pie.operator("machin3.select_edge_mode", text="Edge", icon_value=get_icon('edge'))
+                # 8 - TOP
+                if bpy.context.object.mode == "OBJECT":
+                    text = "Edit"
+                    icon = get_icon('edit_mesh')
+                elif bpy.context.object.mode == "EDIT":
+                    text = "Object"
+                    icon = get_icon('object')
+                pie.operator("machin3.toggle_edit_mode", text=text, icon_value=icon)
+                # 7 - TOP - LEFT
+                if bpy.context.object.mode == "EDIT":
+                    pie.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
+                else:
+                    pie.separator()
+
+                # 9 - TOP - RIGHT
+                pie.separator()
+                # 1 - BOTTOM - LEFT
+                pie.separator()
+                # 3 - BOTTOM - RIGHT
+                if bpy.context.object.mode == "EDIT":
+                    box = pie.split()
+                    column = box.column()
+                    column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
+                else:
+                    pie.separator()
+
+            """
+
+            elif ob.object.type == 'EMPTY':
+                pass
+
+            elif ob.object.type == 'CURVE':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'ARMATURE':
+                pie = layout.menu_pie()
+
+                # 4 - LEFT
+                pie.operator("object.editmode_toggle", text="Edit Mode", icon='OBJECT_DATAMODE')
+                # 6 - RIGHT
+                pie.operator("object.posemode_toggle", text="Pose", icon='POSE_HLT')
+                # 2 - BOTTOM
+                pie.separator()
+                # 8 - TOP
+                pie.operator("class.object", text="Object Mode", icon='OBJECT_DATAMODE')
+                # 7 - TOP - LEFT
+                pie.separator()
+                # 9 - TOP - RIGHT
+                pie.separator()
+                # 1 - BOTTOM - LEFT
+                pie.separator()
+                # 3 - BOTTOM - RIGHT
+
+            elif ob.object.type == 'FONT':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'SURFACE':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'META':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            elif ob.object.type == 'LATTICE':
+                pie = layout.menu_pie()
+                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+
+            else:
+                pass
+
+            """
+
+
+class PieSave(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_save"
     bl_label = "Save, Open, Append"
 
     def draw(self, context):
@@ -117,8 +209,8 @@ class PieSaveOpenAppend(Menu):
                 row.operator("machin3.load_materials_source", text="", icon_value=get_icon('open_material'))
 
 
-class PieChangeShading(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_change_shading"
+class PieShading(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_shading"
     bl_label = "Change Shading"
 
     def draw(self, context):
@@ -377,6 +469,7 @@ class PieChangeShading(Menu):
 
 
         elif view.shading.type == "RENDERED":
+            col.label(text='TODO: render switch expanded enum')
             col.label(text='TODO: render setting presets')
             col.label(text='TODO: pack images op')
 
@@ -398,8 +491,8 @@ class PieChangeShading(Menu):
         return text, icon
 
 
-class PieViewsAndCams(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_views_and_cams"
+class PieViews(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_views"
     bl_label = "Views and Cams"
 
     def draw(self, context):
@@ -524,103 +617,8 @@ class PieViewsAndCams(Menu):
         col.prop(view, "lens")
 
 
-class PieSelectMode(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_select_modes"
-    bl_label = "Select Mode"
-
-    def draw(self, context):
-        layout = self.layout
-        toolsettings = context.tool_settings
-
-        active = context.active_object
-
-        if active:
-            if active.type == 'MESH':
-                pie = layout.menu_pie()
-                # 4 - LEFT
-                pie.operator("machin3.select_vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
-                # 6 - RIGHT
-                pie.operator("machin3.select_face_mode", text="Face", icon_value=get_icon('face'))
-                # 2 - BOTTOM
-                pie.operator("machin3.select_edge_mode", text="Edge", icon_value=get_icon('edge'))
-                # 8 - TOP
-                if bpy.context.object.mode == "OBJECT":
-                    text = "Edit"
-                    icon = get_icon('edit_mesh')
-                elif bpy.context.object.mode == "EDIT":
-                    text = "Object"
-                    icon = get_icon('object')
-                pie.operator("machin3.toggle_edit_mode", text=text, icon_value=icon)
-                # 7 - TOP - LEFT
-                if bpy.context.object.mode == "EDIT":
-                    pie.prop(context.scene.M3, "occlude_geometry", text="Occlude", icon="XRAY")
-                else:
-                    pie.separator()
-
-                # 9 - TOP - RIGHT
-                pie.separator()
-                # 1 - BOTTOM - LEFT
-                pie.separator()
-                # 3 - BOTTOM - RIGHT
-                if bpy.context.object.mode == "EDIT":
-                    box = pie.split()
-                    column = box.column()
-                    column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
-                else:
-                    pie.separator()
-
-            """
-
-            elif ob.object.type == 'EMPTY':
-                pass
-
-            elif ob.object.type == 'CURVE':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-            elif ob.object.type == 'ARMATURE':
-                pie = layout.menu_pie()
-
-                # 4 - LEFT
-                pie.operator("object.editmode_toggle", text="Edit Mode", icon='OBJECT_DATAMODE')
-                # 6 - RIGHT
-                pie.operator("object.posemode_toggle", text="Pose", icon='POSE_HLT')
-                # 2 - BOTTOM
-                pie.separator()
-                # 8 - TOP
-                pie.operator("class.object", text="Object Mode", icon='OBJECT_DATAMODE')
-                # 7 - TOP - LEFT
-                pie.separator()
-                # 9 - TOP - RIGHT
-                pie.separator()
-                # 1 - BOTTOM - LEFT
-                pie.separator()
-                # 3 - BOTTOM - RIGHT
-
-            elif ob.object.type == 'FONT':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-            elif ob.object.type == 'SURFACE':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-            elif ob.object.type == 'META':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-            elif ob.object.type == 'LATTICE':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-            else:
-                pass
-
-            """
-
-
-class PieSwitchWorkspace(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_switch_workspace"
+class PieWorkspace(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_workspace"
     bl_label = "Layout Switch"
 
     def draw(self, context):

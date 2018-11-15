@@ -100,6 +100,10 @@ class SmartFace(bpy.types.Operator):
                 # recalc the face normal
                 bmesh.ops.recalc_face_normals(bm, faces=[f])
 
+                # TODO: you really should do the remmove dobules here, and then increase the ==4 to >= 4
+                # ####: doing that risks removing verts you are refering below however, thereby causing an exception.
+                # ####_ what you really need to do is remove doubles only for the new verts against the closest of all others
+
                 # if any of the other two verts has 4 edges, at least one of them non-manifold, select it. first come first serve.
                 if any([len(v1_other.link_edges) == 4, len(v2_other.link_edges) == 4]):
                     if len(v1_other.link_edges) == 4 and any([not e.is_manifold for e in v1_other.link_edges]):
@@ -114,7 +118,6 @@ class SmartFace(bpy.types.Operator):
                     else:
                         v.select = False
                         bm.select_flush(False)
-
 
                     bm.select_flush(False)
 
