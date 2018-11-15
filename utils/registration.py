@@ -1,3 +1,4 @@
+import bpy
 from bpy.utils import register_class, unregister_class
 from . import MACHIN3 as m3
 
@@ -15,7 +16,38 @@ def unregister_classes(classes):
 
 
 
-def get_core_classes():
+def register_keymaps(keys):
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+
+    for items in keys:
+        for item in items:
+            keymap = item.get("keymap")
+            space_type = item.get("space_type", "EMPTY")
+
+            if keymap:
+                km = kc.keymaps.new(name=keymap, space_type=space_type)
+
+                if km:
+                    idname = item.get("idname")
+                    type = item.get("type")
+                    value = item.get("value")
+
+                    shift = item.get("shift", False)
+                    ctrl = item.get("ctrl", False)
+                    alt = item.get("alt", False)
+
+                    kmi = km.keymap_items.new(idname, type, value, shift=shift, ctrl=ctrl, alt=alt)
+
+                    if kmi:
+                        properties = item.get("properties")
+
+                        if properties:
+                            for attr, value in properties:
+                                setattr(kmi.properties, attr, value)
+
+
+def get_core():
     from .. preferences import MACHIN3toolsPreferences
     from .. properties import AppendMatsCollection, M3SceneProperties, HistoryEpochCollection, HistoryObjectsCollection, HistoryUnmirroredCollection
     from .. ui.UILists import AppendMatsUIList
@@ -31,7 +63,72 @@ def get_core_classes():
     return classes
 
 
-def get_ui_classes():
+def get_tools():
+    classes = []
+
+    # SMART VERT
+
+    if m3.M3_prefs().activate_smart_vert:
+        from .. operators.smart_vert import SmartVert
+
+        classes.append(SmartVert)
+
+
+    # SMART EDGE
+
+    if m3.M3_prefs().activate_smart_edge:
+        from .. operators.smart_edge import SmartEdge
+
+        classes.append(SmartEdge)
+
+
+    # SMART FACE
+
+    if m3.M3_prefs().activate_smart_face:
+        from .. operators.smart_face import SmartFace
+
+        classes.append(SmartFace)
+
+
+    # CLEAN UP
+
+    if m3.M3_prefs().activate_clean_up:
+        from .. operators.clean_up import CleanUp
+        classes.append(CleanUp)
+
+
+    # CLIPPING TOGGLE
+
+    if m3.M3_prefs().activate_clipping_toggle:
+        from .. operators.clipping_toggle import ClippingToggle
+        classes.append(ClippingToggle)
+
+
+    # FOCUS
+
+    if m3.M3_prefs().activate_focus:
+        from .. operators.focus import Focus
+        classes.append(Focus)
+
+
+    # MIRROR
+
+    if m3.M3_prefs().activate_mirror:
+        from .. operators.mirror import Mirror
+        classes.append(Mirror)
+
+
+    # ALIGN
+
+    if m3.M3_prefs().activate_align:
+        from .. operators.align import Align
+        classes.append(Align)
+
+
+    return classes
+
+
+def get_pie_menus():
     classes = []
 
 
@@ -100,66 +197,49 @@ def get_ui_classes():
     return classes
 
 
-def get_op_classes():
-    classes = []
+def get_keymaps():
+    from .. keys import keys
 
-    # SMART VERT
+    keymaps = []
 
     if m3.M3_prefs().activate_smart_vert:
-        from .. operators.smart_vert import SmartVert
-
-        classes.append(SmartVert)
-
-
-    # SMART EDGE
+        keymaps.append(keys["SMART VERT"])
 
     if m3.M3_prefs().activate_smart_edge:
-        from .. operators.smart_edge import SmartEdge
-
-        classes.append(SmartEdge)
-
-
-    # SMART FACE
+        keymaps.append(keys["SMART EDGE"])
 
     if m3.M3_prefs().activate_smart_face:
-        from .. operators.smart_face import SmartFace
-
-        classes.append(SmartFace)
-
-
-    # CLEAN UP
+        keymaps.append(keys["SMART FACE"])
 
     if m3.M3_prefs().activate_clean_up:
-        from .. operators.clean_up import CleanUp
-        classes.append(CleanUp)
-
-
-    # CLIPPING TOGGLE
+        keymaps.append(keys["CLEAN UP"])
 
     if m3.M3_prefs().activate_clipping_toggle:
-        from .. operators.clipping_toggle import ClippingToggle
-        classes.append(ClippingToggle)
-
-
-    # FOCUS
+        keymaps.append(keys["CLIPPING TOGGLE"])
 
     if m3.M3_prefs().activate_focus:
-        from .. operators.focus import Focus
-        classes.append(Focus)
-
-
-    # MIRROR
+        keymaps.append(keys["FOCUS"])
 
     if m3.M3_prefs().activate_mirror:
-        from .. operators.mirror import Mirror
-        classes.append(Mirror)
-
-
-    # ALIGN
+        keymaps.append(keys["MIRROR"])
 
     if m3.M3_prefs().activate_align:
-        from .. operators.align import Align
-        classes.append(Align)
+        keymaps.append(keys["ALIGN"])
 
 
-    return classes
+    if m3.M3_prefs().activate_pie_modes:
+        keymaps.append(keys["PIE MODES"])
+
+    if m3.M3_prefs().activate_pie_save:
+        keymaps.append(keys["PIE SAVE"])
+
+    if m3.M3_prefs().activate_pie_shading:
+        keymaps.append(keys["PIE SHADING"])
+
+    if m3.M3_prefs().activate_pie_views:
+        keymaps.append(keys["PIE VIEWS"])
+
+    if m3.M3_prefs().activate_pie_workspace:
+        keymaps.append(keys["PIE WORKSPACE"])
+
+    return keymaps

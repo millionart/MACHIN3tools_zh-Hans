@@ -32,8 +32,7 @@ bl_info = {
 import bpy
 from bpy.props import PointerProperty
 from . properties import M3SceneProperties
-from . utils.registration import register_classes, unregister_classes, get_core_classes, get_ui_classes, get_op_classes
-from . keymaps import register_ui_keymaps, register_op_keymaps
+from . utils.registration import register_classes, unregister_classes, get_core, get_pie_menus, get_tools, get_keymaps, register_keymaps
 from . icons import register_icons, unregister_icons
 
 
@@ -43,7 +42,7 @@ def register():
 
     # CORE CLASSES
 
-    core_classes = register_classes(get_core_classes())
+    core_classes = register_classes(get_core())
 
 
     # PROPERTIES
@@ -53,14 +52,20 @@ def register():
 
     # ADDITIONAL CLASSES
 
-    ui_classes = register_classes(get_ui_classes())
-    op_classes = register_classes(get_op_classes())
+    op_classes = register_classes(get_tools())
+    ui_classes = register_classes(get_pie_menus())
 
 
     # KEYMAPS
 
-    ui_keys = register_ui_keymaps()
-    op_keys = register_op_keymaps()
+    # ui_keys = register_ui_keymaps()
+    # op_keys = register_op_keymaps()
+
+    keys = get_keymaps()
+
+    register_keymaps(keys)
+
+
 
     register_icons()
 
