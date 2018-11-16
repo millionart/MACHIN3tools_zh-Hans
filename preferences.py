@@ -69,6 +69,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_pie_save: BoolProperty(name="Save Pie", default=True)
     activate_pie_shading: BoolProperty(name="Shading Pie", default=True)
     activate_pie_views: BoolProperty(name="Views Pie", default=True)
+    activate_pie_align: BoolProperty(name="Align Pie", default=True)
     activate_pie_workspace: BoolProperty(name="Workspace Pie", default=False)
 
 
@@ -170,6 +171,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row.label(text="Control views. Create and manage cameras.")
 
         row = column.split(factor=0.25)
+        row.prop(self, "activate_pie_align", toggle=True)
+        row.label(text="Edit mesh alinments.")
+
+        row = column.split(factor=0.25)
         row.prop(self, "activate_pie_workspace", toggle=True)
         r = row.split(factor=0.4)
         r.label(text="Switch workspaces.")
@@ -262,9 +267,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         drawn = False
 
         for title in keys:
-            items = keys.get(title)
-
             if "PIE" not in title:
+                items = keys.get(title)
+
                 if self.draw_keymap_items(kc, title, items, layout):
                     drawn = True
 
@@ -274,9 +279,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def draw_pie_keymaps(self, kc, keys, layout):
         drawn = False
         for title in keys:
-            items = keys.get(title)
-
             if "PIE" in title:
+                items = keys.get(title)
+
                 if self.draw_keymap_items(kc, title, items, layout):
                     drawn = True
 

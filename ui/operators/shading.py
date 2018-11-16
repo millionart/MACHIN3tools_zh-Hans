@@ -1,7 +1,4 @@
 import bpy
-from ... utils import MACHIN3 as m3
-
-
 
 solid_show_overlays = True
 material_show_overlays = False

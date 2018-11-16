@@ -4,6 +4,9 @@ from bpy.types import Menu
 from .. utils import MACHIN3 as m3
 from .. utils.ui import get_icon
 
+# TODO: edit mesh align pie
+# TODO: snapping  pie
+
 
 class PieModes(Menu):
     bl_idname = "VIEW3D_MT_MACHIN3_modes"
@@ -18,12 +21,16 @@ class PieModes(Menu):
         if active:
             if active.type == 'MESH':
                 pie = layout.menu_pie()
+
                 # 4 - LEFT
                 pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
+
                 # 6 - RIGHT
                 pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
+
                 # 2 - BOTTOM
                 pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
+
                 # 8 - TOP
                 if bpy.context.object.mode == "OBJECT":
                     text = "Edit"
@@ -32,6 +39,7 @@ class PieModes(Menu):
                     text = "Object"
                     icon = get_icon('object')
                 pie.operator("machin3.edit_mode", text=text, icon_value=icon)
+
                 # 7 - TOP - LEFT
                 if bpy.context.object.mode == "EDIT":
                     pie.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
@@ -40,8 +48,10 @@ class PieModes(Menu):
 
                 # 9 - TOP - RIGHT
                 pie.separator()
+
                 # 1 - BOTTOM - LEFT
                 pie.separator()
+
                 # 3 - BOTTOM - RIGHT
                 if bpy.context.object.mode == "EDIT":
                     box = pie.split()
@@ -626,6 +636,86 @@ class PieViews(Menu):
         row.operator("view3d.view_persportho", text=text, icon=icon)
 
         col.prop(view, "lens")
+
+
+class PieAlign(Menu):
+    bl_idname = "VIEW3D_MT_MACHIN3_align"
+    bl_label = "Align"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        # 4 - LEFT
+        op = pie.operator("machin3.align_editmesh", text="Y min")
+        op.axis = "Y"
+        op.type = "MIN"
+
+        # 6 - RIGHT
+        op = pie.operator("machin3.align_editmesh", text="Y max")
+        op.axis = "Y"
+        op.type = "MAX"
+
+        # 2 - BOTTOM
+        box = pie.split()
+        box.scale_y = 1.3
+
+        column = box.column()
+        op = column.operator("machin3.align_editmesh", text="X cursor")
+        op.axis = "X"
+        op.type = "CURSOR"
+        op = column.operator("machin3.align_editmesh", text="Y cursor")
+        op.axis = "Y"
+        op.type = "CURSOR"
+        op = column.operator("machin3.align_editmesh", text="Z cursor")
+        op.axis = "Z"
+        op.type = "CURSOR"
+
+        # 8 - TOP
+        box = pie.split()
+        box.scale_y = 1.3
+
+        column = box.column()
+        op = column.operator("machin3.align_editmesh", text="X zero")
+        op.axis = "X"
+        op.type = "ZERO"
+        op = column.operator("machin3.align_editmesh", text="Y zero")
+        op.axis = "Y"
+        op.type = "ZERO"
+        op = column.operator("machin3.align_editmesh", text="Z zero")
+        op.axis = "Z"
+        op.type = "ZERO"
+
+        column = box.column()
+        op = column.operator("machin3.align_editmesh", text="X average")
+        op.axis = "X"
+        op.type = "AVERAGE"
+        op = column.operator("machin3.align_editmesh", text="Y average")
+        op.axis = "Y"
+        op.type = "AVERAGE"
+        op = column.operator("machin3.align_editmesh", text="Z average")
+        op.axis = "Z"
+        op.type = "AVERAGE"
+
+        # 7 - TOP - LEFT
+        op = pie.operator("machin3.align_editmesh", text="X min")
+        op.axis = "X"
+        op.type = "MIN"
+
+        # 9 - TOP - RIGHT
+        op = pie.operator("machin3.align_editmesh", text="X max")
+        op.axis = "X"
+        op.type = "MAX"
+
+        # 1 - BOTTOM - LEFT
+        op = pie.operator("machin3.align_editmesh", text="Z min")
+        op.axis = "Z"
+        op.type = "MIN"
+
+        # 3 - BOTTOM - RIGHT
+        op = pie.operator("machin3.align_editmesh", text="Z max")
+        op.axis = "Z"
+        op.type = "MAX"
 
 
 class PieWorkspace(Menu):

@@ -245,6 +245,16 @@ def get_pie_menus():
         keymaps.append(keys["VIEWS PIE"])
         count += 1
 
+    # Align
+    if m3.M3_prefs().activate_pie_align:
+        from .. ui.pies import PieAlign
+        from .. ui.operators.align import AlignEditMesh
+
+        classes.append(PieAlign)
+        classes.append(AlignEditMesh)
+        keymaps.append(keys["ALIGN PIE"])
+        count += 1
+
 
     # WORKSPACE
 

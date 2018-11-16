@@ -17,5 +17,6 @@ keys = {"SMART VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "mach
         "SAVE PIE": [{"keymap": "Window", "idname": "wm.call_menu_pie", "type": "S", "value": "PRESS", "ctrl": True, "properties": [("name", "VIEW3D_MT_MACHIN3_save")]}],
         "SHADING PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "PAGE_UP", "value": "PRESS", "properties": [("name", "VIEW3D_MT_MACHIN3_shading")]}],
         "VIEWS PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "PAGE_DOWN", "value": "PRESS", "properties": [("name", "VIEW3D_MT_MACHIN3_views")]}],
+        "ALIGN PIE": [{"keymap": "Mesh", "idname": "wm.call_menu_pie", "type": "A", "value": "PRESS", "alt": True, "properties": [("name", "VIEW3D_MT_MACHIN3_align")]}],
         "WORKSPACE PIE": [{"keymap": "Window", "idname": "wm.call_menu_pie", "type": "PAUSE", "value": "PRESS", "properties": [("name", "VIEW3D_MT_MACHIN3_workspace")]}],
         }

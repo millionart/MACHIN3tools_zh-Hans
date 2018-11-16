@@ -63,14 +63,18 @@ class Align(bpy.types.Operator):
         r.prop(self, "sca_y", toggle=True)
         r.prop(self, "sca_z", toggle=True)
 
-
+    @classmethod
+    def poll(cls, context):
+        return context.mode == "OBJECT"
 
     def execute(self, context):
         sel = m3.selected_objects()
         active = m3.get_active()
-        sel.remove(active)
 
-        self.align(active, sel)
+        if active in sel:
+            sel.remove(active)
+
+            self.align(active, sel)
 
         return {'FINISHED'}
 
