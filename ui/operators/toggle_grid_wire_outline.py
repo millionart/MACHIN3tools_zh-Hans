@@ -10,7 +10,7 @@ axis_z = False
 class ToggleGrid(bpy.types.Operator):
     bl_idname = "machin3.toggle_grid"
     bl_label = "Toggle Grid"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     def execute(self, context):
         global axis_x, axis_y, axis_z
@@ -48,7 +48,7 @@ class ToggleGrid(bpy.types.Operator):
 class ToggleWireframe(bpy.types.Operator):
     bl_idname = "machin3.toggle_wireframe"
     bl_label = "Toggle Wireframe"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     def execute(self, context):
         overlay = context.space_data.overlay
@@ -73,7 +73,7 @@ class ToggleWireframe(bpy.types.Operator):
 class ToggleOutline(bpy.types.Operator):
     bl_idname = "machin3.toggle_outline"
     bl_label = "Toggle Outline"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     def execute(self, context):
         shading = context.space_data.shading

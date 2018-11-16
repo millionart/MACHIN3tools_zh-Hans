@@ -181,7 +181,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         # PIE SAVE
 
-        if self.activate_pie_save:
+        if getattr(bpy.types, "VIEW3D_MT_MACHIN3_save", False):
             bb = b.box()
             bb.label(text="Append World and Materials")
 

@@ -19,11 +19,11 @@ class PieModes(Menu):
             if active.type == 'MESH':
                 pie = layout.menu_pie()
                 # 4 - LEFT
-                pie.operator("machin3.select_vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
+                pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
                 # 6 - RIGHT
-                pie.operator("machin3.select_face_mode", text="Face", icon_value=get_icon('face'))
+                pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
                 # 2 - BOTTOM
-                pie.operator("machin3.select_edge_mode", text="Edge", icon_value=get_icon('edge'))
+                pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
                 # 8 - TOP
                 if bpy.context.object.mode == "OBJECT":
                     text = "Edit"
@@ -31,7 +31,7 @@ class PieModes(Menu):
                 elif bpy.context.object.mode == "EDIT":
                     text = "Object"
                     icon = get_icon('object')
-                pie.operator("machin3.toggle_edit_mode", text=text, icon_value=icon)
+                pie.operator("machin3.edit_mode", text=text, icon_value=icon)
                 # 7 - TOP - LEFT
                 if bpy.context.object.mode == "EDIT":
                     pie.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
@@ -230,12 +230,10 @@ class PieShading(Menu):
         pie.operator("machin3.shade_material", text=text, icon=icon)
 
         # 2 - BOTTOM
-        text, icon = self.get_text_icon(context, "RENDERED")
-        pie.operator("machin3.shade_rendered", text=text, icon=icon)
+        pie.separator()
 
         # 8 - TOP
         box = pie.split()
-        # box = pie.box().split()
 
         b = box.box()
         column = b.column()
@@ -256,10 +254,12 @@ class PieShading(Menu):
         pie.separator()
 
         # 1 - BOTTOM - LEFT
-        pie.separator()
+        text, icon = self.get_text_icon(context, "WIREFRAME")
+        pie.operator("machin3.shade_wire", text=text, icon=icon)
 
         # 3 - BOTTOM - RIGHT
-        pie.separator()
+        text, icon = self.get_text_icon(context, "RENDERED")
+        pie.operator("machin3.shade_rendered", text=text, icon=icon)
 
     def draw_left_column(self, context, view, col):
         row = col.split(factor=0.45)
@@ -475,6 +475,12 @@ class PieShading(Menu):
             col.label(text='TODO: render setting presets')
             col.label(text='TODO: pack images op?')
 
+
+        elif view.shading.type == "WIREFRAME":
+            row = col.row()
+            row.prop(view.shading, "show_xray_wireframe", text="")
+            row.prop(view.shading, "xray_alpha_wireframe", text="X-Ray")
+
     def get_text_icon(self, context, shading):
         if context.space_data.shading.type == shading:
             text = "Toggle Overlays"
@@ -489,6 +495,9 @@ class PieShading(Menu):
             elif shading == "RENDERED":
                 text = "Rendered"
                 icon = "SHADING_RENDERED"
+            elif shading == "WIREFRAME":
+                text = "Wireframe"
+                icon = "SHADING_WIRE"
 
         return text, icon
 

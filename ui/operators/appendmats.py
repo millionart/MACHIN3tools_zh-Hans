@@ -14,6 +14,7 @@ def get_mat():
 class Add(bpy.types.Operator):
     bl_idname = "machin3.add_appendmat"
     bl_label = "Add Append Name"
+    bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Add name of Material to append"
 
     @classmethod
@@ -43,7 +44,7 @@ class Move(bpy.types.Operator):
     bl_description = "Move Material Name up or down.\nThis controls the position in the Append Material Menu.\nSave prefs to remember."
 
     direction: EnumProperty(items=[("UP", "Up", ""),
-                                    ("DOWN", "Down", "")])
+                                   ("DOWN", "Down", "")])
 
     def execute(self, context):
         idx, mats, _ = get_mat()
@@ -62,6 +63,7 @@ class Move(bpy.types.Operator):
 class Rename(bpy.types.Operator):
     bl_idname = "machin3.rename_appendmat"
     bl_label = "Rename Material Name"
+    bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Rename the selected Material Name"
 
     newmatname: StringProperty(name="New Name")

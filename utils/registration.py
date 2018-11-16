@@ -190,10 +190,10 @@ def get_pie_menus():
 
     if m3.M3_prefs().activate_pie_modes:
         from .. ui.pies import PieModes
-        from .. ui.operators.select_mode import ToggleEditMode, SelectVertexMode, SelectEdgeMode, SelectFaceMode
+        from .. ui.operators.modes import EditMode, VertexMode, EdgeMode, FaceMode
 
         classes.append(PieModes)
-        classes.extend([SelectVertexMode, SelectEdgeMode, SelectFaceMode, ToggleEditMode])
+        classes.extend([VertexMode, EdgeMode, FaceMode, EditMode])
         keymaps.append(keys["MODES PIE"])
         count += 1
 
@@ -203,8 +203,8 @@ def get_pie_menus():
     if m3.M3_prefs().activate_pie_save:
         from .. ui.pies import PieSave
         from .. ui.menus import MenuAppendMaterials
-        from .. ui.operators.save_load_append import New, Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext
-        from .. ui.operators.save_load_append import AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource
+        from .. ui.operators.save import New, Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext
+        from .. ui.operators.save import AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource
         from .. ui.operators.appendmats import Add, Move, Rename, Clear, Remove
 
         classes.append(PieSave)
@@ -220,14 +220,14 @@ def get_pie_menus():
 
     if m3.M3_prefs().activate_pie_shading:
         from .. ui.pies import PieShading
-        from .. ui.operators.change_shading import ShadeSolid, ShadeMaterial, ShadeRendered
+        from .. ui.operators.shading import ShadeSolid, ShadeMaterial, ShadeRendered, ShadeWire
         from .. ui.operators.toggle_grid_wire_outline import ToggleGrid, ToggleWireframe, ToggleOutline
         from .. ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
         from .. ui.operators.colorize_materials import ColorizeMaterials
         from .. ui.operators.matcap_switch import MatcapSwitch
 
         classes.append(PieShading)
-        classes.extend([ShadeSolid, ShadeMaterial, ShadeRendered])
+        classes.extend([ShadeSolid, ShadeMaterial, ShadeRendered, ShadeWire])
         classes.extend([ToggleGrid, ToggleWireframe, ToggleOutline])
         classes.extend([ShadeSmooth, ShadeFlat])
         classes.extend([ColorizeMaterials, MatcapSwitch])

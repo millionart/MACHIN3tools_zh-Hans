@@ -10,7 +10,7 @@ from ... utils import MACHIN3 as m3
 class New(bpy.types.Operator):
     bl_idname = "machin3.new"
     bl_label = "Current file is unsaved. Start a new file anyway?"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
 
     def execute(self, context):
@@ -32,7 +32,7 @@ class Save(bpy.types.Operator):
     bl_idname = "machin3.save"
     bl_label = "Save"
     bl_description = "Save"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     def execute(self, context):
         currentblend = bpy.data.filepath
@@ -54,7 +54,7 @@ class SaveIncremental(bpy.types.Operator):
     bl_idname = "machin3.save_incremental"
     bl_label = "Incremental Save"
     bl_description = "Incremental Save"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
 
     def execute(self, context):
@@ -233,7 +233,7 @@ class LoadWorldSource(bpy.types.Operator):
     bl_idname = "machin3.load_world_source"
     bl_label = "Load World Source"
     bl_description = "Load World Source File"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
@@ -253,16 +253,11 @@ class LoadMaterialsSource(bpy.types.Operator):
     bl_idname = "machin3.load_materials_source"
     bl_label = "Load Materials Source"
     bl_description = "Load Materials Source File"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
         return m3.M3_prefs().appendmatspath
-
-    def draw(self, context):
-        layout = self.layout
-
-        column = layout.column()
 
     def execute(self, context):
         appendmatspath = m3.M3_prefs().appendmatspath
@@ -277,16 +272,11 @@ class LoadPrevious(bpy.types.Operator):
     bl_idname = "machin3.load_previous"
     bl_label = "Load Previous"
     bl_description = "Load Previous Blend File in Current Folder"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
         return bpy.data.filepath
-
-    def draw(self, context):
-        layout = self.layout
-
-        column = layout.column()
 
     def execute(self, context):
         filepath = bpy.data.filepath
@@ -317,16 +307,11 @@ class LoadNext(bpy.types.Operator):
     bl_idname = "machin3.load_next"
     bl_label = "Load Next"
     bl_description = "Load Next Blend File in Current Folder"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
         return bpy.data.filepath
-
-    def draw(self, context):
-        layout = self.layout
-
-        column = layout.column()
 
     def execute(self, context):
         filepath = bpy.data.filepath

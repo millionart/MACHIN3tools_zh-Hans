@@ -5,7 +5,7 @@ from ... utils import MACHIN3 as m3
 class MatcapSwitch(bpy.types.Operator):
     bl_idname = "machin3.matcap_switch"
     bl_label = "Matcap Switch"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
