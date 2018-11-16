@@ -657,45 +657,51 @@ class PieAlign(Menu):
         op.type = "MAX"
 
         # 2 - BOTTOM
-        box = pie.split()
-        box.scale_y = 1.3
-
-        column = box.column()
-        op = column.operator("machin3.align_editmesh", text="X cursor")
-        op.axis = "X"
-        op.type = "CURSOR"
-        op = column.operator("machin3.align_editmesh", text="Y cursor")
-        op.axis = "Y"
-        op.type = "CURSOR"
-        op = column.operator("machin3.align_editmesh", text="Z cursor")
-        op.axis = "Z"
-        op.type = "CURSOR"
+        pie.separator()
 
         # 8 - TOP
         box = pie.split()
         box.scale_y = 1.3
 
-        column = box.column()
-        op = column.operator("machin3.align_editmesh", text="X zero")
+        column = box.column(align=True)
+        column.label(icon="FREEZE")
+        op = column.operator("machin3.align_editmesh", text="X")
         op.axis = "X"
         op.type = "ZERO"
-        op = column.operator("machin3.align_editmesh", text="Y zero")
+        op = column.operator("machin3.align_editmesh", text="Y")
         op.axis = "Y"
         op.type = "ZERO"
-        op = column.operator("machin3.align_editmesh", text="Z zero")
+        op = column.operator("machin3.align_editmesh", text="Z")
         op.axis = "Z"
         op.type = "ZERO"
 
-        column = box.column()
-        op = column.operator("machin3.align_editmesh", text="X average")
+        column = box.column(align=True)
+        column.label(icon="ARROW_LEFTRIGHT")
+        op = column.operator("machin3.align_editmesh", text="X")
         op.axis = "X"
         op.type = "AVERAGE"
-        op = column.operator("machin3.align_editmesh", text="Y average")
+        op = column.operator("machin3.align_editmesh", text="Y")
         op.axis = "Y"
         op.type = "AVERAGE"
-        op = column.operator("machin3.align_editmesh", text="Z average")
+        op = column.operator("machin3.align_editmesh", text="Z")
         op.axis = "Z"
         op.type = "AVERAGE"
+
+        column = box.column(align=True)
+        column.label(icon="PIVOT_CURSOR")
+        op = column.operator("machin3.align_editmesh", text="X")
+        op.axis = "X"
+        op.type = "CURSOR"
+        op = column.operator("machin3.align_editmesh", text="Y")
+        op.axis = "Y"
+        op.type = "CURSOR"
+        op = column.operator("machin3.align_editmesh", text="Z")
+        op.axis = "Z"
+        op.type = "CURSOR"
+
+        column.separator()
+        column.separator()
+        column.separator()
 
         # 7 - TOP - LEFT
         op = pie.operator("machin3.align_editmesh", text="X min")
