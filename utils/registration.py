@@ -114,6 +114,76 @@ def unregister_icons(icons):
     previews.remove(icons)
 
 
+# RUNTIME TOOL (DE)ACTIVATION
+
+def activate_tool(self, rna_name, register, tool):
+    c = getattr(bpy.types, rna_name, False)
+
+    if c:
+        # UNREGISTER
+
+        if not register:
+
+            # KEYMAPS
+
+            keys = [keysdict[tool.upper()]]
+            keymaps = get_keymaps(keys)
+
+            # update keymaps registered in __init__.py at startup, necessary for addon unregistering
+            from .. import keymaps as startup_keymaps
+            for k in keymaps:
+                if k in startup_keymaps:
+                    startup_keymaps.remove(k)
+
+            # unregister tool keymaps
+            unregister_keymaps(keymaps)
+
+
+            # CLASSES
+
+            # update classes registered in __init__.py at startup, necessary for addon unregistering
+            from .. import classes as startup_classes
+            if c in startup_classes:
+                startup_classes.remove(c)
+
+            # unregister tool class
+            unregister_classes([c])
+            print("Unregistered %s" % (c.bl_idname))
+
+    else:
+        # REGISTER
+
+        if register:
+            classes, keys, _ = eval("get_%s()" % (tool))
+
+            # CLASSES
+
+            # register tool class
+            register_classes(classes)
+
+            # update classes registered in __init__.py at startup, necessary for addon unregistering
+            from .. import classes as startup_classes
+            if c not in startup_classes:
+                startup_classes.extend(classes)
+
+
+            # KEYMAPS
+
+            # register tool keymaps
+            keymaps = register_keymaps(keys)
+
+            # update keymaps registered in __init__.py at startup, necessary for addon unregistering
+            from .. import keymaps as startup_keymaps
+            for k in keymaps:
+                if k not in startup_keymaps:
+                    startup_keymaps.append(k)
+
+
+            print("Registered %s" % (classes[0].bl_idname))
+            classes.clear()
+            keys.clear()
+
+
 # GET CORE, TOOLS and PIES - CLASSES and KEYMAPS
 
 def get_core():
@@ -143,73 +213,31 @@ def get_tools():
 
 
     # SMART EDGE
-
-    if m3.M3_prefs().activate_smart_edge:
-        from .. operators.smart_edge import SmartEdge
-
-        classes.append(SmartEdge)
-        keys.append(keysdict["SMART EDGE"])
-        count +=1
+    classes, keys, count = get_smart_edge(classes, keys, count)
 
 
     # SMART FACE
-
-    if m3.M3_prefs().activate_smart_face:
-        from .. operators.smart_face import SmartFace
-
-        classes.append(SmartFace)
-        keys.append(keysdict["SMART FACE"])
-        count +=1
+    classes, keys, count = get_smart_face(classes, keys, count)
 
 
     # CLEAN UP
-
-    if m3.M3_prefs().activate_clean_up:
-        from .. operators.clean_up import CleanUp
-
-        classes.append(CleanUp)
-        keys.append(keysdict["CLEAN UP"])
-        count +=1
+    classes, keys, count = get_clean_up(classes, keys, count)
 
 
     # CLIPPING TOGGLE
-
-    if m3.M3_prefs().activate_clipping_toggle:
-        from .. operators.clipping_toggle import ClippingToggle
-
-        classes.append(ClippingToggle)
-        keys.append(keysdict["CLIPPING TOGGLE"])
-        count +=1
+    classes, keys, count = get_clipping_toggle(classes, keys, count)
 
 
     # FOCUS
-
-    if m3.M3_prefs().activate_focus:
-        from .. operators.focus import Focus
-
-        classes.append(Focus)
-        keys.append(keysdict["FOCUS"])
-        count +=1
+    classes, keys, count = get_focus(classes, keys, count)
 
 
     # MIRROR
-
-    if m3.M3_prefs().activate_mirror:
-        from .. operators.mirror import Mirror
-
-        classes.append(Mirror)
-        keys.append(keysdict["MIRROR"])
-        count +=1
+    classes, keys, count = get_mirror(classes, keys, count)
 
 
     # ALIGN
-
-    if m3.M3_prefs().activate_align:
-        from .. operators.align import Align
-
-        classes.append(Align)
-        keys.append(keysdict["ALIGN"])
-        count +=1
+    classes, keys, count = get_align(classes, keys, count)
 
     return classes, keys, count
 
@@ -310,7 +338,84 @@ def get_smart_vert(classes=[], keys=[], count=0):
         from .. operators.smart_vert import SmartVert
 
         classes.append(SmartVert)
-        keys.append(keysdict["SMART VERT"])
+        keys.append(keysdict["SMART_VERT"])
+        count +=1
+
+    return classes, keys, count
+
+
+def get_smart_edge(classes=[], keys=[], count=0):
+    if m3.M3_prefs().activate_smart_edge:
+        from .. operators.smart_edge import SmartEdge
+
+        classes.append(SmartEdge)
+        keys.append(keysdict["SMART_EDGE"])
+        count +=1
+
+    return classes, keys, count
+
+
+def get_smart_face(classes=[], keys=[], count=0):
+    if m3.M3_prefs().activate_smart_face:
+        from .. operators.smart_face import SmartFace
+
+        classes.append(SmartFace)
+        keys.append(keysdict["SMART_FACE"])
+        count +=1
+
+    return classes, keys, count
+
+
+def get_clean_up(classes=[], keys=[], count=0):
+    if m3.M3_prefs().activate_clean_up:
+        from .. operators.clean_up import CleanUp
+
+        classes.append(CleanUp)
+        keys.append(keysdict["CLEAN_UP"])
+        count +=1
+
+    return classes, keys, count
+
+
+def get_clipping_toggle(classes=[], keys=[], count=0):
+    if m3.M3_prefs().activate_clipping_toggle:
+        from .. operators.clipping_toggle import ClippingToggle
+
+        classes.append(ClippingToggle)
+        keys.append(keysdict["CLIPPING_TOGGLE"])
+        count +=1
+
+    return classes, keys, count
+
+
+def get_focus(classes=[], keys=[], count=0):
+    if m3.M3_prefs().activate_focus:
+        from .. operators.focus import Focus
+
+        classes.append(Focus)
+        keys.append(keysdict["FOCUS"])
+        count +=1
+
+    return classes, keys, count
+
+
+def get_mirror(classes=[], keys=[], count=0):
+    if m3.M3_prefs().activate_mirror:
+        from .. operators.mirror import Mirror
+
+        classes.append(Mirror)
+        keys.append(keysdict["MIRROR"])
+        count +=1
+
+    return classes, keys, count
+
+
+def get_align(classes=[], keys=[], count=0):
+    if m3.M3_prefs().activate_align:
+        from .. operators.align import Align
+
+        classes.append(Align)
+        keys.append(keysdict["ALIGN"])
         count +=1
 
     return classes, keys, count

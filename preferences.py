@@ -5,7 +5,6 @@ import rna_keymap_ui
 from . properties import AppendMatsCollection
 from . utils.ui import get_icon
 from . utils import registration as reg
-from . keys import keys as keysdict
 
 
 preferences_tabs = [("GENERAL", "General", ""),
@@ -41,72 +40,32 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.switchmatcap2 = "NOT FOUND"
 
 
-    # DYNAMIC TOOL ACTIVATION
+    # RUNTIME TOOL ACTIVATION
 
     def update_activate_smart_vert(self, context):
-        c = getattr(bpy.types, "MACHIN3_OT_smart_vert", False)
+        reg.activate_tool(self, rna_name="MACHIN3_OT_smart_vert", register=self.activate_smart_vert, tool="smart_vert")
 
-        if c:
-            if not self.activate_smart_vert:
+    def update_activate_smart_edge(self, context):
+        reg.activate_tool(self, rna_name="MACHIN3_OT_smart_edge", register=self.activate_smart_edge, tool="smart_edge")
 
-                # KEYMAPS
+    def update_activate_smart_face(self, context):
+        reg.activate_tool(self, rna_name="MACHIN3_OT_smart_face", register=self.activate_smart_face, tool="smart_face")
 
-                keys = [keysdict["SMART VERT"]]
-                keymaps = reg.get_keymaps(keys)
+    def update_activate_clean_up(self, context):
+        reg.activate_tool(self, rna_name="MACHIN3_OT_clean_up", register=self.activate_clean_up, tool="clean_up")
 
-                # update keymaps registered in __init__.py at startup, necessary for addon unregistering
-                from . import keymaps as startup_keymaps
-                for k in keymaps:
-                    if k in startup_keymaps:
-                        startup_keymaps.remove(k)
+    def update_activate_clipping_toggle(self, context):
+        reg.activate_tool(self, rna_name="MACHIN3_OT_clipping_toggle", register=self.activate_clipping_toggle, tool="clipping_toggle")
 
-                # unregister tool keymaps
-                reg.unregister_keymaps(keymaps)
+    def update_activate_focus(self, context):
+        reg.activate_tool(self, rna_name="MACHIN3_OT_focus", register=self.activate_focus, tool="focus")
 
-
-                # CLASSES
-
-                # update classes registered in __init__.py at startup, necessary for addon unregistering
-                from . import classes as startup_classes
-                if c in startup_classes:
-                    startup_classes.remove(c)
-
-                # unregister tool class
-                reg.unregister_classes([c])
-                print("Unnregistered %s" % (c.bl_idname))
-
-        else:
-            if self.update_activate_smart_vert:
-                classes, keys, _ = reg.get_smart_vert()
-
-                # CLASSES
-
-                # register tool class
-                reg.register_classes(classes)
-
-                # update classes registered in __init__.py at startup, necessary for addon unregistering
-                from . import classes as startup_classes
-                if c not in startup_classes:
-                    startup_classes.extend(classes)
+    def update_activate_mirror(self, context):
+        reg.activate_tool(self, rna_name="MACHIN3_OT_mirror", register=self.activate_mirror, tool="mirror")
 
 
-                # KEYMAPS
-
-                # register tool keymaps
-                keymaps = reg.register_keymaps(keys)
-
-                # update keymaps registered in __init__.py at startup, necessary for addon unregistering
-                from . import keymaps as startup_keymaps
-                for k in keymaps:
-                    if k not in startup_keymaps:
-                        startup_keymaps.append(k)
-
-
-                print("Registered %s" % (classes[0].bl_idname))
-                classes.clear()
-                keys.clear()
-
-
+    def update_activate_align(self, context):
+        reg.activate_tool(self, rna_name="MACHIN3_OT_align", register=self.activate_align, tool="align")
 
     # PROPERTIES
 
@@ -125,13 +84,13 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     # MACHIN3tools
 
     activate_smart_vert: BoolProperty(name="Smart Vert", default=True, update=update_activate_smart_vert)
-    activate_smart_edge: BoolProperty(name="Smart Edge", default=True)
-    activate_smart_face: BoolProperty(name="Smart Face", default=True)
-    activate_clean_up: BoolProperty(name="Clean Up", default=True)
-    activate_clipping_toggle: BoolProperty(name="Clipping Toggle", default=True)
-    activate_focus: BoolProperty(name="Focus", default=True)
-    activate_mirror: BoolProperty(name="Mirror", default=True)
-    activate_align: BoolProperty(name="Align", default=True)
+    activate_smart_edge: BoolProperty(name="Smart Edge", default=True, update=update_activate_smart_edge)
+    activate_smart_face: BoolProperty(name="Smart Face", default=True, update=update_activate_smart_face)
+    activate_clean_up: BoolProperty(name="Clean Up", default=True, update=update_activate_clean_up)
+    activate_clipping_toggle: BoolProperty(name="Clipping Toggle", default=True, update=update_activate_clipping_toggle)
+    activate_focus: BoolProperty(name="Focus", default=True, update=update_activate_focus)
+    activate_mirror: BoolProperty(name="Mirror", default=True, update=update_activate_mirror)
+    activate_align: BoolProperty(name="Align", default=True, update=update_activate_align)
 
 
     # MACHIN3pies
@@ -147,7 +106,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     # hidden
 
     avoid_update: BoolProperty(default=False)
-    tabs: EnumProperty(name="Tabs", items=preferences_tabs, default="KEYMAPS")
+    tabs: EnumProperty(name="Tabs", items=preferences_tabs, default="GENERAL")
 
 
     def draw(self, context):
