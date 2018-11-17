@@ -63,9 +63,16 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_mirror(self, context):
         reg.activate_tool(self, rna_name="MACHIN3_OT_mirror", register=self.activate_mirror, tool="mirror")
 
-
     def update_activate_align(self, context):
         reg.activate_tool(self, rna_name="MACHIN3_OT_align", register=self.activate_align, tool="align")
+
+
+    # RUNTIME PIE ACTIVATION
+
+    def update_activate_modes_pie(self, context):
+        # reg.activate_tool(self, rna_name="MACHIN3_MT_modes_pie", register=self.activate_modes_pie, tool="modes_pie")
+        # see notes in registration.activate_tool()
+        pass
 
     # PROPERTIES
 
@@ -95,12 +102,12 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     # MACHIN3pies
 
-    activate_pie_modes: BoolProperty(name="Modes Pie", default=True)
-    activate_pie_save: BoolProperty(name="Save Pie", default=True)
-    activate_pie_shading: BoolProperty(name="Shading Pie", default=True)
-    activate_pie_views: BoolProperty(name="Views Pie", default=True)
-    activate_pie_align: BoolProperty(name="Align Pie", default=True)
-    activate_pie_workspace: BoolProperty(name="Workspace Pie", default=False)
+    activate_modes_pie: BoolProperty(name="Modes Pie", default=True, update=update_activate_modes_pie)
+    activate_save_pie: BoolProperty(name="Save Pie", default=True)
+    activate_shading_pie: BoolProperty(name="Shading Pie", default=True)
+    activate_views_pie: BoolProperty(name="Views Pie", default=True)
+    activate_align_pie: BoolProperty(name="Align Pie", default=True)
+    activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False)
 
 
     # hidden
@@ -185,27 +192,27 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         column = bb.column()
 
         row = column.split(factor=0.25)
-        row.prop(self, "activate_pie_modes", toggle=True)
+        row.prop(self, "activate_modes_pie", toggle=True)
         row.label(text="Quick mode changing.")
 
         row = column.split(factor=0.25)
-        row.prop(self, "activate_pie_save", toggle=True)
+        row.prop(self, "activate_save_pie", toggle=True)
         row.label(text="Save, open, append. Load recent, previous and next. Append World and Materials.")
 
         row = column.split(factor=0.25)
-        row.prop(self, "activate_pie_shading", toggle=True)
+        row.prop(self, "activate_shading_pie", toggle=True)
         row.label(text="Control shading, overlays, eevee and some object properties.")
 
         row = column.split(factor=0.25)
-        row.prop(self, "activate_pie_views", toggle=True)
+        row.prop(self, "activate_views_pie", toggle=True)
         row.label(text="Control views. Create and manage cameras.")
 
         row = column.split(factor=0.25)
-        row.prop(self, "activate_pie_align", toggle=True)
+        row.prop(self, "activate_align_pie", toggle=True)
         row.label(text="Edit mesh alinments.")
 
         row = column.split(factor=0.25)
-        row.prop(self, "activate_pie_workspace", toggle=True)
+        row.prop(self, "activate_workspace_pie", toggle=True)
         r = row.split(factor=0.4)
         r.label(text="Switch workspaces.")
         r.label(text="If enabled, customize it in ui/pies.py", icon="INFO")
@@ -216,7 +223,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         # PIE SAVE
 
-        if getattr(bpy.types, "VIEW3D_MT_MACHIN3_save", False):
+        if getattr(bpy.types, "MACHIN3_MT_save_pie", False):
             bb = b.box()
             bb.label(text="Append World and Materials")
 
@@ -350,12 +357,12 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
                     # single kmi tools, get their label from the title
                     if len(items) == 1:
-                        label = title.title()
+                        label = title.title().replace("_", " ")
 
                     # multi kmi tools, get it from the label tag, while the title is printed once, before the first item
                     else:
                         if idx == 0:
-                            box.label(text=title.title())
+                            box.label(text=title.title().replace("_", " "))
 
                         label = item.get("label")
 

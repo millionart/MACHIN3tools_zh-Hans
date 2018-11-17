@@ -9,7 +9,7 @@ from .. utils.ui import get_icon
 
 
 class PieModes(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_modes"
+    bl_idname = "MACHIN3_MT_modes_pie"
     bl_label = "Modes"
 
     def draw(self, context):
@@ -111,7 +111,7 @@ class PieModes(Menu):
 
 
 class PieSave(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_save"
+    bl_idname = "MACHIN3_MT_save_pie"
     bl_label = "Save, Open, Append"
 
     def draw(self, context):
@@ -221,7 +221,7 @@ class PieSave(Menu):
 
 
 class PieShading(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_shading"
+    bl_idname = "MACHIN3_MT_shading_pie"
     bl_label = "Shading and Overlays"
 
     def draw(self, context):
@@ -513,7 +513,7 @@ class PieShading(Menu):
 
 
 class PieViews(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_views"
+    bl_idname = "MACHIN3_MT_views_pie"
     bl_label = "Views and Cams"
 
     def draw(self, context):
@@ -639,7 +639,7 @@ class PieViews(Menu):
 
 
 class PieAlign(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_align"
+    bl_idname = "MACHIN3_MT_align_pie"
     bl_label = "Align"
 
     def draw(self, context):
@@ -725,7 +725,7 @@ class PieAlign(Menu):
 
 
 class PieWorkspace(Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_workspace"
+    bl_idname = "MACHIN3_MT_workspace_pie"
     bl_label = "Workspaces"
 
     def draw(self, context):

@@ -69,9 +69,9 @@ def get_keymaps(keys):
 
     keymaps = []
 
-    for items in keys:
-        for item in items:
-            keymap = item.get("keymap")
+    for tool in keys:
+        for item in tool:
+            keymap = tool.get("keymap")
 
             if keymap:
                 km = kc.keymaps.get(keymap)
@@ -121,6 +121,13 @@ def activate_tool(self, rna_name, register, tool):
 
     if c:
         # UNREGISTER
+
+        # NOTE: unregistering pies or muli class pies, is incomplete, because we cant just import the classes to unregister them
+        # ####: attmepting to do this via the get_some_pie() function resuls in an empty class list, because the classes are importd already
+        # ####: to unrgister them you need to pick them from bpy.types as you do with the c class
+        # ####: unfortunately it can be quite a lot of classes and I don't want to pass all their rna names in as strings, hmm
+        # ####: since unregistering is incomplete, re-registering will throw an excpetion.
+        # ####: it could be done by mirroring the keymap approach, where all the rna names are loaded in from a json
 
         if not register:
 
@@ -244,24 +251,17 @@ def get_tools():
 
 def get_pie_menus():
     classes = []
-    keymaps = []
+    keys = []
     count = 0
 
     # MODES
 
-    if m3.M3_prefs().activate_pie_modes:
-        from .. ui.pies import PieModes
-        from .. ui.operators.modes import EditMode, VertexMode, EdgeMode, FaceMode
-
-        classes.append(PieModes)
-        classes.extend([VertexMode, EdgeMode, FaceMode, EditMode])
-        keymaps.append(keysdict["MODES PIE"])
-        count += 1
+    classes, keys, count = get_modes_pie(classes, keys, count)
 
 
     # SAVE
 
-    if m3.M3_prefs().activate_pie_save:
+    if m3.M3_prefs().activate_save_pie:
         from .. ui.pies import PieSave
         from .. ui.menus import MenuAppendMaterials
         from .. ui.operators.save import New, Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext
@@ -273,13 +273,13 @@ def get_pie_menus():
         classes.extend([New, Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext])
         classes.extend([AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource])
         classes.extend([Add, Move, Rename, Clear, Remove])
-        keymaps.append(keysdict["SAVE PIE"])
+        keys.append(keysdict["SAVE_PIE"])
         count += 1
 
 
     # SHADING
 
-    if m3.M3_prefs().activate_pie_shading:
+    if m3.M3_prefs().activate_shading_pie:
         from .. ui.pies import PieShading
         from .. ui.operators.shading import ShadeSolid, ShadeMaterial, ShadeRendered, ShadeWire
         from .. ui.operators.toggle_grid_wire_outline import ToggleGrid, ToggleWireframe, ToggleOutline
@@ -292,43 +292,43 @@ def get_pie_menus():
         classes.extend([ToggleGrid, ToggleWireframe, ToggleOutline])
         classes.extend([ShadeSmooth, ShadeFlat])
         classes.extend([ColorizeMaterials, MatcapSwitch])
-        keymaps.append(keysdict["SHADING PIE"])
+        keys.append(keysdict["SHADING_PIE"])
         count += 1
 
     # VIEWS
 
-    if m3.M3_prefs().activate_pie_views:
+    if m3.M3_prefs().activate_views_pie:
         from .. ui.pies import PieViews
         from .. ui.operators.views_and_cams import ViewAxis, MakeCamActive, SmartViewCam
 
         classes.append(PieViews)
         classes.extend([ViewAxis, MakeCamActive, SmartViewCam])
-        keymaps.append(keysdict["VIEWS PIE"])
+        keys.append(keysdict["VIEWS_PIE"])
         count += 1
 
     # Align
-    if m3.M3_prefs().activate_pie_align:
+    if m3.M3_prefs().activate_align_pie:
         from .. ui.pies import PieAlign
         from .. ui.operators.align import AlignEditMesh
 
         classes.append(PieAlign)
         classes.append(AlignEditMesh)
-        keymaps.append(keysdict["ALIGN PIE"])
+        keys.append(keysdict["ALIGN_PIE"])
         count += 1
 
 
     # WORKSPACE
 
-    if m3.M3_prefs().activate_pie_workspace:
+    if m3.M3_prefs().activate_workspace_pie:
         from .. ui.pies import PieWorkspace
         from .. ui.operators.switch_workspace import SwitchWorkspace
 
         classes.append(PieWorkspace)
         classes.append(SwitchWorkspace)
-        keymaps.append(keysdict["WORKSPACE PIE"])
+        keys.append(keysdict["WORKSPACE_PIE"])
         count += 1
 
-    return classes, keymaps, count
+    return classes, keys, count
 
 
 # GET SPECIFIC TOOLS
@@ -417,5 +417,20 @@ def get_align(classes=[], keys=[], count=0):
         classes.append(Align)
         keys.append(keysdict["ALIGN"])
         count +=1
+
+    return classes, keys, count
+
+
+# GET SPECIFIC PIES
+
+def get_modes_pie(classes=[], keys=[], count=0):
+    if m3.M3_prefs().activate_modes_pie:
+        from .. ui.pies import PieModes
+        from .. ui.operators.modes import EditMode, VertexMode, EdgeMode, FaceMode
+
+        classes.append(PieModes)
+        classes.extend([VertexMode, EdgeMode, FaceMode, EditMode])
+        keys.append(keysdict["MODES_PIE"])
+        count += 1
 
     return classes, keys, count
