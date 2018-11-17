@@ -7,6 +7,7 @@ from .. utils import MACHIN3 as m3
 
 # TODO. the slide tool is a great candidate for testing custom drawnig in 2.8
 # TODO: i's also great candidate for testing an improved modal bmesh approach
+# TODO: redo shortest path in bmesh
 
 
 mergetypeitems = [("LAST", "Last", ""),

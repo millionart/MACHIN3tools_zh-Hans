@@ -2,8 +2,10 @@ import bpy
 from bpy.utils import register_class, unregister_class, previews
 import os
 from . import MACHIN3 as m3
-from .. keys import keys
+from .. keys import keys as keysdict
 
+
+# CLASS REGISTRATION
 
 def register_classes(classes):
     for c in classes:
@@ -16,6 +18,8 @@ def unregister_classes(classes):
     for c in classes:
         unregister_class(c)
 
+
+# KEYMAP REGISTRATION
 
 def register_keymaps(keys):
     wm = bpy.context.window_manager
@@ -59,9 +63,42 @@ def unregister_keymaps(keymaps):
         km.keymap_items.remove(kmi)
 
 
+def get_keymaps(keys):
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+
+    keymaps = []
+
+    for items in keys:
+        for item in items:
+            keymap = item.get("keymap")
+
+            if keymap:
+                km = kc.keymaps.get(keymap)
+
+                if km:
+                    idname = item.get("idname")
+
+                    for kmi in km.keymap_items:
+                        if kmi.idname == idname:
+                            properties = item.get("properties")
+
+                            if properties:
+                                if all([getattr(kmi.properties, name, None) == value for name, value in properties]):
+                                    keymaps.append((km, kmi))
+
+                            else:
+                                keymaps.append((km, kmi))
+
+    return keymaps
+
+
+# ICON REGISTRATION
+
+
 def register_icons():
-    icons = previews.new()
     path = os.path.join(m3.M3_prefs().path, "icons")
+    icons = previews.new()
 
     for i in sorted(os.listdir(path)):
         if i.endswith(".png"):
@@ -76,6 +113,8 @@ def register_icons():
 def unregister_icons(icons):
     previews.remove(icons)
 
+
+# GET CORE, TOOLS and PIES - CLASSES and KEYMAPS
 
 def get_core():
     from .. preferences import MACHIN3toolsPreferences
@@ -95,18 +134,12 @@ def get_core():
 
 def get_tools():
     classes = []
-    keymaps = []
+    keys = []
     count = 0
 
 
     # SMART VERT
-
-    if m3.M3_prefs().activate_smart_vert:
-        from .. operators.smart_vert import SmartVert
-
-        classes.append(SmartVert)
-        keymaps.append(keys["SMART VERT"])
-        count +=1
+    classes, keys, count = get_smart_vert(classes, keys, count)
 
 
     # SMART EDGE
@@ -115,7 +148,7 @@ def get_tools():
         from .. operators.smart_edge import SmartEdge
 
         classes.append(SmartEdge)
-        keymaps.append(keys["SMART EDGE"])
+        keys.append(keysdict["SMART EDGE"])
         count +=1
 
 
@@ -125,7 +158,7 @@ def get_tools():
         from .. operators.smart_face import SmartFace
 
         classes.append(SmartFace)
-        keymaps.append(keys["SMART FACE"])
+        keys.append(keysdict["SMART FACE"])
         count +=1
 
 
@@ -135,7 +168,7 @@ def get_tools():
         from .. operators.clean_up import CleanUp
 
         classes.append(CleanUp)
-        keymaps.append(keys["CLEAN UP"])
+        keys.append(keysdict["CLEAN UP"])
         count +=1
 
 
@@ -145,7 +178,7 @@ def get_tools():
         from .. operators.clipping_toggle import ClippingToggle
 
         classes.append(ClippingToggle)
-        keymaps.append(keys["CLIPPING TOGGLE"])
+        keys.append(keysdict["CLIPPING TOGGLE"])
         count +=1
 
 
@@ -155,7 +188,7 @@ def get_tools():
         from .. operators.focus import Focus
 
         classes.append(Focus)
-        keymaps.append(keys["FOCUS"])
+        keys.append(keysdict["FOCUS"])
         count +=1
 
 
@@ -165,7 +198,7 @@ def get_tools():
         from .. operators.mirror import Mirror
 
         classes.append(Mirror)
-        keymaps.append(keys["MIRROR"])
+        keys.append(keysdict["MIRROR"])
         count +=1
 
 
@@ -175,10 +208,10 @@ def get_tools():
         from .. operators.align import Align
 
         classes.append(Align)
-        keymaps.append(keys["ALIGN"])
+        keys.append(keysdict["ALIGN"])
         count +=1
 
-    return classes, keymaps, count
+    return classes, keys, count
 
 
 def get_pie_menus():
@@ -194,7 +227,7 @@ def get_pie_menus():
 
         classes.append(PieModes)
         classes.extend([VertexMode, EdgeMode, FaceMode, EditMode])
-        keymaps.append(keys["MODES PIE"])
+        keymaps.append(keysdict["MODES PIE"])
         count += 1
 
 
@@ -212,7 +245,7 @@ def get_pie_menus():
         classes.extend([New, Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext])
         classes.extend([AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource])
         classes.extend([Add, Move, Rename, Clear, Remove])
-        keymaps.append(keys["SAVE PIE"])
+        keymaps.append(keysdict["SAVE PIE"])
         count += 1
 
 
@@ -231,7 +264,7 @@ def get_pie_menus():
         classes.extend([ToggleGrid, ToggleWireframe, ToggleOutline])
         classes.extend([ShadeSmooth, ShadeFlat])
         classes.extend([ColorizeMaterials, MatcapSwitch])
-        keymaps.append(keys["SHADING PIE"])
+        keymaps.append(keysdict["SHADING PIE"])
         count += 1
 
     # VIEWS
@@ -242,7 +275,7 @@ def get_pie_menus():
 
         classes.append(PieViews)
         classes.extend([ViewAxis, MakeCamActive, SmartViewCam])
-        keymaps.append(keys["VIEWS PIE"])
+        keymaps.append(keysdict["VIEWS PIE"])
         count += 1
 
     # Align
@@ -252,7 +285,7 @@ def get_pie_menus():
 
         classes.append(PieAlign)
         classes.append(AlignEditMesh)
-        keymaps.append(keys["ALIGN PIE"])
+        keymaps.append(keysdict["ALIGN PIE"])
         count += 1
 
 
@@ -264,7 +297,20 @@ def get_pie_menus():
 
         classes.append(PieWorkspace)
         classes.append(SwitchWorkspace)
-        keymaps.append(keys["WORKSPACE PIE"])
+        keymaps.append(keysdict["WORKSPACE PIE"])
         count += 1
 
     return classes, keymaps, count
+
+
+# GET SPECIFIC TOOLS
+
+def get_smart_vert(classes=[], keys=[], count=0):
+    if m3.M3_prefs().activate_smart_vert:
+        from .. operators.smart_vert import SmartVert
+
+        classes.append(SmartVert)
+        keys.append(keysdict["SMART VERT"])
+        count +=1
+
+    return classes, keys, count

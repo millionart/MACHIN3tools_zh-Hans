@@ -42,26 +42,41 @@ class SmartEdge(bpy.types.Operator):
         elif mode == "EDGE":
             seledges = m3.get_selection("EDGE")
 
+            # LOOPCUT
+
+            if len(seledges) == 0:
+                bpy.ops.mesh.loopcut_slide('INVOKE_DEFAULT')
+
             # TURN EDGE
 
-            if 1 <= len(seledges) < 4:
+            elif 1 <= len(seledges) < 4:
                 bpy.ops.mesh.edge_rotate(use_ccw=False)
 
             # LOOP TO REGION
 
-            if len(seledges) >= 4:
+            elif len(seledges) >= 4:
                 bpy.ops.mesh.loop_to_region()
                 m3.set_mode("FACE")
 
-        # REGION TO LOOP
 
         elif mode == "FACE":
-            # NOTE, there seems to be an issue, where blender doesn't update the mode properly
-            # futhermore, I can't manually update if after region to loop either
-            # doing it before works however
-            m3.set_mode("EDGE")
+            selfaces = m3.get_selection("FACE")
 
-            bpy.ops.mesh.region_to_loop()
+            # LOOPCUT
+
+            if len(selfaces) == 0:
+                bpy.ops.mesh.loopcut_slide('INVOKE_DEFAULT')
+
+            # REGION TO LOOP
+
+            elif len(selfaces) >= 1:
+
+                # NOTE, there seems to be an issue, where blender doesn't update the mode properly
+                # futhermore, I can't manually update if after region to loop either
+                # doing it before works however
+                m3.set_mode("EDGE")
+
+                bpy.ops.mesh.region_to_loop()
 
         return {'FINISHED'}
 
