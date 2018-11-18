@@ -4,7 +4,7 @@ import os
 import rna_keymap_ui
 from . properties import AppendMatsCollection
 from . utils.ui import get_icon
-from . utils import registration as reg
+from . utils.registration import activate
 
 
 preferences_tabs = [("GENERAL", "General", ""),
@@ -43,36 +43,49 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     # RUNTIME TOOL ACTIVATION
 
     def update_activate_smart_vert(self, context):
-        reg.activate_tool(self, rna_name="MACHIN3_OT_smart_vert", register=self.activate_smart_vert, tool="smart_vert")
+        activate(self, register=self.activate_smart_vert, tool="smart_vert")
 
     def update_activate_smart_edge(self, context):
-        reg.activate_tool(self, rna_name="MACHIN3_OT_smart_edge", register=self.activate_smart_edge, tool="smart_edge")
+        activate(self, register=self.activate_smart_edge, tool="smart_edge")
 
     def update_activate_smart_face(self, context):
-        reg.activate_tool(self, rna_name="MACHIN3_OT_smart_face", register=self.activate_smart_face, tool="smart_face")
+        activate(self, register=self.activate_smart_face, tool="smart_face")
 
     def update_activate_clean_up(self, context):
-        reg.activate_tool(self, rna_name="MACHIN3_OT_clean_up", register=self.activate_clean_up, tool="clean_up")
+        activate(self, register=self.activate_clean_up, tool="clean_up")
 
     def update_activate_clipping_toggle(self, context):
-        reg.activate_tool(self, rna_name="MACHIN3_OT_clipping_toggle", register=self.activate_clipping_toggle, tool="clipping_toggle")
+        activate(self, register=self.activate_clipping_toggle, tool="clipping_toggle")
 
     def update_activate_focus(self, context):
-        reg.activate_tool(self, rna_name="MACHIN3_OT_focus", register=self.activate_focus, tool="focus")
+        activate(self, register=self.activate_focus, tool="focus")
 
     def update_activate_mirror(self, context):
-        reg.activate_tool(self, rna_name="MACHIN3_OT_mirror", register=self.activate_mirror, tool="mirror")
+        activate(self, register=self.activate_mirror, tool="mirror")
 
     def update_activate_align(self, context):
-        reg.activate_tool(self, rna_name="MACHIN3_OT_align", register=self.activate_align, tool="align")
+        activate(self, register=self.activate_align, tool="align")
 
 
     # RUNTIME PIE ACTIVATION
 
     def update_activate_modes_pie(self, context):
-        # reg.activate_tool(self, rna_name="MACHIN3_MT_modes_pie", register=self.activate_modes_pie, tool="modes_pie")
-        # see notes in registration.activate_tool()
-        pass
+        activate(self, register=self.activate_modes_pie, tool="modes_pie")
+
+    def update_activate_save_pie(self, context):
+        activate(self, register=self.activate_save_pie, tool="save_pie")
+
+    def update_activate_shading_pie(self, context):
+        activate(self, register=self.activate_shading_pie, tool="shading_pie")
+
+    def update_activate_views_pie(self, context):
+        activate(self, register=self.activate_views_pie, tool="views_pie")
+
+    def update_activate_align_pie(self, context):
+        activate(self, register=self.activate_align_pie, tool="align_pie")
+
+    def update_activate_workspace_pie(self, context):
+        activate(self, register=self.activate_workspace_pie, tool="workspace_pie")
 
     # PROPERTIES
 
@@ -103,11 +116,11 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     # MACHIN3pies
 
     activate_modes_pie: BoolProperty(name="Modes Pie", default=True, update=update_activate_modes_pie)
-    activate_save_pie: BoolProperty(name="Save Pie", default=True)
-    activate_shading_pie: BoolProperty(name="Shading Pie", default=True)
-    activate_views_pie: BoolProperty(name="Views Pie", default=True)
-    activate_align_pie: BoolProperty(name="Align Pie", default=True)
-    activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False)
+    activate_save_pie: BoolProperty(name="Save Pie", default=True, update=update_activate_save_pie)
+    activate_shading_pie: BoolProperty(name="Shading Pie", default=True, update=update_activate_shading_pie)
+    activate_views_pie: BoolProperty(name="Views Pie", default=True, update=update_activate_views_pie)
+    activate_align_pie: BoolProperty(name="Align Pie", default=True, update=update_activate_align_pie)
+    activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False, update=update_activate_workspace_pie)
 
 
     # hidden
@@ -221,6 +234,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         b = split.box()
         b.label(text="Settings")
 
+
         # PIE SAVE
 
         if getattr(bpy.types, "MACHIN3_MT_save_pie", False):
@@ -257,6 +271,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             row = column.row()
             row.prop(self, "appendmatsname")
             row.operator("machin3.add_appendmat", text="", icon_value=get_icon('plus'))
+            row = column.row()
+            row.separator()
+            row.label(text="Tip: Add a dash to the end of a name, to create a separator in the menu!", icon="INFO")
 
 
             # MATCAP SWITCH
@@ -298,34 +315,34 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def draw_about(self, box):
         pass
 
-    def draw_tool_keymaps(self, kc, keys, layout):
+    def draw_tool_keymaps(self, kc, keysdict, layout):
         drawn = False
 
-        for title in keys:
-            if "PIE" not in title:
-                items = keys.get(title)
+        for name in keysdict:
+            if "PIE" not in name:
+                keylist = keysdict.get(name)
 
-                if self.draw_keymap_items(kc, title, items, layout):
+                if self.draw_keymap_items(kc, name, keylist, layout):
                     drawn = True
 
         return drawn
 
-
-    def draw_pie_keymaps(self, kc, keys, layout):
+    def draw_pie_keymaps(self, kc, keysdict, layout):
         drawn = False
-        for title in keys:
-            if "PIE" in title:
-                items = keys.get(title)
 
-                if self.draw_keymap_items(kc, title, items, layout):
+        for name in keysdict:
+            if "PIE" in name:
+                keylist = keysdict.get(name)
+
+                if self.draw_keymap_items(kc, name, keylist, layout):
                     drawn = True
 
         return drawn
 
-
-    def draw_keymap_items(self, kc, title, items, layout):
+    def draw_keymap_items(self, kc, name, keylist, layout):
         drawn = False
-        for idx, item in enumerate(items):
+
+        for idx, item in enumerate(keylist):
             keymap = item.get("keymap")
 
             if keymap:
@@ -356,13 +373,13 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
                         box = layout.box()
 
                     # single kmi tools, get their label from the title
-                    if len(items) == 1:
-                        label = title.title().replace("_", " ")
+                    if len(keylist) == 1:
+                        label = name.title().replace("_", " ")
 
                     # multi kmi tools, get it from the label tag, while the title is printed once, before the first item
                     else:
                         if idx == 0:
-                            box.label(text=title.title().replace("_", " "))
+                            box.label(text=name.title().replace("_", " "))
 
                         label = item.get("label")
 

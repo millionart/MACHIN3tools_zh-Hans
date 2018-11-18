@@ -8,7 +8,7 @@ from .. classes import classes as classesdict
 
 # CLASS REGISTRATION
 
-def register_classes(classlists):
+def register_classes(classlists, debug=False):
     classes = []
 
     for classlist in classlists:
@@ -20,27 +20,54 @@ def register_classes(classlists):
             exec(classline)
 
     for c in classes:
+        if debug:
+            print("REGISTERING", c)
+
         register_class(c)
 
     return classes
 
 
-def unregister_classes(classes):
+def unregister_classes(classes, debug=False):
     for c in classes:
+        if debug:
+            print("UN-REGISTERING", c)
+
         unregister_class(c)
+
+
+def get_classes(classlist):
+    classes = []
+
+    for fr, imps in classlist:
+        if "operators" in fr:
+            type = "OT"
+        elif "pies" in fr or "menus" in fr:
+            type = "MT"
+
+        for imp in imps:
+            idname = imp[1]
+            rna_name = "MACHIN3_%s_%s" % (type, idname)
+
+            c = getattr(bpy.types, rna_name, False)
+
+            if c:
+                classes.append(c)
+
+    return classes
 
 
 # KEYMAP REGISTRATION
 
-def register_keymaps(keylist):
+def register_keymaps(keylists):
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
 
     keymaps = []
 
 
-    for items in keylist:
-        for item in items:
+    for keylist in keylists:
+        for item in keylist:
             keymap = item.get("keymap")
             space_type = item.get("space_type", "EMPTY")
 
@@ -126,87 +153,92 @@ def unregister_icons(icons):
 
 # RUNTIME TOOL (DE)ACTIVATION
 
-def activate_tool(self, rna_name, register, tool):
-    c = getattr(bpy.types, rna_name, False)
+def activate(self, register, tool):
+    debug=True
+    debug=False
 
-    if c:
-        # UNREGISTER
+    name = tool.replace("_", " ").title()
 
-        # NOTE: unregistering pies or muli class pies, is incomplete, because we cant just import the classes to unregister them
-        # ####: attmepting to do this via the get_some_pie() function resuls in an empty class list, because the classes are importd already
-        # ####: to unrgister them you need to pick them from bpy.types as you do with the c class
-        # ####: unfortunately it can be quite a lot of classes and I don't want to pass all their rna names in as strings, hmm
-        # ####: since unregistering is incomplete, re-registering will throw an excpetion.
-        # ####: it could be done by mirroring the keymap approach, where all the rna names are loaded in from a json
+    # REGISTER
 
-        if not register:
+    if register:
+        classlist, keylist, _ = eval("get_%s()" % (tool))
 
-            # KEYMAPS
+        # CLASSES
 
-            keylist = keysdict[tool.upper()]
-            keymaps = get_keymaps(keylist)
-
-            # update keymaps registered in __init__.py at startup, necessary for addon unregistering
-            from .. import keymaps as startup_keymaps
-            for k in keymaps:
-                if k in startup_keymaps:
-                    startup_keymaps.remove(k)
-
-            # unregister tool keymaps
-            unregister_keymaps(keymaps)
+        # register tool/pie class
+        classes = register_classes(classlist, debug=debug)
 
 
-            # CLASSES
+        # update classes registered in __init__.py at startup, necessary for addon unregistering
+        from .. import classes as startup_classes
 
-            # update classes registered in __init__.py at startup, necessary for addon unregistering
-            from .. import classes as startup_classes
+        for c in classes:
+            if c not in startup_classes:
+                startup_classes.append(c)
+
+        # KEYMAPS
+
+        # register tool keymaps
+        keymaps = register_keymaps(keylist)
+
+        # update keymaps registered in __init__.py at startup, necessary for addon unregistering
+        from .. import keymaps as startup_keymaps
+        for k in keymaps:
+            if k not in startup_keymaps:
+                startup_keymaps.append(k)
+
+        if classes:
+            print("Registered MACHIN3tools' %s" % (name))
+
+        classlist.clear()
+        keylist.clear()
+
+
+    # UN-REGISTER
+
+    else:
+        # KEYMAPS
+
+        keylist = keysdict[tool.upper()]
+        keymaps = get_keymaps(keylist)
+
+        # update keymaps registered in __init__.py at startup, necessary for addon unregistering
+        from .. import keymaps as startup_keymaps
+        for k in keymaps:
+            if k in startup_keymaps:
+                startup_keymaps.remove(k)
+
+        # unregister tool keymaps
+        unregister_keymaps(keymaps)
+
+
+        # CLASSES
+
+        classlist = classesdict[tool.upper()]
+
+
+        classes = get_classes(classlist)
+
+        # update classes registered in __init__.py at startup, necessary for addon unregistering
+        from .. import classes as startup_classes
+
+        for c in classes:
             if c in startup_classes:
                 startup_classes.remove(c)
 
-            # unregister tool class
-            unregister_classes([c])
-            print("Unregistered %s" % (c.bl_idname))
+        # unregister tool classes
 
-    else:
-        # REGISTER
+        unregister_classes(classes, debug=debug)
 
-        if register:
-            classes, keys, _ = eval("get_%s()" % (tool))
-
-            # CLASSES
-
-            # register tool class
-            register_classes(classes)
-
-            # update classes registered in __init__.py at startup, necessary for addon unregistering
-            from .. import classes as startup_classes
-            if c not in startup_classes:
-                startup_classes.extend(classes)
+        if classes:
+            print("Unregistered MACHIN3tools' %s" % (name))
 
 
-            # KEYMAPS
-
-            # register tool keymaps
-            keymaps = register_keymaps(keys)
-
-            # update keymaps registered in __init__.py at startup, necessary for addon unregistering
-            from .. import keymaps as startup_keymaps
-            for k in keymaps:
-                if k not in startup_keymaps:
-                    startup_keymaps.append(k)
-
-
-            # print("Registered %s" % (classes[0].bl_idname))
-            classes.clear()
-            keys.clear()
-
-
-
-# GET CORE, TOOLS and PIES - CLASSES and KEYMAPS
+# GET CORE, TOOLS and PIES - CLASSES and KEYMAPS - for startup registration
 
 def get_core():
     return [classesdict["CORE"]]
-
 
 
 def get_tools():
