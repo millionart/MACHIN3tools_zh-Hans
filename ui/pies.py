@@ -216,7 +216,7 @@ class PieSave(Menu):
             if appendmatspath:
                 row = col.split(factor=0.8)
                 row.scale_y = 1.5
-                row.operator("wm.call_menu", text="Material", icon_value=get_icon('material')).name = "VIEW3D_MT_MACHIN3_append_materials"
+                row.operator("wm.call_menu", text="Material", icon_value=get_icon('material')).name = "MACHIN3_MT_append_materials"
                 row.operator("machin3.load_materials_source", text="", icon_value=get_icon('open_material'))
 
 

@@ -3,11 +3,22 @@ from bpy.utils import register_class, unregister_class, previews
 import os
 from . import MACHIN3 as m3
 from .. keys import keys as keysdict
+from .. classes import classes as classesdict
 
 
 # CLASS REGISTRATION
 
-def register_classes(classes):
+def register_classes(classlists):
+    classes = []
+
+    for classlist in classlists:
+        for fr, imps in classlist:
+            impline = "from ..%s import %s" % (fr, ", ".join([i[0] for i in imps]))
+            classline = "classes.extend([%s])" % (", ".join([i[0] for i in imps]))
+
+            exec(impline)
+            exec(classline)
+
     for c in classes:
         register_class(c)
 
@@ -21,14 +32,14 @@ def unregister_classes(classes):
 
 # KEYMAP REGISTRATION
 
-def register_keymaps(keys):
+def register_keymaps(keylist):
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
 
     keymaps = []
 
 
-    for items in keys:
+    for items in keylist:
         for item in items:
             keymap = item.get("keymap")
             space_type = item.get("space_type", "EMPTY")
@@ -63,32 +74,31 @@ def unregister_keymaps(keymaps):
         km.keymap_items.remove(kmi)
 
 
-def get_keymaps(keys):
+def get_keymaps(keylist):
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
 
     keymaps = []
 
-    for tool in keys:
-        for item in tool:
-            keymap = tool.get("keymap")
+    for item in keylist:
+        keymap = item.get("keymap")
 
-            if keymap:
-                km = kc.keymaps.get(keymap)
+        if keymap:
+            km = kc.keymaps.get(keymap)
 
-                if km:
-                    idname = item.get("idname")
+            if km:
+                idname = item.get("idname")
 
-                    for kmi in km.keymap_items:
-                        if kmi.idname == idname:
-                            properties = item.get("properties")
+                for kmi in km.keymap_items:
+                    if kmi.idname == idname:
+                        properties = item.get("properties")
 
-                            if properties:
-                                if all([getattr(kmi.properties, name, None) == value for name, value in properties]):
-                                    keymaps.append((km, kmi))
-
-                            else:
+                        if properties:
+                            if all([getattr(kmi.properties, name, None) == value for name, value in properties]):
                                 keymaps.append((km, kmi))
+
+                        else:
+                            keymaps.append((km, kmi))
 
     return keymaps
 
@@ -133,8 +143,8 @@ def activate_tool(self, rna_name, register, tool):
 
             # KEYMAPS
 
-            keys = [keysdict[tool.upper()]]
-            keymaps = get_keymaps(keys)
+            keylist = keysdict[tool.upper()]
+            keymaps = get_keymaps(keylist)
 
             # update keymaps registered in __init__.py at startup, necessary for addon unregistering
             from .. import keymaps as startup_keymaps
@@ -186,251 +196,231 @@ def activate_tool(self, rna_name, register, tool):
                     startup_keymaps.append(k)
 
 
-            print("Registered %s" % (classes[0].bl_idname))
+            # print("Registered %s" % (classes[0].bl_idname))
             classes.clear()
             keys.clear()
+
 
 
 # GET CORE, TOOLS and PIES - CLASSES and KEYMAPS
 
 def get_core():
-    from .. preferences import MACHIN3toolsPreferences
-    from .. properties import AppendMatsCollection, M3SceneProperties, HistoryEpochCollection, HistoryObjectsCollection, HistoryUnmirroredCollection
-    from .. ui.UILists import AppendMatsUIList
+    return [classesdict["CORE"]]
 
-    classes = []
-
-    # PREFERENCES
-    classes.extend([AppendMatsUIList, AppendMatsCollection, MACHIN3toolsPreferences])
-
-    # PROPERTIES
-    classes.extend([HistoryObjectsCollection, HistoryUnmirroredCollection, HistoryEpochCollection, M3SceneProperties])
-
-    return classes
 
 
 def get_tools():
-    classes = []
-    keys = []
+    classlists = []
+    keylists = []
     count = 0
 
 
     # SMART VERT
-    classes, keys, count = get_smart_vert(classes, keys, count)
+    classlists, keylists, count = get_smart_vert(classlists, keylists, count)
 
 
     # SMART EDGE
-    classes, keys, count = get_smart_edge(classes, keys, count)
+    classlists, keylists, count = get_smart_edge(classlists, keylists, count)
 
 
     # SMART FACE
-    classes, keys, count = get_smart_face(classes, keys, count)
+    classlists, keylists, count = get_smart_face(classlists, keylists, count)
 
 
     # CLEAN UP
-    classes, keys, count = get_clean_up(classes, keys, count)
+    classlists, keylists, count = get_clean_up(classlists, keylists, count)
 
 
     # CLIPPING TOGGLE
-    classes, keys, count = get_clipping_toggle(classes, keys, count)
+    classlists, keylists, count = get_clipping_toggle(classlists, keylists, count)
 
 
     # FOCUS
-    classes, keys, count = get_focus(classes, keys, count)
+    classlists, keylists, count = get_focus(classlists, keylists, count)
 
 
     # MIRROR
-    classes, keys, count = get_mirror(classes, keys, count)
+    classlists, keylists, count = get_mirror(classlists, keylists, count)
 
 
     # ALIGN
-    classes, keys, count = get_align(classes, keys, count)
+    classlists, keylists, count = get_align(classlists, keylists, count)
 
-    return classes, keys, count
+    return classlists, keylists, count
 
 
 def get_pie_menus():
-    classes = []
-    keys = []
+    classlists = []
+    keylists = []
     count = 0
 
     # MODES
 
-    classes, keys, count = get_modes_pie(classes, keys, count)
+    classlists, keylists, count = get_modes_pie(classlists, keylists, count)
 
 
     # SAVE
 
-    if m3.M3_prefs().activate_save_pie:
-        from .. ui.pies import PieSave
-        from .. ui.menus import MenuAppendMaterials
-        from .. ui.operators.save import New, Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext
-        from .. ui.operators.save import AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource
-        from .. ui.operators.appendmats import Add, Move, Rename, Clear, Remove
-
-        classes.append(PieSave)
-        classes.append(MenuAppendMaterials)
-        classes.extend([New, Save, SaveIncremental, LoadMostRecent, LoadPrevious, LoadNext])
-        classes.extend([AppendWorld, AppendMaterial, LoadWorldSource, LoadMaterialsSource])
-        classes.extend([Add, Move, Rename, Clear, Remove])
-        keys.append(keysdict["SAVE_PIE"])
-        count += 1
+    classlists, keylists, count = get_save_pie(classlists, keylists, count)
 
 
     # SHADING
 
-    if m3.M3_prefs().activate_shading_pie:
-        from .. ui.pies import PieShading
-        from .. ui.operators.shading import ShadeSolid, ShadeMaterial, ShadeRendered, ShadeWire
-        from .. ui.operators.toggle_grid_wire_outline import ToggleGrid, ToggleWireframe, ToggleOutline
-        from .. ui.operators.shade_smooth_flat import ShadeSmooth, ShadeFlat
-        from .. ui.operators.colorize_materials import ColorizeMaterials
-        from .. ui.operators.matcap_switch import MatcapSwitch
+    classlists, keylists, count = get_shading_pie(classlists, keylists, count)
 
-        classes.append(PieShading)
-        classes.extend([ShadeSolid, ShadeMaterial, ShadeRendered, ShadeWire])
-        classes.extend([ToggleGrid, ToggleWireframe, ToggleOutline])
-        classes.extend([ShadeSmooth, ShadeFlat])
-        classes.extend([ColorizeMaterials, MatcapSwitch])
-        keys.append(keysdict["SHADING_PIE"])
-        count += 1
 
     # VIEWS
 
-    if m3.M3_prefs().activate_views_pie:
-        from .. ui.pies import PieViews
-        from .. ui.operators.views_and_cams import ViewAxis, MakeCamActive, SmartViewCam
+    classlists, keylists, count = get_views_pie(classlists, keylists, count)
 
-        classes.append(PieViews)
-        classes.extend([ViewAxis, MakeCamActive, SmartViewCam])
-        keys.append(keysdict["VIEWS_PIE"])
-        count += 1
 
-    # Align
-    if m3.M3_prefs().activate_align_pie:
-        from .. ui.pies import PieAlign
-        from .. ui.operators.align import AlignEditMesh
+    # ALIGN
 
-        classes.append(PieAlign)
-        classes.append(AlignEditMesh)
-        keys.append(keysdict["ALIGN_PIE"])
-        count += 1
+    classlists, keylists, count = get_align_pie(classlists, keylists, count)
 
 
     # WORKSPACE
 
-    if m3.M3_prefs().activate_workspace_pie:
-        from .. ui.pies import PieWorkspace
-        from .. ui.operators.switch_workspace import SwitchWorkspace
+    classlists, keylists, count = get_workspace_pie(classlists, keylists, count)
 
-        classes.append(PieWorkspace)
-        classes.append(SwitchWorkspace)
-        keys.append(keysdict["WORKSPACE_PIE"])
-        count += 1
-
-    return classes, keys, count
+    return classlists, keylists, count
 
 
 # GET SPECIFIC TOOLS
 
-def get_smart_vert(classes=[], keys=[], count=0):
+def get_smart_vert(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_smart_vert:
         from .. operators.smart_vert import SmartVert
 
-        classes.append(SmartVert)
-        keys.append(keysdict["SMART_VERT"])
+        classlists.append(classesdict["SMART_VERT"])
+        keylists.append(keysdict["SMART_VERT"])
         count +=1
 
-    return classes, keys, count
+    return classlists, keylists, count
 
 
-def get_smart_edge(classes=[], keys=[], count=0):
+def get_smart_edge(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_smart_edge:
         from .. operators.smart_edge import SmartEdge
 
-        classes.append(SmartEdge)
-        keys.append(keysdict["SMART_EDGE"])
+        classlists.append(classesdict["SMART_EDGE"])
+        keylists.append(keysdict["SMART_EDGE"])
         count +=1
 
-    return classes, keys, count
+    return classlists, keylists, count
 
 
-def get_smart_face(classes=[], keys=[], count=0):
+def get_smart_face(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_smart_face:
-        from .. operators.smart_face import SmartFace
-
-        classes.append(SmartFace)
-        keys.append(keysdict["SMART_FACE"])
+        classlists.append(classesdict["SMART_FACE"])
+        keylists.append(keysdict["SMART_FACE"])
         count +=1
 
-    return classes, keys, count
+    return classlists, keylists, count
 
 
-def get_clean_up(classes=[], keys=[], count=0):
+def get_clean_up(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_clean_up:
-        from .. operators.clean_up import CleanUp
-
-        classes.append(CleanUp)
-        keys.append(keysdict["CLEAN_UP"])
+        classlists.append(classesdict["CLEAN_UP"])
+        keylists.append(keysdict["CLEAN_UP"])
         count +=1
 
-    return classes, keys, count
+    return classlists, keylists, count
 
 
-def get_clipping_toggle(classes=[], keys=[], count=0):
+def get_clipping_toggle(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_clipping_toggle:
-        from .. operators.clipping_toggle import ClippingToggle
-
-        classes.append(ClippingToggle)
-        keys.append(keysdict["CLIPPING_TOGGLE"])
+        classlists.append(classesdict["CLIPPING_TOGGLE"])
+        keylists.append(keysdict["CLIPPING_TOGGLE"])
         count +=1
 
-    return classes, keys, count
+    return classlists, keylists, count
 
 
-def get_focus(classes=[], keys=[], count=0):
+def get_focus(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_focus:
-        from .. operators.focus import Focus
-
-        classes.append(Focus)
-        keys.append(keysdict["FOCUS"])
+        classlists.append(classesdict["FOCUS"])
+        keylists.append(keysdict["FOCUS"])
         count +=1
 
-    return classes, keys, count
+    return classlists, keylists, count
 
 
-def get_mirror(classes=[], keys=[], count=0):
+def get_mirror(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_mirror:
-        from .. operators.mirror import Mirror
-
-        classes.append(Mirror)
-        keys.append(keysdict["MIRROR"])
+        classlists.append(classesdict["MIRROR"])
+        keylists.append(keysdict["MIRROR"])
         count +=1
 
-    return classes, keys, count
+    return classlists, keylists, count
 
 
-def get_align(classes=[], keys=[], count=0):
+def get_align(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_align:
-        from .. operators.align import Align
-
-        classes.append(Align)
-        keys.append(keysdict["ALIGN"])
+        classlists.append(classesdict["ALIGN"])
+        keylists.append(keysdict["ALIGN"])
         count +=1
 
-    return classes, keys, count
+    return classlists, keylists, count
 
 
 # GET SPECIFIC PIES
 
-def get_modes_pie(classes=[], keys=[], count=0):
+def get_modes_pie(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_modes_pie:
-        from .. ui.pies import PieModes
-        from .. ui.operators.modes import EditMode, VertexMode, EdgeMode, FaceMode
-
-        classes.append(PieModes)
-        classes.extend([VertexMode, EdgeMode, FaceMode, EditMode])
-        keys.append(keysdict["MODES_PIE"])
+        classlists.append(classesdict["MODES_PIE"])
+        keylists.append(keysdict["MODES_PIE"])
         count += 1
 
-    return classes, keys, count
+    return classlists, keylists, count
+
+
+def get_save_pie(classlists=[], keylists=[], count=0):
+    if m3.M3_prefs().activate_save_pie:
+        classlists.append(classesdict["SAVE_PIE"])
+        keylists.append(keysdict["SAVE_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_shading_pie(classlists=[], keylists=[], count=0):
+    if m3.M3_prefs().activate_shading_pie:
+        classlists.append(classesdict["SHADING_PIE"])
+        keylists.append(keysdict["SHADING_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_views_pie(classlists=[], keylists=[], count=0):
+    if m3.M3_prefs().activate_views_pie:
+        # from .. ui.pies import PieViews
+        # from .. ui.operators.views_and_cams import ViewAxis, MakeCamActive, SmartViewCam
+
+        # classes.append(PieViews)
+        # classes.extend([ViewAxis, MakeCamActive, SmartViewCam])
+
+        classlists.append(classesdict["VIEWS_PIE"])
+        keylists.append(keysdict["VIEWS_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_align_pie(classlists=[], keylists=[], count=0):
+    if m3.M3_prefs().activate_align_pie:
+        classlists.append(classesdict["ALIGN_PIE"])
+        keylists.append(keysdict["ALIGN_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_workspace_pie(classlists=[], keylists=[], count=0):
+    if m3.M3_prefs().activate_workspace_pie:
+        classlists.append(classesdict["WORKSPACE_PIE"])
+        keylists.append(keysdict["WORKSPACE_PIE"])
+        count += 1
+
+    return classlists, keylists, count

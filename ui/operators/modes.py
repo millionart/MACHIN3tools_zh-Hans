@@ -5,7 +5,7 @@ from ... utils import MACHIN3 as m3
 class EditMode(bpy.types.Operator):
     bl_idname = "machin3.edit_mode"
     bl_label = "Edit Mode"
-    bl_options = {'REGISTER'}
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
 
@@ -26,7 +26,7 @@ class VertexMode(bpy.types.Operator):
     bl_idname = "machin3.vertex_mode"
     bl_label = "Vertex Mode"
     bl_description = "Vertex Select\nCTRL + Click: Expand Selection"
-    bl_options = {'REGISTER'}
+    bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
         if bpy.context.object.mode != "EDIT":
@@ -43,7 +43,7 @@ class EdgeMode(bpy.types.Operator):
     bl_idname = "machin3.edge_mode"
     bl_label = "Edge Mode"
     bl_description = "Edge Select\nCTRL + Click: Expand Selection"
-    bl_options = {'REGISTER'}
+    bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
         if bpy.context.object.mode != "EDIT":
@@ -60,7 +60,7 @@ class FaceMode(bpy.types.Operator):
     bl_idname = "machin3.face_mode"
     bl_label = "Face Mode"
     bl_description = "Face Select\nCTRL + Click: Expand Selection"
-    bl_options = {'REGISTER'}
+    bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
         if bpy.context.object.mode != "EDIT":

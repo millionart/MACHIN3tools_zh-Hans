@@ -18,7 +18,7 @@ typeitems = [("MIN", "Min", ""),
 
 class AlignEditMesh(bpy.types.Operator):
     bl_idname = "machin3.align_editmesh"
-    bl_label = "MACHIN3: Align"
+    bl_label = "MACHIN3: Align (Edit Mesh)"
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Default: Local Align\nAlt + Click: Global Align."
 

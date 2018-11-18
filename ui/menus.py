@@ -77,7 +77,7 @@ class VIEW3D_MT_object_machin3tools(bpy.types.Menu):
 
 
 class MenuAppendMaterials(bpy.types.Menu):
-    bl_idname = "VIEW3D_MT_MACHIN3_append_materials"
+    bl_idname = "MACHIN3_MT_append_materials"
     bl_label = "Append Materials"
 
     def draw(self, context):

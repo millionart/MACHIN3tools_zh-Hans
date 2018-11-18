@@ -50,11 +50,11 @@ def register():
 
     # TOOLS, PIE MENUS, KEYMAPS
 
-    tool_classes, tool_keys, toolcount = get_tools()
-    pie_classes, pie_keys, piecount = get_pie_menus()
+    tool_classlists, tool_keylists, toolcount = get_tools()
+    pie_classlists, pie_keylists, piecount = get_pie_menus()
 
-    classes = register_classes(tool_classes + pie_classes) + core_classes
-    keymaps = register_keymaps(tool_keys + pie_keys)
+    classes = register_classes(tool_classlists + pie_classlists) + core_classes
+    keymaps = register_keymaps(tool_keylists + pie_keylists)
 
 
     # ICONS
