@@ -92,8 +92,17 @@ def set_mode(string, extend=False, expand=False):
 
 def change_context(string):
     area = bpy.context.area
+
+    print("area:", area)
+
     old_type = area.type
+
+    print("old type before:", old_type)
+
     area.type = string
+
+    print("old type after:", old_type)
+
     return old_type
 
 

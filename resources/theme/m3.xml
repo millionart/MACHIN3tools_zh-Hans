@@ -296,7 +296,7 @@
       </ThemeUserInterface>
     </user_interface>
     <view_3d>
-      <ThemeView3D grid="#4c4c4cff"
+      <ThemeView3D grid="#36363aff"
                    clipping_border_3d="#313131ff"
                    wire="#434446"
                    wire_edit="#1d1d1d"

@@ -12,7 +12,7 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
            "FOCUS": [("operators.focus", [("Focus", "focus")])],
            "MIRROR": [("operators.mirror", [("Mirror", "mirror")])],
            "ALIGN": [("operators.align", [("Align", "align")])],
-           "CUSTOMIZE": [("operators.customize", [("Customize", "customize")])],
+           "CUSTOMIZE": [("operators.customize", [("Customize", "customize"), ("RestoreKeymaps", "restore_keymaps")])],
 
            "MODES_PIE": [("ui.pies", [("PieModes", "modes_pie")]),
                          ("ui.operators.modes", [("EditMode", "edit_mode"), ("VertexMode", "vertex_mode"), ("EdgeMode", "edge_mode"), ("FaceMode", "face_mode")])],
