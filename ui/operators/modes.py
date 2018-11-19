@@ -8,9 +8,13 @@ class EditMode(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
+        viewprefs = context.user_preferences.view
 
         if context.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="EDIT")
+
+            viewprefs.use_rotate_around_active = False
+
 
 
         elif context.mode == "EDIT_MESH":
@@ -18,6 +22,9 @@ class EditMode(bpy.types.Operator):
             shading.show_xray = False
 
             bpy.ops.object.mode_set(mode="OBJECT")
+
+            if m3.M3_prefs().obj_mode_rotate_around_active:
+                viewprefs.use_rotate_around_active = True
 
         return {'FINISHED'}
 
@@ -36,6 +43,10 @@ class VertexMode(bpy.types.Operator):
 
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='VERT')
 
+
+        if m3.M3_prefs().obj_mode_rotate_around_active:
+            context.user_preferences.view.use_rotate_around_active = False
+
         return {'FINISHED'}
 
 
@@ -53,6 +64,10 @@ class EdgeMode(bpy.types.Operator):
 
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='EDGE')
 
+
+        if m3.M3_prefs().obj_mode_rotate_around_active:
+            context.user_preferences.view.use_rotate_around_active = False
+
         return {'FINISHED'}
 
 
@@ -69,5 +84,9 @@ class FaceMode(bpy.types.Operator):
         expand = True if event.ctrl else False
 
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='FACE')
+
+
+        if m3.M3_prefs().obj_mode_rotate_around_active:
+            context.user_preferences.view.use_rotate_around_active = False
 
         return {'FINISHED'}

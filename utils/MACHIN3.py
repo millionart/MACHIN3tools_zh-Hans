@@ -174,6 +174,12 @@ def open_folder(pathstring):
         os.system('xdg-open "%s" %s &' % (pathstring, "> /dev/null 2> /dev/null"))  # > sends stdout,  2> sends stderr
 
 
+def makedir(pathstring):
+    if not os.path.exists(pathstring):
+        os.makedirs(pathstring)
+    return pathstring
+
+
 def addon_prefs(addonstring):
     return bpy.context.user_preferences.addons[addonstring].preferences
 

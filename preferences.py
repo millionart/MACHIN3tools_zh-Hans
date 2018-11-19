@@ -100,6 +100,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     switchmatcap1: StringProperty(name="Matcap 1", update=update_switchmatcap1)
     switchmatcap2: StringProperty(name="Matcap 2", update=update_switchmatcap2)
 
+    obj_mode_rotate_around_active: BoolProperty(name="Rotate Around Selection, but only in object mode", default=True)
+
 
     # MACHIN3tools
 
@@ -125,8 +127,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     # hidden
 
-    avoid_update: BoolProperty(default=False)
     tabs: EnumProperty(name="Tabs", items=preferences_tabs, default="GENERAL")
+    avoid_update: BoolProperty(default=False)
 
 
     def draw(self, context):
@@ -235,11 +237,23 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         b.label(text="Settings")
 
 
-        # PIE SAVE
+        # MODES PIE
+
+        if getattr(bpy.types, "MACHIN3_MT_modes_pie", False):
+            bb = b.box()
+            bb.label(text="Modes Pie")
+
+            column = bb.column()
+
+            column.prop(self, "obj_mode_rotate_around_active")
+
+
+
+        # SAVE PIE
 
         if getattr(bpy.types, "MACHIN3_MT_save_pie", False):
             bb = b.box()
-            bb.label(text="Append World and Materials")
+            bb.label(text="Save Pie: Append World and Materials")
 
             column = bb.column()
 
@@ -276,10 +290,12 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             row.label(text="Tip: Add a dash to the end of a name, to create a separator in the menu!", icon="INFO")
 
 
-            # MATCAP SWITCH
+        # SHADING PIE
+
+        if getattr(bpy.types, "MACHIN3_MT_shading_pie", False):
 
             bb = b.box()
-            bb.label(text="Matcap Switch")
+            bb.label(text="Shading Pie: Matcap Switch")
 
             column = bb.column()
 
@@ -288,12 +304,17 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             row.prop(self, "switchmatcap1")
             row.prop(self, "switchmatcap2")
 
-        else:
-            b.label(text="Only the Save Pie Menu currently has settings.")
+
+        # NO SETTINGS
+
+        if not any([getattr(bpy.types, "MACHIN3_" + name, False) for name in ["MT_modes_pie", "MT_save_pie", "MT_shading_pie"]]):
+            b.label(text="No tools or pie menus with settings have been activated.")
+
 
     def draw_keymaps(self, box):
         wm = bpy.context.window_manager
-        kc = wm.keyconfigs.addon
+        # kc = wm.keyconfigs.addon
+        kc = wm.keyconfigs.user
 
         from . keys import keys
 
@@ -387,7 +408,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
                     row.label(text=label)
 
                     # layout.context_pointer_set("keymap", km)
-                    rna_keymap_ui.draw_kmi([], kc, km, kmi, row, 0)
+                    rna_keymap_ui.draw_kmi(["ADDON", "USER", "DEFAULT"], kc, km, kmi, row, 0)
 
                     drawn = True
         return drawn

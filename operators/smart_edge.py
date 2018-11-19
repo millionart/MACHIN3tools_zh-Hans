@@ -47,6 +47,7 @@ class SmartEdge(bpy.types.Operator):
             if len(seledges) == 0:
                 bpy.ops.mesh.loopcut_slide('INVOKE_DEFAULT')
 
+
             # TURN EDGE
 
             elif 1 <= len(seledges) < 4:

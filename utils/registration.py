@@ -62,6 +62,7 @@ def get_classes(classlist):
 def register_keymaps(keylists):
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
+    # kc = wm.keyconfigs.user
 
     keymaps = []
 
@@ -104,6 +105,7 @@ def unregister_keymaps(keymaps):
 def get_keymaps(keylist):
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
+    # kc = wm.keyconfigs.user
 
     keymaps = []
 
@@ -278,6 +280,10 @@ def get_tools():
     # ALIGN
     classlists, keylists, count = get_align(classlists, keylists, count)
 
+
+    # CUSTOMIZE
+    classlists, keylists, count = get_customize(classlists, keylists, count)
+
     return classlists, keylists, count
 
 
@@ -392,6 +398,13 @@ def get_align(classlists=[], keylists=[], count=0):
         classlists.append(classesdict["ALIGN"])
         keylists.append(keysdict["ALIGN"])
         count +=1
+
+    return classlists, keylists, count
+
+
+def get_customize(classlists=[], keylists=[], count=0):
+    classlists.append(classesdict["CUSTOMIZE"])
+    count += 1
 
     return classlists, keylists, count
 

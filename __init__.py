@@ -50,8 +50,8 @@ def register():
 
     # TOOLS, PIE MENUS, KEYMAPS
 
-    tool_classlists, tool_keylists, toolcount = get_tools()
-    pie_classlists, pie_keylists, piecount = get_pie_menus()
+    tool_classlists, tool_keylists, tool_count = get_tools()
+    pie_classlists, pie_keylists, pie_count = get_pie_menus()
 
     classes = register_classes(tool_classlists + pie_classlists) + core_classes
     keymaps = register_keymaps(tool_keylists + pie_keylists)
@@ -61,7 +61,7 @@ def register():
 
     icons = register_icons()
 
-    print("Registered %s %s with %d tools and %d pie menus" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), toolcount, piecount))
+    print("Registered %s %s with %d tools and %d pie menus" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, pie_count))
 
 
 def unregister():

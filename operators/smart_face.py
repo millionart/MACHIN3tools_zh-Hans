@@ -156,7 +156,11 @@ class SmartFace(bpy.types.Operator):
                 v2_other = v2_edges[0].other_vert(v2)
 
                 # create new face
-                f = bm.faces.new([v1, v1_other, v2_other, v2])
+                if v1_other == v2_other:
+                    f = bm.faces.new([v1, v1_other, v2])
+                else:
+                    f = bm.faces.new([v1, v1_other, v2_other, v2])
+
                 f.smooth = any([f.smooth for f in faces])
 
                 # recalc the face normal
