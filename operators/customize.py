@@ -226,7 +226,7 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "mesh.select_linked_pick":
                     kmi.type = "LEFTMOUSE"
                     kmi.value = "DOUBLE_CLICK"
-                    kmi.properties.delimit = {"SHARP"}
+                    # kmi.properties.delimit = {"SHARP"}  # you can't set this as default and still remember the ops previous parameers, if you run it a second time
 
                     if kmi.properties.deselect:
                         kmi.alt = True

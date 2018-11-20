@@ -4,8 +4,9 @@ from bpy.types import Menu
 from .. utils import MACHIN3 as m3
 from .. utils.ui import get_icon
 
-# TODO: edit mesh align pie
-# TODO: snapping  pie
+# TODO: snappingcursoe pie
+# TODO: actual snapping pie
+# TODO: orientation/pivot pie
 
 
 class PieModes(Menu):
@@ -299,9 +300,9 @@ class PieShading(Menu):
         row.prop(view.shading, "object_outline_color", text="")
 
         row = col.split(factor=0.45)
-        row.operator("machin3.toggle_cavity", text="(C) Cavity Toggle")
+        row.operator("machin3.toggle_cavity", text="Cavity Toggle")
         r = row.row(align=True)
-        r.prop(view.shading, "cavity_ridge_factor", text="")
+        # r.prop(view.shading, "cavity_ridge_factor", text="")
         r.prop(view.shading, "cavity_valley_factor", text="")
         r.prop(context.scene.display, "matcap_ssao_distance", text="")
 
