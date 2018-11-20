@@ -272,7 +272,7 @@ class LoadPrevious(bpy.types.Operator):
     bl_idname = "machin3.load_previous"
     bl_label = "Load Previous"
     bl_description = "Load Previous Blend File in Current Folder"
-    bl_options = {'REGISTER'}
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -280,6 +280,9 @@ class LoadPrevious(bpy.types.Operator):
 
     def execute(self, context):
         filepath = bpy.data.filepath
+
+
+        # """
 
         if filepath:
             currentpath = os.path.dirname(filepath)
@@ -294,11 +297,26 @@ class LoadPrevious(bpy.types.Operator):
             if previousidx >= 0:
                 previousblend = blendfiles[previousidx]
 
-                print("Loading blend file %d/%d: %s" % (previousidx + 1, len(blendfiles), previousblend))
 
-                bpy.ops.wm.open_mainfile(filepath=os.path.join(currentpath, previousblend), load_ui=True)
+                loadpath = os.path.join(currentpath, previousblend)
+
+                # add the path to the recent files list, for some reason it's not done automatically
+                try:
+                    recent_path = bpy.utils.user_resource('CONFIG', "recent-files.txt")
+                    with open(recent_path, "r+") as f:
+                        content = f.read()
+                        f.seek(0, 0)
+                        f.write(loadpath.rstrip('\r\n') + '\n' + content)
+
+                except (IOError, OSError, FileNotFoundError):
+                    pass
+
+                print("Loading blend file %d/%d: %s" % (previousidx + 1, len(blendfiles), previousblend))
+                bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)
             else:
                 self.report({'ERROR'}, "You've reached the first file in the current foler: %s." % (currentpath))
+
+
 
         return {'FINISHED'}
 
@@ -307,7 +325,7 @@ class LoadNext(bpy.types.Operator):
     bl_idname = "machin3.load_next"
     bl_label = "Load Next"
     bl_description = "Load Next Blend File in Current Folder"
-    bl_options = {'REGISTER'}
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -329,9 +347,21 @@ class LoadNext(bpy.types.Operator):
             if nextidx < len(blendfiles):
                 nextblend = blendfiles[nextidx]
 
-                print("Loading blend file %d/%d: %s" % (nextidx + 1, len(blendfiles), nextblend))
+                loadpath = os.path.join(currentpath, nextblend)
 
-                bpy.ops.wm.open_mainfile(filepath=os.path.join(currentpath, nextblend), load_ui=True)
+                # add the path to the recent files list, for some reason it's not done automatically
+                try:
+                    recent_path = bpy.utils.user_resource('CONFIG', "recent-files.txt")
+                    with open(recent_path, "r+") as f:
+                        content = f.read()
+                        f.seek(0, 0)
+                        f.write(loadpath.rstrip('\r\n') + '\n' + content)
+
+                except (IOError, OSError, FileNotFoundError):
+                    pass
+
+                print("Loading blend file %d/%d: %s" % (nextidx + 1, len(blendfiles), nextblend))
+                bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)
             else:
                 self.report({'ERROR'}, "You've reached the last file in the current foler: %s." % (currentpath))
 
