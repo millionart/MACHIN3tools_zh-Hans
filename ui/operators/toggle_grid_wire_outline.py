@@ -81,3 +81,16 @@ class ToggleOutline(bpy.types.Operator):
         shading.show_object_outline = not shading.show_object_outline
 
         return {'FINISHED'}
+
+
+class ToggleCavity(bpy.types.Operator):
+    bl_idname = "machin3.toggle_cavity"
+    bl_label = "Toggle Cavity"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        shading = context.space_data.shading
+
+        shading.show_cavity = not shading.show_cavity
+
+        return {'FINISHED'}

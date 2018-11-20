@@ -10,7 +10,7 @@ from .. utils import MACHIN3 as m3
 class Customize(bpy.types.Operator):
     bl_idname = "machin3.customize"
     bl_label = "MACHIN3: Customize"
-    bl_description = "Customize various Blender preferences, settings and keymaps. Fresh Blender only."
+    bl_description = "Customize various Blender preferences, settings and keymaps."
     bl_options = {'REGISTER'}
 
 
@@ -42,6 +42,7 @@ class Customize(bpy.types.Operator):
 
         # PREFERENCES
         self.preferences(context)
+
 
         # CUSTOM KEYMAPS
         if m3.M3_prefs().custom_keymaps:
@@ -232,6 +233,7 @@ class Customize(bpy.types.Operator):
                     else:
                         kmi.shift = True
 
+
         def add_keymaps(kc):
             km = kc.keymaps.get("Mesh")
 
@@ -289,6 +291,13 @@ class Customize(bpy.types.Operator):
 
             blenderbinary = bpy.app.binary_path
             keymappath = os.path.join(os.path.dirname(blenderbinary), "2.80", "scripts", "presets", "keyconfig", "blender_27x.py")
+            bpy.ops.wm.keyconfig_activate(filepath=keymappath)
+
+            kcprefs = context.window_manager.keyconfigs.active.preferences
+            kcprefs.select_mouse = "LEFT"
+
+            # for some weird reason doing this 2 times is rquired if you edit the keymaps afterwards
+            # otherwise left mouse tools be right mouse, could be a blender bug, TODO: investiage in beta phase
             bpy.ops.wm.keyconfig_activate(filepath=keymappath)
 
             kcprefs = context.window_manager.keyconfigs.active.preferences
@@ -380,6 +389,9 @@ class Customize(bpy.types.Operator):
                 shading.color_type = "SINGLE"
                 shading.single_color = (0.2270, 0.2270, 0.2423)  # hex 838387
 
+                shading.cavity_ridge_factor = 0
+                shading.cavity_valley_factor = 2
+
     def theme(self, scriptspath, resourcespath):
         print("\n» Enabling M3 theme")
 
@@ -388,7 +400,6 @@ class Customize(bpy.types.Operator):
 
         filepath = shutil.copy(themesourcepath, themetargetpath)
         bpy.ops.script.execute_preset(filepath=filepath, menu_idname="USERPREF_MT_interface_theme_presets")
-
 
 
 class RestoreKeymaps(bpy.types.Operator):

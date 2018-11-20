@@ -77,6 +77,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_align(self, context):
         activate(self, register=self.activate_align, tool="align")
 
+    def update_activate_customize(self, context):
+        activate(self, register=self.activate_customize, tool="customize")
 
     # RUNTIME PIE ACTIVATION
 
@@ -134,6 +136,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_focus: BoolProperty(name="Focus", default=True, update=update_activate_focus)
     activate_mirror: BoolProperty(name="Mirror", default=True, update=update_activate_mirror)
     activate_align: BoolProperty(name="Align", default=True, update=update_activate_align)
+    activate_customize: BoolProperty(name="Customize", default=False, update=update_activate_customize)
 
 
     # MACHIN3pies
@@ -220,6 +223,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row.prop(self, "activate_align", toggle=True)
         row.label(text="Object per-axis location, rotation and scale alignment.")
 
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_customize", toggle=True)
+        row.label(text="Customize various Blender preferences, settings and keymaps.")
+
 
         # MACHIN3pies
 
@@ -246,7 +253,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_align_pie", toggle=True)
-        row.label(text="Edit mesh alinments.")
+        row.label(text="Edit mesh alignments.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_workspace_pie", toggle=True)
@@ -282,7 +289,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             if self.dirty_keymaps:
                 r = row.split(factor=0.7)
                 r.label(text="Keymaps have been modified, restore them first.", icon="ERROR")
-                r.operator("machin3.restore_keymaps", text="Restore now.")
+                r.operator("machin3.restore_keymaps", text="Restore now")
 
             row = column.row()
             row.label()

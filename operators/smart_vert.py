@@ -66,7 +66,7 @@ class SmartVert(bpy.types.Operator):
 
             if self.type == "LAST":
                 if len(selverts) >= 2:
-                    if self.has_valid_select_history(active):
+                    if self.has_valid_select_history(active, lazy=True):
                         bpy.ops.mesh.merge(type='LAST')
 
             elif self.type == "CENTER":
@@ -102,12 +102,16 @@ class SmartVert(bpy.types.Operator):
 
         return {'FINISHED'}
 
-    def has_valid_select_history(self, active):
+    def has_valid_select_history(self, active, lazy=False):
         bm = bmesh.from_edit_mesh(active.data)
         bm.verts.ensure_lookup_table()
 
         verts = [v for v in bm.verts if v.select]
         history = list(bm.select_history)
+
+        # just check for the prence of any element in the history
+        if lazy:
+            return history
 
         return len(verts) == len(history)
 

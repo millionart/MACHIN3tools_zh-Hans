@@ -202,17 +202,20 @@ def activate(self, register, tool):
     else:
         # KEYMAPS
 
-        keylist = keysdict[tool.upper()]
-        keymaps = get_keymaps(keylist)
+        # not every tool has keymappings, so check for it
+        keylist = keysdict.get(tool.upper())
 
-        # update keymaps registered in __init__.py at startup, necessary for addon unregistering
-        from .. import keymaps as startup_keymaps
-        for k in keymaps:
-            if k in startup_keymaps:
-                startup_keymaps.remove(k)
+        if keylist:
+            keymaps = get_keymaps(keylist)
 
-        # unregister tool keymaps
-        unregister_keymaps(keymaps)
+            # update keymaps registered in __init__.py at startup, necessary for addon unregistering
+            from .. import keymaps as startup_keymaps
+            for k in keymaps:
+                if k in startup_keymaps:
+                    startup_keymaps.remove(k)
+
+            # unregister tool keymaps
+            unregister_keymaps(keymaps)
 
 
         # CLASSES
@@ -403,8 +406,9 @@ def get_align(classlists=[], keylists=[], count=0):
 
 
 def get_customize(classlists=[], keylists=[], count=0):
-    classlists.append(classesdict["CUSTOMIZE"])
-    count += 1
+    if m3.M3_prefs().activate_customize:
+        classlists.append(classesdict["CUSTOMIZE"])
+        count += 1
 
     return classlists, keylists, count
 

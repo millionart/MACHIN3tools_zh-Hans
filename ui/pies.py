@@ -298,6 +298,14 @@ class PieShading(Menu):
         row.operator("machin3.toggle_outline", text="(Q) Outline Toggle")
         row.prop(view.shading, "object_outline_color", text="")
 
+        row = col.split(factor=0.45)
+        row.operator("machin3.toggle_cavity", text="(C) Cavity Toggle")
+        r = row.row(align=True)
+        r.prop(view.shading, "cavity_ridge_factor", text="")
+        r.prop(view.shading, "cavity_valley_factor", text="")
+        r.prop(context.scene.display, "matcap_ssao_distance", text="")
+
+
         active = context.active_object
         if active:
             if active.type == "MESH":
