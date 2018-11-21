@@ -66,6 +66,7 @@ class SmartVert(bpy.types.Operator):
 
             if self.type == "LAST":
                 if len(selverts) >= 2:
+                    # TODO: acually, all you need is an active vert, not an entire  history.
                     if self.has_valid_select_history(active, lazy=True):
                         bpy.ops.mesh.merge(type='LAST')
 
@@ -74,6 +75,16 @@ class SmartVert(bpy.types.Operator):
                     bpy.ops.mesh.merge(type='CENTER')
 
             elif self.type == "SMART":
+
+                # m3.select_shortest_path_topo(active)
+                m3.select_shortest_path_len(active)
+                # m3.select_shortest_path_bomb(active)
+
+
+
+
+
+                """
                 if len(selverts) == 4:
                     if self.has_valid_select_history(active):
                         self.wrongselection = False
@@ -99,6 +110,7 @@ class SmartVert(bpy.types.Operator):
 
                 else:
                     self.wrongselection = True
+                """
 
         return {'FINISHED'}
 

@@ -272,7 +272,7 @@ class LoadPrevious(bpy.types.Operator):
     bl_idname = "machin3.load_previous"
     bl_label = "Load Previous"
     bl_description = "Load Previous Blend File in Current Folder"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
@@ -325,7 +325,7 @@ class LoadNext(bpy.types.Operator):
     bl_idname = "machin3.load_next"
     bl_label = "Load Next"
     bl_description = "Load Next Blend File in Current Folder"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
