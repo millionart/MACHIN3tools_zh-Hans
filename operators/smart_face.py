@@ -103,6 +103,8 @@ class SmartFace(bpy.types.Operator):
                 # TODO: you really should do the remmove dobules here, and then increase the ==4 to >= 4
                 # ####: doing that risks removing verts you are refering below however, thereby causing an exception.
                 # ####_ what you really need to do is remove doubles only for the new verts against the closest of all others
+                # ####_ you don't have to check against all other verts, only against all other non manifold verts, which should be much more managable
+                # this should then allow you to increase the merge threshould to just under the length of its shortest edge
 
                 # if any of the other two verts has 4 edges, at least one of them non-manifold, select it. first come first serve.
                 if any([len(v1_other.link_edges) == 4, len(v2_other.link_edges) == 4]):
