@@ -1,8 +1,9 @@
 
-keys = {"SMART_VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "properties": [("type", "LAST"), ("slide_override", False)]},
-                       {"label": "Merge Center", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "shift": True, "properties": [("type", "CENTER"), ("slide_override", False)]},
-                       {"label": "Merge Smart", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "alt": True, "properties": [("type", "SMART"), ("slide_override", False)]},
-                       {"label": "Slide Extend", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "shift": True, "alt": True, "properties": [("slide_override", True)]}],
+keys = {"SMART_VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "properties": [("mode", "MERGE"), ("mergetype", "LAST"), ("slideoverride", False)]},
+                       {"label": "Merge Center", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "shift": True, "properties": [("mode", "MERGE"), ("mergetype", "CENTER"), ("slideoverride", False)]},
+                       {"label": "Merge Paths", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "alt": True, "properties": [("mode", "MERGE"), ("mergetype", "PATHS"), ("slideoverride", False)]},
+                       {"label": "Connect Paths", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "alt": True, "ctrl": True, "properties": [("mode", "CONNECT"), ("slideoverride", False)]},
+                       {"label": "Slide Extend", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "shift": True, "alt": True, "properties": [("slideoverride", True)]}],
         "SMART_EDGE": [{"keymap": "Mesh", "idname": "machin3.smart_edge", "type": "TWO", "value": "PRESS"}],
         "SMART_FACE": [{"keymap": "Mesh", "idname": "machin3.smart_face", "type": "FOUR", "value": "PRESS"}],
         "CLEAN_UP": [{"keymap": "Mesh", "idname": "machin3.clean_up", "type": "THREE", "value": "PRESS"}],

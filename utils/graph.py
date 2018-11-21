@@ -23,36 +23,51 @@ def get_shortest_path(bm, vstart, vend, topo=False, select=False):
     """
 
     def dijkstra(mg, vstart, vend, topo=True):
-        # for every vert, find the distance to every other vert
+        # initiate dict to collect distances from stat vert to every other vert
         d = dict.fromkeys(mg.keys(), sys.maxsize)
 
+        # predecessor dict to track the path walked
         predecessor = dict.fromkeys(mg.keys())
 
         # the distance of the start vert to itself is 0
         d[vstart] = 0
 
-        # keep track of what verts are visited and add the the accumulated distances to those verts
+        # keep track of what verts are seen and add the the accumulated distances to those verts
         unknownverts = [(0, vstart)]
 
-        # with topo you can exist as soon as you hit the vend, without topo you can't
-        while (topo and vstart != vend) or (not topo and unknownverts):
-            # unknownverts.sort()
-            dist, u = unknownverts[0]  # Get the next vert that is closest to s
-            others = mg[u]
+        # with topo you can exit as soon as you hit the vend, without topo you can't, because the shorter distance my involve more vert hops
+        # while (topo and vstart != vend) or (not topo and unknownverts):
+        while unknownverts:
+            # sorting doesnt actually be required but it was in the original source
+            # I question why the list needs to be sorted by index at all. also, doing it via this lambda function is very slow for some reason
+            # unknownverts.sort(key=lambda x: x[1].index)
 
-            for vother, distance in others:  # v = neighbour vert, w = distance from u to this vert
-                if d[vother] > d[u] + distance:
-                    d[vother] = d[u] + distance
+            # get the next vert that is closest to vstart
+            dist, vcurrent = unknownverts[0]
+
+            # use the mesh graph to retrieve the other verts connected
+            others = mg[vcurrent]
+
+            # choose the next vert with the shortest accumulated distance
+            for vother, distance in others:
+                if d[vother] > d[vcurrent] + distance:
+                    d[vother] = d[vcurrent] + distance
+
                     unknownverts.append((d[vother], vother))
-                    predecessor[vother] = u
+                    predecessor[vother] = vcurrent
 
-            unknownverts.pop(0)  # We just finished exploring this vert, so it can be removed
-            vstart = u  # Set new start vert
+            # we've finished exploring this vert, pop it
+            unknownverts.pop(0)
 
+            # you can break out early when determening the topological distances
+            if topo and vcurrent == vend:
+                break
+
+        # backtrace from the end vertex using the predecessor dict
         path = []
         endvert = vend
 
-        while endvert is not None:  # Backtrace rom the end vertex using the "predecessor" dict
+        while endvert is not None:
             path.append(endvert)
             endvert = predecessor[endvert]
 

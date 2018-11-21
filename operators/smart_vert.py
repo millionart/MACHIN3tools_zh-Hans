@@ -9,9 +9,16 @@ from .. utils.graph import get_shortest_path
 # TODO: i's also great candidate for testing an improved modal bmesh approach
 
 
+modeitems = [("MERGE", "Merge", ""),
+             ("CONNECT", "Connect Paths", "")]
+
+
 mergetypeitems = [("LAST", "Last", ""),
                   ("CENTER", "Center", ""),
-                  ("SMART", "Smart", "")]
+                  ("PATHS", "Paths", "")]
+
+pathtypeitems = [("TOPO", "Topo", ""),
+                 ("LENGTH", "Length", "")]
 
 
 class SmartVert(bpy.types.Operator):
@@ -19,88 +26,119 @@ class SmartVert(bpy.types.Operator):
     bl_label = "MACHIN3: Smart Vert"
     bl_options = {'REGISTER', 'UNDO'}
 
-    type: EnumProperty(name="Merge Type", items=mergetypeitems, default="LAST")
-    slide_override: BoolProperty(name="Slide Override", default=False)
+    mode: EnumProperty(name="Mode", items=modeitems, default="MERGE")
+    mergetype: EnumProperty(name="Merge Type", items=mergetypeitems, default="LAST")
+    pathtype: EnumProperty(name="Path Type", items=pathtypeitems, default="TOPO")
 
-    topo: BoolProperty(name="Topo", default=False)
+    slideoverride: BoolProperty(name="Slide Override", default=False)
 
     # hidden
-    wrongsmartselection = False
+    wrongselection = False
 
     def draw(self, context):
         layout = self.layout
 
         column = layout.column()
 
-        row = column.row()
-        row.label(text="Merge")
-        row.prop(self, "type", expand=True)
+        if not self.slideoverride:
+            row = column.split(factor=0.3)
+            row.label(text="Mode")
+            r = row.row()
+            r.prop(self, "mode", expand=True)
 
-        if self.type == "SMART":
-            if self.wrongselection:
-                row = column.split(factor=0.25)
+            if self.mode == "MERGE":
+                row = column.split(factor=0.3)
+                row.label(text="Merge")
+                r = row.row()
+                r.prop(self, "mergetype", expand=True)
 
-                row.separator()
-                row.label(text="You need to select exactly 4 vertices.", icon="INFO")
+            if self.mode == "CONNECT" or (self.mode == "MERGE" and self.mergetype == "PATHS"):
+                if self.wrongselection:
+                    column.label(text="You need to select exactly 4 vertices for paths.", icon="INFO")
 
-            column.prop(self, "topo")
-
-        # NOTE: the slide isn't drawn, even if we wanted, likely due to the transform tool invokation
-
+                else:
+                    row = column.split(factor=0.3)
+                    row.label(text="Shortest Path")
+                    r = row.row()
+                    r.prop(self, "pathtype", expand=True)
 
     @classmethod
     def poll(cls, context):
         return m3.get_mode() == "VERT"
 
-
     def execute(self, context):
+        self.smart_vert(context)
+
+        return {'FINISHED'}
+
+    def smart_vert(self, context):
         active = context.active_object
 
-        # SLIDE aka slide extend aka invisible slide
+        # SLIDE EXTEND
 
-        if self.slide_override:
+        if self.slideoverride:
             self.slide(context)
-
-
-        # MERGE
 
         else:
             selverts = m3.get_selection("VERT")
 
-            if self.type == "LAST":
-                if len(selverts) >= 2:
-                    # TODO: acually, all you need is an active vert, not an entire  history.
-                    if self.has_valid_select_history(active, lazy=True):
-                        bpy.ops.mesh.merge(type='LAST')
 
-            elif self.type == "CENTER":
-                if len(selverts) >= 2:
-                    bpy.ops.mesh.merge(type='CENTER')
+            # MERGE
 
-            elif self.type == "SMART":
+            if self.mode == "MERGE":
+
+                if self.mergetype == "LAST":
+                    if len(selverts) >= 2:
+                        # TODO: acually, all you need is an active vert, not an entire  history.
+                        if self.has_valid_select_history(active, lazy=True):
+                            bpy.ops.mesh.merge(type='LAST')
+
+                elif self.mergetype == "CENTER":
+                    if len(selverts) >= 2:
+                        bpy.ops.mesh.merge(type='CENTER')
+
+                elif self.mergetype == "PATHS":
+                    self.wrongselection = False
+
+                    if len(selverts) == 4:
+                        bm, history = self.has_valid_select_history(active)
+
+                        if history:
+                            topo = True if self.pathtype == "TOPO" else False
+                            bm, path1, path2 = self.get_paths(bm, history, topo)
+
+                            self.weld(active, bm, path1, path2)
+                            return
+
+                    self.wrongselection = True
+
+
+            # CONNECT
+
+            elif self.mode == "CONNECT":
+                self.wrongselection = False
+
                 if len(selverts) == 4:
-
                     bm, history = self.has_valid_select_history(active)
 
                     if history:
-                        pair1 = history[0:2]
-                        pair2 = history[2:4]
-                        pair2.reverse()
+                        topo = True if self.pathtype == "TOPO" else False
+                        bm, path1, path2 = self.get_paths(bm, history, topo)
 
-                        path1 = get_shortest_path(bm, *pair1, topo=self.topo, select=True)
-                        path2 = get_shortest_path(bm, *pair2, topo=self.topo, select=True)
+                        self.connect(active, bm, path1, path2)
+                        return
 
-                        # merge the verts
-                        self.weld(bm, path1, path2)
+                self.wrongselection = True
 
-                        bmesh.update_edit_mesh(active.data)
+    def get_paths(self, bm, history, topo):
+        pair1 = history[0:2]
+        pair2 = history[2:4]
+        pair2.reverse()
 
-                    else:
-                        self.wrongselection = False
-                else:
-                    self.wrongselection = False
+        path1 = get_shortest_path(bm, *pair1, topo=topo, select=True)
+        path2 = get_shortest_path(bm, *pair2, topo=topo, select=True)
 
-        return {'FINISHED'}
+        return bm, path1, path2
 
     def has_valid_select_history(self, active, lazy=False):
         bm = bmesh.from_edit_mesh(active.data)
@@ -118,12 +156,21 @@ class SmartVert(bpy.types.Operator):
             return bm, history
         return None, None
 
-    def weld(self, bm, path1, path2):
+    def weld(self, active, bm, path1, path2):
         targetmap = {}
         for v1, v2 in zip(path1, path2):
             targetmap[v1] = v2
 
         bmesh.ops.weld_verts(bm, targetmap=targetmap)
+
+        bmesh.update_edit_mesh(active.data)
+
+    def connect(self, active, bm, path1, path2):
+        for verts in zip(path1, path2):
+            if not bm.edges.get(verts):
+                bmesh.ops.connect_vert_pair(bm, verts=verts)
+
+        bmesh.update_edit_mesh(active.data)
 
     def slide(self, context):
         tool_settings = context.scene.tool_settings

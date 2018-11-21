@@ -233,8 +233,8 @@ class Customize(bpy.types.Operator):
                     else:
                         kmi.shift = True
 
-
         def add_keymaps(kc):
+            # MESH
             km = kc.keymaps.get("Mesh")
 
             kmi = km.keymap_items.new("mesh.loop_multi_select", "LEFTMOUSE", "CLICK_DRAG", alt=True)
@@ -242,6 +242,9 @@ class Customize(bpy.types.Operator):
 
             kmi = km.keymap_items.new("mesh.loop_multi_select", "LEFTMOUSE", "CLICK_DRAG", alt=True, ctrl=True)
             kmi.properties.ring = True
+
+            kmi = km.keymap_items.new("mesh.subdivide", "TWO", "PRESS", alt=True)
+            kmi.properties.smoothness = 1
 
         print("\n» Customizing 2.7x Keymap")
 
@@ -356,7 +359,7 @@ class Customize(bpy.types.Operator):
     def matcaps(self, context, resourcespath, datafilespath):
         print("\n» Adding Matcaps")
 
-        matcapsourcepath = os.path.join(resourcespath, "matcap")
+        matcapsourcepath = os.path.join(resourcespath, "matcaps")
         matcaptargetpath = m3.makedir(os.path.join(datafilespath, "studiolights", "matcap"))
         matcaps = os.listdir(matcapsourcepath)
 
