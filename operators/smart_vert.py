@@ -89,7 +89,6 @@ class SmartVert(bpy.types.Operator):
 
                 if self.mergetype == "LAST":
                     if len(selverts) >= 2:
-                        # TODO: acually, all you need is an active vert, not an entire  history.
                         if self.has_valid_select_history(active, lazy=True):
                             bpy.ops.mesh.merge(type='LAST')
 

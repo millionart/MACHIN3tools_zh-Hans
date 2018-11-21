@@ -54,11 +54,11 @@ class Mirror(bpy.types.Operator):
         sel = m3.selected_objects()
         active = m3.get_active()
 
-        self.mirror(active, sel)
+        self.mirror(active, sel, self.use_x, self.use_y, self.use_z)
 
         return {'FINISHED'}
 
-    def mirror(self, active, sel):
+    def mirror(self, active, sel, use_x, use_y, use_z):
         if len(sel) > 1 and active in sel:
             sel.remove(active)
 
@@ -67,9 +67,7 @@ class Mirror(bpy.types.Operator):
 
                     mirror = obj.modifiers.new(name="Mirror", type="MIRROR")
 
-                    mirror.use_x = self.use_x
-                    mirror.use_y = self.use_y
-                    mirror.use_z = self.use_z
+                    mirror.use_axis = (use_x, use_y, use_z)
 
                     mirror.mirror_object = active
 
