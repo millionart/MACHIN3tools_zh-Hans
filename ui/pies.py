@@ -325,7 +325,10 @@ class PieShading(Menu):
                 r = row.split().row(align=True)
                 r.operator("machin3.shade_smooth", text="Smooth", icon_value=get_icon('smooth'))
                 r.operator("machin3.shade_flat", text="Flat", icon_value=get_icon('flat'))
-                row.prop(mesh, "use_auto_smooth")
+
+                icon = "CHECKBOX_HLT" if mesh.use_auto_smooth else "CHECKBOX_DEHLT"
+                row.operator("machin3.toggle_auto_smooth", text="AutoSmooth", icon=icon)
+
                 if mesh.use_auto_smooth:
                     if mesh.has_custom_normals:
                         col.operator("mesh.customdata_custom_splitnormals_clear", text="Clear Custom Normals")
@@ -396,6 +399,10 @@ class PieShading(Menu):
                 row = col.row()
                 row.scale_y = 0.6
                 row.template_icon_view(view.shading, "studio_light", show_labels=True, scale=3)
+
+            # studio rotation, same at worl rotation in lookdev
+            if view.shading.light == "STUDIO":
+                col.prop(view.shading, "studiolight_rotate_z", text="Rotation")
 
             # switch matcap
             if view.shading.light == "MATCAP":

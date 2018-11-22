@@ -29,3 +29,24 @@ class ShadeFlat(bpy.types.Operator):
             bpy.ops.mesh.faces_shade_flat()
 
         return {'FINISHED'}
+
+
+class ToggleAutoSmooth(bpy.types.Operator):
+    bl_idname = "machin3.toggle_auto_smooth"
+    bl_label = "Toggle Auto Smooth"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        active = m3.get_active()
+
+        if active:
+            sel = m3.selected_objects()
+            if active not in sel:
+                sel.append(active)
+
+            autosmooth = not active.data.use_auto_smooth
+
+            for obj in sel:
+                obj.data.use_auto_smooth = autosmooth
+
+        return {'FINISHED'}

@@ -408,6 +408,7 @@ class Customize(bpy.types.Operator):
         if overlay:
             overlay.show_face_center = True
             overlay.show_backface_culling = True
+            overlay.wireframe_threshold = 1
 
     def matcaps(self, context, resourcespath, datafilespath):
         print("\n» Adding Matcaps")
