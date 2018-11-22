@@ -97,6 +97,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_align_pie(self, context):
         activate(self, register=self.activate_align_pie, tool="align_pie")
 
+    def update_activate_cursor_pie(self, context):
+        activate(self, register=self.activate_cursor_pie, tool="cursor_pie")
+
     def update_activate_workspace_pie(self, context):
         activate(self, register=self.activate_workspace_pie, tool="workspace_pie")
 
@@ -146,6 +149,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_shading_pie: BoolProperty(name="Shading Pie", default=True, update=update_activate_shading_pie)
     activate_views_pie: BoolProperty(name="Views Pie", default=True, update=update_activate_views_pie)
     activate_align_pie: BoolProperty(name="Align Pie", default=True, update=update_activate_align_pie)
+    activate_cursor_pie: BoolProperty(name="Cursor Pie", default=True, update=update_activate_cursor_pie)
     activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False, update=update_activate_workspace_pie)
 
 
@@ -254,6 +258,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row = column.split(factor=0.25)
         row.prop(self, "activate_align_pie", toggle=True)
         row.label(text="Edit mesh alignments.")
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_cursor_pie", toggle=True)
+        row.label(text="Cursor stuff.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_workspace_pie", toggle=True)

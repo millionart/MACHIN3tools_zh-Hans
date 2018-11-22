@@ -33,12 +33,8 @@ class PieModes(Menu):
                 pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
 
                 # 8 - TOP
-                if bpy.context.object.mode == "OBJECT":
-                    text = "Edit"
-                    icon = get_icon('edit_mesh')
-                elif bpy.context.object.mode == "EDIT":
-                    text = "Object"
-                    icon = get_icon('object')
+
+                text, icon = ("Edit", get_icon('edit_mesh')) if active.mode == "OBJECT" else ("Object", get_icon('object'))
                 pie.operator("machin3.edit_mode", text=text, icon_value=icon)
 
                 # 7 - TOP - LEFT
@@ -61,33 +57,45 @@ class PieModes(Menu):
                 else:
                     pie.separator()
 
-            """
 
-            elif ob.object.type == 'EMPTY':
-                pass
-
-            elif ob.object.type == 'CURVE':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-            elif ob.object.type == 'ARMATURE':
+            elif active.type == 'CURVE':
                 pie = layout.menu_pie()
 
                 # 4 - LEFT
-                pie.operator("object.editmode_toggle", text="Edit Mode", icon='OBJECT_DATAMODE')
+                pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
+
+                # & - RIGHT
+                pie.separator()
+
+                # 1 - BOTTOM
+                pie.separator()
+
+                # 9 - TOP
+                text, icon = ("Edit", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
+                pie.operator("object.editmode_toggle", text=text, icon=icon)
+
+
+            elif active.type == 'ARMATURE':
+                pie = layout.menu_pie()
+
+                # 4 - LEFT
+                pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
+
                 # 6 - RIGHT
-                pie.operator("object.posemode_toggle", text="Pose", icon='POSE_HLT')
+                pie.operator("object.mode_set", text="Pose", icon='POSE_HLT').mode = "POSE"
+
                 # 2 - BOTTOM
                 pie.separator()
+
                 # 8 - TOP
-                pie.operator("class.object", text="Object Mode", icon='OBJECT_DATAMODE')
-                # 7 - TOP - LEFT
-                pie.separator()
-                # 9 - TOP - RIGHT
-                pie.separator()
-                # 1 - BOTTOM - LEFT
-                pie.separator()
-                # 3 - BOTTOM - RIGHT
+                text, icon = ("Edit", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
+                if active.mode == "POSE":
+                    pie.operator("object.posemode_toggle", text=text, icon=icon)
+                else:
+                    pie.operator("object.editmode_toggle", text=text, icon=icon)
+
+
+            """
 
             elif ob.object.type == 'FONT':
                 pie = layout.menu_pie()
@@ -731,6 +739,58 @@ class PieAlign(Menu):
         op = pie.operator("machin3.align_editmesh", text="Z max")
         op.axis = "Z"
         op.type = "MAX"
+
+
+class PieCursor(Menu):
+    bl_idname = "MACHIN3_MT_cursor_pie"
+    bl_label = "Cursor and Origin"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        # 4 - LEFT
+        pie.operator("view3d.snap_cursor_to_center", text="to Origin", icon="PIVOT_CURSOR")
+
+        # 6 - RIGHT
+        pie.operator("view3d.snap_selected_to_cursor", text="to Cursor", icon="RESTRICT_SELECT_OFF").use_offset = False
+
+        # 2 - BOTTOM
+
+        if context.mode == "OBJECT":
+            box = pie.split()
+            column = box.column()
+
+            column.separator()
+
+            row = column.split(factor=0.25)
+            row.separator()
+            row.label(text="Object Origin")
+
+            column.scale_x = 1.1
+
+            row = column.split(factor=0.5)
+            row.scale_y = 1.5
+            row.operator("object.origin_set", text="to Cursor", icon="LAYER_ACTIVE").type = "ORIGIN_CURSOR"
+            row.operator("object.origin_set", text="to Geometry", icon="OBJECT_ORIGIN").type = "ORIGIN_GEOMETRY"
+
+        else:
+            pie.separator()
+
+        # 8 - TOP
+        pie.separator()
+
+        # 7 - TOP - LEFT
+        pie.operator("view3d.snap_cursor_to_selected", text="to Selected", icon="PIVOT_CURSOR")
+
+        # 9 - TOP - RIGHT
+        pie.operator("view3d.snap_selected_to_cursor", text="to Cursor, Offset", icon="RESTRICT_SELECT_OFF").use_offset = True
+
+        # 1 - BOTTOM - LEFT
+        pie.operator("view3d.snap_cursor_to_grid", text="to Grid", icon="PIVOT_CURSOR")
+
+        # 3 - BOTTOM - RIGHT
+        pie.operator("view3d.snap_selected_to_grid", text="to Grid", icon="RESTRICT_SELECT_OFF")
 
 
 class PieWorkspace(Menu):

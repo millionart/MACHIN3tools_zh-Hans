@@ -320,6 +320,11 @@ def get_pie_menus():
     classlists, keylists, count = get_align_pie(classlists, keylists, count)
 
 
+    # CURSOR
+
+    classlists, keylists, count = get_cursor_pie(classlists, keylists, count)
+
+
     # WORKSPACE
 
     classlists, keylists, count = get_workspace_pie(classlists, keylists, count)
@@ -461,6 +466,15 @@ def get_align_pie(classlists=[], keylists=[], count=0):
     if m3.M3_prefs().activate_align_pie:
         classlists.append(classesdict["ALIGN_PIE"])
         keylists.append(keysdict["ALIGN_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_cursor_pie(classlists=[], keylists=[], count=0):
+    if m3.M3_prefs().activate_cursor_pie:
+        classlists.append(classesdict["CURSOR_PIE"])
+        keylists.append(keysdict["CURSOR_PIE"])
         count += 1
 
     return classlists, keylists, count

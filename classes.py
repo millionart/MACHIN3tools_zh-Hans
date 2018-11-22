@@ -31,6 +31,7 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
                          ("ui.operators.views_and_cams", [("ViewAxis", "view_axis"), ("MakeCamActive", "make_cam_active"), ("SmartViewCam", "smart_view_cam")])],
            "ALIGN_PIE": [("ui.pies", [("PieAlign", "align_pie")]),
                          ("ui.operators.align", [("AlignEditMesh", "align_editmesh")])],
+           "CURSOR_PIE": [("ui.pies", [("PieCursor", "cursor_pie")])],
            "WORKSPACE_PIE": [("ui.pies", [("PieWorkspace", "workspace_pie")]),
                              ("ui.operators.switch_workspace", [("SwitchWorkspace", "switch_workspace")])],
            }

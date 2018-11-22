@@ -233,6 +233,57 @@ class Customize(bpy.types.Operator):
                     else:
                         kmi.shift = True
 
+                if kmi.idname == "object.subdivision_set":
+                    kmi.active = False
+
+
+            # CURVE
+
+            km = kc.keymaps.get("Curve")
+            for kmi in km.keymap_items:
+                if kmi.idname == "curve.select_all":
+                    if kmi.properties.action == "SELECT":
+                        kmi.properties.action = "TOGGLE"
+
+                    elif kmi.properties.action == "DESELECT":
+                        kmi.active = False
+
+
+            # ARMATURE
+
+            km = kc.keymaps.get("Armature")
+            for kmi in km.keymap_items:
+                if kmi.idname == "armature.select_all":
+                    if kmi.properties.action == "SELECT":
+                        kmi.properties.action = "TOGGLE"
+
+                    elif kmi.properties.action == "DESELECT":
+                        kmi.active = False
+
+
+            # POSE
+
+            km = kc.keymaps.get("Pose")
+            for kmi in km.keymap_items:
+                if kmi.idname == "pose.select_all":
+                    if kmi.properties.action == "SELECT":
+                        kmi.properties.action = "TOGGLE"
+
+                    elif kmi.properties.action == "DESELECT":
+                        kmi.active = False
+
+
+            # UV
+
+            km = kc.keymaps.get("UV Editor")
+            for kmi in km.keymap_items:
+                if kmi.idname == "uv.select_all":
+                    if kmi.properties.action == "SELECT":
+                        kmi.properties.action = "TOGGLE"
+
+                    elif kmi.properties.action == "DESELECT":
+                        kmi.active = False
+
         def add_keymaps(kc):
             # MESH
             km = kc.keymaps.get("Mesh")
@@ -245,6 +296,8 @@ class Customize(bpy.types.Operator):
 
             kmi = km.keymap_items.new("mesh.subdivide", "TWO", "PRESS", alt=True)
             kmi.properties.smoothness = 1
+
+            kmi = km.keymap_items.new("mesh.bridge_edge_loops", "TWO", "PRESS", ctrl=True)
 
         print("\n» Customizing 2.7x Keymap")
 

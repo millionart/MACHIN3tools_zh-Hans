@@ -6,11 +6,17 @@ from .. utils import MACHIN3 as m3
 
 # TODO: bone support? you can't select a pose bone when in object mode
 
+modeitems = [("ACTIVE", "to Active", ""),
+             ("FLOOR", "Floor", ""),
+             ("CURSOR", "Cursor", "")]
+
 
 class Align(bpy.types.Operator):
     bl_idname = "machin3.align"
     bl_label = "MACHIN3: Align"
     bl_options = {'REGISTER', 'UNDO'}
+
+    mode: EnumProperty(name="Mode", items=modeitems, default="ACTIVE")
 
     location: BoolProperty(name="Align Location", default=True)
     rotation: BoolProperty(name="Align Rotation", default=True)
@@ -34,34 +40,38 @@ class Align(bpy.types.Operator):
 
         column = layout.column()
 
-        row = column.split(factor=0.33)
-        row.prop(self, "location", text="Location")
+        row = column.row()
+        row.prop(self, "mode", expand=True)
 
-        r = row.row(align=True)
-        r.active = self.location
-        r.prop(self, "loc_x", toggle=True)
-        r.prop(self, "loc_y", toggle=True)
-        r.prop(self, "loc_z", toggle=True)
+        if self.mode == "ACTIVE":
+            row = column.split(factor=0.33)
+            row.prop(self, "location", text="Location")
 
-
-        row = column.split(factor=0.33)
-        row.prop(self, "rotation", text="Rotation")
-
-        r = row.row(align=True)
-        r.active = self.rotation
-        r.prop(self, "rot_x", toggle=True)
-        r.prop(self, "rot_y", toggle=True)
-        r.prop(self, "rot_z", toggle=True)
+            r = row.row(align=True)
+            r.active = self.location
+            r.prop(self, "loc_x", toggle=True)
+            r.prop(self, "loc_y", toggle=True)
+            r.prop(self, "loc_z", toggle=True)
 
 
-        row = column.split(factor=0.33)
-        row.prop(self, "scale", text="Scale")
+            row = column.split(factor=0.33)
+            row.prop(self, "rotation", text="Rotation")
 
-        r = row.row(align=True)
-        r.active = self.scale
-        r.prop(self, "sca_x", toggle=True)
-        r.prop(self, "sca_y", toggle=True)
-        r.prop(self, "sca_z", toggle=True)
+            r = row.row(align=True)
+            r.active = self.rotation
+            r.prop(self, "rot_x", toggle=True)
+            r.prop(self, "rot_y", toggle=True)
+            r.prop(self, "rot_z", toggle=True)
+
+
+            row = column.split(factor=0.33)
+            row.prop(self, "scale", text="Scale")
+
+            r = row.row(align=True)
+            r.active = self.scale
+            r.prop(self, "sca_x", toggle=True)
+            r.prop(self, "sca_y", toggle=True)
+            r.prop(self, "sca_z", toggle=True)
 
     @classmethod
     def poll(cls, context):
@@ -69,17 +79,34 @@ class Align(bpy.types.Operator):
 
     def execute(self, context):
         sel = m3.selected_objects()
-        active = m3.get_active()
 
-        if active in sel:
-            sel.remove(active)
+        if self.mode == "ACTIVE":
+            active = m3.get_active()
 
-            self.align(active, sel)
+            if active in sel:
+                sel.remove(active)
+
+                self.align_to_active(active, sel)
+
+        elif self.mode == "FLOOR":
+            self.put_on_floor(sel)
+
+
+        elif self.mode == "CURSOR":
+            # TODO: align_to_cursor
+            pass
 
         return {'FINISHED'}
 
+    def put_on_floor(self, selection):
+        for obj in selection:
+            mx = obj.matrix_world
 
-    def align(self, active, sel):
+            minz = min((mx @ v.co)[2] for v in obj.data.vertices)
+
+            mx.translation.z -= minz
+
+    def align_to_active(self, active, sel):
         # get target matrix and decompose
         amx = active.matrix_world
         aloc, arot, asca = amx.decompose()
