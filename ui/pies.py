@@ -265,6 +265,12 @@ class PieShading(Menu):
         column = b.column()
         self.draw_right_column(context, view, column)
 
+        if view.shading.type == "MATERIAL":
+            b = box.box()
+            column = b.column()
+            self.draw_eevee(context, view, column)
+
+
         # 7 - TOP - LEFT
         pie.separator()
 
@@ -376,6 +382,7 @@ class PieShading(Menu):
 
         if active:
             col.separator()
+
             row = col.row()
             row.prop(active, "name", text="")
             row.prop(active, "display_type", text="")
@@ -470,6 +477,8 @@ class PieShading(Menu):
 
                                         col.separator()
 
+            """
+
             # eevee settings
 
             icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
@@ -500,19 +509,56 @@ class PieShading(Menu):
                 row = col.row(align=True)
                 row.prop(context.scene.eevee, "volumetric_start")
                 row.prop(context.scene.eevee, "volumetric_end")
+            """
 
 
         elif view.shading.type == "RENDERED":
             col.prop(context.scene.render, "engine")
 
-            col.label(text='TODO: render setting presets')
-            col.label(text='TODO: pack images op?')
+            if context.scene.render.engine == "CYCLES":
+                col.label(text='TODO: render setting presets')
+                col.label(text='TODO: pack images op?')
+
+            if context.scene.render.engine == "BLENDER_EEVEE":
+                self.draw_eevee(context, view, col)
 
 
         elif view.shading.type == "WIREFRAME":
             row = col.row()
             row.prop(view.shading, "show_xray_wireframe", text="")
             row.prop(view.shading, "xray_alpha_wireframe", text="X-Ray")
+
+
+    def draw_eevee(self, context, view, col):
+        icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
+        col.prop(context.scene.eevee, "use_ssr", icon=icon)
+        if context.scene.eevee.use_ssr:
+            row = col.row(align=True)
+            row.prop(context.scene.eevee, "ssr_thickness")
+            row.prop(context.scene.eevee, "use_ssr_halfres")
+
+
+        icon = "TRIA_DOWN" if context.scene.eevee.use_gtao else "TRIA_RIGHT"
+        col.prop(context.scene.eevee, "use_gtao", icon=icon)
+        if context.scene.eevee.use_gtao:
+            row = col.row(align=True)
+            row.prop(context.scene.eevee, "gtao_distance")
+            row.prop(context.scene.eevee, "gtao_factor")
+
+        icon = "TRIA_DOWN" if context.scene.eevee.use_bloom else "TRIA_RIGHT"
+        col.prop(context.scene.eevee, "use_bloom", icon=icon)
+        if context.scene.eevee.use_bloom:
+            row = col.row(align=True)
+            row.prop(context.scene.eevee, "bloom_threshold")
+            row.prop(context.scene.eevee, "bloom_radius")
+
+        icon = "TRIA_DOWN" if context.scene.eevee.use_volumetric else "TRIA_RIGHT"
+        col.prop(context.scene.eevee, "use_volumetric", icon=icon)
+        if context.scene.eevee.use_volumetric:
+            row = col.row(align=True)
+            row.prop(context.scene.eevee, "volumetric_start")
+            row.prop(context.scene.eevee, "volumetric_end")
+
 
     def get_text_icon(self, context, shading):
         if context.space_data.shading.type == shading:
