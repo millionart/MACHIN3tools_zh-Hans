@@ -1,12 +1,10 @@
 import bpy
-from bpy.props import EnumProperty
 from bpy.types import Menu
 from .. utils import MACHIN3 as m3
 from .. utils.ui import get_icon
 
-# TODO: snappingcursoe pie
-# TODO: actual snapping pie
-# TODO: orientation/pivot pie
+# TODO: snapping pie
+# TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
 
 
 class PieModes(Menu):
@@ -54,6 +52,7 @@ class PieModes(Menu):
                     box = pie.split()
                     column = box.column()
                     column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
+
                 else:
                     pie.separator()
 
@@ -184,16 +183,16 @@ class PieSave(Menu):
 
     def draw_center_column_top(self, col):
         row = col.split(factor=0.25)
-        row.label(text="Alembic")
+        row.label(text="OBJ")
         r = row.row(align=True)
-        r.operator("wm.alembic_import", text="Import", icon_value=get_icon('import'))
-        r.operator("wm.alembic_export", text="Export", icon_value=get_icon('export'))
+        r.operator("import_scene.obj", text="Import", icon_value=get_icon('import'))
+        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export'))
 
         row = col.split(factor=0.25)
-        row.label(text="Collada")
+        row.label(text="FBX")
         r = row.row(align=True)
-        r.operator("wm.collada_import", text="Import", icon_value=get_icon('import'))
-        r.operator("wm.collada_export", text="Export", icon_value=get_icon('export'))
+        r.operator("import_scene.fbx", text="Import", icon_value=get_icon('import'))
+        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export'))
 
     def draw_center_column_bottom(self, col):
         row = col.split(factor=0.5)
@@ -628,6 +627,14 @@ class PieViews(Menu):
         row = col.row()
         row.scale_y = 1.5
         row.operator("machin3.smart_view_cam", text="Smart View Cam", icon='VISIBLE_IPO_ON')
+
+        if view.region_3d.view_perspective == 'CAMERA':
+            cams = [obj for obj in scene.objects if obj.type == "CAMERA"]
+
+            if len(cams) > 1:
+                row = col.row()
+                row.operator("machin3.next_cam", text="(Q) Previous Cam").previous = True
+                row.operator("machin3.next_cam", text="(W) Next Cam").previous = False
 
 
         row = col.split()

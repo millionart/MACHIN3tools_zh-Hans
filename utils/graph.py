@@ -38,8 +38,8 @@ def get_shortest_path(bm, vstart, vend, topo=False, select=False):
         # with topo you can exit as soon as you hit the vend, without topo you can't, because the shorter distance my involve more vert hops
         # while (topo and vstart != vend) or (not topo and unknownverts):
         while unknownverts:
-            # sorting doesnt actually be required but it was in the original source
-            # I question why the list needs to be sorted by index at all. also, doing it via this lambda function is very slow for some reason
+            # sorting actually doesn't seem to  be required, but it was in the original source
+            # I question why the list needs to be sorted by index at all. also, doing it via the lambda function is very slow for some reason
             # unknownverts.sort(key=lambda x: x[1].index)
 
             # get the next vert that is closest to vstart
@@ -83,12 +83,13 @@ def get_shortest_path(bm, vstart, vend, topo=False, select=False):
 
     mg = build_mesh_graph(verts, edges, topo)
 
-    # [(shortest dist from s (start vert) to vert, vert)]
+    # vert list, shortest dist from vstart to vend
     path = dijkstra(mg, vstart, vend, topo)
 
     # remove duplicates, keeps order, see https://stackoverflow.com/a/480227
     path = f7(path)
 
+    # optionally select the path
     if select:
         for v in path:
             v.select = True

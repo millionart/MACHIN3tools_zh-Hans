@@ -7,8 +7,8 @@ from .. utils import MACHIN3 as m3
 # TODO: bone support? you can't select a pose bone when in object mode
 
 modeitems = [("ACTIVE", "to Active", ""),
-             ("FLOOR", "Floor", ""),
-             ("CURSOR", "Cursor", "")]
+             ("FLOOR", "Floor", "")]
+             # ("CURSOR", "Cursor", "")]
 
 
 class Align(bpy.types.Operator):
@@ -92,9 +92,9 @@ class Align(bpy.types.Operator):
             self.put_on_floor(sel)
 
 
-        elif self.mode == "CURSOR":
+        # elif self.mode == "CURSOR":
             # TODO: align_to_cursor
-            pass
+            # pass
 
         return {'FINISHED'}
 

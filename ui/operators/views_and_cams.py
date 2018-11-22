@@ -1,5 +1,5 @@
 import bpy
-from bpy.props import EnumProperty
+from bpy.props import EnumProperty, BoolProperty
 from ... utils import MACHIN3 as m3
 
 
@@ -55,11 +55,11 @@ class SmartViewCam(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
-        scene_cams = [obj for obj in context.scene.objects if obj.type == "CAMERA"]
+        cams = [obj for obj in context.scene.objects if obj.type == "CAMERA"]
         view = context.space_data
 
         # create camera from view
-        if not scene_cams or event.alt:
+        if not cams or event.alt:
             bpy.ops.object.camera_add()
             context.scene.camera = context.active_object
             bpy.ops.view3d.camera_to_view()
@@ -79,5 +79,45 @@ class SmartViewCam(bpy.types.Operator):
 
             bpy.ops.view3d.view_camera()
             bpy.ops.view3d.view_center_camera()
+
+        return {'FINISHED'}
+
+
+class NextCam(bpy.types.Operator):
+    bl_idname = "machin3.next_cam"
+    bl_label = "MACHIN3: Next Cam"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    previous: BoolProperty(name="Previous", default=False)
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.region_3d.view_perspective == 'CAMERA'
+
+    def execute(self, context):
+        cams = sorted([obj for obj in context.scene.objects if obj.type == "CAMERA"], key=lambda x: x.name)
+
+        if len(cams) > 1:
+            active = context.scene.camera
+
+            print("active:", active)
+
+            idx = cams.index(active)
+
+            # next cam
+            if not self.previous:
+                idx = 0 if idx == len(cams) - 1 else idx + 1
+
+            # previous cam
+            else:
+                idx = len(cams) - 1 if idx == 0 else idx - 1
+
+
+            newcam = cams[idx]
+
+            context.scene.camera = newcam
+
+            bpy.ops.view3d.view_center_camera()
+
 
         return {'FINISHED'}

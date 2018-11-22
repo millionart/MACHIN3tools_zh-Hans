@@ -66,6 +66,10 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "wm.doc_view_manual_ui_context":
                     kmi.active = False
 
+            for kmi in km.keymap_items:
+                if kmi.idname == "wm.save_as_mainfile":
+                    kmi.active = False
+
 
             # SCREEN
 
