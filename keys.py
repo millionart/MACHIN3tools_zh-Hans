@@ -14,7 +14,8 @@ keys = {"SMART_VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "mach
                    {"label": "Z Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Z", "value": "PRESS", "alt": True, "shift": True, "properties": [("use_x", False), ("use_y", False), ("use_z", True)]}],
         "ALIGN": [{"keymap": "Object Mode", "idname": "machin3.align", "type": "A", "value": "PRESS", "alt": True}],
 
-        "MODES_PIE": [{"keymap": "Object Non-modal", "idname": "wm.call_menu_pie", "type": "TAB", "value": "PRESS", "properties": [("name", "MACHIN3_MT_modes_pie")]}],
+        "MODES_PIE": [{"label": "3D View", "keymap": "Object Non-modal", "idname": "wm.call_menu_pie", "type": "TAB", "value": "PRESS", "properties": [("name", "MACHIN3_MT_modes_pie")]},
+                      {"label": "Image Editor", "keymap": "Image", "space_type": "IMAGE_EDITOR", "idname": "wm.call_menu_pie", "type": "TAB", "value": "PRESS", "properties": [("name", "MACHIN3_MT_modes_pie")]}],
         "SAVE_PIE": [{"keymap": "Window", "idname": "wm.call_menu_pie", "type": "S", "value": "PRESS", "ctrl": True, "properties": [("name", "MACHIN3_MT_save_pie")]}],
         "SHADING_PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "PAGE_UP", "value": "PRESS", "properties": [("name", "MACHIN3_MT_shading_pie")]}],
         "VIEWS_PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "PAGE_DOWN", "value": "PRESS", "properties": [("name", "MACHIN3_MT_views_pie")]}],

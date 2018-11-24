@@ -1,5 +1,9 @@
 import bpy
+from bpy.props import StringProperty
 from ... utils import MACHIN3 as m3
+
+
+# TODO: cavity toggle
 
 
 class EditMode(bpy.types.Operator):
@@ -14,7 +18,6 @@ class EditMode(bpy.types.Operator):
             bpy.ops.object.mode_set(mode="EDIT")
 
             viewprefs.use_rotate_around_active = False
-
 
 
         elif context.mode == "EDIT_MESH":
@@ -88,5 +91,49 @@ class FaceMode(bpy.types.Operator):
 
         if m3.M3_prefs().obj_mode_rotate_around_active:
             context.user_preferences.view.use_rotate_around_active = False
+
+        return {'FINISHED'}
+
+
+class ImageMode(bpy.types.Operator):
+    bl_idname = "machin3.image_mode"
+    bl_label = "MACHIN3: Image Mode"
+    bl_options = {'REGISTER'}
+
+    mode: StringProperty()
+
+    def execute(self, context):
+        view = context.space_data
+        active = context.active_object
+
+        view.mode = self.mode
+
+        if self.mode == "UV" and active:
+            if active.mode == "OBJECT":
+                bpy.ops.object.mode_set(mode="EDIT")
+                bpy.ops.mesh.select_all(action="SELECT")
+
+        return {'FINISHED'}
+
+
+class UVMode(bpy.types.Operator):
+    bl_idname = "machin3.uv_mode"
+    bl_label = "MACHIN3: UV Mode"
+    bl_options = {'REGISTER'}
+
+    mode: StringProperty()
+
+    def execute(self, context):
+        toolsettings = context.scene.tool_settings
+        view = context.space_data
+
+        if view.mode != "UV":
+            view.mode = "UV"
+
+        if toolsettings.use_uv_select_sync:
+            bpy.ops.mesh.select_mode(type=self.mode.replace("VERTEX", "VERT"))
+
+        else:
+            toolsettings.uv_select_mode = self.mode
 
         return {'FINISHED'}

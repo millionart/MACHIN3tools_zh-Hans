@@ -17,44 +17,111 @@ class PieModes(Menu):
 
         active = context.active_object
 
+        area = context.area
+
+        # print(area.type)V
+
+
+        # for s in area.spaces:
+            # print(s, s.type)
+
+
+        # print(context.mode)
+
+
         if active:
+
             if active.type == 'MESH':
-                pie = layout.menu_pie()
 
-                # 4 - LEFT
-                pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
+                if context.area.type == "VIEW_3D":
 
-                # 6 - RIGHT
-                pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
+                    pie = layout.menu_pie()
 
-                # 2 - BOTTOM
-                pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
+                    # 4 - LEFT
+                    pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
 
-                # 8 - TOP
+                    # 6 - RIGHT
+                    pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
 
-                text, icon = ("Edit", get_icon('edit_mesh')) if active.mode == "OBJECT" else ("Object", get_icon('object'))
-                pie.operator("machin3.edit_mode", text=text, icon_value=icon)
+                    # 2 - BOTTOM
+                    pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
 
-                # 7 - TOP - LEFT
-                if bpy.context.object.mode == "EDIT":
-                    pie.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
-                else:
+                    # 8 - TOP
+
+                    text, icon = ("Edit", get_icon('edit_mesh')) if active.mode == "OBJECT" else ("Object", get_icon('object'))
+                    pie.operator("machin3.edit_mode", text=text, icon_value=icon)
+
+                    # 7 - TOP - LEFT
+                    if bpy.context.object.mode == "EDIT":
+                        pie.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
+                    else:
+                        pie.separator()
+
+                    # 9 - TOP - RIGHT
                     pie.separator()
 
-                # 9 - TOP - RIGHT
-                pie.separator()
-
-                # 1 - BOTTOM - LEFT
-                pie.separator()
-
-                # 3 - BOTTOM - RIGHT
-                if bpy.context.object.mode == "EDIT":
-                    box = pie.split()
-                    column = box.column()
-                    column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
-
-                else:
+                    # 1 - BOTTOM - LEFT
                     pie.separator()
+
+                    # 3 - BOTTOM - RIGHT
+                    if bpy.context.object.mode == "EDIT":
+                        box = pie.split()
+                        column = box.column()
+                        column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
+
+                    else:
+                        pie.separator()
+
+
+                if context.area.type == "IMAGE_EDITOR":
+                    pie = layout.menu_pie()
+
+                    view = context.space_data
+                    toolsettings = context.scene.tool_settings
+
+                    if active.mode == "OBJECT":
+
+                        # 4 - LEFT
+                        pie.operator("machin3.image_mode", text="UV Edit", icon="GROUP_UVS").mode = "UV"
+
+                        # 6 - RIGHT
+                        pie.operator("machin3.image_mode", text="Paint", icon="TPAINT_HLT").mode = "PAINT"
+
+                        # 2 - BOTTOM)
+                        pie.operator("machin3.image_mode", text="Mask", icon="MOD_MASK").mode = "MASK"
+
+                        # 8 - TOP
+                        pie.operator("machin3.image_mode", text="View", icon="FILE_IMAGE").mode = "VIEW"
+
+
+                    elif active.mode == "EDIT":
+                        # 4 - LEFT
+                        pie.operator("machin3.uv_mode", text="Vertex", icon_value=get_icon('vertex')).mode = "VERTEX"
+
+                        # 6 - RIGHT
+                        pie.operator("machin3.uv_mode", text="Face", icon_value=get_icon('face')).mode = "FACE"
+
+                        # 2 - BOTTOM
+                        pie.operator("machin3.uv_mode", text="Edge", icon_value=get_icon('edge')).mode = "EDGE"
+
+                        # 8 - TOP
+                        pie.operator("object.mode_set", text="Object", icon_value=get_icon('object')).mode = "OBJECT"
+
+                        # 7 - TOP - LEFT
+                        pie.prop(context.scene.M3, "uv_sync_select", text="Sync Selection", icon="UV_SYNC_SELECT")
+
+                        # 9 - TOP - RIGHT
+                        if toolsettings.use_uv_select_sync:
+                            pie.separator()
+                        else:
+                            pie.operator("machin3.uv_mode", text="Island", icon_value=get_icon('island')).mode = "ISLAND"
+
+                        # 1 - BOTTOM - LEFT
+                        pie.separator()
+
+                        # 3 - BOTTOM - RIGHT
+                        pie.separator()
+
 
 
             elif active.type == 'CURVE':
@@ -269,7 +336,6 @@ class PieShading(Menu):
             b = box.box()
             column = b.column()
             self.draw_eevee(context, view, column)
-
 
         # 7 - TOP - LEFT
         pie.separator()

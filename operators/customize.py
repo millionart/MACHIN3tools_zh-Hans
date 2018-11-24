@@ -168,6 +168,23 @@ class Customize(bpy.types.Operator):
                         kmi.active = False
 
 
+            # OBJECT MODE
+
+            km = kc.keymaps.get("Object Non-modal")
+            for kmi in km.keymap_items:
+                if kmi.idname == "object.mode_set":
+                    kmi.active = False
+
+            # IMAGE
+
+            km = kc.keymaps.get("Image")
+            for kmi in km.keymap_items:
+                if kmi.idname == "object.mode_set":
+                    kmi.active = False
+
+
+
+
             # MESH
 
             km = kc.keymaps.get("Mesh")
@@ -277,7 +294,7 @@ class Customize(bpy.types.Operator):
                         kmi.active = False
 
 
-            # UV
+            # UV EDITOR
 
             km = kc.keymaps.get("UV Editor")
             for kmi in km.keymap_items:
@@ -287,6 +304,49 @@ class Customize(bpy.types.Operator):
 
                     elif kmi.properties.action == "DESELECT":
                         kmi.active = False
+
+                if kmi.idname == "mesh.select_mode":
+                    kmi.active = False
+
+                if kmi.idname == "wm.context_set_enum":
+                    kmi.active = False
+
+                if kmi.idname == "uv.select":
+                    kmi.value = "PRESS"
+
+                if kmi.idname == "uv.select_loop":
+                    kmi.value = "PRESS"
+
+                if kmi.idname == "uv.select_more":
+                    kmi.type = "WHEELUPMOUSE"
+                    kmi.shift = True
+                    kmi.ctrl = False
+
+                if kmi.idname == "uv.select_less":
+                    kmi.type = "WHEELDOWNMOUSE"
+                    kmi.shift = True
+                    kmi.ctrl = False
+
+                if kmi.idname == "transform.translate":
+                    if kmi.map_type == "TWEAK":
+                        kmi.active = False
+
+                if kmi.idname == "uv.cursor_set":
+                    kmi.alt = True
+                    kmi.shift = False
+
+
+            # IMAGE EDITOR TOOL: UV, CURSOR
+
+            km = kc.keymaps.get("Image Editor Tool: Uv, Cursor")
+            for kmi in km.keymap_items:
+                if kmi.idname == "transform.translate":
+                    if kmi.map_type == "TWEAK":
+                        kmi.active = False
+
+                if kmi.idname == "uv.cursor_set":
+                    kmi.active = False
+
 
         def add_keymaps(kc):
             # MESH
