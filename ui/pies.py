@@ -932,7 +932,6 @@ class PieWorkspace(Menu):
 
         # 6 - RIGHT
         pie.separator()
-        # pie.operator("machin3.layout_switch", text="Compositing", icon='NODETREE').variable="M3 compositing"
 
         # 2 - BOTTOM
         pie.operator("machin3.switch_workspace", text="Scripting", icon='CONSOLE').name="Scripting"
@@ -951,4 +950,3 @@ class PieWorkspace(Menu):
 
         # 3 - BOTTOM - RIGHT
         pie.separator()
-        # pie.operator("machin3.layout_switch", text="Video Editing", icon='RENDER_ANIMATION').variable="M3 video"
