@@ -25,7 +25,7 @@ bl_info = {
     "location": "",
     "description": "Streamlining Blender.",
     "warning": "",
-    "wiki_url": "https://github.com/machin3io/MACHIN3tools",
+    "wiki_url": "https://machin3.io/MACHIN3tools/docs",
     "category": "Mesh"}
 
 

@@ -147,10 +147,7 @@ class AppendWorld(bpy.types.Operator):
 
         fullpath = "%s/%s" % (path, "World")
 
-        sel = context.selected_objects
-        active = context.active_object
-
-        bpy.ops.wm.append(directory=fullpath, filename=name)
+        bpy.ops.wm.append(directory=fullpath, filename=name, autoselect=False)
 
         world = bpy.data.worlds.get(name)
 
@@ -158,12 +155,6 @@ class AppendWorld(bpy.types.Operator):
             bpy.context.scene.world = world
         else:
             self.report({'ERROR'}, "World '%s' could not be appended.\nMake sure a world of that name exists in the world source file." % (name))
-
-        # resetting original selection and active which is lost after the append op
-        for obj in sel:
-            obj.select_set(True)
-
-        bpy.context.view_layer.objects.active = active
 
         return {'FINISHED'}
 
@@ -195,8 +186,6 @@ class AppendMaterial(bpy.types.Operator):
 
         fullpath = "%s/%s" % (path, "Material")
 
-        sel = context.selected_objects
-        active = context.active_object
 
         if name == "ALL":
             all_names = [mat.name for mat in m3.M3_prefs().appendmats]
@@ -205,26 +194,19 @@ class AppendMaterial(bpy.types.Operator):
                 n = name.replace("-", "")
                 bpy.ops.wm.append(directory=fullpath, filename=n)
         else:
-            bpy.ops.wm.append(directory=fullpath, filename=name)
+            bpy.ops.wm.append(directory=fullpath, filename=name, autoselect=False)
 
             mat = bpy.data.materials.get(name)
 
-            for obj in sel:
-                if obj.type == "MESH":
-                    obj.select_set(True)
+            if mat:
+                if self.applymaterial:
+                    for obj in context.selected_objects:
+                        if not obj.material_slots:
+                            obj.data.materials.append(mat)
 
-                    if self.applymaterial:
-                        if mat:
-                            if not obj.material_slots:
-                                bpy.context.view_layer.objects.active = obj
-                                bpy.ops.object.material_slot_add()
-
-                            obj.material_slots[0].material = mat
-                        else:
-                            self.report({'ERROR'}, "Material '%s' could not be appended.\nMake sure a material of that name exists in the material source file." % (name))
-
-
-        bpy.context.view_layer.objects.active = active
+                        obj.material_slots[0].material = mat
+            else:
+                self.report({'ERROR'}, "Material '%s' could not be appended.\nMake sure a material of that name exists in the material source file." % (name))
 
         return {'FINISHED'}
 

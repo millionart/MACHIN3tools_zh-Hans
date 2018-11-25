@@ -12,6 +12,22 @@ preferences_tabs = [("GENERAL", "General", ""),
                     ("ABOUT", "About", "")]
 
 
+links = [("Documentation", "https://machin3.io/MACHIN3tools/docs/", "INFO"),
+         ("MACHINƎ.io", "https://machin3.io", "WORLD"),
+         ("Youtube", "https://www.youtube.com/channel/UC4yaFzFDILd2yAqOWRuLOvA", "NONE"),
+         ("Twitter", "https://twitter.com/machin3io", "NONE"),
+         ("", "", ""),
+         ("", "", ""),
+         ("DECALmachine", "https://machin3.io/DECALmachine", "NONE"),
+         ("MESHmachine", "https://machin3.io/MESHmachine", "NONE"),
+         ("", "", ""),
+         ("", "", ""),
+         ("MACHINƎ @ Artstation", "https://www.artstation.com/artist/machin3", "NONE"),
+         ("", "", ""),
+         ]
+
+
+
 class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     path = os.path.dirname(os.path.realpath(__file__))
     bl_idname = os.path.basename(path)
@@ -179,7 +195,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.draw_keymaps(box)
 
         elif self.tabs == "ABOUT":
-            self.draw_general(box)
+            self.draw_about(box)
 
     def draw_general(self, box):
         split = box.split()
@@ -399,7 +415,21 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             b.label(text="No keymappings created, because none the pies have been activated.")
 
     def draw_about(self, box):
-        pass
+        column = box.column()
+
+        for idx, (text, url, icon) in enumerate(links):
+            if idx % 2 == 0:
+                row = column.row()
+                if text == "":
+                    row.separator()
+                else:
+                    row.operator("wm.url_open", text=text, icon=icon).url = url
+            else:
+                if text == "":
+                    row.separator()
+                else:
+                    row.operator("wm.url_open", text=text, icon=icon).url = url
+
 
     def draw_tool_keymaps(self, kc, keysdict, layout):
         drawn = False

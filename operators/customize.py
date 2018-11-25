@@ -359,7 +359,7 @@ class Customize(bpy.types.Operator):
             kmi.properties.ring = True
 
             kmi = km.keymap_items.new("mesh.subdivide", "TWO", "PRESS", alt=True)
-            kmi.properties.smoothness = 1
+            # kmi.properties.smoothness = 1
 
             kmi = km.keymap_items.new("mesh.bridge_edge_loops", "TWO", "PRESS", ctrl=True)
 
