@@ -13,11 +13,19 @@ class EditMode(bpy.types.Operator):
 
     def execute(self, context):
         viewprefs = context.user_preferences.view
+        shading = context.space_data.shading
+
+        rotate_around_active = m3.M3_prefs().obj_mode_rotate_around_active
+        toggle_cavity = m3.M3_prefs().toggle_cavity
 
         if context.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="EDIT")
 
-            viewprefs.use_rotate_around_active = False
+            if rotate_around_active:
+                viewprefs.use_rotate_around_active = False
+
+            if toggle_cavity:
+                shading.show_cavity = False
 
 
         elif context.mode == "EDIT_MESH":
@@ -26,8 +34,11 @@ class EditMode(bpy.types.Operator):
 
             bpy.ops.object.mode_set(mode="OBJECT")
 
-            if m3.M3_prefs().obj_mode_rotate_around_active:
+            if rotate_around_active:
                 viewprefs.use_rotate_around_active = True
+
+            if toggle_cavity:
+                shading.show_cavity = True
 
         return {'FINISHED'}
 
@@ -50,6 +61,9 @@ class VertexMode(bpy.types.Operator):
         if m3.M3_prefs().obj_mode_rotate_around_active:
             context.user_preferences.view.use_rotate_around_active = False
 
+        if m3.M3_prefs().toggle_cavity:
+            context.space_data.shading.show_cavity = False
+
         return {'FINISHED'}
 
 
@@ -71,6 +85,9 @@ class EdgeMode(bpy.types.Operator):
         if m3.M3_prefs().obj_mode_rotate_around_active:
             context.user_preferences.view.use_rotate_around_active = False
 
+        if m3.M3_prefs().toggle_cavity:
+            context.space_data.shading.show_cavity = False
+
         return {'FINISHED'}
 
 
@@ -91,6 +108,10 @@ class FaceMode(bpy.types.Operator):
 
         if m3.M3_prefs().obj_mode_rotate_around_active:
             context.user_preferences.view.use_rotate_around_active = False
+
+
+        if m3.M3_prefs().toggle_cavity:
+            context.space_data.shading.show_cavity = False
 
         return {'FINISHED'}
 
