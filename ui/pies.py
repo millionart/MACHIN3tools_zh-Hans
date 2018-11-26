@@ -1,5 +1,6 @@
 import bpy
 from bpy.types import Menu
+import os
 from .. utils.registration import get_prefs
 from .. utils.ui import get_icon
 
@@ -59,7 +60,7 @@ class PieModes(Menu):
                         column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
 
                     else:
-                        pie.separator()
+                       pie.separator()
 
 
                 if context.area.type == "IMAGE_EDITOR":
@@ -483,7 +484,7 @@ class PieShading(Menu):
         elif view.shading.type == "MATERIAL":
 
             # use scene lights and world
-            studio_worlds = [w for w in context.user_preferences.studio_lights if "datafiles/studiolights/world" in w.path]
+            studio_worlds = [w for w in context.user_preferences.studio_lights if os.path.basename(os.path.dirname(w.path)) == "world"]
 
             if any([bpy.data.lights, studio_worlds]):
                 row = col.row()
@@ -530,40 +531,6 @@ class PieShading(Menu):
                                             row.prop(color, "default_value", text="")
 
                                         col.separator()
-
-            """
-
-            # eevee settings
-
-            icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
-            col.prop(context.scene.eevee, "use_ssr", icon=icon)
-            if context.scene.eevee.use_ssr:
-                row = col.row(align=True)
-                row.prop(context.scene.eevee, "ssr_thickness")
-                row.prop(context.scene.eevee, "use_ssr_halfres")
-
-
-            icon = "TRIA_DOWN" if context.scene.eevee.use_gtao else "TRIA_RIGHT"
-            col.prop(context.scene.eevee, "use_gtao", icon=icon)
-            if context.scene.eevee.use_gtao:
-                row = col.row(align=True)
-                row.prop(context.scene.eevee, "gtao_distance")
-                row.prop(context.scene.eevee, "gtao_factor")
-
-            icon = "TRIA_DOWN" if context.scene.eevee.use_bloom else "TRIA_RIGHT"
-            col.prop(context.scene.eevee, "use_bloom", icon=icon)
-            if context.scene.eevee.use_bloom:
-                row = col.row(align=True)
-                row.prop(context.scene.eevee, "bloom_threshold")
-                row.prop(context.scene.eevee, "bloom_radius")
-
-            icon = "TRIA_DOWN" if context.scene.eevee.use_volumetric else "TRIA_RIGHT"
-            col.prop(context.scene.eevee, "use_volumetric", icon=icon)
-            if context.scene.eevee.use_volumetric:
-                row = col.row(align=True)
-                row.prop(context.scene.eevee, "volumetric_start")
-                row.prop(context.scene.eevee, "volumetric_end")
-            """
 
 
         elif view.shading.type == "RENDERED":
