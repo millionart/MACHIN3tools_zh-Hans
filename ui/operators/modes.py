@@ -1,5 +1,6 @@
 import bpy
 from bpy.props import StringProperty
+from ... utils.registration import get_prefs
 from ... utils import MACHIN3 as m3
 
 
@@ -13,11 +14,19 @@ class EditMode(bpy.types.Operator):
 
     def execute(self, context):
         viewprefs = context.user_preferences.view
+        shading = context.space_data.shading
+
+        rotate_around_active = get_prefs().obj_mode_rotate_around_active
+        toggle_cavity = get_prefs().toggle_cavity
 
         if context.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="EDIT")
 
-            viewprefs.use_rotate_around_active = False
+            if rotate_around_active:
+                viewprefs.use_rotate_around_active = False
+
+            if toggle_cavity:
+                shading.show_cavity = False
 
 
         elif context.mode == "EDIT_MESH":
@@ -26,8 +35,11 @@ class EditMode(bpy.types.Operator):
 
             bpy.ops.object.mode_set(mode="OBJECT")
 
-            if m3.M3_prefs().obj_mode_rotate_around_active:
+            if rotate_around_active:
                 viewprefs.use_rotate_around_active = True
+
+            if toggle_cavity:
+                shading.show_cavity = True
 
         return {'FINISHED'}
 
@@ -47,8 +59,11 @@ class VertexMode(bpy.types.Operator):
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='VERT')
 
 
-        if m3.M3_prefs().obj_mode_rotate_around_active:
+        if get_prefs().obj_mode_rotate_around_active:
             context.user_preferences.view.use_rotate_around_active = False
+
+        if get_prefs().toggle_cavity:
+            context.space_data.shading.show_cavity = False
 
         return {'FINISHED'}
 
@@ -68,8 +83,11 @@ class EdgeMode(bpy.types.Operator):
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='EDGE')
 
 
-        if m3.M3_prefs().obj_mode_rotate_around_active:
+        if get_prefs().obj_mode_rotate_around_active:
             context.user_preferences.view.use_rotate_around_active = False
+
+        if get_prefs().toggle_cavity:
+            context.space_data.shading.show_cavity = False
 
         return {'FINISHED'}
 
@@ -89,8 +107,12 @@ class FaceMode(bpy.types.Operator):
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='FACE')
 
 
-        if m3.M3_prefs().obj_mode_rotate_around_active:
+        if get_prefs().obj_mode_rotate_around_active:
             context.user_preferences.view.use_rotate_around_active = False
+
+
+        if get_prefs().toggle_cavity:
+            context.space_data.shading.show_cavity = False
 
         return {'FINISHED'}
 

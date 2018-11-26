@@ -6,6 +6,19 @@ from .. keys import keys as keysdict
 from .. classes import classes as classesdict
 
 
+
+def get_path():
+    return os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+
+def get_name():
+    return os.path.basename(get_path())
+
+
+def get_prefs():
+    return bpy.context.user_preferences.addons[get_name()].preferences
+
+
 # CLASS REGISTRATION
 
 def register_classes(classlists, debug=False):
@@ -136,7 +149,7 @@ def get_keymaps(keylist):
 
 
 def register_icons():
-    path = os.path.join(m3.M3_prefs().path, "icons")
+    path = os.path.join(get_prefs().path, "icons")
     icons = previews.new()
 
     for i in sorted(os.listdir(path)):
@@ -335,7 +348,7 @@ def get_pie_menus():
 # GET SPECIFIC TOOLS
 
 def get_smart_vert(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_smart_vert:
+    if get_prefs().activate_smart_vert:
         from .. operators.smart_vert import SmartVert
 
         classlists.append(classesdict["SMART_VERT"])
@@ -346,7 +359,7 @@ def get_smart_vert(classlists=[], keylists=[], count=0):
 
 
 def get_smart_edge(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_smart_edge:
+    if get_prefs().activate_smart_edge:
         from .. operators.smart_edge import SmartEdge
 
         classlists.append(classesdict["SMART_EDGE"])
@@ -357,7 +370,7 @@ def get_smart_edge(classlists=[], keylists=[], count=0):
 
 
 def get_smart_face(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_smart_face:
+    if get_prefs().activate_smart_face:
         classlists.append(classesdict["SMART_FACE"])
         keylists.append(keysdict["SMART_FACE"])
         count +=1
@@ -366,7 +379,7 @@ def get_smart_face(classlists=[], keylists=[], count=0):
 
 
 def get_clean_up(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_clean_up:
+    if get_prefs().activate_clean_up:
         classlists.append(classesdict["CLEAN_UP"])
         keylists.append(keysdict["CLEAN_UP"])
         count +=1
@@ -375,7 +388,7 @@ def get_clean_up(classlists=[], keylists=[], count=0):
 
 
 def get_clipping_toggle(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_clipping_toggle:
+    if get_prefs().activate_clipping_toggle:
         classlists.append(classesdict["CLIPPING_TOGGLE"])
         keylists.append(keysdict["CLIPPING_TOGGLE"])
         count +=1
@@ -384,7 +397,7 @@ def get_clipping_toggle(classlists=[], keylists=[], count=0):
 
 
 def get_focus(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_focus:
+    if get_prefs().activate_focus:
         classlists.append(classesdict["FOCUS"])
         keylists.append(keysdict["FOCUS"])
         count +=1
@@ -393,7 +406,7 @@ def get_focus(classlists=[], keylists=[], count=0):
 
 
 def get_mirror(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_mirror:
+    if get_prefs().activate_mirror:
         classlists.append(classesdict["MIRROR"])
         keylists.append(keysdict["MIRROR"])
         count +=1
@@ -402,7 +415,7 @@ def get_mirror(classlists=[], keylists=[], count=0):
 
 
 def get_align(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_align:
+    if get_prefs().activate_align:
         classlists.append(classesdict["ALIGN"])
         keylists.append(keysdict["ALIGN"])
         count +=1
@@ -411,7 +424,7 @@ def get_align(classlists=[], keylists=[], count=0):
 
 
 def get_customize(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_customize:
+    if get_prefs().activate_customize:
         classlists.append(classesdict["CUSTOMIZE"])
         count += 1
 
@@ -421,7 +434,7 @@ def get_customize(classlists=[], keylists=[], count=0):
 # GET SPECIFIC PIES
 
 def get_modes_pie(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_modes_pie:
+    if get_prefs().activate_modes_pie:
         classlists.append(classesdict["MODES_PIE"])
         keylists.append(keysdict["MODES_PIE"])
         count += 1
@@ -430,7 +443,7 @@ def get_modes_pie(classlists=[], keylists=[], count=0):
 
 
 def get_save_pie(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_save_pie:
+    if get_prefs().activate_save_pie:
         classlists.append(classesdict["SAVE_PIE"])
         keylists.append(keysdict["SAVE_PIE"])
         count += 1
@@ -439,7 +452,7 @@ def get_save_pie(classlists=[], keylists=[], count=0):
 
 
 def get_shading_pie(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_shading_pie:
+    if get_prefs().activate_shading_pie:
         classlists.append(classesdict["SHADING_PIE"])
         keylists.append(keysdict["SHADING_PIE"])
         count += 1
@@ -448,7 +461,7 @@ def get_shading_pie(classlists=[], keylists=[], count=0):
 
 
 def get_views_pie(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_views_pie:
+    if get_prefs().activate_views_pie:
         # from .. ui.pies import PieViews
         # from .. ui.operators.views_and_cams import ViewAxis, MakeCamActive, SmartViewCam
 
@@ -463,7 +476,7 @@ def get_views_pie(classlists=[], keylists=[], count=0):
 
 
 def get_align_pie(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_align_pie:
+    if get_prefs().activate_align_pie:
         classlists.append(classesdict["ALIGN_PIE"])
         keylists.append(keysdict["ALIGN_PIE"])
         count += 1
@@ -472,7 +485,7 @@ def get_align_pie(classlists=[], keylists=[], count=0):
 
 
 def get_cursor_pie(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_cursor_pie:
+    if get_prefs().activate_cursor_pie:
         classlists.append(classesdict["CURSOR_PIE"])
         keylists.append(keysdict["CURSOR_PIE"])
         count += 1
@@ -481,7 +494,7 @@ def get_cursor_pie(classlists=[], keylists=[], count=0):
 
 
 def get_workspace_pie(classlists=[], keylists=[], count=0):
-    if m3.M3_prefs().activate_workspace_pie:
+    if get_prefs().activate_workspace_pie:
         classlists.append(classesdict["WORKSPACE_PIE"])
         keylists.append(keysdict["WORKSPACE_PIE"])
         count += 1

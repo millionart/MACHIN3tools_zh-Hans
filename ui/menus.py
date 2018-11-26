@@ -1,6 +1,5 @@
 import bpy
-from ..utils import MACHIN3 as m3
-
+from .. utils.registration import get_prefs
 
 
 class MenuAppendMaterials(bpy.types.Menu):
@@ -10,7 +9,7 @@ class MenuAppendMaterials(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
 
-        names = [mat.name for mat in m3.M3_prefs().appendmats]
+        names = [mat.name for mat in get_prefs().appendmats]
 
         if names:
             names.insert(0, "ALL")

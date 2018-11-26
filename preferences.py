@@ -1,10 +1,9 @@
 import bpy
 from bpy.props import IntProperty, StringProperty, CollectionProperty, BoolProperty, EnumProperty
-import os
 import rna_keymap_ui
 from . properties import AppendMatsCollection
 from . utils.ui import get_icon
-from . utils.registration import activate
+from . utils.registration import activate, get_path, get_name
 
 
 preferences_tabs = [("GENERAL", "General", ""),
@@ -29,8 +28,8 @@ links = [("Documentation", "https://machin3.io/MACHIN3tools/docs/", "INFO"),
 
 
 class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
-    path = os.path.dirname(os.path.realpath(__file__))
-    bl_idname = os.path.basename(path)
+    path = get_path()
+    bl_idname = get_name()
 
     # CHECKS
 
@@ -132,7 +131,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     switchmatcap1: StringProperty(name="Matcap 1", update=update_switchmatcap1)
     switchmatcap2: StringProperty(name="Matcap 2", update=update_switchmatcap2)
 
-    obj_mode_rotate_around_active: BoolProperty(name="Rotate Around Selection, but only in object mode", default=True)
+    obj_mode_rotate_around_active: BoolProperty(name="Rotate Around Selection, but only in Object Mode", default=True)
+    toggle_cavity: BoolProperty(name="Toggle Cavity OFF in Edit Mode, ON in Object Mode", default=True)
 
     custom_theme: BoolProperty(name="Theme", default=True)
     custom_matcaps: BoolProperty(name="Matcaps and Default Shading", default=True)
@@ -330,6 +330,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             column = bb.column()
 
             column.prop(self, "obj_mode_rotate_around_active")
+            column.prop(self, "toggle_cavity")
 
 
         # SAVE PIE
@@ -429,7 +430,6 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
                     row.separator()
                 else:
                     row.operator("wm.url_open", text=text, icon=icon).url = url
-
 
     def draw_tool_keymaps(self, kc, keysdict, layout):
         drawn = False

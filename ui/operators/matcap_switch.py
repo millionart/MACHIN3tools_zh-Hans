@@ -1,4 +1,5 @@
 import bpy
+from ... utils.registration import get_prefs
 from ... utils import MACHIN3 as m3
 
 
@@ -14,8 +15,8 @@ class MatcapSwitch(bpy.types.Operator):
 
     def execute(self, context):
         shading = context.space_data.shading
-        matcap1 = m3.M3_prefs().switchmatcap1
-        matcap2 = m3.M3_prefs().switchmatcap2
+        matcap1 = get_prefs().switchmatcap1
+        matcap2 = get_prefs().switchmatcap2
 
         if matcap1 and matcap2 and "NOT FOUND" not in [matcap1, matcap2]:
             if shading.studio_light == matcap1:
