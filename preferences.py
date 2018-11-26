@@ -1,10 +1,9 @@
 import bpy
 from bpy.props import IntProperty, StringProperty, CollectionProperty, BoolProperty, EnumProperty
-import os
 import rna_keymap_ui
 from . properties import AppendMatsCollection
 from . utils.ui import get_icon
-from . utils.registration import activate
+from . utils.registration import activate, get_path, get_name
 
 
 preferences_tabs = [("GENERAL", "General", ""),
@@ -29,8 +28,8 @@ links = [("Documentation", "https://machin3.io/MACHIN3tools/docs/", "INFO"),
 
 
 class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
-    path = os.path.dirname(os.path.realpath(__file__))
-    bl_idname = os.path.basename(path)
+    path = get_path()
+    bl_idname = get_name()
 
     # CHECKS
 

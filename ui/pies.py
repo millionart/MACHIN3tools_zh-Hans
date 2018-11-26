@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Menu
-from .. utils import MACHIN3 as m3
+from .. utils.registration import get_prefs
 from .. utils.ui import get_icon
 
 # TODO: snapping pie
@@ -16,17 +16,6 @@ class PieModes(Menu):
         toolsettings = context.tool_settings
 
         active = context.active_object
-
-        area = context.area
-
-        # print(area.type)V
-
-
-        # for s in area.spaces:
-            # print(s, s.type)
-
-
-        # print(context.mode)
 
 
         if active:
@@ -76,7 +65,6 @@ class PieModes(Menu):
                 if context.area.type == "IMAGE_EDITOR":
                     pie = layout.menu_pie()
 
-                    view = context.space_data
                     toolsettings = context.scene.tool_settings
 
                     if active.mode == "OBJECT":
@@ -276,8 +264,8 @@ class PieSave(Menu):
 
         # append world and materials
 
-        appendworldpath = m3.M3_prefs().appendworldpath
-        appendmatspath = m3.M3_prefs().appendmatspath
+        appendworldpath = get_prefs().appendworldpath
+        appendmatspath = get_prefs().appendmatspath
 
         if any([appendworldpath, appendmatspath]):
             col.separator()

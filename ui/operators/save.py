@@ -3,6 +3,7 @@ from bpy.props import StringProperty, BoolProperty
 import os
 import re
 import time
+from ... utils.registration import get_prefs
 from ... utils import MACHIN3 as m3
 
 
@@ -134,7 +135,7 @@ class AppendWorld(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return m3.M3_prefs().appendworldpath and m3.M3_prefs().appendworldname
+        return get_prefs().appendworldpath and get_prefs().appendworldname
 
     def draw(self, context):
         layout = self.layout
@@ -142,8 +143,8 @@ class AppendWorld(bpy.types.Operator):
         column = layout.column()
 
     def execute(self, context):
-        path = m3.M3_prefs().appendworldpath
-        name = m3.M3_prefs().appendworldname
+        path = get_prefs().appendworldpath
+        name = get_prefs().appendworldname
 
         fullpath = "%s/%s" % (path, "World")
 
@@ -171,7 +172,7 @@ class AppendMaterial(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return m3.M3_prefs().appendmatspath
+        return get_prefs().appendmatspath
 
     def draw(self, context):
         layout = self.layout
@@ -181,14 +182,14 @@ class AppendMaterial(bpy.types.Operator):
         column.prop(self, "applymaterial")
 
     def execute(self, context):
-        path = m3.M3_prefs().appendmatspath
+        path = get_prefs().appendmatspath
         name = self.name
 
         fullpath = "%s/%s" % (path, "Material")
 
 
         if name == "ALL":
-            all_names = [mat.name for mat in m3.M3_prefs().appendmats]
+            all_names = [mat.name for mat in get_prefs().appendmats]
 
             for name in all_names:
                 n = name.replace("-", "")
@@ -219,11 +220,11 @@ class LoadWorldSource(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return m3.M3_prefs().appendworldpath
+        return get_prefs().appendworldpath
 
 
     def execute(self, context):
-        appendworldpath = m3.M3_prefs().appendworldpath
+        appendworldpath = get_prefs().appendworldpath
 
         if os.path.exists(appendworldpath):
             bpy.ops.wm.open_mainfile(filepath=appendworldpath, load_ui=True)
@@ -239,10 +240,10 @@ class LoadMaterialsSource(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return m3.M3_prefs().appendmatspath
+        return get_prefs().appendmatspath
 
     def execute(self, context):
-        appendmatspath = m3.M3_prefs().appendmatspath
+        appendmatspath = get_prefs().appendmatspath
 
         if os.path.exists(appendmatspath):
             bpy.ops.wm.open_mainfile(filepath=appendmatspath, load_ui=True)

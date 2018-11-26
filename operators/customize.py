@@ -1,6 +1,7 @@
 import bpy
 import os
 import shutil
+from .. utils.registration import get_prefs
 from .. utils import MACHIN3 as m3
 
 
@@ -18,7 +19,7 @@ class Customize(bpy.types.Operator):
         scriptspath = bpy.utils.user_resource('SCRIPTS')
         datafilespath = bpy.utils.user_resource('DATAFILES')
 
-        resourcespath = os.path.join(m3.M3_prefs().path, "resources")
+        resourcespath = os.path.join(get_prefs().path, "resources")
 
         # WINDOW (is read only)
         # bpy.context.window.screen.areas[0].regions[0].alignment = "TOP"
@@ -29,15 +30,15 @@ class Customize(bpy.types.Operator):
             bpy.ops.wm.tool_set_by_name(name="Cursor")
 
         # THEME
-        if m3.M3_prefs().custom_theme:
+        if get_prefs().custom_theme:
             self.theme(scriptspath, resourcespath)
 
         # MATCAPS + DEFAULT SHADING
-        if m3.M3_prefs().custom_matcaps:
+        if get_prefs().custom_matcaps:
             self.matcaps(context, resourcespath, datafilespath)
 
         # OVERLAYS
-        if m3.M3_prefs().custom_overlays:
+        if get_prefs().custom_overlays:
             self.overlays(context)
 
         # PREFERENCES
@@ -45,7 +46,7 @@ class Customize(bpy.types.Operator):
 
 
         # CUSTOM KEYMAPS
-        if m3.M3_prefs().custom_keymaps:
+        if get_prefs().custom_keymaps:
             self.keymaps(context)
 
 
@@ -371,12 +372,12 @@ class Customize(bpy.types.Operator):
 
         add_keymaps(kc)
 
-        m3.M3_prefs().custom_keymaps = False
+        get_prefs().custom_keymaps = False
 
     def preferences(self, context):
         prefs = context.user_preferences
 
-        if m3.M3_prefs().custom_preferences_interface:
+        if get_prefs().custom_preferences_interface:
             print("\n» Changing Preferences: Interface")
 
             v = prefs.view
@@ -386,7 +387,7 @@ class Customize(bpy.types.Operator):
             v.mini_axis_type = "MINIMAL"
 
             v.use_zoom_to_mouse = True
-            if m3.M3_prefs().obj_mode_rotate_around_active:
+            if get_prefs().obj_mode_rotate_around_active:
                 v.use_rotate_around_active = True
 
             v.pie_animation_timeout = 0
@@ -394,7 +395,7 @@ class Customize(bpy.types.Operator):
             v.use_quit_dialog = False
 
 
-        if m3.M3_prefs().custom_preferences_editing:
+        if get_prefs().custom_preferences_editing:
             print("\n» Changing Preferences: Editing")
 
             e = prefs.edit
@@ -402,7 +403,7 @@ class Customize(bpy.types.Operator):
             e.undo_steps = 64
 
 
-        if m3.M3_prefs().custom_preferences_input:
+        if get_prefs().custom_preferences_input:
             print("\n» Changing Preferences: Input")
 
             i = prefs.inputs
@@ -424,7 +425,7 @@ class Customize(bpy.types.Operator):
             kcprefs.select_mouse = "LEFT"
 
 
-        if m3.M3_prefs().custom_preferences_file:
+        if get_prefs().custom_preferences_file:
             print("\n» Changing Preferences: File")
 
             f = prefs.filepaths
@@ -435,7 +436,7 @@ class Customize(bpy.types.Operator):
             f.recent_files = 20
 
 
-        if m3.M3_prefs().custom_preferences_system:
+        if get_prefs().custom_preferences_system:
             print("\n» Changing Preferences: System")
 
             c = prefs.addons['cycles'].preferences
@@ -488,8 +489,8 @@ class Customize(bpy.types.Operator):
         context.user_preferences.studio_lights.refresh()
 
         if all([mc in matcaps for mc in ["matcap_base.exr", "matcap_shiny_red.exr"]]):
-            m3.M3_prefs().switchmatcap1 = "matcap_base.exr"
-            m3.M3_prefs().switchmatcap2 = "matcap_shiny_red.exr"
+            get_prefs().switchmatcap1 = "matcap_base.exr"
+            get_prefs().switchmatcap2 = "matcap_shiny_red.exr"
 
 
             print("\n» Setting up Viewport Shading")
@@ -535,6 +536,6 @@ class RestoreKeymaps(bpy.types.Operator):
             if km.is_user_modified:
                 km.restore_to_default()
 
-        m3.M3_prefs().dirty_keymaps = False
+        get_prefs().dirty_keymaps = False
 
         return {'FINISHED'}

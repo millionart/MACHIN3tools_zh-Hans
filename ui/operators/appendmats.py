@@ -1,11 +1,12 @@
 import bpy
 from bpy.props import StringProperty, EnumProperty
+from ... utils.registration import get_prefs
 from ... utils import MACHIN3 as m3
 
 
 def get_mat():
-    idx = m3.M3_prefs().appendmatsIDX
-    mats = m3.M3_prefs().appendmats
+    idx = get_prefs().appendmatsIDX
+    mats = get_prefs().appendmats
     active = mats[idx]
 
     return idx, mats, active
@@ -19,20 +20,20 @@ class Add(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        name = m3.M3_prefs().appendmatsname
-        appendmats = m3.M3_prefs().appendmats
+        name = get_prefs().appendmatsname
+        appendmats = get_prefs().appendmats
 
         return name and name not in appendmats
 
     def execute(self, context):
-        name = m3.M3_prefs().appendmatsname
-        appendmats = m3.M3_prefs().appendmats
+        name = get_prefs().appendmatsname
+        appendmats = get_prefs().appendmats
 
         if name not in appendmats:
             am = appendmats.add()
             am.name = name
 
-            appendmats = m3.M3_prefs().appendmatsname = ""
+            appendmats = get_prefs().appendmatsname = ""
 
         return {'FINISHED'}
 
@@ -55,7 +56,7 @@ class Move(bpy.types.Operator):
             nextidx = min(idx + 1, len(mats) - 1)
 
         mats.move(idx, nextidx)
-        m3.M3_prefs().appendmatsIDX = nextidx
+        get_prefs().appendmatsIDX = nextidx
 
         return {'FINISHED'}
 
@@ -104,7 +105,7 @@ class Clear(bpy.types.Operator):
     bl_description = "Clear All Material Names.\nSave prefs to remember."
 
     def execute(self, context):
-        m3.M3_prefs().appendmats.clear()
+        get_prefs().appendmats.clear()
 
         return {'FINISHED'}
 
