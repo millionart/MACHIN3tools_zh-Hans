@@ -20,7 +20,7 @@ Copyright (C) 2018 MACHIN3, machin3.io, support@machin3.io
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, "1a"),
+    "version": (0, 3, "1b"),
     "blender": (2, 80, 0),
     "location": "",
     "description": "Streamlining Blender.",
