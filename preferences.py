@@ -1,5 +1,6 @@
 import bpy
 from bpy.props import IntProperty, StringProperty, CollectionProperty, BoolProperty, EnumProperty
+import os
 import rna_keymap_ui
 from . properties import AppendMatsCollection
 from . utils.ui import get_icon
@@ -38,7 +39,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.avoid_update = False
             return
 
-        matcaps = [mc.name for mc in context.user_preferences.studio_lights if "datafiles/studiolights/matcap" in mc.path]
+        matcaps = [mc.name for mc in context.user_preferences.studio_lights if os.path.basename(os.path.dirname(mc.path)) == "matcap"]
         if self.switchmatcap1 not in matcaps:
             self.avoid_update = True
             self.switchmatcap1 = "NOT FOUND"
@@ -48,7 +49,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.avoid_update = False
             return
 
-        matcaps = [mc.name for mc in context.user_preferences.studio_lights if "datafiles/studiolights/matcap" in mc.path]
+        matcaps = [mc.name for mc in context.user_preferences.studio_lights if os.path.basename(os.path.dirname(mc.path)) == "matcap"]
         if self.switchmatcap2 not in matcaps:
             self.avoid_update = True
             self.switchmatcap2 = "NOT FOUND"
@@ -126,7 +127,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     appendmatspath: StringProperty(name="Materials Source .blend", subtype='FILE_PATH')
     appendmats: CollectionProperty(type=AppendMatsCollection)
     appendmatsIDX: IntProperty()
-    appendmatsname: StringProperty(name="Name of Material to appand")
+    appendmatsname: StringProperty(name="Name of Material to append")
 
     switchmatcap1: StringProperty(name="Matcap 1", update=update_switchmatcap1)
     switchmatcap2: StringProperty(name="Matcap 2", update=update_switchmatcap2)
