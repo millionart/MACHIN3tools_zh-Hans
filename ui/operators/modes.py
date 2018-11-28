@@ -4,9 +4,6 @@ from ... utils.registration import get_prefs
 from ... utils import MACHIN3 as m3
 
 
-# TODO: cavity toggle
-
-
 class EditMode(bpy.types.Operator):
     bl_idname = "machin3.edit_mode"
     bl_label = "Edit Mode"
@@ -30,8 +27,10 @@ class EditMode(bpy.types.Operator):
 
 
         elif context.mode == "EDIT_MESH":
-            shading = context.space_data.shading
-            shading.show_xray = False
+            scene = context.scene
+
+            scene.M3.pass_through = False
+            scene.M3.show_edit_mesh_wire = False
 
             bpy.ops.object.mode_set(mode="OBJECT")
 

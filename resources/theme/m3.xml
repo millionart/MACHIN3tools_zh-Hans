@@ -161,7 +161,7 @@
         <wcol_box>
           <ThemeWidgetColors
             outline="#2d2e33"
-            inner="#43454dff"
+            inner="#3c3e45c0"
             inner_sel="#599eb3ff"
             item="#191919ff"
             text="#eeeeee"

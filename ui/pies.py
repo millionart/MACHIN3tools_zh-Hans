@@ -6,6 +6,7 @@ from .. utils.ui import get_icon
 
 # TODO: snapping pie
 # TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
+# TODO: in shading pie, separate curvature toggle, mappeed to v
 
 
 class PieModes(Menu):
@@ -367,12 +368,23 @@ class PieShading(Menu):
         row.operator("machin3.toggle_outline", text="(Q) Outline Toggle")
         row.prop(view.shading, "object_outline_color", text="")
 
+
+        # cavity
+
         row = col.split(factor=0.45)
         row.operator("machin3.toggle_cavity", text="Cavity Toggle")
         r = row.row(align=True)
         # r.prop(view.shading, "cavity_ridge_factor", text="")
         r.prop(view.shading, "cavity_valley_factor", text="")
         r.prop(context.scene.display, "matcap_ssao_distance", text="")
+
+        # curvature
+
+        row = col.split(factor=0.45)
+        row.operator("machin3.toggle_curvature", text="(V) Curvature Toggle")
+        r = row.row(align=True)
+        r.prop(view.shading, "curvature_ridge_factor", text="")
+        r.prop(view.shading, "curvature_valley_factor", text="")
 
 
         active = context.active_object
@@ -564,7 +576,8 @@ class PieShading(Menu):
         if context.scene.eevee.use_gtao:
             row = col.row(align=True)
             row.prop(context.scene.eevee, "gtao_distance")
-            row.prop(context.scene.eevee, "gtao_factor")
+            # row.prop(context.scene.eevee, "gtao_factor")
+            row.prop(context.scene.M3, "eevee_gtao_factor")
 
         icon = "TRIA_DOWN" if context.scene.eevee.use_bloom else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_bloom", icon=icon)

@@ -410,19 +410,21 @@ class Customize(bpy.types.Operator):
 
             i.invert_mouse_zoom = True
 
-            blenderbinary = bpy.app.binary_path
-            keymappath = os.path.join(os.path.dirname(blenderbinary), "2.80", "scripts", "presets", "keyconfig", "blender_27x.py")
-            bpy.ops.wm.keyconfig_activate(filepath=keymappath)
+            keyconfigpath = bpy.utils.preset_paths(subdir='keyconfig')
+            if keyconfigpath:
+                keymappath = os.path.join(keyconfigpath[0], "blender_27x.py")
 
-            kcprefs = context.window_manager.keyconfigs.active.preferences
-            kcprefs.select_mouse = "LEFT"
+                bpy.ops.wm.keyconfig_activate(filepath=keymappath)
 
-            # for some weird reason doing this 2 times is rquired if you edit the keymaps afterwards
-            # otherwise left mouse tools be right mouse, could be a blender bug, TODO: investiage in beta phase
-            bpy.ops.wm.keyconfig_activate(filepath=keymappath)
+                kcprefs = context.window_manager.keyconfigs.active.preferences
+                kcprefs.select_mouse = "LEFT"
 
-            kcprefs = context.window_manager.keyconfigs.active.preferences
-            kcprefs.select_mouse = "LEFT"
+                # for some weird reason doing this 2 times is required if you edit the keymaps afterwards
+                # otherwise left mouse tools be right mouse, could be a blender bug, TODO: investiage in beta phase
+                bpy.ops.wm.keyconfig_activate(filepath=keymappath)
+
+                kcprefs = context.window_manager.keyconfigs.active.preferences
+                kcprefs.select_mouse = "LEFT"
 
 
         if get_prefs().custom_preferences_file:
