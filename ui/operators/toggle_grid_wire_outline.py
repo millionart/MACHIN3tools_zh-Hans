@@ -89,8 +89,21 @@ class ToggleCavity(bpy.types.Operator):
     bl_options = {'REGISTER'}
 
     def execute(self, context):
-        shading = context.space_data.shading
+        scene = context.scene
 
-        shading.show_cavity = not shading.show_cavity
+        scene.M3.show_cavity = not scene.M3.show_cavity
+
+        return {'FINISHED'}
+
+
+class ToggleCurvature(bpy.types.Operator):
+    bl_idname = "machin3.toggle_curvature"
+    bl_label = "Toggle Curvature"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.M3.show_curvature = not scene.M3.show_curvature
 
         return {'FINISHED'}
