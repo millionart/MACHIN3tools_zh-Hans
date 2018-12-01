@@ -29,8 +29,10 @@ class EditMode(bpy.types.Operator):
         elif context.mode == "EDIT_MESH":
             scene = context.scene
 
+            # reset xray
             scene.M3.pass_through = False
             scene.M3.show_edit_mesh_wire = False
+            shading.xray_alpha = 0.5
 
             bpy.ops.object.mode_set(mode="OBJECT")
 

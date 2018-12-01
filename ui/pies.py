@@ -7,6 +7,7 @@ from .. utils.ui import get_icon
 # TODO: snapping pie
 # TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
 # TODO: in shading pie, separate curvature toggle, mappeed to v
+# TODO: eevee presets
 
 
 class PieModes(Menu):
