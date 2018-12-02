@@ -102,15 +102,11 @@ class SmartFace(bpy.types.Operator):
                     nonmanifoldverts = [v for v in bm.verts if any([not e.is_manifold for e in v.link_edges]) and v not in [vs, v_new, v1_other, v2_other]]
 
                     if nonmanifoldverts:
-                        distances = [((v_new.co - v.co).length, v) for v in nonmanifoldverts]
-                        distances.sort(key=lambda x: x[0])
+                        distance = min([((v_new.co - v.co).length, v) for v in nonmanifoldverts], key=lambda x: x[0])
+                        threshold = min([(v_new.co - v.co).length * 0.5 for v in [v1_other, v2_other]])
 
-                        thresholds = [(v_new.co - v.co).length * 0.5 for v in [v1_other, v2_other]]
-                        thresholds.sort()
-                        threshold = thresholds[0]
-
-                        if distances[0][0] < threshold:
-                            v_closest = distances[0][1]
+                        if distance[0] < threshold:
+                            v_closest = distance[1]
 
                             # merge new to closest, NOTE: in this verts order, the v_new vert stays alive, which is perfect
                             bmesh.ops.pointmerge(bm, verts=[v_new, v_closest], merge_co=v_closest.co)
