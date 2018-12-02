@@ -33,6 +33,7 @@ class Customize(bpy.types.Operator):
         if get_prefs().custom_theme:
             self.theme(scriptspath, resourcespath)
 
+
         # MATCAPS + DEFAULT SHADING
         if get_prefs().custom_matcaps:
             self.matcaps(context, resourcespath, datafilespath)
@@ -115,6 +116,7 @@ class Customize(bpy.types.Operator):
                     kmi.type = "RIGHTMOUSE"
                     kmi.alt = True
                     kmi.shift = False
+                    kmi.properties.orientation = "GEOM"
 
                 if kmi.idname == "view3d.select":
                     if kmi.value == "CLICK":
@@ -484,9 +486,12 @@ class Customize(bpy.types.Operator):
         matcaptargetpath = m3.makedir(os.path.join(datafilespath, "studiolights", "matcap"))
         matcaps = os.listdir(matcapsourcepath)
 
+
+
         for matcap in sorted(matcaps):
             shutil.copy(os.path.join(matcapsourcepath, matcap), matcaptargetpath)
             print("  %s -> %s" % (matcap, matcaptargetpath))
+
 
         context.user_preferences.studio_lights.refresh()
 
@@ -507,7 +512,7 @@ class Customize(bpy.types.Operator):
                             shading = area.spaces[0].shading
 
             if shading:
-                shading.type = "SOLID"
+                # shading.type = "SOLID"  # TODO: crashes Blender as of 1b870bce85d
                 shading.light = "MATCAP"
                 shading.studio_light = "matcap_base.exr"
                 shading.color_type = "SINGLE"

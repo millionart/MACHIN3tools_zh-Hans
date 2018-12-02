@@ -1,9 +1,11 @@
 import bpy
 from bpy.props import StringProperty, BoolProperty
+import bmesh
 import os
 import re
 import time
 from ... utils.registration import get_prefs
+from ... utils.append import append_material, append_world
 from ... utils import MACHIN3 as m3
 
 
@@ -146,11 +148,7 @@ class AppendWorld(bpy.types.Operator):
         path = get_prefs().appendworldpath
         name = get_prefs().appendworldname
 
-        fullpath = "%s/%s" % (path, "World")
-
-        bpy.ops.wm.append(directory=fullpath, filename=name, autoselect=False)
-
-        world = bpy.data.worlds.get(name)
+        world = append_world(path, name)
 
         if world:
             bpy.context.scene.world = world
@@ -185,7 +183,6 @@ class AppendMaterial(bpy.types.Operator):
         path = get_prefs().appendmatspath
         name = self.name
 
-        fullpath = "%s/%s" % (path, "Material")
 
 
         if name == "ALL":
@@ -193,19 +190,35 @@ class AppendMaterial(bpy.types.Operator):
 
             for name in all_names:
                 n = name.replace("-", "")
-                bpy.ops.wm.append(directory=fullpath, filename=n)
+                append_material(path, n)
         else:
-            bpy.ops.wm.append(directory=fullpath, filename=name, autoselect=False)
-
-            mat = bpy.data.materials.get(name)
+            mat = append_material(path, name)
 
             if mat:
                 if self.applymaterial:
                     for obj in context.selected_objects:
-                        if not obj.material_slots:
-                            obj.data.materials.append(mat)
 
-                        obj.material_slots[0].material = mat
+                        # append material when there are no slots[creates a new slot automatically, as well as when in edit mode
+                        if not obj.material_slots or obj.mode == "EDIT":
+                            obj.data.materials.append(mat)
+                            idx = len(obj.data.materials) - 1
+
+                            if obj.mode == "EDIT":
+                                bm = bmesh.from_edit_mesh(obj.data)
+                                bm.normal_update()
+
+                                faces = [f for f in bm.faces if f.select]
+
+                                for face in faces:
+                                    face.material_index = idx
+
+                                bmesh.update_edit_mesh(obj.data)
+
+
+                        # other wise just set the first slot's material
+                        else:
+                            obj.material_slots[0].material = mat
+
             else:
                 self.report({'ERROR'}, "Material '%s' could not be appended.\nMake sure a material of that name exists in the material source file." % (name))
 

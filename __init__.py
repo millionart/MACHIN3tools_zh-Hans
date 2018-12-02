@@ -1,5 +1,5 @@
 '''
-Copyright (C) 2018 MACHIN3, machin3.io, support@machin3.io
+Copyright (C) 2016-2018 MACHIN3, machin3.io, support@machin3.io
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@ Copyright (C) 2018 MACHIN3, machin3.io, support@machin3.io
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, 2),
+    "version": (0, 3, 3),
     "blender": (2, 80, 0),
     "location": "",
-    "description": "Streamlining Blender.",
+    "description": "Streamlining Blender 2.80.",
     "warning": "",
     "wiki_url": "https://machin3.io/MACHIN3tools/docs",
     "category": "Mesh"}
