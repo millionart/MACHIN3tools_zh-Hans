@@ -132,8 +132,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     switchmatcap1: StringProperty(name="Matcap 1", update=update_switchmatcap1)
     switchmatcap2: StringProperty(name="Matcap 2", update=update_switchmatcap2)
 
-    obj_mode_rotate_around_active: BoolProperty(name="Rotate Around Selection, but only in Object Mode", default=True)
-    toggle_cavity: BoolProperty(name="Toggle Cavity OFF in Edit Mode, ON in Object Mode", default=True)
+    obj_mode_rotate_around_active: BoolProperty(name="Rotate Around Selection, but only in Object Mode", default=False)
+    toggle_cavity: BoolProperty(name="Toggle Cavity/Curvature OFF in Edit Mode, ON in Object Mode", default=True)
 
     custom_theme: BoolProperty(name="Theme", default=True)
     custom_matcaps: BoolProperty(name="Matcaps and Default Shading", default=True)
