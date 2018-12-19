@@ -4,6 +4,8 @@ from ... utils.registration import get_prefs
 from ... utils import MACHIN3 as m3
 
 
+# TODO: populste world and materials automatically, using bpy.data.labraries.load
+
 def get_mat():
     idx = get_prefs().appendmatsIDX
     mats = get_prefs().appendmats

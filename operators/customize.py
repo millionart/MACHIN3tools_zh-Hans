@@ -150,7 +150,7 @@ class Customize(bpy.types.Operator):
 
             # 3D VIEW TOOLS
 
-            km = kc.keymaps.get("3D View Tool: Object, Cursor")
+            km = kc.keymaps.get("3D View Tool: Cursor")
             for kmi in km.keymap_items:
                 if kmi.idname == "view3d.cursor3d":
                     kmi.active = False
@@ -349,7 +349,6 @@ class Customize(bpy.types.Operator):
 
                 if kmi.idname == "uv.cursor_set":
                     kmi.active = False
-
 
         def add_keymaps(kc):
             # MESH
