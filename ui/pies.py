@@ -441,8 +441,8 @@ class PieShading(Menu):
         r.prop(view.overlay, "show_object_origins_all", text="All")
 
         col.separator()
-        row = col.row()
-        row.prop(view.overlay, "show_backface_culling")
+        row = col.row(align=True)
+        row.prop(view.shading, "show_backface_culling")
         row.prop(view.overlay, "show_face_orientation")
         col.prop(view.overlay, "show_relationship_lines")
 
