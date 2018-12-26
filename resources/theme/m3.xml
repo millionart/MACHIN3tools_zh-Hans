@@ -318,6 +318,8 @@
             inner_driven_sel="#9900e6"
             inner_overridden="#000000"
             inner_overridden_sel="#000000"
+            inner_changed="#cc7529"
+            inner_changed_sel="#e6852d"
             blend="0.5"
             >
           </ThemeWidgetStateColors>
@@ -1041,8 +1043,8 @@
         </space>
       </ThemeInfo>
     </info>
-    <user_preferences>
-      <ThemeUserPreferences>
+    <preferences>
+      <ThemePreferences>
         <space>
           <ThemeSpaceGeneric
             back="#2f3035"
@@ -1072,8 +1074,8 @@
             </panelcolors>
           </ThemeSpaceGeneric>
         </space>
-      </ThemeUserPreferences>
-    </user_preferences>
+      </ThemePreferences>
+    </preferences>
     <console>
       <ThemeConsole
         line_output="#808096"
@@ -1130,6 +1132,8 @@
         frame_current="#308837"
         strips="#0c0a0a"
         strips_selected="#ff8c00"
+        metadatabg="#000000"
+        metadatatext="#ffffff"
         handle_free="#000000"
         handle_auto="#909000"
         handle_align="#803060"

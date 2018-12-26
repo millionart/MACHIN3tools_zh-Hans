@@ -7,33 +7,45 @@ from ... utils import MACHIN3 as m3
 def get_mat():
     idx = get_prefs().appendmatsIDX
     mats = get_prefs().appendmats
-    active = mats[idx]
+
+    active = mats[idx] if mats else None
 
     return idx, mats, active
 
 
-class Add(bpy.types.Operator):
-    bl_idname = "machin3.add_appendmat"
-    bl_label = "Add Append Name"
+class AddSeparator(bpy.types.Operator):
+    bl_idname = "machin3.add_separator"
+    bl_label = "Add Separator"
     bl_options = {'REGISTER', 'UNDO'}
-    bl_description = "Add name of Material to append"
+    bl_description = "Add Separator"
+
+    def execute(self, context):
+        appendmats = get_prefs().appendmats
+
+        sep = appendmats.add()
+        sep.name = "---"
+
+        return {'FINISHED'}
+
+
+class Populate(bpy.types.Operator):
+    bl_idname = "machin3.populate_appendmats"
+    bl_label = "MACHIN3: Populate"
+    bl_description = "Populate list with material names from source file."
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        name = get_prefs().appendmatsname
-        appendmats = get_prefs().appendmats
-
-        return name and name not in appendmats
+        return get_prefs().appendmatspath
 
     def execute(self, context):
-        name = get_prefs().appendmatsname
-        appendmats = get_prefs().appendmats
+        idx, mats, _ = get_mat()
 
-        if name not in appendmats:
-            am = appendmats.add()
-            am.name = name
-
-            appendmats = get_prefs().appendmatsname = ""
+        with bpy.data.libraries.load(get_prefs().appendmatspath, link=False) as (data_from, _):
+            for name in getattr(data_from, "materials"):
+                if name not in mats:
+                    am = mats.add()
+                    am.name = name
 
         return {'FINISHED'}
 
@@ -72,6 +84,10 @@ class Rename(bpy.types.Operator):
     def check(self, context):
         return True
 
+    @classmethod
+    def poll(cls, context):
+        return get_prefs().appendmats
+
     def draw(self, context):
         layout = self.layout
 
@@ -104,6 +120,10 @@ class Clear(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Clear All Material Names.\nSave prefs to remember."
 
+    @classmethod
+    def poll(cls, context):
+        return get_prefs().appendmats
+
     def execute(self, context):
         get_prefs().appendmats.clear()
 
@@ -116,8 +136,15 @@ class Remove(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Remove selected Material Name.\nSave prefs to remember."
 
+    @classmethod
+    def poll(cls, context):
+        return get_prefs().appendmats
+
     def execute(self, context):
         idx, mats, _ = get_mat()
 
         mats.remove(idx)
+
+        get_prefs().appendmatsIDX = min(idx, len(get_prefs().appendmats) - 1)
+
         return {'FINISHED'}

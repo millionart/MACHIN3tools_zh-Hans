@@ -10,7 +10,7 @@ class EditMode(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        viewprefs = context.user_preferences.view
+        viewprefs = context.preferences.view
         shading = context.space_data.shading
 
         rotate_around_active = get_prefs().obj_mode_rotate_around_active
@@ -61,7 +61,7 @@ class VertexMode(bpy.types.Operator):
 
 
         if get_prefs().obj_mode_rotate_around_active:
-            context.user_preferences.view.use_rotate_around_active = False
+            context.preferences.view.use_rotate_around_active = False
 
         if get_prefs().toggle_cavity:
             context.space_data.shading.show_cavity = False
@@ -85,7 +85,7 @@ class EdgeMode(bpy.types.Operator):
 
 
         if get_prefs().obj_mode_rotate_around_active:
-            context.user_preferences.view.use_rotate_around_active = False
+            context.preferences.view.use_rotate_around_active = False
 
         if get_prefs().toggle_cavity:
             context.space_data.shading.show_cavity = False
@@ -109,7 +109,7 @@ class FaceMode(bpy.types.Operator):
 
 
         if get_prefs().obj_mode_rotate_around_active:
-            context.user_preferences.view.use_rotate_around_active = False
+            context.preferences.view.use_rotate_around_active = False
 
 
         if get_prefs().toggle_cavity:

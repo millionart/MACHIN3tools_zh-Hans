@@ -142,7 +142,7 @@ def GP_check():
 
 
 def addon_check(string, precise=True):
-    for addon in bpy.context.user_preferences.addons.keys():
+    for addon in bpy.context.preferences.addons.keys():
         if precise:
             if string == addon:
                 return True
@@ -190,23 +190,23 @@ def makedir(pathstring):
 
 
 def addon_prefs(addonstring):
-    return bpy.context.user_preferences.addons[addonstring].preferences
+    return bpy.context.preferences.addons[addonstring].preferences
 
 
 def DM_prefs():
-    return bpy.context.user_preferences.addons["DECALmachine"].preferences
+    return bpy.context.preferences.addons["DECALmachine"].preferences
 
 
 def MM_prefs():
-    return bpy.context.user_preferences.addons["MESHmachine"].preferences
+    return bpy.context.preferences.addons["MESHmachine"].preferences
 
 
 def RM_prefs():
-    return bpy.context.user_preferences.addons["RIGmachine"].preferences
+    return bpy.context.preferences.addons["RIGmachine"].preferences
 
 
 def M3_prefs():
-    return bpy.context.user_preferences.addons["MACHIN3tools"].preferences
+    return bpy.context.preferences.addons["MACHIN3tools"].preferences
 
 
 def make_selection(string, idlist):

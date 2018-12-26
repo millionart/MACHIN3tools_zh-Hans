@@ -32,6 +32,25 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     path = get_path()
     bl_idname = get_name()
 
+
+    # APPENDMATS
+
+    def update_appendmatsname(self, context):
+        if self.avoid_update:
+            self.avoid_update = False
+            return
+
+        else:
+            if self.appendmatsname and self.appendmatsname not in self.appendmats:
+                am = self.appendmats.add()
+                am.name = self.appendmatsname
+
+                self.appendmatsIDX = len(self.appendmats) - 1
+
+            self.avoid_update = True
+            self.appendmatsname = ""
+
+
     # CHECKS
 
     def update_switchmatcap1(self, context):
@@ -39,7 +58,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.avoid_update = False
             return
 
-        matcaps = [mc.name for mc in context.user_preferences.studio_lights if os.path.basename(os.path.dirname(mc.path)) == "matcap"]
+        matcaps = [mc.name for mc in context.preferences.studio_lights if os.path.basename(os.path.dirname(mc.path)) == "matcap"]
         if self.switchmatcap1 not in matcaps:
             self.avoid_update = True
             self.switchmatcap1 = "NOT FOUND"
@@ -49,7 +68,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.avoid_update = False
             return
 
-        matcaps = [mc.name for mc in context.user_preferences.studio_lights if os.path.basename(os.path.dirname(mc.path)) == "matcap"]
+        matcaps = [mc.name for mc in context.preferences.studio_lights if os.path.basename(os.path.dirname(mc.path)) == "matcap"]
         if self.switchmatcap2 not in matcaps:
             self.avoid_update = True
             self.switchmatcap2 = "NOT FOUND"
@@ -127,7 +146,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     appendmatspath: StringProperty(name="Materials Source .blend", subtype='FILE_PATH')
     appendmats: CollectionProperty(type=AppendMatsCollection)
     appendmatsIDX: IntProperty()
-    appendmatsname: StringProperty(name="Name of Material to append")
+    appendmatsname: StringProperty(name="Name of Material to append", update=update_appendmatsname)
 
     switchmatcap1: StringProperty(name="Matcap 1", update=update_switchmatcap1)
     switchmatcap2: StringProperty(name="Matcap 2", update=update_switchmatcap2)
@@ -175,6 +194,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     tabs: EnumProperty(name="Tabs", items=preferences_tabs, default="GENERAL")
     avoid_update: BoolProperty(default=False)
     dirty_keymaps: BoolProperty(default=False)
+
 
 
     def draw(self, context):
@@ -360,16 +380,16 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             c.operator("machin3.move_appendmat", text="", icon='TRIA_DOWN').direction = "DOWN"
 
             c.separator()
-            c.separator()
-            c.operator("machin3.rename_appendmat", text="", icon='OUTLINER_DATA_FONT')
-            c.separator()
-            c.separator()
             c.operator("machin3.clear_appendmats", text="", icon='LOOP_BACK')
             c.operator("machin3.remove_appendmat", text="", icon_value=get_icon('cancel'))
+            c.separator()
+            c.operator("machin3.populate_appendmats", text="", icon='MATERIAL')
+            c.operator("machin3.rename_appendmat", text="", icon='OUTLINER_DATA_FONT')
+
 
             row = column.row()
             row.prop(self, "appendmatsname")
-            row.operator("machin3.add_appendmat", text="", icon_value=get_icon('plus'))
+            row.operator("machin3.add_separator", text="", icon_value=get_icon('separator'))
             row = column.row()
             row.separator()
             row.label(text="Tip: Add a dash to the end of a name, to create a separator in the menu!", icon="INFO")

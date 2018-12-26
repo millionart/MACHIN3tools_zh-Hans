@@ -16,7 +16,7 @@ def get_name():
 
 
 def get_prefs():
-    return bpy.context.user_preferences.addons[get_name()].preferences
+    return bpy.context.preferences.addons[get_name()].preferences
 
 
 # CLASS REGISTRATION
