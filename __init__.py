@@ -20,7 +20,7 @@ Copyright (C) 2016-2018 MACHIN3, machin3.io, support@machin3.io
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, 3),
+    "version": (0, 3, 4),
     "blender": (2, 80, 0),
     "location": "",
     "description": "Streamlining Blender 2.80.",
