@@ -441,7 +441,7 @@ class PieShading(Menu):
         r.prop(view.overlay, "show_object_origins_all", text="All")
 
         col.separator()
-        row = col.row(align=True)
+        row = col.row()
         row.prop(view.shading, "show_backface_culling")
         row.prop(view.overlay, "show_face_orientation")
         col.prop(view.overlay, "show_relationship_lines")
@@ -497,7 +497,7 @@ class PieShading(Menu):
         elif view.shading.type == "MATERIAL":
 
             # use scene lights and world
-            studio_worlds = [w for w in context.user_preferences.studio_lights if os.path.basename(os.path.dirname(w.path)) == "world"]
+            studio_worlds = [w for w in context.preferences.studio_lights if os.path.basename(os.path.dirname(w.path)) == "world"]
 
             if any([bpy.data.lights, studio_worlds]):
                 row = col.row()

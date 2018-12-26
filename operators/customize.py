@@ -350,6 +350,7 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "uv.cursor_set":
                     kmi.active = False
 
+
         def add_keymaps(kc):
             # MESH
             km = kc.keymaps.get("Mesh")
@@ -376,7 +377,7 @@ class Customize(bpy.types.Operator):
         get_prefs().custom_keymaps = False
 
     def preferences(self, context):
-        prefs = context.user_preferences
+        prefs = context.preferences
 
         if get_prefs().custom_preferences_interface:
             print("\n» Changing Preferences: Interface")
@@ -472,11 +473,15 @@ class Customize(bpy.types.Operator):
                 for area in screen.areas:
                     if area.type == "VIEW_3D":
                         overlay = area.spaces[0].overlay
+                        shading = area.spaces[0].shading
 
         if overlay:
             overlay.show_face_center = True
-            overlay.show_backface_culling = True
             overlay.wireframe_threshold = 1
+
+        if shading:
+            shading.show_backface_culling = True
+
 
     def matcaps(self, context, resourcespath, datafilespath):
         print("\n» Adding Matcaps")
@@ -492,7 +497,7 @@ class Customize(bpy.types.Operator):
             print("  %s -> %s" % (matcap, matcaptargetpath))
 
 
-        context.user_preferences.studio_lights.refresh()
+        context.preferences.studio_lights.refresh()
 
         if all([mc in matcaps for mc in ["matcap_base.exr", "matcap_shiny_red.exr"]]):
             get_prefs().switchmatcap1 = "matcap_base.exr"

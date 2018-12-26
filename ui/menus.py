@@ -14,8 +14,8 @@ class MenuAppendMaterials(bpy.types.Menu):
         if names:
             names.insert(0, "ALL")
         else:
-            layout.label("No Materials added yet!", icon="ERROR")
-            layout.label("Check MACHIN3tools prefs.", icon="INFO")
+            layout.label(text="No Materials added yet!", icon="ERROR")
+            layout.label(text="Check MACHIN3tools prefs.", icon="INFO")
 
 
         for name in names:
@@ -23,12 +23,12 @@ class MenuAppendMaterials(bpy.types.Menu):
             if name == "ALL":
                 layout.operator("machin3.append_material", text=name, icon="MATERIAL_DATA").name = name
                 layout.separator()
+
+            elif name == "---":
+                layout.separator()
+
             else:
-                n = name.replace("-", "")
-                mat = bpy.data.materials.get(n)
+                mat = bpy.data.materials.get(name)
                 icon_val = layout.icon(mat) if mat else 0
 
-                layout.operator("machin3.append_material", text=n, icon_value=icon_val).name = n
-
-            if name.endswith("-"):
-                layout.separator()
+                layout.operator("machin3.append_material", text=name, icon_value=icon_val).name = name
