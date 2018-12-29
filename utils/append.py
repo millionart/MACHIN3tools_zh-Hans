@@ -29,7 +29,7 @@ def append_element(filepath, collection_name, element_name, link):
             if element_name in getattr(data_from, collection_name):
                 getattr(data_to, collection_name).append(element_name)
             else:
-                print("The group name does not exist")
+                print("The %s name does not exist" % (collection_name[:-1]))
 
         return getattr(data_to, collection_name)[0]
 

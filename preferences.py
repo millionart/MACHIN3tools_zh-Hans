@@ -27,6 +27,8 @@ links = [("Documentation", "https://machin3.io/MACHIN3tools/docs/", "INFO"),
          ]
 
 
+# TODO: check if the aeppend world/materials paths exist and make them abosolute
+
 
 class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     path = get_path()

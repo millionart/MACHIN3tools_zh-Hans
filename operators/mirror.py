@@ -1,5 +1,6 @@
 import bpy
 from bpy.props import BoolProperty
+from .. utils.registration import get_addon
 from .. utils import MACHIN3 as m3
 
 
@@ -12,13 +13,8 @@ class Mirror(bpy.types.Operator):
     use_y: BoolProperty(name="Y", default=False)
     use_z: BoolProperty(name="Z", default=False)
 
-    """
     DM_mirror_u: BoolProperty(name="U", default=True)
     DM_mirror_v: BoolProperty(name="V", default=False)
-
-    DMcustomNormals: BoolProperty(name="re-do custom Normals", default=True)
-    DMcopiedNormals: BoolProperty(name="move copied Normals to end of stack", default=True)
-    # """
 
     def draw(self, context):
         layout = self.layout
@@ -30,35 +26,28 @@ class Mirror(bpy.types.Operator):
         row.prop(self, "use_y", toggle=True)
         row.prop(self, "use_z", toggle=True)
 
-        """
-        if m3.DM_check():
+        DMenabled, _, _, _ = get_addon("DECALmachine")
+        if DMenabled:
             column.separator()
 
-            column.label("DECALmachine - UVs")
+            column.label(text="DECALmachine - UVs")
             row = column.row(align=True)
-            row.prop(self, "DMmirrorU", toggle=True)
-            row.prop(self, "DMmirrorV", toggle=True)
-
-            column.separator()
-
-            column.label("DECALmachine - custom Normals")
-            column.prop(self, "DMcustomNormals")
-            column.prop(self, "DMcopiedNormals")
-        """
+            row.prop(self, "DM_mirror_u", toggle=True)
+            row.prop(self, "DM_mirror_v", toggle=True)
 
     @classmethod
     def poll(cls, context):
         return context.mode == "OBJECT"
 
     def execute(self, context):
-        sel = m3.selected_objects()
-        active = m3.get_active()
+        sel = context.selected_objects
+        active = context.active_object
 
-        self.mirror(active, sel, self.use_x, self.use_y, self.use_z)
+        self.mirror(context, active, sel)
 
         return {'FINISHED'}
 
-    def mirror(self, active, sel, use_x, use_y, use_z):
+    def mirror(self, context, active, sel):
         if len(sel) > 1 and active in sel:
             sel.remove(active)
 
@@ -66,73 +55,21 @@ class Mirror(bpy.types.Operator):
                 if obj.type in ["MESH", "CURVE"]:
 
                     mirror = obj.modifiers.new(name="Mirror", type="MIRROR")
-
-                    mirror.use_axis = (use_x, use_y, use_z)
-
+                    mirror.use_axis = (self.use_x, self.use_y, self.use_z)
                     mirror.mirror_object = active
 
-                    """
+                    DMenabled, _, _, _ = get_addon("DECALmachine")
 
-                    if m3.DM_check():
-                        # DECALmachine support (u or v mirror for parallax and for info decals!)
-                        if obj.DM.isdecal and obj.DM.decaltype in ['SIMPLE', 'SUBSET', 'INFO']:
-                            if self.DMmirrorU:
-                                mirror.use_mirror_u = True
-                            if self.DMmirrorV:
-                                mirror.use_mirror_v = True
+                    if DMenabled:
+                        if obj.DM.isdecal:
+                            mirror.use_mirror_u = self.DM_mirror_u
+                            mirror.use_mirror_v = self.DM_mirror_v
 
-                        # DECALmachine custom normals, hard custom normals and surface fix support
-                        if self.DMcustomNormals:
-                            mod = obj.modifiers.get("M3_custom_normals")
-                            if mod:
-                                src = mod.object
+                            nrmtransfer = obj.modifiers.get("NormalTransfer")
 
-                                srcmirror = src.modifiers.new(name="M3_mirror", type="MIRROR")
-                                srcmirror.use_x = self.axisx
-                                srcmirror.use_y = self.axisy
-                                srcmirror.use_z = self.axisz
-                                srcmirror.mirror_object = active
+                            if nrmtransfer:
+                                context.view_layer.objects.active = obj
+                                while obj.modifiers.keys().index(nrmtransfer.name) < obj.modifiers.keys().index(mirror.name):
+                                    bpy.ops.object.modifier_move_up(modifier=mirror.name)
 
-                                m3.make_active(obj)
-                                bpy.ops.object.modifier_move_up(modifier=mirror.name)
-                                m3.make_active(active)
-
-                            mod = obj.modifiers.get("M3_hard_custom_normals")
-                            if mod:
-                                src = mod.object
-
-                                srcmirror = src.modifiers.new(name="M3_mirror", type="MIRROR")
-                                srcmirror.use_x = self.axisx
-                                srcmirror.use_y = self.axisy
-                                srcmirror.use_z = self.axisz
-                                srcmirror.mirror_object = active
-
-                                m3.make_active(obj)
-                                bpy.ops.object.modifier_move_up(modifier=mirror.name)
-                                m3.make_active(active)
-
-                            mod = obj.modifiers.get("M3_surface_fix")
-                            if mod:
-                                src = mod.object
-
-                                srcmirror = src.modifiers.new(name="M3_mirror", type="MIRROR")
-                                srcmirror.use_x = self.axisx
-                                srcmirror.use_y = self.axisy
-                                srcmirror.use_z = self.axisz
-                                srcmirror.mirror_object = active
-
-                                m3.make_active(obj)
-                                bpy.ops.object.modifier_move_up(modifier=mirror.name)
-                                m3.make_active(active)
-
-                        # DECALmachine copied normals support
-                        if self.DMcopiedNormals:
-                            mod = obj.modifiers.get("M3_copied_normals")
-                            if mod:
-                                # making obj active for ops
-                                m3.make_active(obj)
-                                while obj.modifiers[-1].name != "M3_copied_normals":
-                                    bpy.ops.object.modifier_move_down(modifier=mod.name)
-                                # setting the original active back again
-                                m3.make_active(active)
-                    # """
+            context.view_layer.objects.active = active
