@@ -1,12 +1,11 @@
 import bpy
 from bpy.types import Menu
 import os
-from .. utils.registration import get_prefs
+from .. utils.registration import get_prefs, get_addon
 from .. utils.ui import get_icon
 
 # TODO: snapping pie
 # TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
-# TODO: in shading pie, separate curvature toggle, mappeed to v
 # TODO: eevee presets
 
 
@@ -26,7 +25,6 @@ class PieModes(Menu):
             if active.type == 'MESH':
 
                 if context.area.type == "VIEW_3D":
-
                     pie = layout.menu_pie()
 
                     # 4 - LEFT
@@ -62,7 +60,7 @@ class PieModes(Menu):
                         column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
 
                     else:
-                       pie.separator()
+                        pie.separator()
 
 
                 if context.area.type == "IMAGE_EDITOR":
@@ -114,7 +112,6 @@ class PieModes(Menu):
                         pie.separator()
 
 
-
             elif active.type == 'CURVE':
                 pie = layout.menu_pie()
 
@@ -152,6 +149,13 @@ class PieModes(Menu):
                     pie.operator("object.editmode_toggle", text=text, icon=icon)
 
 
+            elif active.type == 'EMPTY':
+                enabled, _, _, _ = get_addon("Group Pro", debug=True)
+
+                if enabled:
+                    self.draw_group_pro(context)
+
+
             """
 
             elif ob.object.type == 'FONT':
@@ -174,6 +178,84 @@ class PieModes(Menu):
                 pass
 
             """
+
+
+    def draw_group_pro(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        # 4 - LEFT
+        if context.active_object is not None and context.active_object.type == "EMPTY" and context.active_object.instance_collection:
+            pie.operator("wm.call_menu_pie", text="Set Origin").name = "object.grouppro_origin_pie"
+        else:
+            pie.separator()
+
+        # 6 - RIGHT
+        pie.operator("object.close_grouppro", icon='STICKY_UVS_LOC')
+
+        # 2 - BOTTOM
+        split = pie.split()
+        col = split.column(align=True)
+        row = col.row(align=True)
+        row.scale_y = 1.5
+        geoOper = row.operator("object.gpro_converttogeo", icon='OUTLINER_OB_GROUP_INSTANCE')
+        geoOper.maxDept = 0
+        row = col.row(align=True)
+        row.scale_y = 1.5
+        row.operator("object.grouppro_flip", icon='AUTOMERGE_ON')
+        row = col.row(align=True)
+        row.scale_y = 1.5
+        oper = row.operator("object.gpro_makeunique", icon='UNLINKED')
+        oper.maxDept = 1
+        row = col.row(align=True)
+        row.scale_y = 1.5
+        row.operator("object.gpro_initialize", icon='BOIDS')
+        row = col.row(align=True)
+        row.separator()
+        row = col.row(align=True)
+        row.scale_y = 1.5
+        row.operator("object.gpro_cleanup", icon='PARTICLE_DATA')
+        row = col.row(align=True)
+        row.scale_y = 1.5
+        row.operator("object.gpro_delete", icon='PANEL_CLOSE')
+
+        # 8 - TOP
+        create = pie.operator("object.create_grouppro", icon='STICKY_UVS_LOC')
+        if context.active_object:
+            create.Name = context.active_object.name
+
+        # 7 - TOP - LEFT
+        pie.operator("object.group_pro_raycast_open", icon='EYEDROPPER', text='Pick Group')
+
+        # 9 - TOP - RIGHT
+        pie.operator("object.edit_grouppro", icon='TRIA_DOWN')
+
+        # 1 - BOTTOM - LEFT
+        if len(bpy.context.scene.storedGroupSettings) > 0:
+            split = pie.split()
+            col = split.column(align=True)
+            row = col.row(align=True)
+            row.scale_y = 1.5
+            row.prop(context.scene, 'GroupLocalView', icon='RESTRICT_VIEW_OFF')
+            row = col.row(align=True)
+            row.scale_y = 1.5
+            row.prop(context.scene, 'GroupLocalViewDepth', slider=False, text='')
+
+        else:
+            pie.separator()
+
+        # 3 - BOTTOM - RIGHT
+        if len(bpy.context.scene.storedGroupSettings) > 0:
+            split = pie.split()
+            col = split.column(align=True)
+            row = col.row(align=True)
+            row.scale_y = 1.5
+            row.operator("object.add_to_grouppro", icon='ADD')
+            row = col.row(align=True)
+            row.scale_y = 1.5
+            row.operator("object.remove_from_grouppro", icon='REMOVE')
+        else:
+            pie.separator()
 
 
 class PieSave(Menu):
@@ -444,7 +526,10 @@ class PieShading(Menu):
         row = col.row()
         row.prop(view.shading, "show_backface_culling")
         row.prop(view.overlay, "show_face_orientation")
-        col.prop(view.overlay, "show_relationship_lines")
+
+        row = col.row()
+        row.prop(view.overlay, "show_relationship_lines")
+        row.prop(view.overlay, "show_extra_indices")
 
         active = context.active_object
 
