@@ -5,7 +5,7 @@ from .. utils import MACHIN3 as m3
 from .. utils.graph import get_shortest_path
 
 
-# TODO. the slide tool is a great candidate for testing custom drawnig in 2.8
+# TODO. the slide tool is a great candidate for testing custom drawing in 2.8
 # TODO: i's also great candidate for testing an improved modal bmesh approach
 
 
@@ -189,8 +189,8 @@ class SmartVert(bpy.types.Operator):
         if history and len(history) == 2:
             v_remote = history[1].index
 
-            # remember previosu transform orientatino
-            old_orientation = context.scene.transform_orientation
+            # remember previous transform orientatinon
+            old_orientation = context.scene.transform_orientation_slots[0].type
 
             # establish direction by creation new transform orientation based on 2 selected vertices
             bpy.ops.transform.create_orientation(name="SlideExtend", use=True, overwrite=True)
@@ -211,4 +211,4 @@ class SmartVert(bpy.types.Operator):
             bpy.ops.transform.delete_orientation()
 
             # change the orientation back to what is was before
-            context.scene.transform_orientation = old_orientation
+            context.scene.transform_orientation_slots[0].type = old_orientation
