@@ -556,8 +556,7 @@ class PieShading(Menu):
             # studio / matcap selection
             if view.shading.light in ["STUDIO", "MATCAP"]:
                 row = col.row()
-                row.scale_y = 0.6
-                row.template_icon_view(view.shading, "studio_light", show_labels=True, scale=3)
+                row.template_icon_view(view.shading, "studio_light", show_labels=True, scale=4, scale_popup=3)
 
             # studio rotation, same at worl rotation in lookdev
             if view.shading.light == "STUDIO":
@@ -595,8 +594,7 @@ class PieShading(Menu):
                     # world hdri selection and manipulation
                     if not view.shading.use_scene_world:
                             row = col.row()
-                            row.scale_y = 0.6
-                            row.template_icon_view(view.shading, "studio_light")
+                            row.template_icon_view(view.shading, "studio_light", scale=4, scale_popup=4)
 
                             col.prop(view.shading, "studiolight_rotate_z", text="Rotation")
                             col.prop(view.shading, "studiolight_background_alpha")
