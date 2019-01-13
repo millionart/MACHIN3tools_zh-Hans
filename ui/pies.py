@@ -558,7 +558,7 @@ class PieShading(Menu):
                 row = col.row()
                 row.template_icon_view(view.shading, "studio_light", show_labels=True, scale=4, scale_popup=3)
 
-            # studio rotation, same at worl rotation in lookdev
+            # studio rotation, same as world rotation in lookdev
             if view.shading.light == "STUDIO":
                 col.prop(view.shading, "studiolight_rotate_z", text="Rotation")
 
@@ -566,7 +566,7 @@ class PieShading(Menu):
             if view.shading.light == "MATCAP":
                 row = col.row()
                 row.operator("machin3.matcap_switch", text="(X) Matcap Switch")
-                row.operator('VIEW3D_OT_toggle_matcap_flip', text="Matcap Flip", icon='ARROW_LEFTRIGHT')
+                row.operator('view3d.toggle_matcap_flip', text="Matcap Flip", icon='ARROW_LEFTRIGHT')
 
             # color type
             row = col.row(align=True)
@@ -642,6 +642,7 @@ class PieShading(Menu):
 
         elif view.shading.type == "WIREFRAME":
             row = col.row()
+            # TODO: make the whoe scene toggle an op called by pressing X
             row.prop(view.shading, "show_xray_wireframe", text="")
             row.prop(view.shading, "xray_alpha_wireframe", text="X-Ray")
 
