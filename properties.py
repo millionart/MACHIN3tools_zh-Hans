@@ -32,7 +32,7 @@ class M3SceneProperties(bpy.types.PropertyGroup):
         shading = context.space_data.shading
 
         shading.show_xray = self.pass_through
-        shading.xray_alpha = 1
+        shading.xray_alpha = 1 if context.active_object and context.active_object.type == "MESH" else 0.5
 
     def update_show_edit_mesh_wire(self, context):
         shading = context.space_data.shading

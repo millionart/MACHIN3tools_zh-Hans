@@ -17,11 +17,12 @@ class PieModes(Menu):
         layout = self.layout
         toolsettings = context.tool_settings
 
+        grouppro, _, _, _ = get_addon("Group Pro")
+
         active = context.active_object
 
 
         if active:
-
             if active.type == 'MESH':
 
                 if context.area.type == "VIEW_3D":
@@ -48,7 +49,10 @@ class PieModes(Menu):
                         pie.separator()
 
                     # 9 - TOP - RIGHT
-                    pie.separator()
+                    if bpy.context.object.mode == "OBJECT" and grouppro:
+                        pie.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                    else:
+                        pie.separator()
 
                     # 1 - BOTTOM - LEFT
                     pie.separator()
@@ -112,23 +116,6 @@ class PieModes(Menu):
                         pie.separator()
 
 
-            elif active.type == 'CURVE':
-                pie = layout.menu_pie()
-
-                # 4 - LEFT
-                pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
-
-                # & - RIGHT
-                pie.separator()
-
-                # 1 - BOTTOM
-                pie.separator()
-
-                # 9 - TOP
-                text, icon = ("Edit", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
-                pie.operator("object.editmode_toggle", text=text, icon=icon)
-
-
             elif active.type == 'ARMATURE':
                 pie = layout.menu_pie()
 
@@ -149,113 +136,103 @@ class PieModes(Menu):
                     pie.operator("object.editmode_toggle", text=text, icon=icon)
 
 
+            elif active.type in ['CURVE', 'FONT', 'SURFACE', 'META', 'LATTICE']:
+                pie = layout.menu_pie()
+
+                # 4 - LEFT
+                pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
+
+                # & - RIGHT
+                pie.separator()
+
+                # 1 - BOTTOM
+                pie.separator()
+
+                # 9 - TOP
+                text, icon = ("Edit", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
+                pie.operator("object.editmode_toggle", text=text, icon=icon)
+
+                # 7 - TOP - LEFT
+                if active.type in ['SURFACE', 'META'] and bpy.context.object.mode == "EDIT":
+                    pie.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
+                else:
+                    pie.separator()
+
+                # 9 - TOP - RIGHT
+                if bpy.context.object.mode == "OBJECT" and grouppro:
+                    pie.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                else:
+                    pie.separator()
+
+                # 1 - BOTTOM - LEFT
+                pie.separator()
+
+                # 3 - BOTTOM - RIGHT
+                pie.separator()
+
+
             elif active.type == 'EMPTY':
-                enabled, _, _, _ = get_addon("Group Pro", debug=True)
-
-                if enabled:
-                    self.draw_group_pro(context)
-
-
-            """
-
-            elif ob.object.type == 'FONT':
                 pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 
-            elif ob.object.type == 'SURFACE':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+                # 4 - LEFT
+                pie.separator()
 
-            elif ob.object.type == 'META':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+                # 6 - RIGHT
+                pie.separator()
 
-            elif ob.object.type == 'LATTICE':
-                pie = layout.menu_pie()
-                pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
+                # 2 - BOTTOM
+                pie.separator()
 
+                # 8 - TOP
+                pie.separator()
+
+                # 7 - TOP - LEFT
+                pie.separator()
+
+                # 9 - TOP - RIGHT
+                if grouppro:
+                    pie.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                else:
+                    pie.separator()
+
+                # 1 - BOTTOM - LEFT
+                pie.separator()
+
+                # 3 - BOTTOM - RIGHT
+                pie.separator()
+
+
+        # no active object
+        else:
+            pie = layout.menu_pie()
+
+            # 4 - LEFT
+            pie.separator()
+
+            # 6 - RIGHT
+            pie.separator()
+
+            # 2 - BOTTOM
+            pie.separator()
+
+            # 8 - TOP
+            pie.separator()
+
+            # 7 - TOP - LEFT
+            pie.separator()
+
+            # 9 - TOP - RIGHT
+            if grouppro:
+                pie.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
             else:
-                pass
+                pie.separator()
 
-            """
-
-
-    def draw_group_pro(self, context):
-        layout = self.layout
-        pie = layout.menu_pie()
-
-        # 4 - LEFT
-        if context.active_object is not None and context.active_object.type == "EMPTY" and context.active_object.instance_collection:
-            pie.operator("wm.call_menu_pie", text="Set Origin").name = "object.grouppro_origin_pie"
-        else:
+            # 1 - BOTTOM - LEFT
             pie.separator()
 
-        # 6 - RIGHT
-        pie.operator("object.close_grouppro", icon='STICKY_UVS_LOC')
-
-        # 2 - BOTTOM
-        split = pie.split()
-        col = split.column(align=True)
-        row = col.row(align=True)
-        row.scale_y = 1.5
-        geoOper = row.operator("object.gpro_converttogeo", icon='OUTLINER_OB_GROUP_INSTANCE')
-        geoOper.maxDept = 0
-        row = col.row(align=True)
-        row.scale_y = 1.5
-        row.operator("object.grouppro_flip", icon='AUTOMERGE_ON')
-        row = col.row(align=True)
-        row.scale_y = 1.5
-        oper = row.operator("object.gpro_makeunique", icon='UNLINKED')
-        oper.maxDept = 1
-        row = col.row(align=True)
-        row.scale_y = 1.5
-        row.operator("object.gpro_initialize", icon='BOIDS')
-        row = col.row(align=True)
-        row.separator()
-        row = col.row(align=True)
-        row.scale_y = 1.5
-        row.operator("object.gpro_cleanup", icon='PARTICLE_DATA')
-        row = col.row(align=True)
-        row.scale_y = 1.5
-        row.operator("object.gpro_delete", icon='PANEL_CLOSE')
-
-        # 8 - TOP
-        create = pie.operator("object.create_grouppro", icon='STICKY_UVS_LOC')
-        if context.active_object:
-            create.Name = context.active_object.name
-
-        # 7 - TOP - LEFT
-        pie.operator("object.group_pro_raycast_open", icon='EYEDROPPER', text='Pick Group')
-
-        # 9 - TOP - RIGHT
-        pie.operator("object.edit_grouppro", icon='TRIA_DOWN')
-
-        # 1 - BOTTOM - LEFT
-        if len(bpy.context.scene.storedGroupSettings) > 0:
-            split = pie.split()
-            col = split.column(align=True)
-            row = col.row(align=True)
-            row.scale_y = 1.5
-            row.prop(context.scene, 'GroupLocalView', icon='RESTRICT_VIEW_OFF')
-            row = col.row(align=True)
-            row.scale_y = 1.5
-            row.prop(context.scene, 'GroupLocalViewDepth', slider=False, text='')
-
-        else:
+            # 3 - BOTTOM - RIGHT
             pie.separator()
 
-        # 3 - BOTTOM - RIGHT
-        if len(bpy.context.scene.storedGroupSettings) > 0:
-            split = pie.split()
-            col = split.column(align=True)
-            row = col.row(align=True)
-            row.scale_y = 1.5
-            row.operator("object.add_to_grouppro", icon='ADD')
-            row = col.row(align=True)
-            row.scale_y = 1.5
-            row.operator("object.remove_from_grouppro", icon='REMOVE')
-        else:
-            pie.separator()
 
 
 class PieSave(Menu):
