@@ -21,36 +21,160 @@ class PieModes(Menu):
 
         active = context.active_object
 
+        pie = layout.menu_pie()
 
         if active:
-            if active.type == 'MESH':
+            if context.mode in ['OBJECT', 'EDIT_MESH', 'EDIT_CURVE', 'EDIT_TEXT', 'EDIT_SURFACE', 'EDIT_METABALL', 'EDIT_LATTICE', 'EDIT_GPENCIL', 'PAINT_GPENCIL', 'SCULPT_GPENCIL', 'WEIGHT_GPENCIL']:
+                if active.type == 'MESH':
+                    if context.area.type == "VIEW_3D":
+                        # 4 - LEFT
+                        pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
 
-                if context.area.type == "VIEW_3D":
-                    pie = layout.menu_pie()
+                        # 6 - RIGHT
+                        pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
 
-                    # 4 - LEFT
-                    pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
+                        # 2 - BOTTOM
+                        pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
 
-                    # 6 - RIGHT
-                    pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
+                        # 8 - TOP
+                        text, icon = ("Edit", get_icon('edit_mesh')) if active.mode == "OBJECT" else ("Object", get_icon('object'))
+                        pie.operator("machin3.edit_mode", text=text, icon_value=icon)
 
-                    # 2 - BOTTOM
-                    pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
+                        # 7 - TOP - LEFT
+                        box = pie.split()
+                        column = box.column()
+                        column.scale_y = 1.5
+                        column.scale_x = 1.5
 
-                    # 8 - TOP
+                        row = column.row(align=True)
 
-                    text, icon = ("Edit", get_icon('edit_mesh')) if active.mode == "OBJECT" else ("Object", get_icon('object'))
-                    pie.operator("machin3.edit_mode", text=text, icon_value=icon)
+                        r = row.row(align=True)
+                        r.active = False if context.mode == 'TEXTURE_PAINT' else True
+                        r.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
 
-                    # 7 - TOP - LEFT
-                    if bpy.context.object.mode == "EDIT":
-                        pie.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
-                    else:
+                        r = row.row(align=True)
+                        r.active = False if context.mode == 'WEIGHT_PAINT' else True
+                        r.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
+
+                        r = row.row(align=True)
+                        r.active = False if context.mode == 'VERTEX_PAINT' else True
+                        r.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
+
+                        r = row.row(align=True)
+                        r.active = False if context.mode == 'SCULPT' else True
+                        r.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
+
+                        r = row.row(align=True)
+                        r.active = False if context.mode == 'OBJECT' else True
+                        r.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+
+                        r = row.row(align=True)
+                        r.active = False if context.mode == 'EDIT_MESH' else True
+                        r.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+
+
+                        # 9 - TOP - RIGHT
+                        if grouppro and bpy.context.mode == "OBJECT":
+                            box = pie.split()
+                            column = box.column()
+                            column.scale_y = 1.5
+                            column.scale_x = 1.2
+                            column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                        else:
+                            pie.separator()
+
+
+                        # 1 - BOTTOM - LEFT
                         pie.separator()
 
+                        # 3 - BOTTOM - RIGHT
+                        if bpy.context.mode == "EDIT_MESH":
+                            box = pie.split()
+                            column = box.column()
+
+                            row = column.row()
+                            row.scale_y = 1.2
+                            row.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
+
+                            column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
+
+
+                        else:
+                            pie.separator()
+
+
+                    if context.area.type == "IMAGE_EDITOR":
+                        toolsettings = context.scene.tool_settings
+
+                        if context.mode == "OBJECT":
+                            # 4 - LEFT
+                            pie.operator("machin3.image_mode", text="UV Edit", icon="GROUP_UVS").mode = "UV"
+
+                            # 6 - RIGHT
+                            pie.operator("machin3.image_mode", text="Paint", icon="TPAINT_HLT").mode = "PAINT"
+
+                            # 2 - BOTTOM)
+                            pie.operator("machin3.image_mode", text="Mask", icon="MOD_MASK").mode = "MASK"
+
+                            # 8 - TOP
+                            pie.operator("machin3.image_mode", text="View", icon="FILE_IMAGE").mode = "VIEW"
+
+
+                        elif context.mode == "EDIT_MESH":
+                            # 4 - LEFT
+                            pie.operator("machin3.uv_mode", text="Vertex", icon_value=get_icon('vertex')).mode = "VERTEX"
+
+                            # 6 - RIGHT
+                            pie.operator("machin3.uv_mode", text="Face", icon_value=get_icon('face')).mode = "FACE"
+
+                            # 2 - BOTTOM
+                            pie.operator("machin3.uv_mode", text="Edge", icon_value=get_icon('edge')).mode = "EDGE"
+
+                            # 8 - TOP
+                            pie.operator("object.mode_set", text="Object", icon_value=get_icon('object')).mode = "OBJECT"
+
+                            # 7 - TOP - LEFT
+                            pie.prop(context.scene.M3, "uv_sync_select", text="Sync Selection", icon="UV_SYNC_SELECT")
+
+                            # 9 - TOP - RIGHT
+                            if toolsettings.use_uv_select_sync:
+                                pie.separator()
+                            else:
+                                pie.operator("machin3.uv_mode", text="Island", icon_value=get_icon('island')).mode = "ISLAND"
+
+                            # 1 - BOTTOM - LEFT
+                            pie.separator()
+
+                            # 3 - BOTTOM - RIGHT
+                            pie.separator()
+
+                elif active.type == 'ARMATURE':
+                    # 4 - LEFT
+                    pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
+
+                    # 6 - RIGHT
+                    pie.operator("object.mode_set", text="Pose", icon='POSE_HLT').mode = "POSE"
+
+                    # 2 - BOTTOM
+                    pie.separator()
+
+                    # 8 - TOP
+                    text, icon = ("Edit", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
+                    if active.mode == "POSE":
+                        pie.operator("object.posemode_toggle", text=text, icon=icon)
+                    else:
+                        pie.operator("object.editmode_toggle", text=text, icon=icon)
+
+                    # 7 - TOP - LEFT
+                    pie.separator()
+
                     # 9 - TOP - RIGHT
-                    if bpy.context.object.mode == "OBJECT" and grouppro:
-                        pie.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                    if grouppro and context.mode == "OBJECT":
+                        box = pie.split()
+                        column = box.column()
+                        column.scale_y = 1.5
+                        column.scale_x = 1.2
+                        column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
                     else:
                         pie.separator()
 
@@ -58,154 +182,357 @@ class PieModes(Menu):
                     pie.separator()
 
                     # 3 - BOTTOM - RIGHT
-                    if bpy.context.object.mode == "EDIT":
+                    pie.separator()
+
+                elif active.type in ['CURVE', 'FONT', 'SURFACE', 'META', 'LATTICE']:
+                    # 4 - LEFT
+                    pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
+
+                    # & - RIGHT
+                    pie.separator()
+
+                    # 1 - BOTTOM
+                    pie.separator()
+
+                    # 9 - TOP
+                    text, icon = ("Edit", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
+                    pie.operator("object.editmode_toggle", text=text, icon=icon)
+
+                    # 7 - TOP - LEFT
+                    pie.separator()
+
+                    # 9 - TOP - RIGHT
+                    if grouppro:
                         box = pie.split()
                         column = box.column()
-                        column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
-
+                        column.scale_y = 1.5
+                        column.scale_x = 1.2
+                        column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
                     else:
                         pie.separator()
 
+                    # 1 - BOTTOM - LEFT
+                    pie.separator()
 
-                if context.area.type == "IMAGE_EDITOR":
-                    pie = layout.menu_pie()
+                    # 3 - BOTTOM - RIGHT
+                    if bpy.context.mode in ['EDIT_SURFACE', 'EDIT_METABALL']:
+                        box = pie.split()
+                        column = box.column()
 
-                    toolsettings = context.scene.tool_settings
-
-                    if active.mode == "OBJECT":
-
-                        # 4 - LEFT
-                        pie.operator("machin3.image_mode", text="UV Edit", icon="GROUP_UVS").mode = "UV"
-
-                        # 6 - RIGHT
-                        pie.operator("machin3.image_mode", text="Paint", icon="TPAINT_HLT").mode = "PAINT"
-
-                        # 2 - BOTTOM)
-                        pie.operator("machin3.image_mode", text="Mask", icon="MOD_MASK").mode = "MASK"
-
-                        # 8 - TOP
-                        pie.operator("machin3.image_mode", text="View", icon="FILE_IMAGE").mode = "VIEW"
-
-
-                    elif active.mode == "EDIT":
-                        # 4 - LEFT
-                        pie.operator("machin3.uv_mode", text="Vertex", icon_value=get_icon('vertex')).mode = "VERTEX"
-
-                        # 6 - RIGHT
-                        pie.operator("machin3.uv_mode", text="Face", icon_value=get_icon('face')).mode = "FACE"
-
-                        # 2 - BOTTOM
-                        pie.operator("machin3.uv_mode", text="Edge", icon_value=get_icon('edge')).mode = "EDGE"
-
-                        # 8 - TOP
-                        pie.operator("object.mode_set", text="Object", icon_value=get_icon('object')).mode = "OBJECT"
-
-                        # 7 - TOP - LEFT
-                        pie.prop(context.scene.M3, "uv_sync_select", text="Sync Selection", icon="UV_SYNC_SELECT")
-
-                        # 9 - TOP - RIGHT
-                        if toolsettings.use_uv_select_sync:
-                            pie.separator()
-                        else:
-                            pie.operator("machin3.uv_mode", text="Island", icon_value=get_icon('island')).mode = "ISLAND"
-
-                        # 1 - BOTTOM - LEFT
+                        row = column.row()
+                        row.scale_y = 1.2
+                        row.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
+                    else:
                         pie.separator()
 
-                        # 3 - BOTTOM - RIGHT
+                elif active.type == 'GPENCIL':
+                    gpd = context.gpencil_data
+
+                    # 4 - LEFT
+                    pie.operator("object.mode_set", text="Draw", icon='EDITMODE_HLT').mode = "PAINT_GPENCIL"
+
+                    # 6 - RIGHT
+                    pie.operator("object.mode_set", text="Sculpt", icon='EDITMODE_HLT').mode = "SCULPT_GPENCIL"
+
+                    # 2 - BOTTOM
+                    pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT_GPENCIL"
+
+                    # 8 - TOP
+                    text, icon = ("Draw", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
+
+                    if active.mode == "WEIGHT_GPENCIL":
+                        pie.operator("gpencil.weightmode_toggle", text=text, icon=icon)
+                    elif active.mode == "EDIT_GPENCIL":
+                        pie.operator("gpencil.editmode_toggle", text=text, icon=icon)
+                    elif active.mode == "SCULPT_GPENCIL":
+                        pie.operator("gpencil.sculptmode_toggle", text=text, icon=icon)
+                    else:
+                        pie.operator("gpencil.paintmode_toggle", text=text, icon=icon)
+
+                    # 7 - TOP - LEFT
+                    box = pie.split()
+                    column = box.column()
+                    column.scale_y = 1.5
+                    column.scale_x = 1.5
+
+                    row = column.row(align=True)
+                    r = row.row(align=True)
+                    r.active = False if context.mode == "WEIGHT_GPENCIL" else True
+                    r.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_GPENCIL'
+                    r = row.row(align=True)
+                    r.active = False if context.mode == "PAINT_GPENCIL" else True
+                    r.operator("object.mode_set", text="", icon="GREASEPENCIL").mode = 'PAINT_GPENCIL'
+                    r = row.row(align=True)
+                    r.active = False if context.mode == "SCULPT_GPENCIL" else True
+                    r.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT_GPENCIL'
+                    r = row.row(align=True)
+                    r.active = False if context.mode == "OBJECT" else True
+                    r.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+                    r = row.row(align=True)
+                    r.active = False if context.mode == 'EDIT_GPENCIL' else True
+                    r.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT_GPENCIL'
+
+                    # 9 - TOP - RIGHT
+                    if grouppro and context.mode == "OBJECT":
+                        box = pie.split()
+                        column = box.column()
+                        column.scale_y = 1.5
+                        column.scale_x = 1.2
+                        column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                    else:
                         pie.separator()
 
+                    # 1 - BOTTOM - LEFT
+                    box = pie.split()
+                    column = box.column()
+                    column.scale_y = 1.2
+                    column.scale_x = 1.2
 
-            elif active.type == 'ARMATURE':
-                pie = layout.menu_pie()
+                    if context.mode == "PAINT_GPENCIL":
+                        row = column.row(align=True)
+                        row.prop(toolsettings, "use_gpencil_draw_onback", text="", icon="MOD_OPACITY")
+                        row.prop(toolsettings, "use_gpencil_weight_data_add", text="", icon="WPAINT_HLT")
+                        row.prop(toolsettings, "use_gpencil_draw_additive", text="", icon="FREEZE")
 
-                # 4 - LEFT
-                pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
-
-                # 6 - RIGHT
-                pie.operator("object.mode_set", text="Pose", icon='POSE_HLT').mode = "POSE"
-
-                # 2 - BOTTOM
-                pie.separator()
-
-                # 8 - TOP
-                text, icon = ("Edit", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
-                if active.mode == "POSE":
-                    pie.operator("object.posemode_toggle", text=text, icon=icon)
-                else:
-                    pie.operator("object.editmode_toggle", text=text, icon=icon)
+                    elif context.mode == "EDIT_GPENCIL":
+                        row = column.row(align=True)
+                        row.prop(toolsettings, "gpencil_selectmode", text="", expand=True)
 
 
-            elif active.type in ['CURVE', 'FONT', 'SURFACE', 'META', 'LATTICE']:
-                pie = layout.menu_pie()
+                    # 3 - BOTTOM - RIGHT
+                    box = pie.split()
+                    column = box.column()
 
-                # 4 - LEFT
-                pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT"
+                    if context.mode == "EDIT_GPENCIL":
+                        row = column.row(align=True)
+                        row.prop(gpd, "use_multiedit", text="", icon='GP_MULTIFRAME_EDITING')
 
-                # & - RIGHT
-                pie.separator()
+                        r = row.row(align=True)
+                        r.active = gpd.use_multiedit
+                        r.popover(panel="VIEW3D_PT_gpencil_multi_frame", text="Multiframe")
 
-                # 1 - BOTTOM
-                pie.separator()
+                        row = column.row(align=True)
+                        row.prop(toolsettings.gpencil_sculpt, "use_select_mask", text="")
 
-                # 9 - TOP
-                text, icon = ("Edit", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
-                pie.operator("object.editmode_toggle", text=text, icon=icon)
+                        row.popover(panel="VIEW3D_PT_tools_grease_pencil_interpolate", text="Interpolate")
 
-                # 7 - TOP - LEFT
-                if active.type in ['SURFACE', 'META'] and bpy.context.object.mode == "EDIT":
-                    pie.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
-                else:
+                    elif context.mode == "SCULPT_GPENCIL":
+                        row = column.row(align=True)
+                        row.prop(toolsettings.gpencil_sculpt, "use_select_mask", text="")
+
+                        row.separator()
+                        row.prop(gpd, "use_multiedit", text="", icon='GP_MULTIFRAME_EDITING')
+
+                        r = row.row(align=True)
+                        r.active = gpd.use_multiedit
+                        r.popover(panel="VIEW3D_PT_gpencil_multi_frame", text="Multiframe")
+
+                elif active.type == 'EMPTY':
+                    # 4 - LEFT
                     pie.separator()
 
-                # 9 - TOP - RIGHT
-                if bpy.context.object.mode == "OBJECT" and grouppro:
-                    pie.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
-                else:
+                    # 6 - RIGHT
                     pie.separator()
 
-                # 1 - BOTTOM - LEFT
-                pie.separator()
-
-                # 3 - BOTTOM - RIGHT
-                pie.separator()
-
-
-            elif active.type == 'EMPTY':
-                pie = layout.menu_pie()
-
-                # 4 - LEFT
-                pie.separator()
-
-                # 6 - RIGHT
-                pie.separator()
-
-                # 2 - BOTTOM
-                pie.separator()
-
-                # 8 - TOP
-                pie.separator()
-
-                # 7 - TOP - LEFT
-                pie.separator()
-
-                # 9 - TOP - RIGHT
-                if grouppro:
-                    pie.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
-                else:
+                    # 2 - BOTTOM
                     pie.separator()
 
-                # 1 - BOTTOM - LEFT
-                pie.separator()
+                    # 8 - TOP
+                    pie.separator()
 
-                # 3 - BOTTOM - RIGHT
-                pie.separator()
+                    # 7 - TOP - LEFT
+                    pie.separator()
 
+                    # 9 - TOP - RIGHT
+                    if grouppro:
+                        box = pie.split()
+                        column = box.column()
+                        column.scale_y = 1.5
+                        column.scale_x = 1.2
+                        column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                    else:
+                        pie.separator()
+
+                    # 1 - BOTTOM - LEFT
+                    pie.separator()
+
+                    # 3 - BOTTOM - RIGHT
+                    pie.separator()
+
+            elif context.mode == "SCULPT":
+                    # 4 - LEFT
+                    pie.separator()
+
+                    # 6 - RIGHT
+                    pie.separator()
+
+                    # 2 - BOTTOM
+                    pie.separator()
+
+                    # 8 - TOP
+                    pie.separator()
+
+                    # 7 - TOP - LEFT
+                    box = pie.split()
+                    column = box.column()
+                    column.scale_y = 1.5
+                    column.scale_x = 1.5
+
+                    row = column.row(align=True)
+                    row.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
+                    row.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
+                    row.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
+                    r = row.row(align=True)
+                    r.active = False
+                    r.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
+                    row.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+                    row.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+
+                    # 9 - TOP - RIGHT
+                    pie.separator()
+
+                    # 1 - BOTTOM - LEFT
+                    pie.separator()
+
+                    # 3 - BOTTOM - RIGHT
+                    pie.separator()
+
+            elif context.mode == "PAINT_TEXTURE":
+                    # 4 - LEFT
+                    pie.separator()
+
+                    # 6 - RIGHT
+                    pie.separator()
+
+                    # 2 - BOTTOM
+                    pie.separator()
+
+                    # 8 - TOP
+                    pie.separator()
+
+                    # 7 - TOP - LEFT
+                    box = pie.split()
+                    column = box.column()
+                    column.scale_y = 1.5
+                    column.scale_x = 1.5
+
+                    row = column.row(align=True)
+                    r = row.row(align=True)
+                    r.active = False
+                    r.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
+                    row.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
+                    row.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
+                    row.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
+                    row.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+                    row.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+
+                    # 9 - TOP - RIGHT
+                    box = pie.split()
+                    column = box.column()
+                    column.scale_y = 1.5
+                    column.scale_x = 1.5
+
+                    row = column.row(align=True)
+                    row.prop(active.data, "use_paint_mask", text="", icon="FACESEL")
+
+                    # 1 - BOTTOM - LEFT
+                    pie.separator()
+
+                    # 3 - BOTTOM - RIGHT
+                    pie.separator()
+
+            elif context.mode == "PAINT_WEIGHT":
+                    # 4 - LEFT
+                    pie.separator()
+
+                    # 6 - RIGHT
+                    pie.separator()
+
+                    # 2 - BOTTOM
+                    pie.separator()
+
+                    # 8 - TOP
+                    pie.separator()
+
+                    # 7 - TOP - LEFT
+                    box = pie.split()
+                    column = box.column()
+                    column.scale_y = 1.5
+                    column.scale_x = 1.5
+
+                    row = column.row(align=True)
+                    row.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
+                    r = row.row(align=True)
+                    r.active = False
+                    r.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
+                    row.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
+                    row.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
+                    row.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+                    row.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+
+                    # 9 - TOP - RIGHT
+                    box = pie.split()
+                    column = box.column()
+                    column.scale_y = 1.5
+                    column.scale_x = 1.5
+
+                    row = column.row(align=True)
+                    row.prop(active.data, "use_paint_mask", text="", icon="FACESEL")
+                    row.prop(active.data, "use_paint_mask_vertex", text="", icon="VERTEXSEL")
+
+                    # 1 - BOTTOM - LEFT
+                    pie.separator()
+
+                    # 3 - BOTTOM - RIGHT
+                    pie.separator()
+
+            elif context.mode == "PAINT_VERTEX":
+                    # 4 - LEFT
+                    pie.separator()
+
+                    # 6 - RIGHT
+                    pie.separator()
+
+                    # 2 - BOTTOM
+                    pie.separator()
+
+                    # 8 - TOP
+                    pie.separator()
+
+                    # 7 - TOP - LEFT
+                    box = pie.split()
+                    column = box.column()
+                    column.scale_y = 1.5
+                    column.scale_x = 1.5
+
+                    row = column.row(align=True)
+                    row.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
+                    row.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
+                    r = row.row(align=True)
+                    r.active = False
+                    r.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
+                    row.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
+                    row.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+                    row.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+
+                    # 9 - TOP - RIGHT
+                    box = pie.split()
+                    column = box.column()
+                    column.scale_y = 1.5
+                    column.scale_x = 1.5
+
+                    row = column.row(align=True)
+                    row.prop(active.data, "use_paint_mask", text="", icon="FACESEL")
+                    row.prop(active.data, "use_paint_mask_vertex", text="", icon="VERTEXSEL")
+
+                    # 1 - BOTTOM - LEFT
+                    pie.separator()
+
+                    # 3 - BOTTOM - RIGHT
+                    pie.separator()
 
         # no active object
         else:
-            pie = layout.menu_pie()
-
             # 4 - LEFT
             pie.separator()
 
@@ -232,7 +559,6 @@ class PieModes(Menu):
 
             # 3 - BOTTOM - RIGHT
             pie.separator()
-
 
 
 class PieSave(Menu):

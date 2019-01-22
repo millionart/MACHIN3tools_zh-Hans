@@ -21,13 +21,28 @@ class Customize(bpy.types.Operator):
 
         resourcespath = os.path.join(get_prefs().path, "resources")
 
-        # WINDOW (is read only)
-        # bpy.context.window.screen.areas[0].regions[0].alignment = "TOP"
-        # bpy.context.area.region[0].alignment = "TOP"
 
-        # SET CURSOR TOOL
+        # SET Select TOOL, in object and edit mode
         if context.area.type == "VIEW_3D":
-            bpy.ops.wm.tool_set_by_name(name="Cursor")
+            bpy.ops.wm.tool_set_by_name(name="Select")
+
+            if context.active_object and context.active_object.type == "MESH":
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.wm.tool_set_by_name(name="Select")
+                bpy.ops.object.editmode_toggle()
+
+
+        # context override https://blender.stackexchange.com/a/27182/33919
+        else:
+            overrides = [{'area': area} for screen in context.workspace.screens for area in screen.areas if area.type == "VIEW_3D"]
+            for o in overrides:
+                bpy.ops.wm.tool_set_by_name(o, name="Select")
+
+                if context.active_object and context.active_object.type == "MESH":
+                    bpy.ops.object.editmode_toggle()
+                    bpy.ops.wm.tool_set_by_name(o, name="Select")
+                    bpy.ops.object.editmode_toggle()
+
 
         # THEME
         if get_prefs().custom_theme:
@@ -46,18 +61,13 @@ class Customize(bpy.types.Operator):
         self.preferences(context)
 
 
-        # CUSTOM KEYMAPS
-        if get_prefs().custom_keymaps:
-            self.keymaps(context)
-
-
         # START UP
         # copy and load start up file, which includes workspaces
         # """
 
         return {'FINISHED'}
 
-    def keymaps(self, context):
+    def customize_keymap(self, context):
         def modify_keymaps(kc):
             # WINDOW
             km = kc.keymaps.get("Window")
@@ -350,7 +360,6 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "uv.cursor_set":
                     kmi.active = False
 
-
         def add_keymaps(kc):
             # MESH
             km = kc.keymaps.get("Mesh")
@@ -365,8 +374,6 @@ class Customize(bpy.types.Operator):
             # kmi.properties.smoothness = 1
 
             kmi = km.keymap_items.new("mesh.bridge_edge_loops", "TWO", "PRESS", ctrl=True)
-
-        print("\n» Customizing 2.7x Keymap")
 
         kc = context.window_manager.keyconfigs.user
 
@@ -383,36 +390,47 @@ class Customize(bpy.types.Operator):
             print("\n» Changing Preferences: Interface")
 
             v = prefs.view
+            s = prefs.system
 
+            v.show_splash = False
+            v.show_tooltips = True
             v.show_tooltips_python = True
             v.show_developer_ui = True
-            v.mini_axis_type = "MINIMAL"
 
-            v.use_zoom_to_mouse = True
-            if get_prefs().obj_mode_rotate_around_active:
-                v.use_rotate_around_active = True
+            v.header_align_default = 'BOTTOM'
+            s.use_region_overlap = True
+
+            v.color_picker_type = "SQUARE_SV"
+
+            v.use_text_antialiasing = True
+            v.text_hinting = "NONE"
 
             v.pie_animation_timeout = 0
-            v.show_splash = False
-            v.use_quit_dialog = False
 
+        if get_prefs().custom_preferences_viewport:
+            print("\n» Changing Preferences: Viewport")
 
-        if get_prefs().custom_preferences_editing:
-            print("\n» Changing Preferences: Editing")
+            v = prefs.view
+            s = prefs.system
 
-            e = prefs.edit
+            v.mini_axis_type = 'MINIMAL'
 
-            e.undo_steps = 64
+            s.gpu_viewport_quality = 1
+            s.multi_sample = "8"
 
-
-        if get_prefs().custom_preferences_input:
-            print("\n» Changing Preferences: Input")
+        if get_prefs().custom_preferences_navigation:
+            print("\n» Changing Preferences: Navigation")
 
             i = prefs.inputs
 
             i.invert_mouse_zoom = True
+            i.use_zoom_to_mouse = True
+
+        if get_prefs().custom_preferences_keymap:
+            print("\n» Changing Preferences: Keymap")
 
             keyconfigpath = bpy.utils.preset_paths(subdir='keyconfig')
+
             if keyconfigpath:
                 keymappath = os.path.join(keyconfigpath[0], "blender_27x.py")
 
@@ -421,67 +439,63 @@ class Customize(bpy.types.Operator):
                 kcprefs = context.window_manager.keyconfigs.active.preferences
                 kcprefs.select_mouse = "LEFT"
 
+                # """
                 # for some weird reason doing this 2 times is required if you edit the keymaps afterwards
-                # otherwise left mouse tools be right mouse, could be a blender bug, TODO: investiage in beta phase
+                # otherwise middle mouse mappings for zoom, pan, rotate and dolly will be missing, perhaps some other things as well
                 bpy.ops.wm.keyconfig_activate(filepath=keymappath)
 
                 kcprefs = context.window_manager.keyconfigs.active.preferences
                 kcprefs.select_mouse = "LEFT"
 
+                # """
 
-        if get_prefs().custom_preferences_file:
-            print("\n» Changing Preferences: File")
-
-            f = prefs.filepaths
-
-            f.use_file_compression = True
-            f.use_load_ui = False
-            f.save_version = 3
-            f.recent_files = 20
-
+            self.customize_keymap(context)
 
         if get_prefs().custom_preferences_system:
             print("\n» Changing Preferences: System")
 
             c = prefs.addons['cycles'].preferences
+            s = prefs.system
+            e = prefs.edit
 
             c.compute_device_type = "CUDA"
+
+            # TODO: as of c59370bf643f, likely a bit earlier, the c.devices collection won't update until the user switches to the SYSTEM prefs panel manually, re-investigate later
+            # ####: as a consequence, the integrated gpu won't be activated
+
             for d in c.devices:
                 d.use = True
 
-            s = prefs.system
+            e.undo_steps = 64
 
-            s.opensubdiv_compute_type = "GLSL_COMPUTE"
+        if get_prefs().custom_preferences_save:
+            print("\n» Changing Preferences: Save & Load")
+            v = prefs.view
+            f = prefs.filepaths
 
-            s.select_method = "GL_QUERY"
+            f.use_file_compression = True
+            f.use_load_ui = False
 
-            s.anisotropic_filter = "FILTER_8"
-            s.multi_sample = "8"
+            v.use_quit_dialog = False
 
-            s.text_hinting = "NONE"
-
-            s.color_picker_type = "SQUARE_SV"
+            f.save_version = 3
+            f.recent_files = 20
 
     def overlays(self, context):
         print("\n» Modifying Overlays")
 
-        ws = context.workspace
+        areas = [area for screen in context.workspace.screens for area in screen.areas if area.type == "VIEW_3D"]
 
-        overlay = False
-        for screen in ws.screens:
-            if not overlay:
-                for area in screen.areas:
-                    if area.type == "VIEW_3D":
-                        overlay = area.spaces[0].overlay
-                        shading = area.spaces[0].shading
+        for area in areas:
+            overlay = area.spaces[0].overlay
+            shading = area.spaces[0].shading
 
-        if overlay:
             overlay.show_face_center = True
             overlay.wireframe_threshold = 1
 
-        if shading:
             shading.show_backface_culling = True
 
+            overlay.vertex_opacity = 1
 
     def matcaps(self, context, resourcespath, datafilespath):
         print("\n» Adding Matcaps")
@@ -489,8 +503,6 @@ class Customize(bpy.types.Operator):
         matcapsourcepath = os.path.join(resourcespath, "matcaps")
         matcaptargetpath = m3.makedir(os.path.join(datafilespath, "studiolights", "matcap"))
         matcaps = os.listdir(matcapsourcepath)
-
-
 
         for matcap in sorted(matcaps):
             shutil.copy(os.path.join(matcapsourcepath, matcap), matcaptargetpath)
@@ -516,7 +528,7 @@ class Customize(bpy.types.Operator):
                             shading = area.spaces[0].shading
 
             if shading:
-                # shading.type = "SOLID"  # TODO: crashes Blender as of 1b870bce85d
+                shading.type = "SOLID"
                 shading.light = "MATCAP"
                 shading.studio_light = "matcap_base.exr"
                 shading.color_type = "SINGLE"
@@ -526,7 +538,7 @@ class Customize(bpy.types.Operator):
                 shading.cavity_valley_factor = 2
 
     def theme(self, scriptspath, resourcespath):
-        print("\n» Enabling M3 theme")
+        print("\n» Installing and Enabling M3 theme")
 
         themesourcepath = os.path.join(resourcespath, "theme", "m3.xml")
         themetargetpath = m3.makedir(os.path.join(scriptspath, "presets", "interface_theme"))

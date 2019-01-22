@@ -4,25 +4,26 @@ from ... utils.registration import get_prefs
 from ... utils import MACHIN3 as m3
 
 
+
+user_cavity = True
+
+
 class EditMode(bpy.types.Operator):
     bl_idname = "machin3.edit_mode"
     bl_label = "Edit Mode"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        viewprefs = context.preferences.view
+        global user_cavity
         shading = context.space_data.shading
-
-        rotate_around_active = get_prefs().obj_mode_rotate_around_active
         toggle_cavity = get_prefs().toggle_cavity
+
 
         if context.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="EDIT")
 
-            if rotate_around_active:
-                viewprefs.use_rotate_around_active = False
-
             if toggle_cavity:
+                user_cavity = shading.show_cavity
                 shading.show_cavity = False
 
 
@@ -36,11 +37,9 @@ class EditMode(bpy.types.Operator):
 
             bpy.ops.object.mode_set(mode="OBJECT")
 
-            if rotate_around_active:
-                viewprefs.use_rotate_around_active = True
-
-            if toggle_cavity:
+            if toggle_cavity and user_cavity:
                 shading.show_cavity = True
+                user_cavity = True
 
         return {'FINISHED'}
 
@@ -52,19 +51,20 @@ class VertexMode(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
-        if bpy.context.object.mode != "EDIT":
+        global user_cavity
+        shading = context.space_data.shading
+        toggle_cavity = get_prefs().toggle_cavity
+
+        if context.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="EDIT")
+
+            if toggle_cavity:
+                user_cavity = shading.show_cavity
+                shading.show_cavity = False
 
         expand = True if event.ctrl else False
 
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='VERT')
-
-
-        if get_prefs().obj_mode_rotate_around_active:
-            context.preferences.view.use_rotate_around_active = False
-
-        if get_prefs().toggle_cavity:
-            context.space_data.shading.show_cavity = False
 
         return {'FINISHED'}
 
@@ -76,19 +76,21 @@ class EdgeMode(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
-        if bpy.context.object.mode != "EDIT":
+        global user_cavity
+        shading = context.space_data.shading
+        toggle_cavity = get_prefs().toggle_cavity
+
+        if context.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="EDIT")
+
+            if toggle_cavity:
+                user_cavity = shading.show_cavity
+                shading.show_cavity = False
+
 
         expand = True if event.ctrl else False
 
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='EDGE')
-
-
-        if get_prefs().obj_mode_rotate_around_active:
-            context.preferences.view.use_rotate_around_active = False
-
-        if get_prefs().toggle_cavity:
-            context.space_data.shading.show_cavity = False
 
         return {'FINISHED'}
 
@@ -100,20 +102,20 @@ class FaceMode(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
-        if bpy.context.object.mode != "EDIT":
+        global user_cavity
+        shading = context.space_data.shading
+        toggle_cavity = get_prefs().toggle_cavity
+
+        if context.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="EDIT")
+
+            if toggle_cavity:
+                user_cavity = shading.show_cavity
+                shading.show_cavity = False
 
         expand = True if event.ctrl else False
 
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=expand, type='FACE')
-
-
-        if get_prefs().obj_mode_rotate_around_active:
-            context.preferences.view.use_rotate_around_active = False
-
-
-        if get_prefs().toggle_cavity:
-            context.space_data.shading.show_cavity = False
 
         return {'FINISHED'}
 

@@ -49,7 +49,7 @@
             show_shaded="FALSE"
             shadetop="0"
             shadedown="-5"
-            roundness="0.4"
+            roundness="0.8"
             >
           </ThemeWidgetColors>
         </wcol_tool>
@@ -229,7 +229,7 @@
             show_shaded="FALSE"
             shadetop="10"
             shadedown="-10"
-            roundness="1"
+            roundness="0.8"
             >
           </ThemeWidgetColors>
         </wcol_pie_menu>

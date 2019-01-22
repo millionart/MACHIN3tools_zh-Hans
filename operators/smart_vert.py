@@ -73,7 +73,6 @@ class SmartVert(bpy.types.Operator):
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glDepthFunc(bgl.GL_ALWAYS)
 
-        # side lines
         bgl.glLineWidth(3)
         shader.uniform_float("color", (0.5, 1, 0.5, 0.5))
         batch = batch_for_shader(shader, 'LINES', {"pos": self.coords}, indices=self.edge_indices)
