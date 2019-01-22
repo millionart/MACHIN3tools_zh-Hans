@@ -69,6 +69,7 @@ class Customize(bpy.types.Operator):
 
     def customize_keymap(self, context):
         def modify_keymaps(kc):
+
             # WINDOW
             km = kc.keymaps.get("Window")
             for kmi in km.keymap_items:
@@ -113,7 +114,6 @@ class Customize(bpy.types.Operator):
                     else:
                         kmi.active = False
 
-
             # 3D VIEW
 
             km = kc.keymaps.get("3D View")
@@ -128,16 +128,20 @@ class Customize(bpy.types.Operator):
                     kmi.shift = False
                     kmi.properties.orientation = "GEOM"
 
+                # NOTE: changing these from  CLICK to PRESS seems to introduce weird behavior where blender always selects the object in the back, not in the front
                 if kmi.idname == "view3d.select":
                     if kmi.value == "CLICK":
                         if not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "toggle", "center", "enumerate", "object"]]):
-                            kmi.value = "PRESS"
+                            # kmi.value = "PRESS"
+                            pass
 
                         elif kmi.properties.toggle and not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "center", "enumerate", "object"]]):
-                            kmi.value = "PRESS"
+                            # kmi.value = "PRESS"
+                            pass
 
                         elif kmi.properties.enumerate and not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "toggle", "center", "object"]]):
-                            kmi.value = "PRESS"
+                            # kmi.value = "PRESS"
+                            pass
 
                         else:
                             kmi.active = False
@@ -155,7 +159,6 @@ class Customize(bpy.types.Operator):
 
                 # if kmi.idname == "wm.context_toggle":  # gizmo toggle
                     # kmi.active = False
-
 
 
             # 3D VIEW TOOLS
@@ -194,8 +197,6 @@ class Customize(bpy.types.Operator):
             for kmi in km.keymap_items:
                 if kmi.idname == "object.mode_set":
                     kmi.active = False
-
-
 
 
             # MESH
@@ -360,6 +361,7 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "uv.cursor_set":
                     kmi.active = False
 
+
         def add_keymaps(kc):
             # MESH
             km = kc.keymaps.get("Mesh")
@@ -446,7 +448,6 @@ class Customize(bpy.types.Operator):
 
                 kcprefs = context.window_manager.keyconfigs.active.preferences
                 kcprefs.select_mouse = "LEFT"
-
                 # """
 
             self.customize_keymap(context)
