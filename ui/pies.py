@@ -949,7 +949,6 @@ class PieShading(Menu):
             row.prop(view.shading, "show_xray_wireframe", text="")
             row.prop(view.shading, "xray_alpha_wireframe", text="X-Ray")
 
-
     def draw_eevee(self, context, view, col):
         icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_ssr", icon=icon)
@@ -980,7 +979,6 @@ class PieShading(Menu):
             row = col.row(align=True)
             row.prop(context.scene.eevee, "volumetric_start")
             row.prop(context.scene.eevee, "volumetric_end")
-
 
     def get_text_icon(self, context, shading):
         if context.space_data.shading.type == shading:
@@ -1287,7 +1285,7 @@ class PieWorkspace(Menu):
         pie.operator("machin3.switch_workspace", text="MACHIN3", icon='VIEW3D').name="General"
 
         # 6 - RIGHT
-        pie.separator()
+        pie.operator("machin3.switch_workspace", text="Compositing", icon='NODE_COMPOSITING').name="Compositing"
 
         # 2 - BOTTOM
         pie.operator("machin3.switch_workspace", text="Scripting", icon='CONSOLE').name="Scripting"
