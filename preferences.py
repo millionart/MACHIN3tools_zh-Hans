@@ -27,6 +27,8 @@ links = [("Documentation", "https://machin3.io/MACHIN3tools/docs/", "INFO"),
          ]
 
 
+# TODO: check if the aeppend world/materials paths exist and make them abosolute
+
 
 class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     path = get_path()
@@ -73,13 +75,13 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             self.avoid_update = True
             self.switchmatcap2 = "NOT FOUND"
 
-    def update_custom_keymaps(self, context):
-        if self.custom_keymaps:
+    def update_custom_preferences_keymap(self, context):
+        if self.custom_preferences_keymap:
             kc = context.window_manager.keyconfigs.user
 
             for km in kc.keymaps:
                 if km.is_user_modified:
-                    self.custom_keymaps = False
+                    self.custom_preferences_keymap = False
                     self.dirty_keymaps = True
                     return
 
@@ -158,11 +160,11 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     custom_matcaps: BoolProperty(name="Matcaps and Default Shading", default=True)
     custom_overlays: BoolProperty(name="Overlays", default=True)
     custom_preferences_interface: BoolProperty(name="Preferences: Interface", default=True)
-    custom_preferences_editing: BoolProperty(name="Preferences: Editing", default=True)
-    custom_preferences_input: BoolProperty(name="Preferences: Input", default=True)
-    custom_preferences_file: BoolProperty(name="Preferences: File", default=True)
+    custom_preferences_viewport: BoolProperty(name="Preferences: Viewport", default=True)
+    custom_preferences_navigation: BoolProperty(name="Preferences: Navigation", default=True)
+    custom_preferences_keymap: BoolProperty(name="Preferences: Keymap", default=False, update=update_custom_preferences_keymap)
     custom_preferences_system: BoolProperty(name="Preferences: System", default=False)
-    custom_keymaps: BoolProperty(name="Keymaps", default=False, update=update_custom_keymaps)
+    custom_preferences_save: BoolProperty(name="Preferences: Save & Load", default=True)
 
 
     # MACHIN3tools
@@ -315,28 +317,40 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             bb = b.box()
             bb.label(text="Customize")
 
-            column = bb.column()
+            bbb = bb.box()
+            column = bbb.column()
 
             row = column.row()
             row.prop(self, "custom_theme")
             row.prop(self, "custom_matcaps")
             row.prop(self, "custom_overlays")
-            row = column.row()
-            row.prop(self, "custom_preferences_interface")
-            row.prop(self, "custom_preferences_editing")
-            row.prop(self, "custom_preferences_input")
-            row = column.row()
-            row.prop(self, "custom_preferences_file")
-            row.prop(self, "custom_preferences_system")
-            row.label()
-            row = column.row()
-            row.prop(self, "custom_keymaps")
-            if self.dirty_keymaps:
-                r = row.split(factor=0.7)
-                r.label(text="Keymaps have been modified, restore them first.", icon="ERROR")
-                r.operator("machin3.restore_keymaps", text="Restore now")
+
+            bbb = bb.box()
+            column = bbb.column()
 
             row = column.row()
+
+            col = row.column()
+            col.prop(self, "custom_preferences_interface")
+            col.prop(self, "custom_preferences_viewport")
+
+            col = row.column()
+            col.prop(self, "custom_preferences_navigation")
+            col.prop(self, "custom_preferences_keymap")
+
+            col = row.column()
+            col.prop(self, "custom_preferences_system")
+            col.prop(self, "custom_preferences_save")
+
+            if self.dirty_keymaps:
+                row = column.row()
+                row.label(text="Keymaps have been modified, restore them first.", icon="ERROR")
+                row.operator("machin3.restore_keymaps", text="Restore now")
+                row.label()
+
+            column = bb.column()
+            row = column.row()
+
             row.label()
             row.operator("machin3.customize")
             row.label()
@@ -350,7 +364,6 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
             column = bb.column()
 
-            column.prop(self, "obj_mode_rotate_around_active")
             column.prop(self, "toggle_cavity")
 
 
@@ -390,9 +403,6 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             row = column.row()
             row.prop(self, "appendmatsname")
             row.operator("machin3.add_separator", text="", icon_value=get_icon('separator'))
-            row = column.row()
-            row.separator()
-            row.label(text="Tip: Add a dash to the end of a name, to create a separator in the menu!", icon="INFO")
 
 
         # SHADING PIE

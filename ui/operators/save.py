@@ -183,14 +183,12 @@ class AppendMaterial(bpy.types.Operator):
         path = get_prefs().appendmatspath
         name = self.name
 
-
-
         if name == "ALL":
             all_names = [mat.name for mat in get_prefs().appendmats]
 
             for name in all_names:
-                n = name.replace("-", "")
-                append_material(path, n)
+                if name != "---":
+                    append_material(path, name)
         else:
             mat = append_material(path, name)
 
