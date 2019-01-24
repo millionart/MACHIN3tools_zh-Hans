@@ -7,7 +7,7 @@ from ... utils import MACHIN3 as m3
 
 class ColorizeMaterials(bpy.types.Operator):
     bl_idname = "machin3.colorize_materials"
-    bl_label = "Colorize Materials"
+    bl_label = "MACHIN3: Colorize Materials"
     bl_options = {'REGISTER', 'UNDO'}
 
     lighten_amount: FloatProperty(name="Lighten", default=0.05, min=0, max=1)
@@ -39,11 +39,28 @@ class ColorizeMaterials(bpy.types.Operator):
         return {'FINISHED'}
 
     def lighten(self, color, amount):
+        def remap(value, new_low):
+            old_range = (1 - 0)
+            new_range = (1 - new_low)
+            return (((value - 0) * new_range) / old_range) + new_low
+
         return tuple(remap(c, amount) for c in color)
 
 
+class ColorizeObjects(bpy.types.Operator):
+    bl_idname = "machin3.colorize_objects"
+    bl_label = "MACHIN3: Colorize Objects"
+    bl_description = "description"
+    bl_options = {'REGISTER', 'UNDO'}
 
-def remap(value, new_low):
-    old_range = (1 - 0)
-    new_range = (1 - new_low)
-    return (((value - 0) * new_range) / old_range) + new_low
+    @classmethod
+    def poll(cls, context):
+        return context.active_object and len(context.selected_objects) > 1
+
+    def execute(self, context):
+        activecolor = context.active_object.color
+
+        for obj in context.selected_objects:
+            obj.color = activecolor
+
+        return {'FINISHED'}

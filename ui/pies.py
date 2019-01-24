@@ -847,6 +847,7 @@ class PieShading(Menu):
             row.prop(active, "show_name", text="Name")
             row.prop(active, "show_axis", text="Axis")
             row.prop(active, "show_in_front", text="In Front")
+            row.prop(active, "color", text="")
 
     def draw_right_column(self, context, view, col):
         if view.shading.type == "SOLID":
@@ -878,8 +879,12 @@ class PieShading(Menu):
             # single color
             if view.shading.color_type == 'SINGLE':
                 col.prop(view.shading, "single_color", text="")
+
             elif view.shading.color_type == 'MATERIAL':
-                col.operator("machin3.colorize_materials", icon='MATERIAL')
+                col.operator("machin3.colorize_materials", text='Colorize Materials', icon='MATERIAL')
+
+            elif view.shading.color_type == 'OBJECT':
+                col.operator("machin3.colorize_objects", text='Colorize Objects from Active', icon='OBJECT_DATA')
 
         elif view.shading.type == "MATERIAL":
 
