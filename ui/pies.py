@@ -202,7 +202,7 @@ class PieModes(Menu):
                     pie.separator()
 
                     # 9 - TOP - RIGHT
-                    if grouppro:
+                    if grouppro and bpy.context.mode == "OBJECT":
                         box = pie.split()
                         column = box.column()
                         column.scale_y = 1.5
