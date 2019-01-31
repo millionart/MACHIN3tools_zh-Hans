@@ -1235,7 +1235,7 @@ class PieCursor(Menu):
         pie = layout.menu_pie()
 
         # 4 - LEFT
-        pie.operator("view3d.snap_cursor_to_center", text="to Origin", icon="PIVOT_CURSOR")
+        pie.operator("machin3.cursor_to_origin", text="to Origin", icon="PIVOT_CURSOR")
 
         # 6 - RIGHT
         pie.operator("view3d.snap_selected_to_cursor", text="to Cursor", icon="RESTRICT_SELECT_OFF").use_offset = False
