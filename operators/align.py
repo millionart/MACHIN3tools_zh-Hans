@@ -102,9 +102,14 @@ class Align(bpy.types.Operator):
         for obj in selection:
             mx = obj.matrix_world
 
-            minz = min((mx @ v.co)[2] for v in obj.data.vertices)
+            if obj.type == "MESH":
+                minz = min((mx @ v.co)[2] for v in obj.data.vertices)
 
-            mx.translation.z -= minz
+                mx.translation.z -= minz
+
+            elif obj.type == "EMPTY":
+                mx.translation.z -= obj.location.z
+
 
     def align_to_active(self, active, sel):
         # get target matrix and decompose

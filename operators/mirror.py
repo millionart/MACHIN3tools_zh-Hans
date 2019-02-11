@@ -4,6 +4,9 @@ from .. utils.registration import get_addon
 from .. utils import MACHIN3 as m3
 
 
+# TODO: unmirror op - remove last mirror modifier
+
+
 class Mirror(bpy.types.Operator):
     bl_idname = "machin3.mirror"
     bl_label = "MACHIN3: Mirror"
@@ -90,19 +93,44 @@ class Mirror(bpy.types.Operator):
 
     def mirror(self, context, active, sel):
         if len(sel) == 1 and active in sel:
-            self.add_mirror_mod(context, active)
+            if active.type in ["MESH", "CURVE"]:
+                self.mirror_mesh_obj(context, active)
+
+            elif active.type == "EMPTY" and active.instance_collection:
+                self.mirror_grouppro(context, active)
 
         elif len(sel) > 1 and active in sel:
             sel.remove(active)
 
             for obj in sel:
                 if obj.type in ["MESH", "CURVE"]:
-                    self.add_mirror_mod(context, obj, active)
+                    self.mirror_mesh_obj(context, obj, active)
+
+                elif obj.type == "EMPTY" and obj.instance_collection:
+                    self.mirror_grouppro(context, obj, active)
 
             context.view_layer.objects.active = active
 
 
-    def add_mirror_mod(self, context, obj, active=None):
+    def mirror_grouppro(self, context, obj, active=None):
+        mirrorempty = bpy.data.objects.new("mirror_empty", None)
+
+        col = obj.instance_collection
+
+        if active:
+            mirrorempty.matrix_world = active.matrix_world
+
+        mirrorempty.matrix_world = obj.matrix_world.inverted() @ mirrorempty.matrix_world
+
+        col.objects.link(mirrorempty)
+
+        meshes = [obj for obj in col.objects if obj.type == "MESH"]
+
+        for obj in meshes:
+            self.mirror_mesh_obj(context, obj, mirrorempty)
+
+
+    def mirror_mesh_obj(self, context, obj, active=None):
         mirror = obj.modifiers.new(name="Mirror", type="MIRROR")
         mirror.use_axis = (self.use_x, self.use_y, self.use_z)
         mirror.use_bisect_axis = (self.bisect_x, self.bisect_y, self.bisect_z)
@@ -120,7 +148,16 @@ class Mirror(bpy.types.Operator):
 
                 nrmtransfer = obj.modifiers.get("NormalTransfer")
 
+                # make a copy of the nrmtransfer mod, add it to the end of the stack and remove the old one
                 if nrmtransfer:
-                    context.view_layer.objects.active = obj
-                    while obj.modifiers.keys().index(nrmtransfer.name) < obj.modifiers.keys().index(mirror.name):
-                        bpy.ops.object.modifier_move_up(modifier=mirror.name)
+                    new = obj.modifiers.new("temp", "DATA_TRANSFER")
+                    new.object = nrmtransfer.object
+                    new.use_loop_data = True
+                    new.data_types_loops = {'CUSTOM_NORMAL'}
+                    new.loop_mapping = 'POLYINTERP_LNORPROJ'
+                    new.show_expanded = False
+                    new.show_render = nrmtransfer.show_render
+                    new.show_viewport = nrmtransfer.show_viewport
+
+                    obj.modifiers.remove(nrmtransfer)
+                    new.name = "NormalTransfer"
