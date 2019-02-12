@@ -198,19 +198,21 @@ def unregister_icons(icons):
     previews.remove(icons)
 
 
-# SPECIALS MENU REGISTRATION
+# SPECIALS MENU ADDITION
 
 def object_specials_menu(self, context):
-    self.layout.menu("MACHIN3_MT_MACHIN3tools")
+    self.layout.menu("MACHIN3_MT_machin3tools_object_specials")
     self.layout.separator()
 
 
-def register_specials_menu():
-    bpy.types.VIEW3D_MT_object_specials.prepend(object_specials_menu)
+def add_object_specials_menu(runtime=False):
+    if get_prefs().activate_object_specials_menu or runtime:
+        bpy.types.VIEW3D_MT_object_specials.prepend(object_specials_menu)
 
 
-def unregister_specials_menu():
-    bpy.types.VIEW3D_MT_object_specials.remove(object_specials_menu)
+def remove_object_specials_menu(runtime=False):
+    if get_prefs().activate_object_specials_menu or runtime:
+        bpy.types.VIEW3D_MT_object_specials.remove(object_specials_menu)
 
 
 # RUNTIME TOOL (DE)ACTIVATION
@@ -226,6 +228,7 @@ def activate(self, register, tool):
     if register:
         classlist, keylist, _ = eval("get_%s()" % (tool))
 
+
         # CLASSES
 
         # register tool/pie class
@@ -238,6 +241,7 @@ def activate(self, register, tool):
         for c in classes:
             if c not in startup_classes:
                 startup_classes.append(c)
+
 
         # KEYMAPS
 
@@ -255,6 +259,11 @@ def activate(self, register, tool):
 
         classlist.clear()
         keylist.clear()
+
+        # MENU ADDITION
+
+        if tool == "object_specials_menu":
+            add_object_specials_menu(runtime=True)
 
 
     # UN-REGISTER
@@ -298,6 +307,12 @@ def activate(self, register, tool):
 
         if classes:
             print("Unregistered MACHIN3tools' %s" % (name))
+
+
+        # MENU REMOVAL
+
+        if tool == "object_specials_menu":
+            remove_object_specials_menu(runtime=True)
 
 
 # GET CORE, TOOLS and PIES - CLASSES and KEYMAPS - for startup registration
@@ -388,6 +403,18 @@ def get_pie_menus():
     # WORKSPACE
 
     classlists, keylists, count = get_workspace_pie(classlists, keylists, count)
+
+    return classlists, keylists, count
+
+
+def get_menus():
+    classlists = []
+    keylists = []
+    count = 0
+
+    # OBJECT SPECIALS
+
+    classlists, keylists, count = get_object_specials_menu(classlists, keylists, count)
 
     return classlists, keylists, count
 
@@ -544,6 +571,16 @@ def get_workspace_pie(classlists=[], keylists=[], count=0):
     if get_prefs().activate_workspace_pie:
         classlists.append(classesdict["WORKSPACE_PIE"])
         keylists.append(keysdict["WORKSPACE_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+# GET OBJECT SPECIALS MENU
+
+def get_object_specials_menu(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_object_specials_menu:
+        classlists.append(classesdict["OBJECT_SPECIALS_MENU"])
         count += 1
 
     return classlists, keylists, count

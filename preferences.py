@@ -140,6 +140,13 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_workspace_pie(self, context):
         activate(self, register=self.activate_workspace_pie, tool="workspace_pie")
 
+
+    # RUNTIME MENU ACTIVATION
+
+    def update_activate_object_specials_menu(self, context):
+        activate(self, register=self.activate_object_specials_menu, tool="object_specials_menu")
+
+
     # PROPERTIES
 
     appendworldpath: StringProperty(name="World Source .blend", subtype='FILE_PATH')
@@ -191,6 +198,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False, update=update_activate_workspace_pie)
 
 
+    # MACHIN3menf
+    activate_object_specials_menu: BoolProperty(name="Object Specials Menu", default=True, update=update_activate_object_specials_menu)
+
+
     # hidden
 
     tabs: EnumProperty(name="Tabs", items=preferences_tabs, default="GENERAL")
@@ -222,6 +233,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     def draw_general(self, box):
         split = box.split()
+
+        # LEFT
 
         b = split.box()
         b.label(text="Activate")
@@ -308,6 +321,20 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         r.label(text="Switch workspaces.")
         r.label(text="If enabled, customize it in ui/pies.py", icon="INFO")
 
+
+        # MACHIN3menus
+
+        bb = b.box()
+        bb.label(text="Menus")
+
+        column = bb.column()
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_object_specials_menu", toggle=True)
+        row.label(text="Object Specials, access tools, that aren't keymapped.")
+
+
+        # RIGHT
 
         b = split.box()
         b.label(text="Settings")

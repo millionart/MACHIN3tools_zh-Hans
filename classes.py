@@ -1,6 +1,5 @@
 
 classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
-                    ("ui.menus", [("MenuMACHIN3tools", "MACHIN3tools")]),
                     ("properties", [("AppendMatsCollection", "")]),
                     ("properties", [("HistoryObjectsCollection", ""), ("HistoryUnmirroredCollection", ""), ("HistoryEpochCollection", ""), ("M3SceneProperties", "")]),
                     ("preferences", [("MACHIN3toolsPreferences", "")])],
@@ -38,4 +37,7 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
                           ("ui.operators.cursor", [("CursorToOrigin", "cursor_to_origin")])],
            "WORKSPACE_PIE": [("ui.pies", [("PieWorkspace", "workspace_pie")]),
                              ("ui.operators.switch_workspace", [("SwitchWorkspace", "switch_workspace")])],
+
+           "OBJECT_SPECIALS_MENU": [("ui.menus", [("MenuMACHIN3toolsObjectSpecials", "machin3tools_object_specials")])],
+
            }
