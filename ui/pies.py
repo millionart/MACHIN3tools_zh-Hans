@@ -78,8 +78,22 @@ class PieModes(Menu):
                             box = pie.split()
                             column = box.column()
                             column.scale_y = 1.5
-                            column.scale_x = 1.2
-                            column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+
+                            if len(context.scene.storedGroupSettings) == 0:
+                                row = column.split(factor=0.7, align=True)
+                                row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                                row.operator("object.create_grouppro", text="Create")
+                            else:
+                                row = column.row()
+                                r = row.split(factor=0.7, align=True)
+                                r.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                                r.operator("object.close_grouppro", text="Close")
+
+                                r = row.row(align=True)
+                                r.scale_x = 1.2
+                                r.operator("object.add_to_grouppro", text="", icon='ADD')
+                                r.operator("object.remove_from_grouppro", text="", icon='REMOVE')
+
                         else:
                             pie.separator()
 
@@ -98,10 +112,8 @@ class PieModes(Menu):
 
                             column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
 
-
                         else:
                             pie.separator()
-
 
                     if context.area.type == "IMAGE_EDITOR":
                         toolsettings = context.scene.tool_settings
@@ -173,8 +185,14 @@ class PieModes(Menu):
                         box = pie.split()
                         column = box.column()
                         column.scale_y = 1.5
-                        column.scale_x = 1.2
-                        column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+
+                        if len(context.scene.storedGroupSettings) == 0:
+                            column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                        else:
+                            row = column.split(factor=0.7, align=True)
+                            row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                            row.operator("object.close_grouppro", text="Close")
+
                     else:
                         pie.separator()
 
@@ -206,8 +224,20 @@ class PieModes(Menu):
                         box = pie.split()
                         column = box.column()
                         column.scale_y = 1.5
-                        column.scale_x = 1.2
-                        column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+
+                        if len(context.scene.storedGroupSettings) == 0:
+                            column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                        else:
+                            row = column.row()
+                            r = row.split(factor=0.7, align=True)
+                            r.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                            r.operator("object.close_grouppro", text="Close")
+
+                            r = row.row(align=True)
+                            r.scale_x = 1.2
+                            r.operator("object.add_to_grouppro", text="", icon='ADD')
+                            r.operator("object.remove_from_grouppro", text="", icon='REMOVE')
+
                     else:
                         pie.separator()
 
@@ -277,8 +307,19 @@ class PieModes(Menu):
                         box = pie.split()
                         column = box.column()
                         column.scale_y = 1.5
-                        column.scale_x = 1.2
-                        column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+
+                        if len(context.scene.storedGroupSettings) == 0:
+                            column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                        else:
+                            row = column.row()
+                            r = row.split(factor=0.7, align=True)
+                            r.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                            r.operator("object.close_grouppro", text="Close")
+
+                            r = row.row(align=True)
+                            r.scale_x = 1.2
+                            r.operator("object.add_to_grouppro", text="", icon='ADD')
+                            r.operator("object.remove_from_grouppro", text="", icon='REMOVE')
                     else:
                         pie.separator()
 
@@ -329,13 +370,19 @@ class PieModes(Menu):
 
                 elif active.type == 'EMPTY':
                     # 4 - LEFT
-                    pie.separator()
+                    if grouppro and active.instance_collection:
+                        pie.operator("object.edit_grouppro", text="Edit Group")
+
+                    else:
+                        pie.separator()
+
 
                     # 6 - RIGHT
                     pie.separator()
 
                     # 2 - BOTTOM
-                    pie.separator()
+                    pie.operator("object.gpro_converttogeo", icon='OUTLINER_OB_GROUP_INSTANCE').maxDept = 0
+
 
                     # 8 - TOP
                     pie.separator()
@@ -348,8 +395,19 @@ class PieModes(Menu):
                         box = pie.split()
                         column = box.column()
                         column.scale_y = 1.5
-                        column.scale_x = 1.2
-                        column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+
+                        if len(context.scene.storedGroupSettings) == 0:
+                            column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                        else:
+                            row = column.row()
+                            r = row.split(factor=0.7, align=True)
+                            r.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                            r.operator("object.close_grouppro", text="Close")
+
+                            r = row.row(align=True)
+                            r.scale_x = 1.2
+                            r.operator("object.add_to_grouppro", text="", icon='ADD')
+                            r.operator("object.remove_from_grouppro", text="", icon='REMOVE')
                     else:
                         pie.separator()
 
@@ -550,7 +608,17 @@ class PieModes(Menu):
 
             # 9 - TOP - RIGHT
             if grouppro:
-                pie.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                box = pie.split()
+                column = box.column()
+                column.scale_y = 1.5
+
+                if len(context.scene.storedGroupSettings) == 0:
+                    column.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                else:
+                    row = column.split(factor=0.7, align=True)
+                    row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+                    row.operator("object.close_grouppro", text="Close")
+
             else:
                 pie.separator()
 
