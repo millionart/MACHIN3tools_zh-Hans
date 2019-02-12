@@ -4,7 +4,7 @@ from .. utils.registration import get_addon
 from .. utils import MACHIN3 as m3
 
 
-# TODO: unmirror op - remove last mirror modifier
+# TODO: add object property on grouppro empty, an int counting up the amounts the group was mirrored?
 
 
 class Mirror(bpy.types.Operator):
@@ -85,8 +85,6 @@ class Mirror(bpy.types.Operator):
             self.bisect_x = self.bisect_y = self.bisect_z = False
             self.flip_x = self.flip_y = self.flip_z = False
 
-
-
         self.mirror(context, active, sel)
 
         return {'FINISHED'}
@@ -110,25 +108,6 @@ class Mirror(bpy.types.Operator):
                     self.mirror_grouppro(context, obj, active)
 
             context.view_layer.objects.active = active
-
-
-    def mirror_grouppro(self, context, obj, active=None):
-        mirrorempty = bpy.data.objects.new("mirror_empty", None)
-
-        col = obj.instance_collection
-
-        if active:
-            mirrorempty.matrix_world = active.matrix_world
-
-        mirrorempty.matrix_world = obj.matrix_world.inverted() @ mirrorempty.matrix_world
-
-        col.objects.link(mirrorempty)
-
-        meshes = [obj for obj in col.objects if obj.type == "MESH"]
-
-        for obj in meshes:
-            self.mirror_mesh_obj(context, obj, mirrorempty)
-
 
     def mirror_mesh_obj(self, context, obj, active=None):
         mirror = obj.modifiers.new(name="Mirror", type="MIRROR")
@@ -161,3 +140,56 @@ class Mirror(bpy.types.Operator):
 
                     obj.modifiers.remove(nrmtransfer)
                     new.name = "NormalTransfer"
+
+    def mirror_grouppro(self, context, obj, active=None):
+        mirrorempty = bpy.data.objects.new("mirror_empty", None)
+
+        col = obj.instance_collection
+
+        if active:
+            mirrorempty.matrix_world = active.matrix_world
+
+        mirrorempty.matrix_world = obj.matrix_world.inverted() @ mirrorempty.matrix_world
+
+        col.objects.link(mirrorempty)
+
+        meshes = [obj for obj in col.objects if obj.type == "MESH"]
+
+        for obj in meshes:
+            self.mirror_mesh_obj(context, obj, mirrorempty)
+
+
+class Unmirror(bpy.types.Operator):
+    bl_idname = "machin3.unmirror"
+    bl_label = "MACHIN3: Unmirror"
+    bl_description = "Removes the last modifer in the stack of the selected objects"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            if obj.type in ["MESH", "CURVE"]:
+                self.unmirror_mesh_obj(obj)
+
+            elif obj.type == "EMPTY" and obj.instance_collection:
+                col = obj.instance_collection
+
+                targets = set()
+
+                for obj in col.objects:
+                    target = self.unmirror_mesh_obj(obj)
+
+                    if target and target.type == "EMPTY":
+                        targets.add(target)
+
+                if len(targets) == 1:
+                    bpy.data.objects.remove(list(targets)[0], do_unlink=True)
+
+        return {'FINISHED'}
+
+    def unmirror_mesh_obj(self, obj):
+        mirrors = [mod for mod in obj.modifiers if mod.type == "MIRROR"]
+
+        if mirrors:
+            target = mirrors[-1].mirror_object
+            obj.modifiers.remove(mirrors[-1])
+            return target
