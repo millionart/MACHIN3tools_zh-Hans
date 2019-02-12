@@ -1,7 +1,6 @@
 import bpy
 from bpy.props import BoolProperty
 from .. utils.registration import get_addon
-from .. utils import MACHIN3 as m3
 
 
 class Mirror(bpy.types.Operator):
@@ -170,11 +169,12 @@ class Unmirror(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         mirror_meshes = [obj for obj in context.selected_objects if obj.type == "MESH" and any(mod.type == "MIRROR" for mod in obj.modifiers)]
+        if mirror_meshes:
+            return True
 
         groups = [obj for obj in context.selected_objects if obj.type == "EMPTY" and obj.instance_collection]
-        mirror_groups = [empty for empty in groups if any(obj for obj in empty.instance_collection.objects if any(mod.type == "MIRROR" for mod in obj.modifiers))]
-
-        return mirror_meshes or mirror_groups
+        if groups:
+            return [empty for empty in groups if any(obj for obj in empty.instance_collection.objects if any(mod.type == "MIRROR" for mod in obj.modifiers))]
 
     def execute(self, context):
         for obj in context.selected_objects:
