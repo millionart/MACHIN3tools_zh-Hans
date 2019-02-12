@@ -4,6 +4,7 @@ import os
 from . import MACHIN3 as m3
 from .. keys import keys as keysdict
 from .. classes import classes as classesdict
+# from .. ui.menus import object_specials_menu
 
 
 
@@ -195,6 +196,21 @@ def register_icons():
 
 def unregister_icons(icons):
     previews.remove(icons)
+
+
+# SPECIALS MENU REGISTRATION
+
+def object_specials_menu(self, context):
+    self.layout.menu("MACHIN3_MT_MACHIN3tools")
+    self.layout.separator()
+
+
+def register_specials_menu():
+    bpy.types.VIEW3D_MT_object_specials.prepend(object_specials_menu)
+
+
+def unregister_specials_menu():
+    bpy.types.VIEW3D_MT_object_specials.remove(object_specials_menu)
 
 
 # RUNTIME TOOL (DE)ACTIVATION

@@ -32,7 +32,7 @@ bl_info = {
 import bpy
 from bpy.props import PointerProperty
 from . properties import M3SceneProperties
-from . utils.registration import get_core, get_tools, get_pie_menus, register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons
+from . utils.registration import get_core, get_tools, get_pie_menus, register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, register_specials_menu, unregister_specials_menu
 
 
 def register():
@@ -61,11 +61,24 @@ def register():
 
     icons = register_icons()
 
+
+    # SPECIALS MENU
+
+    register_specials_menu()
+
+
     print("Registered %s %s with %d tools and %d pie menus" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, pie_count))
 
 
 def unregister():
     global classes, keymaps, icons
+
+    # SPECIALS MENU
+
+    unregister_specials_menu()
+
+
+    # TOOLS, PIE MENUS, KEYMAPS
 
     unregister_keymaps(keymaps)
     unregister_classes(classes)

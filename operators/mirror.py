@@ -4,9 +4,6 @@ from .. utils.registration import get_addon
 from .. utils import MACHIN3 as m3
 
 
-# TODO: add object property on grouppro empty, an int counting up the amounts the group was mirrored?
-
-
 class Mirror(bpy.types.Operator):
     bl_idname = "machin3.mirror"
     bl_label = "MACHIN3: Mirror"

@@ -2,6 +2,18 @@ import bpy
 from .. utils.registration import get_prefs
 
 
+
+class MenuMACHIN3tools(bpy.types.Menu):
+    bl_idname = "MACHIN3_MT_MACHIN3tools"
+    bl_label = "MACHIN3"
+
+    def draw(self, context):
+        layout = self.layout
+
+        if getattr(bpy.types, "MACHIN3_OT_unmirror", False):
+            layout.operator("machin3.unmirror", text="Un-Mirror")
+
+
 class MenuAppendMaterials(bpy.types.Menu):
     bl_idname = "MACHIN3_MT_append_materials"
     bl_label = "Append Materials"

@@ -1,5 +1,6 @@
 
 classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
+                    ("ui.menus", [("MenuMACHIN3tools", "MACHIN3tools")]),
                     ("properties", [("AppendMatsCollection", "")]),
                     ("properties", [("HistoryObjectsCollection", ""), ("HistoryUnmirroredCollection", ""), ("HistoryEpochCollection", ""), ("M3SceneProperties", "")]),
                     ("preferences", [("MACHIN3toolsPreferences", "")])],
