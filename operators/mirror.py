@@ -162,6 +162,20 @@ class Unmirror(bpy.types.Operator):
     bl_description = "Removes the last modifer in the stack of the selected objects"
     bl_options = {'REGISTER', 'UNDO'}
 
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+    @classmethod
+    def poll(cls, context):
+        mirror_meshes = [obj for obj in context.selected_objects if obj.type == "MESH" and any(mod.type == "MIRROR" for mod in obj.modifiers)]
+
+        groups = [obj for obj in context.selected_objects if obj.type == "EMPTY" and obj.instance_collection]
+        mirror_groups = [empty for empty in groups if any(obj for obj in empty.instance_collection.objects if any(mod.type == "MIRROR" for mod in obj.modifiers))]
+
+        return mirror_meshes or mirror_groups
+
     def execute(self, context):
         for obj in context.selected_objects:
             if obj.type in ["MESH", "CURVE"]:

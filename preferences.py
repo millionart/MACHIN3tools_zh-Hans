@@ -198,7 +198,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False, update=update_activate_workspace_pie)
 
 
-    # MACHIN3menf
+    # MACHIN3menus
     activate_object_specials_menu: BoolProperty(name="Object Specials Menu", default=True, update=update_activate_object_specials_menu)
 
 
@@ -273,7 +273,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_mirror", toggle=True)
-        row.label(text="Object-across-object mirroring.")
+        row.label(text="Object Mirroring + Un-Mirroring")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_align", toggle=True)
