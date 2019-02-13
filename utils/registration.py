@@ -211,8 +211,8 @@ def add_object_specials_menu(runtime=False):
 
 
 def remove_object_specials_menu(runtime=False):
-    if get_prefs().activate_object_specials_menu or runtime:
-        bpy.types.VIEW3D_MT_object_specials.remove(object_specials_menu)
+    # if get_prefs().activate_object_specials_menu or runtime:
+    bpy.types.VIEW3D_MT_object_specials.remove(object_specials_menu)
 
 
 # RUNTIME TOOL (DE)ACTIVATION
