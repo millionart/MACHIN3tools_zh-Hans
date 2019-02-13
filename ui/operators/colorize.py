@@ -1,6 +1,7 @@
 import bpy
 from bpy.props import FloatProperty
 from ... utils import MACHIN3 as m3
+from ... utils.material import get_last_node, lighten_color
 
 
 # TODO: unique preset colors for decal types
@@ -8,6 +9,7 @@ from ... utils import MACHIN3 as m3
 class ColorizeMaterials(bpy.types.Operator):
     bl_idname = "machin3.colorize_materials"
     bl_label = "MACHIN3: Colorize Materials"
+    descriptino = "Set Material Viewport Colors from last Node in Materials"
     bl_options = {'REGISTER', 'UNDO'}
 
     lighten_amount: FloatProperty(name="Lighten", default=0.05, min=0, max=1)
@@ -18,44 +20,60 @@ class ColorizeMaterials(bpy.types.Operator):
 
     def execute(self, context):
         for mat in bpy.data.materials:
-            if mat.use_nodes:
-                tree = mat.node_tree
-                output = tree.nodes.get("Material Output")
-                if output:
-                    surf = output.inputs.get("Surface")
-                    if surf:
-                        if surf.links:
-                            node = surf.links[0].from_node
+            node = get_last_node(mat)
 
-                            if node:
-                                color = node.inputs.get("Base Color")
+            if node:
+                color = node.inputs.get("Base Color")
 
-                                if not color:
-                                    color = node.inputs.get("Color")
+                if not color:
+                    color = node.inputs.get("Color")
 
-                                if color:
-                                    mat.diffuse_color = self.lighten(color=color.default_value[:3], amount=self.lighten_amount)
+                if color:
+                    mat.diffuse_color = lighten_color(color=color.default_value, amount=self.lighten_amount)
 
         return {'FINISHED'}
 
-    def lighten(self, color, amount):
-        def remap(value, new_low):
-            old_range = (1 - 0)
-            new_range = (1 - new_low)
-            return (((value - 0) * new_range) / old_range) + new_low
 
-        return tuple(remap(c, amount) for c in color)
+class ColorizeObjectsFromMaterials(bpy.types.Operator):
+    bl_idname = "machin3.colorize_objects_from_materials"
+    bl_label = "MACHIN3: Colorize Objects from Materials"
+    bl_description = "Set Object Viewport Colors of selected Objects from their active Materials"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    lighten_amount: FloatProperty(name="Lighten", default=0.05, min=0, max=1)
+
+    @classmethod
+    def poll(cls, context):
+        return context.selected_objects
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            mat = obj.active_material
+
+            if mat:
+                node = get_last_node(mat)
+
+                if node:
+                    color = node.inputs.get("Base Color")
+
+                    if not color:
+                        color = node.inputs.get("Color")
+
+                    if color:
+                        obj.color = lighten_color(color=color.default_value, amount=self.lighten_amount)
+
+        return {'FINISHED'}
 
 
-class ColorizeObjects(bpy.types.Operator):
-    bl_idname = "machin3.colorize_objects"
-    bl_label = "MACHIN3: Colorize Objects"
-    bl_description = "description"
+class ColorizeObjectsFromActive(bpy.types.Operator):
+    bl_idname = "machin3.colorize_objects_from_active"
+    bl_label = "MACHIN3: Colorize Objects from Active"
+    bl_description = "Set Object Viewport Colors from Active Object"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        return context.active_object and len(context.selected_objects) > 1
+        return context.active_object and context.selected_objects
 
     def execute(self, context):
         activecolor = context.active_object.color

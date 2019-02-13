@@ -22,6 +22,8 @@ class Customize(bpy.types.Operator):
         resourcespath = os.path.join(get_prefs().path, "resources")
 
 
+        """ no longer needed, with the PRESS box select working perfectly
+
         # SET Select TOOL, in object and edit mode
         if context.area.type == "VIEW_3D":
             bpy.ops.wm.tool_set_by_name(name="Select")
@@ -42,6 +44,7 @@ class Customize(bpy.types.Operator):
                     bpy.ops.object.editmode_toggle()
                     bpy.ops.wm.tool_set_by_name(o, name="Select")
                     bpy.ops.object.editmode_toggle()
+        """
 
 
         # THEME
@@ -63,7 +66,6 @@ class Customize(bpy.types.Operator):
 
         # START UP
         # copy and load start up file, which includes workspaces
-        # """
 
         return {'FINISHED'}
 
@@ -129,19 +131,18 @@ class Customize(bpy.types.Operator):
                     kmi.properties.orientation = "GEOM"
 
                 # NOTE: changing these from  CLICK to PRESS seems to introduce weird behavior where blender always selects the object in the back, not in the front
+                # ####: this applies only to the new "just select" tool. for it seems that work properly, it needs to remain at CLICK - but it still acts as it PRESS was set, odd
+                # ####: also the new box select tool, can now be set to PRESS and will still work just fine
                 if kmi.idname == "view3d.select":
                     if kmi.value == "CLICK":
                         if not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "toggle", "center", "enumerate", "object"]]):
-                            # kmi.value = "PRESS"
-                            pass
+                            kmi.value = "PRESS"
 
                         elif kmi.properties.toggle and not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "center", "enumerate", "object"]]):
-                            # kmi.value = "PRESS"
-                            pass
+                            kmi.value = "PRESS"
 
                         elif kmi.properties.enumerate and not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "toggle", "center", "object"]]):
-                            # kmi.value = "PRESS"
-                            pass
+                            kmi.value = "PRESS"
 
                         else:
                             kmi.active = False
@@ -399,7 +400,7 @@ class Customize(bpy.types.Operator):
             v.show_tooltips_python = True
             v.show_developer_ui = True
 
-            v.header_align_default = 'BOTTOM'
+            v.header_align = 'BOTTOM'
             s.use_region_overlap = True
 
             v.color_picker_type = "SQUARE_SV"

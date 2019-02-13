@@ -602,7 +602,6 @@ class PieModes(Menu):
                 r.operator("object.remove_from_grouppro", text="", icon='REMOVE')
 
 
-
 class PieSave(Menu):
     bl_idname = "MACHIN3_MT_save_pie"
     bl_label = "Save, Open, Append"
@@ -926,7 +925,10 @@ class PieShading(Menu):
                 col.operator("machin3.colorize_materials", text='Colorize Materials', icon='MATERIAL')
 
             elif view.shading.color_type == 'OBJECT':
-                col.operator("machin3.colorize_objects", text='Colorize Objects from Active', icon='OBJECT_DATA')
+                r = col.split(factor=0.2)
+                r.label(text="Colorize")
+                r.operator("machin3.colorize_objects_from_materials", text='from Materials', icon='MATERIAL')
+                r.operator("machin3.colorize_objects_from_active", text='from Active', icon='OBJECT_DATA')
 
         elif view.shading.type == "MATERIAL":
 
