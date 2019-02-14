@@ -343,9 +343,9 @@ class PieModes(Menu):
                     # 2 - BOTTOM
                     if grouppro and active.instance_collection:
                         if decalmachine:
-                            pie.operator("machin3.grouppro_dissolve", text="Dissolve", icon='OUTLINER_OB_GROUP_INSTANCE').maxDept = 0
+                            pie.operator("machin3.grouppro_dissolve", text="Dissolve", icon='OUTLINER_OB_GROUP_INSTANCE')
                         else:
-                            pie.operator("object.gpro_converttogeo", icon='OUTLINER_OB_GROUP_INSTANCE').maxDept = 0
+                            pie.operator("object.gpro_converttogeo", icon='OUTLINER_OB_GROUP_INSTANCE')
                     else:
                         pie.separator()
 

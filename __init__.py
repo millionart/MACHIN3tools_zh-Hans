@@ -20,7 +20,7 @@ Copyright (C) 2016-2018 MACHIN3, machin3.io, support@machin3.io
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, "5a"),
+    "version": (0, 3, 6),
     "blender": (2, 80, 0),
     "location": "",
     "description": "Streamlining Blender 2.80.",
@@ -66,7 +66,9 @@ def register():
     icons = register_icons()
 
 
-    print("Registered %s %s with %d tools and %d pie menus" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, pie_count))
+    # REGISTRATION OUTPUT
+
+    print("Registered %s %s with %d %s, %d pie %s and %s special %s" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, "tool" if tool_count == 1 else "tools", pie_count, "menu" if pie_count == 1 else "menus", menu_count, "menu" if menu_count == 1 else "menus"))
 
 
 def unregister():
