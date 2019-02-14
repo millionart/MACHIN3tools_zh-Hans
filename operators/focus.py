@@ -12,7 +12,7 @@ class Focus(bpy.types.Operator):
     bl_label = "MACHIN3: Focus"
     bl_options = {'REGISTER', 'UNDO'}
 
-    mode: EnumProperty(name="Mode", items=mode_items, default="LOCALVIEW")
+    mode: EnumProperty(name="Mode", items=mode_items, default="FOCUS")
 
     view_selected: BoolProperty(name="View Selcted", default=True)
     unmirror: BoolProperty(name="Un-Mirror", default=True)
