@@ -1,7 +1,6 @@
 import bpy
 from bpy.props import BoolProperty
 from .. utils.registration import get_addon
-from .. utils import MACHIN3 as m3
 
 
 class Mirror(bpy.types.Operator):
@@ -82,27 +81,31 @@ class Mirror(bpy.types.Operator):
             self.bisect_x = self.bisect_y = self.bisect_z = False
             self.flip_x = self.flip_y = self.flip_z = False
 
-
-
         self.mirror(context, active, sel)
 
         return {'FINISHED'}
 
     def mirror(self, context, active, sel):
         if len(sel) == 1 and active in sel:
-            self.add_mirror_mod(context, active)
+            if active.type in ["MESH", "CURVE"]:
+                self.mirror_mesh_obj(context, active)
+
+            elif active.type == "EMPTY" and active.instance_collection:
+                self.mirror_grouppro(context, active)
 
         elif len(sel) > 1 and active in sel:
             sel.remove(active)
 
             for obj in sel:
                 if obj.type in ["MESH", "CURVE"]:
-                    self.add_mirror_mod(context, obj, active)
+                    self.mirror_mesh_obj(context, obj, active)
+
+                elif obj.type == "EMPTY" and obj.instance_collection:
+                    self.mirror_grouppro(context, obj, active)
 
             context.view_layer.objects.active = active
 
-
-    def add_mirror_mod(self, context, obj, active=None):
+    def mirror_mesh_obj(self, context, obj, active=None):
         mirror = obj.modifiers.new(name="Mirror", type="MIRROR")
         mirror.use_axis = (self.use_x, self.use_y, self.use_z)
         mirror.use_bisect_axis = (self.bisect_x, self.bisect_y, self.bisect_z)
@@ -120,7 +123,84 @@ class Mirror(bpy.types.Operator):
 
                 nrmtransfer = obj.modifiers.get("NormalTransfer")
 
+                # make a copy of the nrmtransfer mod, add it to the end of the stack and remove the old one
                 if nrmtransfer:
-                    context.view_layer.objects.active = obj
-                    while obj.modifiers.keys().index(nrmtransfer.name) < obj.modifiers.keys().index(mirror.name):
-                        bpy.ops.object.modifier_move_up(modifier=mirror.name)
+                    new = obj.modifiers.new("temp", "DATA_TRANSFER")
+                    new.object = nrmtransfer.object
+                    new.use_loop_data = True
+                    new.data_types_loops = {'CUSTOM_NORMAL'}
+                    new.loop_mapping = 'POLYINTERP_LNORPROJ'
+                    new.show_expanded = False
+                    new.show_render = nrmtransfer.show_render
+                    new.show_viewport = nrmtransfer.show_viewport
+
+                    obj.modifiers.remove(nrmtransfer)
+                    new.name = "NormalTransfer"
+
+    def mirror_grouppro(self, context, obj, active=None):
+        mirrorempty = bpy.data.objects.new("mirror_empty", None)
+
+        col = obj.instance_collection
+
+        if active:
+            mirrorempty.matrix_world = active.matrix_world
+
+        mirrorempty.matrix_world = obj.matrix_world.inverted() @ mirrorempty.matrix_world
+
+        col.objects.link(mirrorempty)
+
+        meshes = [obj for obj in col.objects if obj.type == "MESH"]
+
+        for obj in meshes:
+            self.mirror_mesh_obj(context, obj, mirrorempty)
+
+
+class Unmirror(bpy.types.Operator):
+    bl_idname = "machin3.unmirror"
+    bl_label = "MACHIN3: Unmirror"
+    bl_description = "Removes the last modifer in the stack of the selected objects"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
+    @classmethod
+    def poll(cls, context):
+        mirror_meshes = [obj for obj in context.selected_objects if obj.type == "MESH" and any(mod.type == "MIRROR" for mod in obj.modifiers)]
+        if mirror_meshes:
+            return True
+
+        groups = [obj for obj in context.selected_objects if obj.type == "EMPTY" and obj.instance_collection]
+        if groups:
+            return [empty for empty in groups if any(obj for obj in empty.instance_collection.objects if any(mod.type == "MIRROR" for mod in obj.modifiers))]
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            if obj.type in ["MESH", "CURVE"]:
+                self.unmirror_mesh_obj(obj)
+
+            elif obj.type == "EMPTY" and obj.instance_collection:
+                col = obj.instance_collection
+
+                targets = set()
+
+                for obj in col.objects:
+                    target = self.unmirror_mesh_obj(obj)
+
+                    if target and target.type == "EMPTY":
+                        targets.add(target)
+
+                if len(targets) == 1:
+                    bpy.data.objects.remove(list(targets)[0], do_unlink=True)
+
+        return {'FINISHED'}
+
+    def unmirror_mesh_obj(self, obj):
+        mirrors = [mod for mod in obj.modifiers if mod.type == "MIRROR"]
+
+        if mirrors:
+            target = mirrors[-1].mirror_object
+            obj.modifiers.remove(mirrors[-1])
+            return target

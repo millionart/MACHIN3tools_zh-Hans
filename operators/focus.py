@@ -1,12 +1,18 @@
 import bpy
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, EnumProperty
 from .. utils import MACHIN3 as m3
+
+
+mode_items = [("FOCUS", "Focus", ""),
+              ("LOCALVIEW", "Local View", "")]
 
 
 class Focus(bpy.types.Operator):
     bl_idname = "machin3.focus"
     bl_label = "MACHIN3: Focus"
     bl_options = {'REGISTER', 'UNDO'}
+
+    mode: EnumProperty(name="Mode", items=mode_items, default="FOCUS")
 
     view_selected: BoolProperty(name="View Selcted", default=True)
     unmirror: BoolProperty(name="Un-Mirror", default=True)
@@ -17,36 +23,48 @@ class Focus(bpy.types.Operator):
         column = layout.column()
 
         row = column.row()
-        row.prop(self, "view_selected")
-        row.prop(self, "unmirror")
+        row.prop(self, "mode", expand=True)
+
+        if self.mode == "FOCUS":
+            row = column.row()
+            row.prop(self, "view_selected")
+            row.prop(self, "unmirror")
 
     @classmethod
     def poll(cls, context):
         return context.mode == "OBJECT"
 
     def execute(self, context):
-        history = context.scene.M3.focus_history
 
-        sel = m3.selected_objects()
+        # local view
+        if self.mode == "LOCALVIEW":
+            bpy.ops.view3d.localview()
 
-        if sel:
-            self.focus(context, sel, history)
+        # focus
+        elif self.mode == "FOCUS":
+            history = context.scene.M3.focus_history
+
+            sel = context.selected_objects
+
+            if sel:
+                self.focus(context, sel, history)
 
 
-        elif history:
-            self.unfocus(context, history)
+            elif history:
+                self.unfocus(context, history)
 
-        # for epoch in history:
-            # print(epoch.name, ", hidden: ", [obj.name for obj in epoch.objects], ", unmirrored: ", [obj.name for obj in epoch.unmirrored])
+            # for epoch in history:
+                # print(epoch.name, ", hidden: ", [obj.name for obj in epoch.objects], ", unmirrored: ", [obj.name for obj in epoch.unmirrored])
 
         return {'FINISHED'}
 
     def focus(self, context, sel, history):
         hidden = []
+        visible = context.visible_objects
 
         # hide objects not in the selection (and not already hidden)
 
-        for obj in context.visible_objects:
+        for obj in visible:
             if obj not in sel:
                 hidden.append(obj)
                 obj.hide_viewport = True
@@ -68,28 +86,30 @@ class Focus(bpy.types.Operator):
 
             if self.unmirror:
                 for obj in sel:
-                    for mod in obj.modifiers:
-                        if mod.type == "MIRROR":
-                            if mod.show_viewport:
-                                mod.show_viewport = False
+                    mirrored = [(obj, mod) for mod in obj.modifiers if mod.type == "MIRROR"]
 
-                                entry = epoch.unmirrored.add()
-                                entry.obj = obj
-                                entry.name = obj.name
+                    for mobj, mod in mirrored:
+                        if mod.show_viewport:
+                            mod.show_viewport = False
+
+                            entry = epoch.unmirrored.add()
+                            entry.obj = mobj
+                            entry.name = mobj.name
 
             # view selected
 
-            if self.view_selected:
-                bpy.ops.view3d.view_selected()
+        if self.view_selected:
+            bpy.ops.view3d.view_selected()
 
     def unfocus(self, context, history):
         selected = []
+        visible = context.visible_objects
 
         # for view_selected, select visible objects
 
         if self.view_selected:
 
-            for obj in context.visible_objects:
+            for obj in visible:
                 obj.select_set(True)
                 selected.append(obj)
 

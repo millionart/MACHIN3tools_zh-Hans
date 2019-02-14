@@ -20,7 +20,7 @@ Copyright (C) 2016-2018 MACHIN3, machin3.io, support@machin3.io
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, "5a"),
+    "version": (0, 3, 6),
     "blender": (2, 80, 0),
     "location": "",
     "description": "Streamlining Blender 2.80.",
@@ -32,7 +32,8 @@ bl_info = {
 import bpy
 from bpy.props import PointerProperty
 from . properties import M3SceneProperties
-from . utils.registration import get_core, get_tools, get_pie_menus, register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons
+from . utils.registration import get_core, get_tools, get_pie_menus, get_menus
+from . utils.registration import register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, add_object_specials_menu, remove_object_specials_menu
 
 
 def register():
@@ -48,24 +49,34 @@ def register():
     bpy.types.Scene.M3 = PointerProperty(type=M3SceneProperties)
 
 
-    # TOOLS, PIE MENUS, KEYMAPS
+    # TOOLS, PIE MENUS, KEYMAPS, MENUS
 
     tool_classlists, tool_keylists, tool_count = get_tools()
     pie_classlists, pie_keylists, pie_count = get_pie_menus()
+    menu_classlists, menu_keylists, menu_count = get_menus()
 
-    classes = register_classes(tool_classlists + pie_classlists) + core_classes
-    keymaps = register_keymaps(tool_keylists + pie_keylists)
+    classes = register_classes(tool_classlists + pie_classlists + menu_classlists) + core_classes
+    keymaps = register_keymaps(tool_keylists + pie_keylists + menu_keylists)
+
+    add_object_specials_menu()
 
 
     # ICONS
 
     icons = register_icons()
 
-    print("Registered %s %s with %d tools and %d pie menus" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, pie_count))
+
+    # REGISTRATION OUTPUT
+
+    print("Registered %s %s with %d %s, %d pie %s and %s special %s" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, "tool" if tool_count == 1 else "tools", pie_count, "menu" if pie_count == 1 else "menus", menu_count, "menu" if menu_count == 1 else "menus"))
 
 
 def unregister():
     global classes, keymaps, icons
+
+    # TOOLS, PIE MENUS, KEYMAPS, MENUS
+
+    remove_object_specials_menu()
 
     unregister_keymaps(keymaps)
     unregister_classes(classes)
