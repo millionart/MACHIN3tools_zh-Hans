@@ -9,13 +9,13 @@ mode_items = [("FOCUS", "Focus", ""),
 
 class Focus(bpy.types.Operator):
     bl_idname = "machin3.focus"
-    bl_label = "MACHIN3: Focus"
+    bl_label = "MACHIN3: 聚焦"
     bl_options = {'REGISTER', 'UNDO'}
 
     mode: EnumProperty(name="Mode", items=mode_items, default="FOCUS")
 
-    view_selected: BoolProperty(name="View Selcted", default=True)
-    unmirror: BoolProperty(name="Un-Mirror", default=True)
+    view_selected: BoolProperty(name="查看选中项", default=True)
+    unmirror: BoolProperty(name="非镜像", default=True)
 
     def draw(self, context):
         layout = self.layout

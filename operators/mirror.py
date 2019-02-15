@@ -5,20 +5,20 @@ from .. utils.registration import get_addon
 
 class Mirror(bpy.types.Operator):
     bl_idname = "machin3.mirror"
-    bl_label = "MACHIN3: Mirror"
+    bl_label = "MACHIN3: 镜射"
     bl_options = {'REGISTER', 'UNDO'}
 
     use_x: BoolProperty(name="X", default=True)
     use_y: BoolProperty(name="Y", default=False)
     use_z: BoolProperty(name="Z", default=False)
 
-    bisect_x: BoolProperty(name="Bisect", default=False)
-    bisect_y: BoolProperty(name="Bisect", default=False)
-    bisect_z: BoolProperty(name="Bisect", default=False)
+    bisect_x: BoolProperty(name="对分", default=False)
+    bisect_y: BoolProperty(name="对分", default=False)
+    bisect_z: BoolProperty(name="对分", default=False)
 
-    flip_x: BoolProperty(name="Flip", default=False)
-    flip_y: BoolProperty(name="Flip", default=False)
-    flip_z: BoolProperty(name="Flip", default=False)
+    flip_x: BoolProperty(name="翻转", default=False)
+    flip_y: BoolProperty(name="翻转", default=False)
+    flip_z: BoolProperty(name="翻转", default=False)
 
     DM_mirror_u: BoolProperty(name="U", default=True)
     DM_mirror_v: BoolProperty(name="V", default=False)
@@ -157,8 +157,8 @@ class Mirror(bpy.types.Operator):
 
 class Unmirror(bpy.types.Operator):
     bl_idname = "machin3.unmirror"
-    bl_label = "MACHIN3: Unmirror"
-    bl_description = "Removes the last modifer in the stack of the selected objects"
+    bl_label = "MACHIN3: 非镜像"
+    bl_description = "删除所选对象堆栈中的最后一个修改器"
     bl_options = {'REGISTER', 'UNDO'}
 
     def draw(self, context):

@@ -96,9 +96,9 @@ class PieModes(Menu):
 
                             row = column.row()
                             row.scale_y = 1.2
-                            row.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
+                            row.prop(context.scene.M3, "pass_through", text="穿透" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
 
-                            column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
+                            column.prop(toolsettings, "use_mesh_automerge", text="自动合并")
 
                         else:
                             pie.separator()
@@ -223,7 +223,7 @@ class PieModes(Menu):
 
                         row = column.row()
                         row.scale_y = 1.2
-                        row.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
+                        row.prop(context.scene.M3, "pass_through", text="穿透" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
                     else:
                         pie.separator()
 
@@ -604,20 +604,20 @@ class PieModes(Menu):
 
 class PieSave(Menu):
     bl_idname = "MACHIN3_MT_save_pie"
-    bl_label = "Save, Open, Append"
+    bl_label = "保存，打开，追加"
 
     def draw(self, context):
         layout = self.layout
         pie = layout.menu_pie()
 
         # 4 - LEFT
-        pie.operator("wm.open_mainfile", text="Open...", icon_value=get_icon('open'))
+        pie.operator("wm.open_mainfile", text="打开...", icon_value=get_icon('open'))
 
         # 6 - RIGHT
-        pie.operator("machin3.save", text="Save", icon_value=get_icon('save'))
+        pie.operator("machin3.save", text="保存", icon_value=get_icon('save'))
 
         # 2 - BOTTOM
-        pie.operator("wm.save_as_mainfile", text="Save As..", icon_value=get_icon('save_as'))
+        pie.operator("wm.save_as_mainfile", text="另存为..", icon_value=get_icon('save_as'))
 
         # 8 - TOP
         box = pie.split()
@@ -646,49 +646,49 @@ class PieSave(Menu):
         pie.separator()
 
         # 1 - BOTTOM - LEFT
-        pie.operator("machin3.new", text="New", icon_value=get_icon('new'))
+        pie.operator("machin3.new", text="新建", icon_value=get_icon('new'))
 
         # 3 - BOTTOM - RIGHT
-        pie.operator("machin3.save_incremental", text="Incremental Save", icon_value=get_icon('save_incremental'))
+        pie.operator("machin3.save_incremental", text="增量保存", icon_value=get_icon('save_incremental'))
 
     def draw_left_column(self, col):
         col.scale_x = 1.1
 
         row = col.row()
         row.scale_y = 1.5
-        row.operator("machin3.load_most_recent", text="(R) Most Recent", icon_value=get_icon('open_recent'))
+        row.operator("machin3.load_most_recent", text="恢复最近的一次工程", icon_value=get_icon('open_recent'))
         # row.operator("wm.call_menu", text="All Recent", icon_value=get_icon('open_recent')).name = "INFO_MT_file_open_recent"
-        row.operator("wm.call_menu", text="All Recent", icon_value=get_icon('open_recent')).name = "TOPBAR_MT_file_open_recent"
+        row.operator("wm.call_menu", text="打开最近", icon_value=get_icon('open_recent')).name = "TOPBAR_MT_file_open_recent"
 
         col.separator()
-        col.operator("wm.recover_auto_save", text="Recover Auto Save...", icon_value=get_icon('recover_auto_save'))
+        col.operator("wm.recover_auto_save", text="恢复到自动存档文件...", icon_value=get_icon('recover_auto_save'))
         # col.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
-        col.operator("wm.revert_mainfile", text="Revert", icon_value=get_icon('revert'))
+        col.operator("wm.revert_mainfile", text="还原", icon_value=get_icon('revert'))
 
     def draw_center_column_top(self, col):
         row = col.split(factor=0.25)
         row.label(text="OBJ")
         r = row.row(align=True)
-        r.operator("import_scene.obj", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export'))
+        r.operator("import_scene.obj", text="导入", icon_value=get_icon('import'))
+        r.operator("export_scene.obj", text="导出", icon_value=get_icon('export'))
 
         row = col.split(factor=0.25)
         row.label(text="FBX")
         r = row.row(align=True)
-        r.operator("import_scene.fbx", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export'))
+        r.operator("import_scene.fbx", text="导入", icon_value=get_icon('import'))
+        r.operator("export_scene.fbx", text="导出", icon_value=get_icon('export'))
 
     def draw_center_column_bottom(self, col):
         row = col.split(factor=0.5)
         row.scale_y = 1.25
-        row.operator("machin3.load_previous", text="Previous", icon_value=get_icon('open_previous'))
-        row.operator("machin3.load_next", text="Next", icon_value=get_icon('open_next'))
+        row.operator("machin3.load_previous", text="上一个", icon_value=get_icon('open_previous'))
+        row.operator("machin3.load_next", text="下一个", icon_value=get_icon('open_next'))
 
     def draw_right_column(self, col):
         row = col.row()
         r = row.row(align=True)
-        r.operator("wm.append", text="Append", icon_value=get_icon('append'))
-        r.operator("wm.link", text="Link", icon_value=get_icon('link'))
+        r.operator("wm.append", text="追加", icon_value=get_icon('append'))
+        r.operator("wm.link", text="关联", icon_value=get_icon('link'))
         row.operator("wm.call_menu", text="", icon_value=get_icon('external_data')).name = "TOPBAR_MT_file_external_data"
 
         # append world and materials
@@ -702,19 +702,19 @@ class PieSave(Menu):
             if appendworldpath:
                 row = col.split(factor=0.8)
                 row.scale_y = 1.5
-                row.operator("machin3.append_world", text="World", icon_value=get_icon('world'))
+                row.operator("machin3.append_world", text="世界环境", icon_value=get_icon('world'))
                 row.operator("machin3.load_world_source", text="", icon_value=get_icon('open_world'))
 
             if appendmatspath:
                 row = col.split(factor=0.8)
                 row.scale_y = 1.5
-                row.operator("wm.call_menu", text="Material", icon_value=get_icon('material')).name = "MACHIN3_MT_append_materials"
+                row.operator("wm.call_menu", text="材质", icon_value=get_icon('material')).name = "MACHIN3_MT_append_materials"
                 row.operator("machin3.load_materials_source", text="", icon_value=get_icon('open_material'))
 
 
 class PieShading(Menu):
     bl_idname = "MACHIN3_MT_shading_pie"
-    bl_label = "Shading and Overlays"
+    bl_label = "着色和遮罩"
 
     def draw(self, context):
         layout = self.layout
@@ -770,7 +770,7 @@ class PieShading(Menu):
 
     def draw_left_column(self, context, view, col):
         row = col.split(factor=0.45)
-        row.operator("machin3.toggle_grid", text="Grid Toggle", icon="GRID")
+        row.operator("machin3.toggle_grid", text="栅格显隐", icon="GRID")
         r = row.split().row(align=True)
         r.active = view.overlay.show_floor
         r.prop(view.overlay, "show_axis_x", text="X", toggle=True)
@@ -781,25 +781,25 @@ class PieShading(Menu):
         row = col.split(factor=0.45)
 
         icon = get_icon('wireframe_overlay') if view.overlay.show_wireframes else get_icon('wireframe')
-        row.operator("machin3.toggle_wireframe", text="Wire Toggle", icon_value=icon)
+        row.operator("machin3.toggle_wireframe", text="线框显隐", icon_value=icon)
 
         r = row.split().row()
         if context.mode == "OBJECT":
             r.active = view.overlay.show_wireframes
-            r.prop(view.overlay, "wireframe_threshold", text="Wireframe")
+            r.prop(view.overlay, "wireframe_threshold", text="线框")
         elif context.mode == "EDIT_MESH":
             r.active = view.shading.show_xray
             r.prop(view.shading, "xray_alpha", text="X-Ray")
 
         row = col.split(factor=0.45)
-        row.operator("machin3.toggle_outline", text="(Q) Outline Toggle")
+        row.operator("machin3.toggle_outline", text="(Q) 轮廓线显隐")
         row.prop(view.shading, "object_outline_color", text="")
 
 
         # cavity
 
         row = col.split(factor=0.45)
-        row.operator("machin3.toggle_cavity", text="Cavity Toggle")
+        row.operator("machin3.toggle_cavity", text="空腔显隐")
         r = row.row(align=True)
         # r.prop(view.shading, "cavity_ridge_factor", text="")
         r.prop(view.shading, "cavity_valley_factor", text="")
@@ -808,7 +808,7 @@ class PieShading(Menu):
         # curvature
 
         row = col.split(factor=0.45)
-        row.operator("machin3.toggle_curvature", text="(V) Curvature Toggle")
+        row.operator("machin3.toggle_curvature", text="(V) 曲率显隐")
         r = row.row(align=True)
         r.prop(view.shading, "curvature_ridge_factor", text="")
         r.prop(view.shading, "curvature_valley_factor", text="")
@@ -822,15 +822,15 @@ class PieShading(Menu):
                 col.separator()
                 row = col.split(factor=0.55)
                 r = row.split().row(align=True)
-                r.operator("machin3.shade_smooth", text="Smooth", icon_value=get_icon('smooth'))
-                r.operator("machin3.shade_flat", text="Flat", icon_value=get_icon('flat'))
+                r.operator("machin3.shade_smooth", text="光滑", icon_value=get_icon('smooth'))
+                r.operator("machin3.shade_flat", text="平直", icon_value=get_icon('flat'))
 
                 icon = "CHECKBOX_HLT" if mesh.use_auto_smooth else "CHECKBOX_DEHLT"
-                row.operator("machin3.toggle_auto_smooth", text="AutoSmooth", icon=icon)
+                row.operator("machin3.toggle_auto_smooth", text="自动平滑", icon=icon)
 
                 if mesh.use_auto_smooth:
                     if mesh.has_custom_normals:
-                        col.operator("mesh.customdata_custom_splitnormals_clear", text="Clear Custom Normals")
+                        col.operator("mesh.customdata_custom_splitnormals_clear", text="清除自定义法线")
                     else:
                         col.prop(mesh, "auto_smooth_angle")
 
@@ -852,24 +852,24 @@ class PieShading(Menu):
             # row.prop(mesh, "show_faces", text="Faces")
 
             row = col.row(align=True)
-            row.prop(view.overlay, "show_edge_crease", text="Creases", toggle=True)
-            row.prop(view.overlay, "show_edge_sharp", text="Sharp", toggle=True)
-            row.prop(view.overlay, "show_edge_bevel_weight", text="Bevel", toggle=True)
+            row.prop(view.overlay, "show_edge_crease", text="折痕", toggle=True)
+            row.prop(view.overlay, "show_edge_sharp", text="锐边", toggle=True)
+            row.prop(view.overlay, "show_edge_bevel_weight", text="倒角", toggle=True)
 
             if not bpy.app.build_options.freestyle:
-                row.prop(view.overlay, "show_edge_seams", text="Seams", toggle=True)
+                row.prop(view.overlay, "show_edge_seams", text="接缝", toggle=True)
 
     def draw_center_column(self, context, view, col):
         row = col.split(factor=0.42)
-        row.prop(view.overlay, "show_cursor", text="3D Cursor")
+        row.prop(view.overlay, "show_cursor", text="3D 游标")
         r = row.split().row(align=True)
-        r.prop(view.overlay, "show_object_origins", text="Origins")
-        r.prop(view.overlay, "show_object_origins_all", text="All")
+        r.prop(view.overlay, "show_object_origins", text="原心")
+        r.prop(view.overlay, "show_object_origins_all", text="全部")
 
         col.separator()
         row = col.row()
         row.prop(view.shading, "show_backface_culling")
-        row.prop(view.overlay, "show_face_orientation")
+        row.prop(view.overlay, "show_face_orientation", text="面的方向")
 
         row = col.row()
         row.prop(view.overlay, "show_relationship_lines")
@@ -885,9 +885,9 @@ class PieShading(Menu):
             row.prop(active, "display_type", text="")
 
             row = col.row()
-            row.prop(active, "show_name", text="Name")
-            row.prop(active, "show_axis", text="Axis")
-            row.prop(active, "show_in_front", text="In Front")
+            row.prop(active, "show_name", text="名称")
+            row.prop(active, "show_axis", text="轴向")
+            row.prop(active, "show_in_front", text="显示在最前")
             row.prop(active, "color", text="")
 
     def draw_right_column(self, context, view, col):
@@ -905,13 +905,13 @@ class PieShading(Menu):
 
             # studio rotation, same as world rotation in lookdev
             if view.shading.light == "STUDIO":
-                col.prop(view.shading, "studiolight_rotate_z", text="Rotation")
+                col.prop(view.shading, "studiolight_rotate_z", text="旋转")
 
             # switch matcap
             if view.shading.light == "MATCAP":
                 row = col.row()
-                row.operator("machin3.matcap_switch", text="(X) Matcap Switch")
-                row.operator('view3d.toggle_matcap_flip', text="Matcap Flip", icon='ARROW_LEFTRIGHT')
+                row.operator("machin3.matcap_switch", text="(X) 材质捕获开关")
+                row.operator('view3d.toggle_matcap_flip', text="材质捕获翻转", icon='ARROW_LEFTRIGHT')
 
             # color type
             row = col.row(align=True)
@@ -922,13 +922,13 @@ class PieShading(Menu):
                 col.prop(view.shading, "single_color", text="")
 
             elif view.shading.color_type == 'MATERIAL':
-                col.operator("machin3.colorize_materials", text='Colorize Materials', icon='MATERIAL')
+                col.operator("machin3.colorize_materials", text='着色材质', icon='MATERIAL')
 
             elif view.shading.color_type == 'OBJECT':
                 r = col.split(factor=0.2)
                 r.label(text="Colorize")
-                r.operator("machin3.colorize_objects_from_materials", text='from Materials', icon='MATERIAL')
-                r.operator("machin3.colorize_objects_from_active", text='from Active', icon='OBJECT_DATA')
+                r.operator("machin3.colorize_objects_from_materials", text='来自材质', icon='MATERIAL')
+                r.operator("machin3.colorize_objects_from_active", text='来自活动', icon='OBJECT_DATA')
 
         elif view.shading.type == "MATERIAL":
 
@@ -948,7 +948,7 @@ class PieShading(Menu):
                             row = col.row()
                             row.template_icon_view(view.shading, "studio_light", scale=4, scale_popup=4)
 
-                            col.prop(view.shading, "studiolight_rotate_z", text="Rotation")
+                            col.prop(view.shading, "studiolight_rotate_z", text="旋转")
                             col.prop(view.shading, "studiolight_background_alpha")
 
             # world background node props
@@ -996,7 +996,7 @@ class PieShading(Menu):
             row = col.row()
             # TODO: make the whoe scene toggle an op called by pressing X
             row.prop(view.shading, "show_xray_wireframe", text="")
-            row.prop(view.shading, "xray_alpha_wireframe", text="X-Ray")
+            row.prop(view.shading, "xray_alpha_wireframe", text="X 光")
 
     def draw_eevee(self, context, view, col):
         icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
@@ -1031,20 +1031,20 @@ class PieShading(Menu):
 
     def get_text_icon(self, context, shading):
         if context.space_data.shading.type == shading:
-            text = "Toggle Overlays"
+            text = "切换遮罩"
             icon = "OVERLAY"
         else:
             if shading == "SOLID":
-                text = "Solid"
+                text = "实体"
                 icon = "SHADING_SOLID"
             elif shading == "MATERIAL":
-                text = "LookDev"
+                text = "材质"
                 icon = "SHADING_TEXTURE"
             elif shading == "RENDERED":
-                text = "Rendered"
+                text = "渲染"
                 icon = "SHADING_RENDERED"
             elif shading == "WIREFRAME":
-                text = "Wireframe"
+                text = "线框"
                 icon = "SHADING_WIRE"
 
         return text, icon
@@ -1052,7 +1052,7 @@ class PieShading(Menu):
 
 class PieViews(Menu):
     bl_idname = "MACHIN3_MT_views_pie"
-    bl_label = "Views and Cams"
+    bl_label = "视图和摄像机"
 
     def draw(self, context):
         layout = self.layout
@@ -1068,14 +1068,14 @@ class PieViews(Menu):
         # align_active = bpy.context.scene.machin3.pieviewsalignactive
 
         # 4 - LEFT
-        op = pie.operator("machin3.view_axis", text="Front")
+        op = pie.operator("machin3.view_axis", text="前视图")
         op.axis='FRONT'
 
         # 6 - RIGHT
-        op = pie.operator("machin3.view_axis", text="Right")
+        op = pie.operator("machin3.view_axis", text="右视图")
         op.axis='RIGHT'
         # 2 - BOTTOM
-        op = pie.operator("machin3.view_axis", text="Top")
+        op = pie.operator("machin3.view_axis", text="顶视图")
         op.axis='TOP'
         # 8 - TOP
 
@@ -1141,64 +1141,64 @@ class PieViews(Menu):
 
         row = col.row()
         row.scale_y = 1.5
-        row.operator("machin3.smart_view_cam", text="Smart View Cam", icon='VISIBLE_IPO_ON')
+        row.operator("machin3.smart_view_cam", text="智能视图摄像机", icon='VISIBLE_IPO_ON')
 
         if view.region_3d.view_perspective == 'CAMERA':
             cams = [obj for obj in scene.objects if obj.type == "CAMERA"]
 
             if len(cams) > 1:
                 row = col.row()
-                row.operator("machin3.next_cam", text="(Q) Previous Cam").previous = True
-                row.operator("machin3.next_cam", text="(W) Next Cam").previous = False
+                row.operator("machin3.next_cam", text="(Q) 上一个摄像机").previous = True
+                row.operator("machin3.next_cam", text="(W) 下一个摄像机").previous = False
 
 
         row = col.split()
-        row.operator("machin3.make_cam_active")
+        row.operator("machin3.make_cam_active", text="激活")
         row.prop(scene, "camera", text="")
 
 
         row = col.split()
-        row.operator("view3d.camera_to_view", text="Cam to view", icon='VIEW_CAMERA')
+        row.operator("view3d.camera_to_view", text="摄像机视图", icon='VIEW_CAMERA')
 
-        text, icon = ("Unlock from View", "UNLOCKED") if view.lock_camera else ("Lock to View", "LOCKED")
+        text, icon = ("从视图中解锁", "UNLOCKED") if view.lock_camera else ("锁定视图", "LOCKED")
         row.operator("wm.context_toggle", text=text, icon=icon).data_path = "space_data.lock_camera"
 
     def draw_center_column(self, col):
         col.scale_y = 1.5
-        op = col.operator("machin3.view_axis", text="Bottom")
+        op = col.operator("machin3.view_axis", text="底视图")
         op.axis='BOTTOM'
 
         row = col.row(align=True)
-        op = row.operator("machin3.view_axis", text="Left")
+        op = row.operator("machin3.view_axis", text="左视图")
         op.axis='LEFT'
 
-        op = row.operator("machin3.view_axis", text="Back")
+        op = row.operator("machin3.view_axis", text="后视图")
         op.axis='BACK'
 
     def draw_right_column(self, view, r3d, col):
         row = col.row()
         row.scale_y = 1.5
-        text, icon = ("Orthographic", "VIEW_ORTHO") if r3d.is_perspective else ("Perspective", "VIEW_PERSPECTIVE")
+        text, icon = ("正交", "VIEW_ORTHO") if r3d.is_perspective else ("透视", "VIEW_PERSPECTIVE")
         row.operator("view3d.view_persportho", text=text, icon=icon)
 
-        col.prop(view, "lens")
+        col.prop(view, "lens", text="焦距")
 
 
 class PieAlign(Menu):
     bl_idname = "MACHIN3_MT_align_pie"
-    bl_label = "Align"
+    bl_label = "对齐"
 
     def draw(self, context):
         layout = self.layout
         pie = layout.menu_pie()
 
         # 4 - LEFT
-        op = pie.operator("machin3.align_editmesh", text="Y min")
+        op = pie.operator("machin3.align_editmesh", text="Y 最小值")
         op.axis = "Y"
         op.type = "MIN"
 
         # 6 - RIGHT
-        op = pie.operator("machin3.align_editmesh", text="Y max")
+        op = pie.operator("machin3.align_editmesh", text="Y 最大值")
         op.axis = "Y"
         op.type = "MAX"
 
@@ -1250,39 +1250,39 @@ class PieAlign(Menu):
         column.separator()
 
         # 7 - TOP - LEFT
-        op = pie.operator("machin3.align_editmesh", text="X min")
+        op = pie.operator("machin3.align_editmesh", text="X 最小值")
         op.axis = "X"
         op.type = "MIN"
 
         # 9 - TOP - RIGHT
-        op = pie.operator("machin3.align_editmesh", text="X max")
+        op = pie.operator("machin3.align_editmesh", text="X 最大值")
         op.axis = "X"
         op.type = "MAX"
 
         # 1 - BOTTOM - LEFT
-        op = pie.operator("machin3.align_editmesh", text="Z min")
+        op = pie.operator("machin3.align_editmesh", text="Z 最小值")
         op.axis = "Z"
         op.type = "MIN"
 
         # 3 - BOTTOM - RIGHT
-        op = pie.operator("machin3.align_editmesh", text="Z max")
+        op = pie.operator("machin3.align_editmesh", text="Z 最大值")
         op.axis = "Z"
         op.type = "MAX"
 
 
 class PieCursor(Menu):
     bl_idname = "MACHIN3_MT_cursor_pie"
-    bl_label = "Cursor and Origin"
+    bl_label = "游标和原心"
 
     def draw(self, context):
         layout = self.layout
         pie = layout.menu_pie()
 
         # 4 - LEFT
-        pie.operator("machin3.cursor_to_origin", text="to Origin", icon="PIVOT_CURSOR")
+        pie.operator("machin3.cursor_to_origin", text="到原心", icon="PIVOT_CURSOR")
 
         # 6 - RIGHT
-        pie.operator("view3d.snap_selected_to_cursor", text="to Cursor", icon="RESTRICT_SELECT_OFF").use_offset = False
+        pie.operator("view3d.snap_selected_to_cursor", text="到游标", icon="RESTRICT_SELECT_OFF").use_offset = False
 
         # 2 - BOTTOM
 
@@ -1294,14 +1294,14 @@ class PieCursor(Menu):
 
             row = column.split(factor=0.25)
             row.separator()
-            row.label(text="Object Origin")
+            row.label(text="物体原心")
 
             column.scale_x = 1.1
 
             row = column.split(factor=0.5)
             row.scale_y = 1.5
-            row.operator("object.origin_set", text="to Cursor", icon="LAYER_ACTIVE").type = "ORIGIN_CURSOR"
-            row.operator("object.origin_set", text="to Geometry", icon="OBJECT_ORIGIN").type = "ORIGIN_GEOMETRY"
+            row.operator("object.origin_set", text="到游标", icon="LAYER_ACTIVE").type = "ORIGIN_CURSOR"
+            row.operator("object.origin_set", text="到几何原心", icon="OBJECT_ORIGIN").type = "ORIGIN_GEOMETRY"
 
         else:
             pie.separator()
@@ -1310,16 +1310,16 @@ class PieCursor(Menu):
         pie.separator()
 
         # 7 - TOP - LEFT
-        pie.operator("view3d.snap_cursor_to_selected", text="to Selected", icon="PIVOT_CURSOR")
+        pie.operator("view3d.snap_cursor_to_selected", text="到所选", icon="PIVOT_CURSOR")
 
         # 9 - TOP - RIGHT
-        pie.operator("view3d.snap_selected_to_cursor", text="to Cursor, Offset", icon="RESTRICT_SELECT_OFF").use_offset = True
+        pie.operator("view3d.snap_selected_to_cursor", text="到游标，带偏移", icon="RESTRICT_SELECT_OFF").use_offset = True
 
         # 1 - BOTTOM - LEFT
-        pie.operator("view3d.snap_cursor_to_grid", text="to Grid", icon="PIVOT_CURSOR")
+        pie.operator("view3d.snap_cursor_to_grid", text="到栅格", icon="PIVOT_CURSOR")
 
         # 3 - BOTTOM - RIGHT
-        pie.operator("view3d.snap_selected_to_grid", text="to Grid", icon="RESTRICT_SELECT_OFF")
+        pie.operator("view3d.snap_selected_to_grid", text="到栅格", icon="RESTRICT_SELECT_OFF")
 
 
 class PieWorkspace(Menu):
@@ -1334,19 +1334,19 @@ class PieWorkspace(Menu):
         pie.operator("machin3.switch_workspace", text="MACHIN3", icon='VIEW3D').name="General"
 
         # 6 - RIGHT
-        pie.operator("machin3.switch_workspace", text="Compositing", icon='NODE_COMPOSITING').name="Compositing"
+        pie.operator("machin3.switch_workspace", text="组合", icon='NODE_COMPOSITING').name="Compositing"
 
         # 2 - BOTTOM
-        pie.operator("machin3.switch_workspace", text="Scripting", icon='CONSOLE').name="Scripting"
+        pie.operator("machin3.switch_workspace", text="脚本", icon='CONSOLE').name="Scripting"
 
         # 8 - TOP
-        pie.operator("machin3.switch_workspace", text="Material", icon='MATERIAL_DATA').name="Material"
+        pie.operator("machin3.switch_workspace", text="材质", icon='MATERIAL_DATA').name="Material"
 
         # 7 - TOP - LEFT
         pie.operator("machin3.switch_workspace", text="UVs", icon='GROUP_UVS').name="UVs"
 
         # 9 - TOP - RIGHT
-        pie.operator("machin3.switch_workspace", text="World", icon='WORLD').name="World"
+        pie.operator("machin3.switch_workspace", text="世界环境", icon='WORLD').name="World"
 
         # 1 - BOTTOM - LEFT
         pie.separator()

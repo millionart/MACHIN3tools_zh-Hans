@@ -10,8 +10,8 @@ from .. utils import MACHIN3 as m3
 
 class Customize(bpy.types.Operator):
     bl_idname = "machin3.customize"
-    bl_label = "MACHIN3: Customize"
-    bl_description = "Customize various Blender preferences, settings and keymaps."
+    bl_label = "MACHIN3: 自定义"
+    bl_description = "自定义各种 Blender 首选项，设置和键盘映射。"
     bl_options = {'REGISTER'}
 
 
@@ -390,7 +390,7 @@ class Customize(bpy.types.Operator):
         prefs = context.preferences
 
         if get_prefs().custom_preferences_interface:
-            print("\n» Changing Preferences: Interface")
+            print("\n» 正在更改首选项：界面")
 
             v = prefs.view
             s = prefs.system
@@ -411,7 +411,7 @@ class Customize(bpy.types.Operator):
             v.pie_animation_timeout = 0
 
         if get_prefs().custom_preferences_viewport:
-            print("\n» Changing Preferences: Viewport")
+            print("\n» 正在更改首选项：视口")
 
             v = prefs.view
             s = prefs.system
@@ -422,7 +422,7 @@ class Customize(bpy.types.Operator):
             s.multi_sample = "8"
 
         if get_prefs().custom_preferences_navigation:
-            print("\n» Changing Preferences: Navigation")
+            print("\n» 正在更改首选项：导航")
 
             i = prefs.inputs
 
@@ -430,7 +430,7 @@ class Customize(bpy.types.Operator):
             i.use_zoom_to_mouse = True
 
         if get_prefs().custom_preferences_keymap:
-            print("\n» Changing Preferences: Keymap")
+            print("\n» 正在更改首选项：键盘映射")
 
             keyconfigpath = bpy.utils.preset_paths(subdir='keyconfig')
 
@@ -454,7 +454,7 @@ class Customize(bpy.types.Operator):
             self.customize_keymap(context)
 
         if get_prefs().custom_preferences_system:
-            print("\n» Changing Preferences: System")
+            print("\n» 正在更改首选项：系统")
 
             c = prefs.addons['cycles'].preferences
             s = prefs.system
@@ -471,7 +471,7 @@ class Customize(bpy.types.Operator):
             e.undo_steps = 64
 
         if get_prefs().custom_preferences_save:
-            print("\n» Changing Preferences: Save & Load")
+            print("\n» 正在更改首选项：保存和载入")
             v = prefs.view
             f = prefs.filepaths
 
@@ -484,7 +484,7 @@ class Customize(bpy.types.Operator):
             f.recent_files = 20
 
     def overlays(self, context):
-        print("\n» Modifying Overlays")
+        print("\n» 正在修改遮罩")
 
         areas = [area for screen in context.workspace.screens for area in screen.areas if area.type == "VIEW_3D"]
 
@@ -500,7 +500,7 @@ class Customize(bpy.types.Operator):
             overlay.vertex_opacity = 1
 
     def matcaps(self, context, resourcespath, datafilespath):
-        print("\n» Adding Matcaps")
+        print("\n» 正在添加材质捕获")
 
         matcapsourcepath = os.path.join(resourcespath, "matcaps")
         matcaptargetpath = m3.makedir(os.path.join(datafilespath, "studiolights", "matcap"))
@@ -518,7 +518,7 @@ class Customize(bpy.types.Operator):
             get_prefs().switchmatcap2 = "matcap_shiny_red.exr"
 
 
-            print("\n» Setting up Viewport Shading")
+            print("\n» 正在设置视口着色")
 
             ws = context.workspace
 
@@ -540,7 +540,7 @@ class Customize(bpy.types.Operator):
                 shading.cavity_valley_factor = 2
 
     def theme(self, scriptspath, resourcespath):
-        print("\n» Installing and Enabling M3 theme")
+        print("\n» 正在安装和启用 M3 主题")
 
         themesourcepath = os.path.join(resourcespath, "theme", "m3.xml")
         themetargetpath = m3.makedir(os.path.join(scriptspath, "presets", "interface_theme"))

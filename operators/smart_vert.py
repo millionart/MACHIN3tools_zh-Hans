@@ -23,14 +23,14 @@ pathtypeitems = [("TOPO", "Topo", ""),
 
 class SmartVert(bpy.types.Operator):
     bl_idname = "machin3.smart_vert"
-    bl_label = "MACHIN3: Smart Vert"
+    bl_label = "MACHIN3: 智能点"
     bl_options = {'REGISTER', 'UNDO'}
 
-    mode: EnumProperty(name="Mode", items=modeitems, default="MERGE")
-    mergetype: EnumProperty(name="Merge Type", items=mergetypeitems, default="LAST")
-    pathtype: EnumProperty(name="Path Type", items=pathtypeitems, default="TOPO")
+    mode: EnumProperty(name="模式", items=modeitems, default="MERGE")
+    mergetype: EnumProperty(name="合并类型", items=mergetypeitems, default="LAST")
+    pathtype: EnumProperty(name="路径类型", items=pathtypeitems, default="TOPO")
 
-    slideoverride: BoolProperty(name="Slide Override", default=False)
+    slideoverride: BoolProperty(name="滑动遮罩", default=False)
 
     # hidden
     wrongselection = False

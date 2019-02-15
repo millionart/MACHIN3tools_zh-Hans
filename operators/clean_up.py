@@ -5,35 +5,35 @@ import math
 from .. utils import MACHIN3 as m3
 
 
-selecttypeitems = [("NON-MANIFOLD", "Non-Manifold", ""),
-                   ("TRIS", "Tris", ""),
-                   ("NGONS", "Ngons", "")]
+selecttypeitems = [("NON-MANIFOLD", "非流形", ""),
+                   ("TRIS", "三角面", ""),
+                   ("NGONS", "盎司", "")]
 
 
 class CleanUp(bpy.types.Operator):
     bl_idname = "machin3.clean_up"
-    bl_label = "MACHIN3: Clean Up"
+    bl_label = "MACHIN3: 清理"
     bl_options = {'REGISTER', 'UNDO'}
 
-    remove_doubles: BoolProperty(name="Remove Doubles", default=True)
-    dissolve_degenerate: BoolProperty(name="Dissolve Degenerate", default=True)
-    distance: FloatProperty(name="Merge Distance", default=0.0001, min=0, step=0.01, precision=4)
+    remove_doubles: BoolProperty(name="移除重复", default=True)
+    dissolve_degenerate: BoolProperty(name="溶并无用", default=True)
+    distance: FloatProperty(name="合并距离", default=0.0001, min=0, step=0.01, precision=4)
 
-    recalc_normals: BoolProperty(name="Recalculate Normals", default=True)
-    flip_normals: BoolProperty(name="Flip Normals", default=False)
+    recalc_normals: BoolProperty(name="重新计算法线", default=True)
+    flip_normals: BoolProperty(name="翻转法线", default=False)
 
-    delete_loose: BoolProperty(name="Delete Loose", default=True)
-    delete_loose_verts: BoolProperty(name="Delete Loose Verts", default=True)
-    delete_loose_edges: BoolProperty(name="Delete Loose Edges", default=True)
-    delete_loose_faces: BoolProperty(name="Delete Loose Faces", default=False)
+    delete_loose: BoolProperty(name="删除松散", default=True)
+    delete_loose_verts: BoolProperty(name="删除松散 点", default=True)
+    delete_loose_edges: BoolProperty(name="删除松散 线", default=True)
+    delete_loose_faces: BoolProperty(name="删除松散 面", default=False)
 
-    dissolve_2_edged: BoolProperty(name="Dissolve 2-Edged Verts", default=True)
-    angle_threshold: FloatProperty(name="Angle Threshould", default=179, min=0, max=180)
+    dissolve_2_edged: BoolProperty(name="溶并线段上的点", default=True)
+    angle_threshold: FloatProperty(name="角度阈值", default=179, min=0, max=180)
 
-    select: BoolProperty(name="Select", default=True)
-    select_type: EnumProperty(name="Select", items=selecttypeitems, default="NON-MANIFOLD")
+    select: BoolProperty(name="选择", default=True)
+    select_type: EnumProperty(name="选择", items=selecttypeitems, default="NON-MANIFOLD")
 
-    view_selected: BoolProperty(name="View Selected", default=False)
+    view_selected: BoolProperty(name="查看选中项", default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -42,25 +42,25 @@ class CleanUp(bpy.types.Operator):
         col = box.column()
 
         row = col.row()
-        row.prop(self, "remove_doubles", text="Doubles")
-        row.prop(self, "dissolve_degenerate", text="Degenerate")
+        row.prop(self, "remove_doubles", text="重复")
+        row.prop(self, "dissolve_degenerate", text="无用")
         r = row.row()
         r.active = any([self.remove_doubles, self.dissolve_degenerate])
         r.prop(self, "distance", text="")
 
         row = col.split(factor=0.33)
-        row.prop(self, "delete_loose", text="Loose")
+        row.prop(self, "delete_loose", text="松散")
         r = row.row(align=True)
         r.active = self.delete_loose
-        r.prop(self, "delete_loose_verts", text="Verts", toggle=True)
-        r.prop(self, "delete_loose_edges", text="Edges", toggle=True)
-        r.prop(self, "delete_loose_faces", text="Faces", toggle=True)
+        r.prop(self, "delete_loose_verts", text="点", toggle=True)
+        r.prop(self, "delete_loose_edges", text="线", toggle=True)
+        r.prop(self, "delete_loose_faces", text="面", toggle=True)
 
         row = col.row()
-        row.prop(self, "dissolve_2_edged", text="2-Edged Verts")
+        row.prop(self, "dissolve_2_edged", text="线段上的点")
         r = row.row()
         r.active = self.dissolve_2_edged
-        r.prop(self, "angle_threshold", text="Angle")
+        r.prop(self, "angle_threshold", text="角度")
 
         row = col.row()
         row.prop(self, "recalc_normals")

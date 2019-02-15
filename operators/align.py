@@ -6,21 +6,21 @@ from .. utils import MACHIN3 as m3
 
 # TODO: bone support? you can't select a pose bone when in object mode
 
-modeitems = [("ACTIVE", "to Active", ""),
-             ("FLOOR", "Floor", "")]
+modeitems = [("ACTIVE", "到活动项", ""),
+             ("FLOOR", "到地面（基面）", "")]
              # ("CURSOR", "Cursor", "")]
 
 
 class Align(bpy.types.Operator):
     bl_idname = "machin3.align"
-    bl_label = "MACHIN3: Align"
+    bl_label = "MACHIN3: 对齐"
     bl_options = {'REGISTER', 'UNDO'}
 
-    mode: EnumProperty(name="Mode", items=modeitems, default="ACTIVE")
+    mode: EnumProperty(name="模式", items=modeitems, default="ACTIVE")
 
-    location: BoolProperty(name="Align Location", default=True)
-    rotation: BoolProperty(name="Align Rotation", default=True)
-    scale: BoolProperty(name="Align Scale", default=False)
+    location: BoolProperty(name="对齐位置", default=True)
+    rotation: BoolProperty(name="对齐旋转", default=True)
+    scale: BoolProperty(name="对齐缩放", default=False)
 
     loc_x: BoolProperty(name="X", default=True)
     loc_y: BoolProperty(name="Y", default=True)
@@ -45,7 +45,7 @@ class Align(bpy.types.Operator):
 
         if self.mode == "ACTIVE":
             row = column.split(factor=0.33)
-            row.prop(self, "location", text="Location")
+            row.prop(self, "location", text="位置")
 
             r = row.row(align=True)
             r.active = self.location
@@ -55,7 +55,7 @@ class Align(bpy.types.Operator):
 
 
             row = column.split(factor=0.33)
-            row.prop(self, "rotation", text="Rotation")
+            row.prop(self, "rotation", text="旋转")
 
             r = row.row(align=True)
             r.active = self.rotation
@@ -65,7 +65,7 @@ class Align(bpy.types.Operator):
 
 
             row = column.split(factor=0.33)
-            row.prop(self, "scale", text="Scale")
+            row.prop(self, "scale", text="缩放")
 
             r = row.row(align=True)
             r.active = self.scale

@@ -6,10 +6,10 @@ from .. utils import MACHIN3 as m3
 
 class SmartFace(bpy.types.Operator):
     bl_idname = "machin3.smart_face"
-    bl_label = "MACHIN3: Smart Face"
+    bl_label = "MACHIN3: 智能面"
     bl_options = {'REGISTER', 'UNDO'}
 
-    automerge: BoolProperty(name="Merge to close-by Vert", default=True)
+    automerge: BoolProperty(name="合并到点附近", default=True)
 
     def draw(self, context):
         layout = self.layout
