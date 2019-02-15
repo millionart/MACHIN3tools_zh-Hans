@@ -80,6 +80,19 @@ class M3SceneProperties(bpy.types.PropertyGroup):
         elif t == (False, True):
             shading.cavity_type = "SCREEN"
 
+    def update_grouppro_dotnames(self, context):
+        gpcols = [col for col in bpy.data.collections if col.created_with_gp]
+
+        for col in gpcols:
+            # hide collections
+            if self.grouppro_dotnames:
+                if not col.name.startswith("."):
+                    col.name = ".%s" % col.name
+
+            else:
+                if col.name.startswith("."):
+                    col.name = col.name[1:]
+
     pass_through: BoolProperty(name="Pass Through", default=False, update=update_pass_through)
     show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_show_edit_mesh_wire)
     uv_sync_select: BoolProperty(name="Synce Selection", default=False, update=update_uv_sync_select)
@@ -89,3 +102,5 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     show_curvature: BoolProperty(name="Curvature", default=False, update=update_show_curvature)
 
     focus_history: CollectionProperty(type=HistoryEpochCollection)
+
+    grouppro_dotnames: BoolProperty(name=".dotname GroupPro collections", default=False, update=update_grouppro_dotnames)

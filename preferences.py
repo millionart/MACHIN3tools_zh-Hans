@@ -137,6 +137,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_cursor_pie(self, context):
         activate(self, register=self.activate_cursor_pie, tool="cursor_pie")
 
+    def update_activate_collections_pie(self, context):
+        activate(self, register=self.activate_collections_pie, tool="collections_pie")
+
     def update_activate_workspace_pie(self, context):
         activate(self, register=self.activate_workspace_pie, tool="workspace_pie")
 
@@ -195,6 +198,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_views_pie: BoolProperty(name="Views Pie", default=True, update=update_activate_views_pie)
     activate_align_pie: BoolProperty(name="Align Pie", default=True, update=update_activate_align_pie)
     activate_cursor_pie: BoolProperty(name="Cursor Pie", default=True, update=update_activate_cursor_pie)
+    activate_collections_pie: BoolProperty(name="Collections Pie", default=True, update=update_activate_collections_pie)
     activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False, update=update_activate_workspace_pie)
 
 
@@ -313,7 +317,11 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_cursor_pie", toggle=True)
-        row.label(text="Cursor stuff.")
+        row.label(text="Cursor manipulation.")
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_collections_pie", toggle=True)
+        row.label(text="Collection management.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_workspace_pie", toggle=True)
@@ -339,6 +347,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         b = split.box()
         b.label(text="Settings")
 
+        # CUSTOMIZE
 
         if getattr(bpy.types, "MACHIN3_OT_customize", False):
             bb = b.box()
@@ -379,7 +388,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             row = column.row()
 
             row.label()
-            row.operator("machin3.customize")
+            row.operator("machin3.customize", text="Customize")
             row.label()
 
 

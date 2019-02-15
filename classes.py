@@ -70,6 +70,17 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
                          ("ui.operators.align", [("AlignEditMesh", "align_editmesh")])],
            "CURSOR_PIE": [("ui.pies", [("PieCursor", "cursor_pie")]),
                           ("ui.operators.cursor", [("CursorToOrigin", "cursor_to_origin")])],
+
+           "COLLECTIONS_PIE": [("ui.pies", [("PieCollections", "collections_pie")]),
+                               ("ui.operators.collections", [("CreateCollection", "create_collection"),
+                                                             ("AddToCollection", "add_to_collection"),
+                                                             ("RemoveFromCollection", "remove_from_collection"),
+                                                             ("MoveToCollection", "move_to_collection"),
+                                                             ("SortGroupProGroups", "sort_grouppro_groups"),
+                                                             ("Purge", "purge_collections"),
+                                                             ("OpenCollectionInstanceLibrary", "open_collection_instance_library"),
+                                                             ("Void", "void")])],
+
            "WORKSPACE_PIE": [("ui.pies", [("PieWorkspace", "workspace_pie")]),
                              ("ui.operators.switch_workspace", [("SwitchWorkspace", "switch_workspace")])],
 

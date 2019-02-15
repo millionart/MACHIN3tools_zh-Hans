@@ -400,6 +400,11 @@ def get_pie_menus():
     classlists, keylists, count = get_cursor_pie(classlists, keylists, count)
 
 
+    # COLLECTIONS
+
+    classlists, keylists, count = get_collections_pie(classlists, keylists, count)
+
+
     # WORKSPACE
 
     classlists, keylists, count = get_workspace_pie(classlists, keylists, count)
@@ -562,6 +567,15 @@ def get_cursor_pie(classlists=[], keylists=[], count=0):
     if get_prefs().activate_cursor_pie:
         classlists.append(classesdict["CURSOR_PIE"])
         keylists.append(keysdict["CURSOR_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_collections_pie(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_collections_pie:
+        classlists.append(classesdict["COLLECTIONS_PIE"])
+        keylists.append(keysdict["COLLECTIONS_PIE"])
         count += 1
 
     return classlists, keylists, count

@@ -100,7 +100,7 @@ class NextCam(bpy.types.Operator):
         if len(cams) > 1:
             active = context.scene.camera
 
-            print("active:", active)
+            # print("active:", active)
 
             idx = cams.index(active)
 
