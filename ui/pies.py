@@ -333,7 +333,7 @@ class PieModes(Menu):
 
                 elif active.type == 'EMPTY':
                     # 4 - LEFT
-                    if grouppro and active.instance_collection and active.instance_collection.created_with_gp:
+                    if grouppro and active.instance_collection and active.instance_collection.created_with_gp and not active.instance_collection.library:
                         pie.operator("object.edit_grouppro", text="Edit Group")
 
                     elif active.instance_collection and active.instance_collection.library:
@@ -351,7 +351,7 @@ class PieModes(Menu):
                     pie.separator()
 
                     # 2 - BOTTOM
-                    if grouppro and active.instance_collection and active.instance_collection.created_with_gp:
+                    if grouppro and active.instance_collection and active.instance_collection.created_with_gp and not active.instance_collection.library:
                         if decalmachine:
                             pie.operator("machin3.grouppro_dissolve", text="Dissolve", icon='OUTLINER_OB_GROUP_INSTANCE').maxDept = 0
                         else:
