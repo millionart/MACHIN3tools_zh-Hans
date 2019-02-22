@@ -1,6 +1,12 @@
 import bpy
 
 
+def quotepath(path):
+    if " " in path:
+        path = '"%s"' % (path)
+    return path
+
+
 def add_path_to_recent_files(path):
     """
     add the path to the recent files list, for some reason it's not done automatically when saving or loading

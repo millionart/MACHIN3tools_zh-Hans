@@ -4,6 +4,9 @@ import subprocess
 from ... utils.collection import get_groups_collection, get_scene_collections
 
 
+# TODO: store selected objects in blend file an immedeatly relink it into the current scene, call it StoreCollection() or SaveCollection()
+
+
 class CreateCollection(bpy.types.Operator):
     bl_idname = "machin3.create_collection"
     bl_label = "MACHIN3: Create Collection"
