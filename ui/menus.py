@@ -13,6 +13,9 @@ class MenuMACHIN3toolsObjectSpecials(bpy.types.Menu):
         if getattr(bpy.types, "MACHIN3_OT_unmirror", False):
             layout.operator("machin3.unmirror", text="Un-Mirror")
 
+        if getattr(bpy.types, "MACHIN3_OT_select_center_objects", False):
+            layout.operator("machin3.select_center_objects", text="Select Center Objects")
+
 
 class MenuAppendMaterials(bpy.types.Menu):
     bl_idname = "MACHIN3_MT_append_materials"

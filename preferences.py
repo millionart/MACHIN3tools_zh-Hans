@@ -114,6 +114,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_align(self, context):
         activate(self, register=self.activate_align, tool="align")
 
+    def update_activate_select(self, context):
+        activate(self, register=self.activate_select, tool="select")
+
     def update_activate_customize(self, context):
         activate(self, register=self.activate_customize, tool="customize")
 
@@ -187,6 +190,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_focus: BoolProperty(name="Focus", default=True, update=update_activate_focus)
     activate_mirror: BoolProperty(name="Mirror", default=True, update=update_activate_mirror)
     activate_align: BoolProperty(name="Align", default=True, update=update_activate_align)
+    activate_select: BoolProperty(name="Select", default=True, update=update_activate_select)
     activate_customize: BoolProperty(name="Customize", default=False, update=update_activate_customize)
 
 
@@ -282,6 +286,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row = column.split(factor=0.25)
         row.prop(self, "activate_align", toggle=True)
         row.label(text="Object per-axis location, rotation and scale alignment.")
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_select", toggle=True)
+        row.label(text="Selection helpers.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_customize", toggle=True)

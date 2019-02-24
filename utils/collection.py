@@ -30,7 +30,7 @@ def get_scene_collections(scene, ignore_decals=True):
     while seen:
         col = seen.pop(0)
         if col not in scenecols:
-            if not (ignore_decals and decalmachine and col.DM.isdecalcol):
+            if not (ignore_decals and decalmachine and col.DM.isdecaltypecol):
                 scenecols.append(col)
         seen.extend(list(col.children))
 

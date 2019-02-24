@@ -1345,7 +1345,7 @@ class PieCollections(Menu):
         decalmachine, _, _, _ = get_addon("DECALmachine")
 
         if sel:
-            collections = sorted(list(set(col for obj in sel for col in obj.users_collection if not (decalmachine and col.DM.isdecalcol))), key=lambda x: x.name)[:10]
+            collections = sorted(list(set(col for obj in sel for col in obj.users_collection if not (decalmachine and col.DM.isdecaltypecol))), key=lambda x: x.name)[:10]
 
         else:
             collections = sorted(get_scene_collections(context.scene), key=lambda x: x.name)[:10]
@@ -1387,16 +1387,17 @@ class PieCollections(Menu):
                 column.scale_x = 2
             self.draw_left_column(context, column)
 
-        if batchops:
-            column = box.column()
-            b = column.box()
-            if len(collections) > 5:
-                column.scale_x = 1.2
-            self.draw_center_top_column(context, active, sel, collections, b)
+        column = box.column()
+        b = column.box()
+        if len(collections) > 5:
+            column.scale_x = 1.2
+        self.draw_center_top_column(context, batchops, active, sel, collections, b)
 
         if decalmachine:
-            b = column.box()
-            self.draw_center_bottom_column(context, active, sel, collections, b)
+            dcol = bpy.data.collections.get("Decals")
+            if dcol and dcol.DM.isdecaltypecol:
+                b = column.box()
+                self.draw_center_bottom_column(context, active, sel, collections, b)
 
         b = box.box()
         column = b.column()
@@ -1427,28 +1428,30 @@ class PieCollections(Menu):
         row.scale_y = 1.5
         row.operator("machin3.sort_grouppro_groups", text="Sort Groups")
 
-
-    def draw_center_top_column(self, context, active, sel, collections, layout):
+    def draw_center_top_column(self, context, batchops, active, sel, collections, layout):
         if sel:
             layout.label(text="Collections among Selection")
 
         else:
             layout.label(text="Scene Collections")
 
-        column = layout.column(align=True)
 
         if len(collections) <= 5:
+            column = layout.column(align=True)
+
             for col in collections:
                 row = column.row(align=True)
 
                 # regular collections are drawn as a button(which does nothing)
                 if col.children or col.objects:
-                    row.operator("machin3.void", text=col.name)
+                    row.operator("machin3.select_collection", text=col.name).name = col.name
 
                 # empty collections are drawn as text
                 else:
                     row.label(text=col.name)
-                row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname=col.name
+
+                if batchops:
+                    row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
 
         else:
             layout.scale_x = 2
@@ -1462,38 +1465,61 @@ class PieCollections(Menu):
             for col in cols1:
                 row = column.row(align=True)
                 if col.children or col.objects:
-                    row.operator("machin3.void", text=col.name)
+                    row.operator("machin3.select_collection", text=col.name).name = col.name
                 else:
                     row.label(text=col.name)
-                row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname=col.name
+
+                if batchops:
+                    row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
 
             column = split.column(align=True)
 
             for col in cols2:
                 row = column.row(align=True)
                 if col.children or col.objects:
-                    row.operator("machin3.void", text=col.name)
+                    row.operator("machin3.select_collection", text=col.name).name = col.name
                 else:
                     row.label(text=col.name)
-                row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname=col.name
+
+                if batchops:
+                    row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
 
     def draw_center_bottom_column(self, context, active, sel, collections, layout):
         row = layout.row(align=True)
 
-        row.operator("batch_ops_collections.contextual_click", text="Decals").idname="Decals"
-        row.operator("batch_ops_collections.contextual_click", text="Simple").idname="Simple"
-        row.operator("batch_ops_collections.contextual_click", text="Subset").idname="Subset"
-        row.operator("batch_ops_collections.contextual_click", text="Info").idname="Info"
-        row.operator("batch_ops_collections.contextual_click", text="Panel").idname="Panel"
+        op = row.operator("machin3.select_collection", text="Decals")
+        op.name = "Decals"
+        op.force_all = True
 
+        simple = bpy.data.collections.get('Simple')
+        subset = bpy.data.collections.get('Subset')
+        info = bpy.data.collections.get('Info')
+        panel = bpy.data.collections.get('Panel')
+
+        if simple and simple.DM.isdecaltypecol and simple.objects:
+            row.operator("machin3.select_collection", text="Simple").name = "Simple"
+        else:
+            row.label(text="Simple")
+
+        if subset and subset.DM.isdecaltypecol and subset.objects:
+            row.operator("machin3.select_collection", text="Subset").name = "Subset"
+        else:
+            row.label(text="Subset")
+
+        if info and info.DM.isdecaltypecol and info.objects:
+            row.operator("machin3.select_collection", text="Info").name = "Info"
+        else:
+            row.label(text="Info")
+
+        if panel and panel.DM.isdecaltypecol and panel.objects:
+            row.operator("machin3.select_collection", text="Panel").name = "Panel"
+        else:
+            row.label(text="Panel")
 
     def draw_right_column(self, context, layout):
-        m3 = context.scene.M3
-
         row = layout.row()
         row.scale_y = 1.5
         row.operator("machin3.purge_collections", text="Purge", icon='MONKEY')
-
 
 
 class PieWorkspace(Menu):

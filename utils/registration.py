@@ -358,6 +358,9 @@ def get_tools():
     # ALIGN
     classlists, keylists, count = get_align(classlists, keylists, count)
 
+    # SELECT
+    classlists, keylists, count = get_select(classlists, keylists, count)
+
 
     # CUSTOMIZE
     classlists, keylists, count = get_customize(classlists, keylists, count)
@@ -497,6 +500,15 @@ def get_align(classlists=[], keylists=[], count=0):
     if get_prefs().activate_align:
         classlists.append(classesdict["ALIGN"])
         keylists.append(keysdict["ALIGN"])
+        count +=1
+
+    return classlists, keylists, count
+
+
+def get_select(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_select:
+        classlists.append(classesdict["SELECT"])
+        # keylists.append(keysdict["ALIGN"])
         count +=1
 
     return classlists, keylists, count

@@ -46,9 +46,15 @@ class CreateCollection(bpy.types.Operator):
     def execute(self, context):
         name = self.name.strip()
 
+        # create collection
         col = bpy.data.collections.new(name=name)
 
-        context.scene.collection.children.link(col)
+        # link it to the active collection
+        acol = context.view_layer.active_layer_collection.collection
+        acol.children.link(col)
+
+        # reset the name prop
+        self.name = ''
 
         return {'FINISHED'}
 
@@ -155,13 +161,29 @@ class Purge(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class Void(bpy.types.Operator):
-    bl_idname = "machin3.void"
-    bl_label = "MACHIN3: Void"
-    bl_description = "Void"
+class Select(bpy.types.Operator):
+    bl_idname = "machin3.select_collection"
+    bl_label = "MACHIN3: (De)Select Collection"
+    bl_description = "Select Collection Objects\nSHIFT: Select all Collection Objects\nALT: Deselect Collection Objects\nSHIFT+ALT: Deselect all Collection Objects"
     bl_options = {'REGISTER'}
 
-    def execute(self, context):
+    name: StringProperty()
+    force_all: BoolProperty()
+
+    def invoke(self, context, event):
+        col = bpy.data.collections.get(self.name)
+        objects = col.all_objects if event.shift or self.force_all else col.objects
+
+        if col:
+            if event.alt:
+                for obj in objects:
+                    obj.select_set(False)
+
+            else:
+                for obj in objects:
+                    obj.select_set(True)
+
+        self.force_all = False
         return {'FINISHED'}
 
 
