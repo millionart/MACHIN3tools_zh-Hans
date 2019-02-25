@@ -2,7 +2,11 @@ import bpy
 from bpy.props import BoolProperty
 import bmesh
 from mathutils import Vector, Quaternion
-from .. utils.math import get_loc_matrix, get_rot_matrix, get_sca_matrix
+from .. utils.registration import get_addon
+from .. utils.math import flatten_matrix, get_loc_matrix, get_rot_matrix, get_sca_matrix
+
+
+# TODO: updare child parent inverse mx?
 
 
 class Apply(bpy.types.Operator):
@@ -26,6 +30,8 @@ class Apply(bpy.types.Operator):
 
     def execute(self, context):
         if any([self.rotation, self.scale]):
+            decalmachine, _, _, _ = get_addon("DECALmachine")
+
             parents = [obj for obj in context.selected_objects if not obj.parent]
 
             for obj in parents:
@@ -77,5 +83,10 @@ class Apply(bpy.types.Operator):
                 # reset the children to their original state again
                 for obj, mxw in children:
                     obj.matrix_world = mxw
+
+                    # update decal backups's backup matrices as well, we can just reuse the bmesh mx here
+                    if decalmachine and obj.DM.decalbackup:
+                        backup = obj.DM.decalbackup
+                        backup.DM.backupmx = flatten_matrix(bmmx @ backup.DM.backupmx)
 
         return {'FINISHED'}

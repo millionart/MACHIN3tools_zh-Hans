@@ -1,6 +1,10 @@
 from mathutils import Matrix
 
 
+def flatten_matrix(mx):
+    dimension = len(mx)
+    return [mx[j][i] for i in range(dimension) for j in range(dimension)]
+
 def get_sca_matrix(vector):
     scale_mx = Matrix()
     for i in range(3):
