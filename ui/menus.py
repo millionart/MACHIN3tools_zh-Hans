@@ -16,6 +16,9 @@ class MenuMACHIN3toolsObjectSpecials(bpy.types.Menu):
         if getattr(bpy.types, "MACHIN3_OT_select_center_objects", False):
             layout.operator("machin3.select_center_objects", text="Select Center Objects")
 
+        if getattr(bpy.types, "MACHIN3_OT_apply_transformations", False):
+            layout.operator("machin3.apply_transformations", text="Apply Transformations")
+
 
 class MenuAppendMaterials(bpy.types.Menu):
     bl_idname = "MACHIN3_MT_append_materials"

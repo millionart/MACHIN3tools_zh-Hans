@@ -7,6 +7,8 @@ from .. utils import MACHIN3 as m3
 
 # TODO: do the prefs part based on a dictionary?
 
+# TODO: outliner focus
+
 
 class Customize(bpy.types.Operator):
     bl_idname = "machin3.customize"
@@ -257,17 +259,19 @@ class Customize(bpy.types.Operator):
                     kmi.shift = False
 
                 if kmi.idname == "mesh.select_linked":
-                    kmi.active = False
-
-                if kmi.idname == "mesh.select_linked_pick":
                     kmi.type = "LEFTMOUSE"
                     kmi.value = "DOUBLE_CLICK"
-                    # kmi.properties.delimit = {"SHARP"}  # you can't set this as default and still remember the ops previous parameers, if you run it a second time
+                    kmi.ctrl = False
+                    kmi.shift = True
 
+                if kmi.idname == "mesh.select_linked_pick":
                     if kmi.properties.deselect:
+                        kmi.type = "LEFTMOUSE"
+                        kmi.value = "DOUBLE_CLICK"
                         kmi.alt = True
+
                     else:
-                        kmi.shift = True
+                        kmi.active = False
 
                 if kmi.idname == "object.subdivision_set":
                     kmi.active = False

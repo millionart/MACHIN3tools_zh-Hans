@@ -1394,7 +1394,8 @@ class PieCollections(Menu):
         self.draw_center_top_column(context, batchops, active, sel, collections, b)
 
         if decalmachine:
-            dcol = bpy.data.collections.get("Decals")
+            decalsname = ".Decals" if context.scene.DM.hide_decaltype_collections else "Decals"
+            dcol = bpy.data.collections.get(decalsname)
             if dcol and dcol.DM.isdecaltypecol:
                 b = column.box()
                 self.draw_center_bottom_column(context, active, sel, collections, b)
@@ -1487,32 +1488,38 @@ class PieCollections(Menu):
     def draw_center_bottom_column(self, context, active, sel, collections, layout):
         row = layout.row(align=True)
 
+        decalsname = ".Decals" if context.scene.DM.hide_decaltype_collections else "Decals"
+        simplename = ".Simple" if context.scene.DM.hide_decaltype_collections else "Simple"
+        subsetname = ".Subset" if context.scene.DM.hide_decaltype_collections else "Subset"
+        infoname = ".Info" if context.scene.DM.hide_decaltype_collections else "Info"
+        panelname = ".Panel" if context.scene.DM.hide_decaltype_collections else "Panel"
+
         op = row.operator("machin3.select_collection", text="Decals")
-        op.name = "Decals"
+        op.name = decalsname
         op.force_all = True
 
-        simple = bpy.data.collections.get('Simple')
-        subset = bpy.data.collections.get('Subset')
-        info = bpy.data.collections.get('Info')
-        panel = bpy.data.collections.get('Panel')
+        simple = bpy.data.collections.get(simplename)
+        subset = bpy.data.collections.get(subsetname)
+        info = bpy.data.collections.get(infoname)
+        panel = bpy.data.collections.get(panelname)
 
         if simple and simple.DM.isdecaltypecol and simple.objects:
-            row.operator("machin3.select_collection", text="Simple").name = "Simple"
+            row.operator("machin3.select_collection", text="Simple").name = simplename
         else:
             row.label(text="Simple")
 
         if subset and subset.DM.isdecaltypecol and subset.objects:
-            row.operator("machin3.select_collection", text="Subset").name = "Subset"
+            row.operator("machin3.select_collection", text="Subset").name = subsetname
         else:
             row.label(text="Subset")
 
         if info and info.DM.isdecaltypecol and info.objects:
-            row.operator("machin3.select_collection", text="Info").name = "Info"
+            row.operator("machin3.select_collection", text="Info").name = infoname
         else:
             row.label(text="Info")
 
         if panel and panel.DM.isdecaltypecol and panel.objects:
-            row.operator("machin3.select_collection", text="Panel").name = "Panel"
+            row.operator("machin3.select_collection", text="Panel").name = panelname
         else:
             row.label(text="Panel")
 
