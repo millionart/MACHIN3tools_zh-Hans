@@ -7,8 +7,6 @@ from .. utils import MACHIN3 as m3
 
 # TODO: do the prefs part based on a dictionary?
 
-# TODO: outliner focus
-
 
 class Customize(bpy.types.Operator):
     bl_idname = "machin3.customize"
@@ -118,6 +116,15 @@ class Customize(bpy.types.Operator):
                     else:
                         kmi.active = False
 
+            # OUTLINER
+
+            km = kc.keymaps.get("Outliner")
+            for kmi in km.keymap_items:
+                if kmi.idname == "outliner.show_active":
+                    if kmi.type == "PERIOD":
+                        kmi.type = "F"
+
+
             # 3D VIEW
 
             km = kc.keymaps.get("3D View")
@@ -186,8 +193,12 @@ class Customize(bpy.types.Operator):
                     elif kmi.properties.action == "DESELECT":
                         kmi.active = False
 
+                if kmi.idname == "object.delete":
+                    if kmi.type == "X" and kmi.shift:
+                        kmi.active = False
 
-            # OBJECT MODE
+
+            # OBJECT NON-MODAL
 
             km = kc.keymaps.get("Object Non-modal")
             for kmi in km.keymap_items:
