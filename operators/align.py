@@ -2,6 +2,7 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty
 from mathutils import Matrix, Vector, Euler
 from .. utils import MACHIN3 as m3
+from .. utils.math import get_loc_matrix, get_sca_matrix
 
 
 # TODO: bone support? you can't select a pose bone when in object mode
@@ -140,11 +141,11 @@ class Align(bpy.types.Operator):
                 locz = alocz if self.loc_z else olocz
 
                 # re-assemble into translation matrix
-                loc = Matrix.Translation(Vector((locx, locy, locz)))
+                loc = get_loc_matrix(Vector((locx, locy, locz)))
 
             # otherwise, just use the object's location component
             else:
-                loc = Matrix.Translation(oloc)
+                loc = get_loc_matrix(oloc)
 
 
             # ROTATION
@@ -165,7 +166,6 @@ class Align(bpy.types.Operator):
 
             # SCALE
 
-            sca = Matrix()
 
             # if scale is aligned, pick the axis elements based on the sca axis props
             if self.scale:
@@ -174,13 +174,11 @@ class Align(bpy.types.Operator):
                 scaz = ascaz if self.sca_z else oscaz
 
                 # re-assemble into scale matrix
-                for i in range(3):
-                    sca[i][i] = (scax, scay, scaz)[i]
+                sca = get_sca_matrix(Vector((scax, scay, scaz)))
 
             # otherwise, just use the object's scale component
             else:
-                for i in range(3):
-                    sca[i][i] = osca[i]
+                sca = get_sca_matrix(osca)
 
 
             # re-combine components into world matrix

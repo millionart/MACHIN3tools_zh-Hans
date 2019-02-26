@@ -9,6 +9,7 @@ class CursorToOrigin(bpy.types.Operator):
 
     def execute(self, context):
         context.scene.cursor_location.zero()
-        context.scene.cursor_rotation.angle = 0
+        context.scene.cursor_rotation_mode = 'XYZ'
+        context.scene.cursor_rotation_euler.zero()
 
         return {'FINISHED'}
