@@ -164,7 +164,7 @@ class Purge(bpy.types.Operator):
 class Select(bpy.types.Operator):
     bl_idname = "machin3.select_collection"
     bl_label = "MACHIN3: (De)Select Collection"
-    bl_description = "Select Collection Objects\nSHIFT: Select all Collection Objects\nALT: Deselect Collection Objects\nSHIFT+ALT: Deselect all Collection Objects"
+    bl_description = "Select Collection Objects\nSHIFT: Select all Collection Objects\nALT: Deselect Collection Objects\nSHIFT+ALT: Deselect all Collection Objects\nCTRL: Toggle Viewport Selection of Collection Objects"
     bl_options = {'REGISTER'}
 
     name: StringProperty()
@@ -174,13 +174,21 @@ class Select(bpy.types.Operator):
         col = bpy.data.collections.get(self.name)
         objects = col.all_objects if event.shift or self.force_all else col.objects
 
+        hideselect = objects[0].hide_select
+
         if col:
-            if event.alt:
-                for obj in objects:
+            for obj in objects:
+                # deselect
+                if event.alt:
                     obj.select_set(False)
 
-            else:
-                for obj in objects:
+                # toggle hide_select (but only for objects not all_objects)
+                elif event.ctrl:
+                    if obj.name in col.objects:
+                        obj.hide_select = not hideselect
+
+                # seleect
+                else:
                     obj.select_set(True)
 
         self.force_all = False

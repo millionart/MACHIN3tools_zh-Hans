@@ -1417,7 +1417,6 @@ class PieCollections(Menu):
         # 3 - BOTTOM - RIGHT
         pie.separator()
 
-
     def draw_left_column(self, context, layout):
         m3 = context.scene.M3
 
@@ -1445,7 +1444,8 @@ class PieCollections(Menu):
 
                 # regular collections are drawn as a button(which does nothing)
                 if col.children or col.objects:
-                    row.operator("machin3.select_collection", text=col.name).name = col.name
+                    icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
+                    row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
 
                 # empty collections are drawn as text
                 else:
@@ -1466,7 +1466,8 @@ class PieCollections(Menu):
             for col in cols1:
                 row = column.row(align=True)
                 if col.children or col.objects:
-                    row.operator("machin3.select_collection", text=col.name).name = col.name
+                    icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
+                    row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
                 else:
                     row.label(text=col.name)
 
@@ -1478,7 +1479,8 @@ class PieCollections(Menu):
             for col in cols2:
                 row = column.row(align=True)
                 if col.children or col.objects:
-                    row.operator("machin3.select_collection", text=col.name).name = col.name
+                    icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
+                    row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
                 else:
                     row.label(text=col.name)
 
