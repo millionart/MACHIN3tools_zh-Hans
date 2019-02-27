@@ -1004,9 +1004,13 @@ class PieShading(Menu):
 
         elif view.shading.type == "WIREFRAME":
             row = col.row()
-            # TODO: make the whoe scene toggle an op called by pressing X
+            # # TODO: make the whoe scene toggle an op called by pressing X
             row.prop(view.shading, "show_xray_wireframe", text="")
             row.prop(view.shading, "xray_alpha_wireframe", text="X-Ray")
+
+            # wireframe color type
+            row = col.row(align=True)
+            row.prop(view.shading, "wireframe_color_type", expand=True)
 
     def draw_eevee(self, context, view, col):
         icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
@@ -1345,10 +1349,10 @@ class PieCollections(Menu):
         decalmachine, _, _, _ = get_addon("DECALmachine")
 
         if sel:
-            collections = sorted(list(set(col for obj in sel for col in obj.users_collection if not (decalmachine and col.DM.isdecaltypecol))), key=lambda x: x.name)[:10]
+            collections = list(set(col for obj in sel for col in obj.users_collection if not (decalmachine and col.DM.isdecaltypecol)))[:10]
 
         else:
-            collections = sorted(get_scene_collections(context.scene), key=lambda x: x.name)[:10]
+            collections = get_scene_collections(context.scene)[:10]
 
 
         layout = self.layout
