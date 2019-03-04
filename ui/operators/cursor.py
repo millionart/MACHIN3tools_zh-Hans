@@ -8,8 +8,8 @@ class CursorToOrigin(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        context.scene.cursor_location.zero()
-        context.scene.cursor_rotation_mode = 'XYZ'
-        context.scene.cursor_rotation_euler.zero()
+        context.scene.cursor.location.zero()
+        context.scene.cursor.rotation_mode = 'XYZ'
+        context.scene.cursor.rotation_euler.zero()
 
         return {'FINISHED'}

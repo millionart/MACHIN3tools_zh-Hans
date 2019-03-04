@@ -7,6 +7,8 @@ from .. utils import MACHIN3 as m3
 
 # TODO: do the prefs part based on a dictionary?
 
+# TODO: deactivate shift y/z wire toggle
+
 
 class Customize(bpy.types.Operator):
     bl_idname = "machin3.customize"
