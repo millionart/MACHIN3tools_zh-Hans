@@ -121,3 +121,24 @@ class NextCam(bpy.types.Operator):
 
 
         return {'FINISHED'}
+
+
+class ToggleCamPerspOrtho(bpy.types.Operator):
+    bl_idname = "machin3.toggle_cam_persportho"
+    bl_label = "MACHIN3: Toggle Camera Perspective/Ortho"
+    bl_description = "Toggle Active Scene Camera Perspective/Ortho"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.camera
+
+    def execute(self, context):
+        cam = context.scene.camera
+
+        if cam.data.type == "PERSP":
+            cam.data.type = "ORTHO"
+        else:
+            cam.data.type = "PERSP"
+
+        return {'FINISHED'}

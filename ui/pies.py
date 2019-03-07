@@ -936,9 +936,9 @@ class PieShading(Menu):
             elif view.shading.color_type == 'OBJECT':
                 r = col.split(factor=0.12, align=True)
                 r.label(text="from")
-                r.operator("machin3.colorize_objects_from_materials", text='Materials', icon='MATERIAL')
                 r.operator("machin3.colorize_objects_from_active", text='Active', icon='OBJECT_DATA')
-                r.operator("machin3.colorize_objects_from_collections", text='Collections', icon='OUTLINER_OB_GROUP_INSTANCE')
+                r.operator("machin3.colorize_objects_from_materials", text='Material', icon='MATERIAL')
+                r.operator("machin3.colorize_objects_from_collections", text='Collection', icon='OUTLINER_OB_GROUP_INSTANCE')
 
         elif view.shading.type == "MATERIAL":
 
@@ -1106,7 +1106,7 @@ class PieViews(Menu):
 
         b = box.box()
         column = b.column()
-        self.draw_right_column(view, r3d, column)
+        self.draw_right_column(context, view, r3d, column)
 
 
         # 7 - TOP - LEFT
@@ -1189,13 +1189,31 @@ class PieViews(Menu):
         op = row.operator("machin3.view_axis", text="Back")
         op.axis='BACK'
 
-    def draw_right_column(self, view, r3d, col):
+    def draw_right_column(self, context, view, r3d, col):
         row = col.row()
         row.scale_y = 1.5
-        text, icon = ("Orthographic", "VIEW_ORTHO") if r3d.is_perspective else ("Perspective", "VIEW_PERSPECTIVE")
-        row.operator("view3d.view_persportho", text=text, icon=icon)
 
-        col.prop(view, "lens")
+        # CAMERA ALIGNED
+
+        if view.region_3d.view_perspective == 'CAMERA':
+            cam = context.scene.camera
+
+            text, icon = ("Orthographic", "VIEW_ORTHO") if cam.data.type == "PERSP" else ("Perspective", "VIEW_PERSPECTIVE")
+            row.operator("machin3.toggle_cam_persportho", text=text, icon=icon)
+
+            if cam.data.type == "PERSP":
+                col.prop(cam.data, "lens")
+
+            elif cam.data.type == "ORTHO":
+                col.prop(cam.data, "ortho_scale")
+
+        # USER VIEW
+
+        else:
+            text, icon = ("Orthographic", "VIEW_ORTHO") if r3d.is_perspective else ("Perspective", "VIEW_PERSPECTIVE")
+            row.operator("view3d.view_persportho", text=text, icon=icon)
+
+            col.prop(view, "lens")
 
 
 class PieAlign(Menu):
