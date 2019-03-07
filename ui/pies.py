@@ -588,7 +588,6 @@ class PieModes(Menu):
             # 3 - BOTTOM - RIGHT
             pie.separator()
 
-
     def draw_grouppro(self, context, layout, addremove=True):
         box = layout.split()
         column = box.column()
@@ -935,10 +934,11 @@ class PieShading(Menu):
                 col.operator("machin3.colorize_materials", text='Colorize Materials', icon='MATERIAL')
 
             elif view.shading.color_type == 'OBJECT':
-                r = col.split(factor=0.2)
-                r.label(text="Colorize")
-                r.operator("machin3.colorize_objects_from_materials", text='from Materials', icon='MATERIAL')
-                r.operator("machin3.colorize_objects_from_active", text='from Active', icon='OBJECT_DATA')
+                r = col.split(factor=0.12, align=True)
+                r.label(text="from")
+                r.operator("machin3.colorize_objects_from_materials", text='Materials', icon='MATERIAL')
+                r.operator("machin3.colorize_objects_from_active", text='Active', icon='OBJECT_DATA')
+                r.operator("machin3.colorize_objects_from_collections", text='Collections', icon='OUTLINER_OB_GROUP_INSTANCE')
 
         elif view.shading.type == "MATERIAL":
 
@@ -1439,14 +1439,13 @@ class PieCollections(Menu):
         else:
             layout.label(text="Scene Collections")
 
-
         if len(collections) <= 5:
             column = layout.column(align=True)
 
             for col in collections:
                 row = column.row(align=True)
 
-                # regular collections are drawn as a button(which does nothing)
+                # regular collections are drawn as a button
                 if col.children or col.objects:
                     icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
                     row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
