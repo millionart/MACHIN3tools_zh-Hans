@@ -454,15 +454,15 @@ class Customize(bpy.types.Operator):
             if keyconfigpath:
                 keymappath = os.path.join(keyconfigpath[0], "blender_27x.py")
 
-                bpy.ops.wm.keyconfig_activate(filepath=keymappath)
+                bpy.ops.preferences.keyconfig_activate(filepath=keymappath)
 
                 kcprefs = context.window_manager.keyconfigs.active.preferences
                 kcprefs.select_mouse = "LEFT"
 
                 # """
-                # for some weird reason doing this 2 times is required if you edit the keymaps afterwards
+                # for some weird reason doing this 2 times is required if you edit the keymaps afterwards, TODO: check if still true
                 # otherwise middle mouse mappings for zoom, pan, rotate and dolly will be missing, perhaps some other things as well
-                bpy.ops.wm.keyconfig_activate(filepath=keymappath)
+                bpy.ops.preferences.keyconfig_activate(filepath=keymappath)
 
                 kcprefs = context.window_manager.keyconfigs.active.preferences
                 kcprefs.select_mouse = "LEFT"
@@ -495,7 +495,7 @@ class Customize(bpy.types.Operator):
             f.use_file_compression = True
             f.use_load_ui = False
 
-            v.use_quit_dialog = False
+            v.use_save_prompt = False
 
             f.save_version = 3
             f.recent_files = 20
