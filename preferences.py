@@ -27,7 +27,7 @@ links = [("Documentation", "https://machin3.io/MACHIN3tools/docs/", "INFO"),
          ]
 
 
-# TODO: check if the aeppend world/materials paths exist and make them abosolute
+# TODO: check if the append world/materials paths exist and make them abosolute
 
 
 class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
@@ -333,7 +333,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_cursor_pie", toggle=True)
-        row.label(text="Cursor manipulation.")
+        row.label(text="Cursor and Origin manipulation.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_collections_pie", toggle=True)
@@ -342,7 +342,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row = column.split(factor=0.25)
         row.prop(self, "activate_workspace_pie", toggle=True)
         r = row.split(factor=0.4)
-        r.label(text="Switch workspaces.")
+        r.label(text="Switch Workplaces.")
         r.label(text="If enabled, customize it in ui/pies.py", icon="INFO")
 
 

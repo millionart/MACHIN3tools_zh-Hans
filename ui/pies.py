@@ -1373,10 +1373,21 @@ class PieCollections(Menu):
                 decalparentcollections = list(set(col for obj in sel for col in obj.users_collection if col.DM.isdecalparentcol))[:10]
 
         else:
-            collections = get_scene_collections(context.scene)[:10]
+            if context.scene.collection.objects:
+                collections = get_scene_collections(context.scene)[:9]
+                collections.insert(0, context.scene.collection)
+
+            else:
+                collections = get_scene_collections(context.scene)[:10]
 
             if decalmachine:
                 decalparentcollections = [col for col in get_scene_collections(context.scene, ignore_decals=False) if col.DM.isdecalparentcol][:10]
+
+
+        if decalmachine:
+            decalsname = ".Decals" if context.scene.DM.hide_decaltype_collections else "Decals"
+            dcol = bpy.data.collections.get(decalsname)
+
 
 
         layout = self.layout
@@ -1405,41 +1416,97 @@ class PieCollections(Menu):
             pie.operator("machin3.create_collection", text="Create", icon="GROUP")
 
         # 8 - TOP
-        box = pie.split()
 
-        column = box.column()
+        if decalmachine and (decalparentcollections or dcol):
 
-        b = column.box()
-        # if len(collections) <= 5:
-            # column.scale_x = 2
-        self.draw_left_top_column(context, b)
+            # 1 - 1 - 1
+            if len(collections) <= 5 and len(decalparentcollections) <= 5:
+                row = pie.split(factor=0.34)
 
-        b = column.box()
-        self.draw_left_bottom_column(context, b)
+            # 1 - 2 - 1
+            elif len(collections) > 5 and len(decalparentcollections) <= 5:
+                row = pie.split(factor=0.25)
+                row.scale_x = 0.8
+
+            # 1 - 1 - 2
+            elif len(collections) <= 5 and len(decalparentcollections) > 5:
+                row = pie.split(factor=0.25)
+                row.scale_x = 0.8
+
+            # 1 - 2 - 2
+            else:
+                row = pie.split(factor=0.20)
+                row.scale_x = 0.8
+
+        else:
+            # 1 - 1
+            if len(collections) <= 5:
+                row = pie.split(factor=0.5)
+                row.scale_x = 1.5
+
+            # 1 - 2
+            elif len(collections) > 5:
+                row = pie.split(factor=0.33)
+                row.scale_x = 0.8
 
 
-        b = box.box()
-        column = b.column()
-        # if len(collections) > 5:
-            # column.scale_x = 1.2
-        self.draw_center_column(context, batchops, sel, collections, column)
+        # LEFT
 
-        if decalmachine:
-            column = box.column()
+        column = row.column()
+
+        box = column.box()
+        self.draw_left_top_column(context, box)
+
+        if grouppro:
+            box = column.box()
+            self.draw_left_bottom_column(context, box)
+
+
+        # MIDDLE
+
+        if decalmachine and (decalparentcollections or dcol):
+
+            # 1 - 1 - 1
+            if len(collections) <= 5 and len(decalparentcollections) <= 5:
+                r = row.split(factor=0.5)
+
+            # 1 - 2 - 1
+            elif len(collections) > 5 and len(decalparentcollections) <= 5:
+                r = row.split(factor=0.66)
+
+            # 1 - 1 - 2
+            elif len(collections) <= 5 and len(decalparentcollections) > 5:
+                r = row.split(factor=0.33)
+
+            # 1 - 2 - 2
+            else:
+                r = row.split(factor=0.5)
+
+
+        else:
+            r = row
+
+        box = r.box()
+        self.draw_center_column(context, batchops, sel, collections, box)
+
+
+        # RIGHT
+
+        if decalmachine and (decalparentcollections or dcol):
+
+            column = r.column()
 
             # decal parent collections
 
             if decalparentcollections:
-                b = column.box()
-                self.draw_right_top_column(context, batchops, sel, decalparentcollections, b)
+                box = column.box()
+                self.draw_right_top_column(context, batchops, sel, decalparentcollections, box)
 
             # decal type collections
 
-            decalsname = ".Decals" if context.scene.DM.hide_decaltype_collections else "Decals"
-            dcol = bpy.data.collections.get(decalsname)
             if dcol and dcol.DM.isdecaltypecol:
-                b = column.box()
-                self.draw_right_bottom_column(context, b)
+                box = column.box()
+                self.draw_right_bottom_column(context, box)
 
 
         # 7 - TOP - LEFT
@@ -1477,7 +1544,7 @@ class PieCollections(Menu):
 
     def draw_center_column(self, context, batchops, sel, collections, layout):
         if sel:
-            layout.label(text="Collections among Selection")
+            layout.label(text="Scene Collections (Selection)")
 
         else:
             layout.label(text="Scene Collections")
@@ -1497,7 +1564,7 @@ class PieCollections(Menu):
                 else:
                     row.label(text=col.name)
 
-                if batchops:
+                if batchops and col != context.scene.collection:
                     row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
 
         else:
@@ -1534,13 +1601,12 @@ class PieCollections(Menu):
                     row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
 
     def draw_right_top_column(self, context, batchops, sel, collections, layout):
-        # if sel:
-            # layout.label(text="Collections among Selection")
+        if sel:
+            layout.label(text="Decal Parent Collections (Selection)")
 
-        # else:
-            # layout.label(text="Scene Collections")
+        else:
+            layout.label(text="Decal Parent Collections")
 
-        layout.label(text="Decal Parent Collections")
 
         if len(collections) <= 5:
             column = layout.column(align=True)

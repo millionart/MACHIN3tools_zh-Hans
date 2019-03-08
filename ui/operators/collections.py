@@ -171,25 +171,27 @@ class Select(bpy.types.Operator):
     force_all: BoolProperty()
 
     def invoke(self, context, event):
-        col = bpy.data.collections.get(self.name)
+        col = bpy.data.collections.get(self.name, context.scene.collection)
+
         objects = col.all_objects if event.shift or self.force_all else col.objects
 
-        hideselect = objects[0].hide_select
+        if objects:
+            hideselect = objects[0].hide_select
 
-        if col:
-            for obj in objects:
-                # deselect
-                if event.alt:
-                    obj.select_set(False)
+            if col:
+                for obj in objects:
+                    # deselect
+                    if event.alt:
+                        obj.select_set(False)
 
-                # toggle hide_select (but only for objects not all_objects)
-                elif event.ctrl:
-                    if obj.name in col.objects:
-                        obj.hide_select = not hideselect
+                    # toggle hide_select (but only for objects not all_objects)
+                    elif event.ctrl:
+                        if obj.name in col.objects:
+                            obj.hide_select = not hideselect
 
-                # seleect
-                else:
-                    obj.select_set(True)
+                    # seleect
+                    else:
+                        obj.select_set(True)
 
         self.force_all = False
         return {'FINISHED'}
