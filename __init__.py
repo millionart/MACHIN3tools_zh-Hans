@@ -20,7 +20,7 @@ Copyright (C) 2016-2018 MACHIN3, machin3.io, support@machin3.io
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, 6),
+    "version": (0, 3, 7),
     "blender": (2, 80, 0),
     "location": "",
     "description": "Streamlining Blender 2.80.",
@@ -30,7 +30,7 @@ bl_info = {
 
 
 import bpy
-from bpy.props import PointerProperty
+from bpy.props import BoolProperty, PointerProperty
 from . properties import M3SceneProperties
 from . utils.registration import get_core, get_tools, get_pie_menus, get_menus
 from . utils.registration import register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, add_object_specials_menu, remove_object_specials_menu
@@ -47,7 +47,6 @@ def register():
     # PROPERTIES
 
     bpy.types.Scene.M3 = PointerProperty(type=M3SceneProperties)
-
 
     # TOOLS, PIE MENUS, KEYMAPS, MENUS
 

@@ -167,6 +167,10 @@ class SmartVert(bpy.types.Operator):
 
         return {'FINISHED'}
 
+    def execute(self, context):
+        self.smart_vert(context)
+        return {'FINISHED'}
+
     def smart_vert(self, context):
         selverts = m3.get_selection("VERT")
 

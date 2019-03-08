@@ -66,12 +66,12 @@ class AlignEditMesh(bpy.types.Operator):
 
         elif type == "CURSOR":
             if local:
-                c_world = context.scene.cursor_location
+                c_world = context.scene.cursor.location
                 c_local = mx.inverted() @ c_world
                 target = c_local[axis]
 
             else:
-                target = context.scene.cursor_location[axis]
+                target = context.scene.cursor.location[axis]
 
 
         # set the new coordinates

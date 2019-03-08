@@ -28,17 +28,18 @@ class HistoryEpochCollection(bpy.types.PropertyGroup):
 
 
 class M3SceneProperties(bpy.types.PropertyGroup):
-    def update_pass_through(self, context):
+
+    def update_xray(self, context):
+        x = (self.pass_through, self.show_edit_mesh_wire)
         shading = context.space_data.shading
 
-        shading.show_xray = self.pass_through
-        shading.xray_alpha = 1 if context.active_object and context.active_object.type == "MESH" else 0.5
+        shading.show_xray = True if any(x) else False
 
-    def update_show_edit_mesh_wire(self, context):
-        shading = context.space_data.shading
+        if self.show_edit_mesh_wire:
+            shading.xray_alpha = 0.1
 
-        shading.show_xray = self.show_edit_mesh_wire
-        shading.xray_alpha = 0.1
+        elif self.pass_through:
+            shading.xray_alpha = 1 if context.active_object and context.active_object.type == "MESH" else 0.5
 
     def update_uv_sync_select(self, context):
         toolsettings = context.scene.tool_settings
@@ -65,27 +66,27 @@ class M3SceneProperties(bpy.types.PropertyGroup):
         elif t == (False, True):
             shading.cavity_type = "SCREEN"
 
-    def update_show_curvature(self, context):
-        t = (self.show_cavity, self.show_curvature)
-        shading = context.space_data.shading
+    def update_grouppro_dotnames(self, context):
+        gpcols = [col for col in bpy.data.collections if col.created_with_gp]
 
-        shading.show_cavity = True if any(t) else False
+        for col in gpcols:
+            # hide collections
+            if self.grouppro_dotnames:
+                if not col.name.startswith("."):
+                    col.name = ".%s" % col.name
 
-        if t == (True, True):
-            shading.cavity_type = "BOTH"
+            else:
+                if col.name.startswith("."):
+                    col.name = col.name[1:]
 
-        elif t == (True, False):
-            shading.cavity_type = "WORLD"
-
-        elif t == (False, True):
-            shading.cavity_type = "SCREEN"
-
-    pass_through: BoolProperty(name="Pass Through", default=False, update=update_pass_through)
-    show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_show_edit_mesh_wire)
+    pass_through: BoolProperty(name="Pass Through", default=False, update=update_xray)
+    show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_xray)
     uv_sync_select: BoolProperty(name="Synce Selection", default=False, update=update_uv_sync_select)
     eevee_gtao_factor: FloatProperty(name="Factor", default=1, min=0, update=update_eevee_gtao_factor)
 
     show_cavity: BoolProperty(name="Cavity", default=True, update=update_show_cavity)
-    show_curvature: BoolProperty(name="Curvature", default=False, update=update_show_curvature)
+    show_curvature: BoolProperty(name="Curvature", default=False, update=update_show_cavity)
 
     focus_history: CollectionProperty(type=HistoryEpochCollection)
+
+    grouppro_dotnames: BoolProperty(name=".dotname GroupPro collections", default=False, update=update_grouppro_dotnames)

@@ -21,5 +21,6 @@ keys = {"SMART_VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "mach
         "VIEWS_PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "PAGE_DOWN", "value": "PRESS", "properties": [("name", "MACHIN3_MT_views_pie")]}],
         "ALIGN_PIE": [{"keymap": "Mesh", "idname": "wm.call_menu_pie", "type": "A", "value": "PRESS", "alt": True, "properties": [("name", "MACHIN3_MT_align_pie")]}],
         "CURSOR_PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "S", "value": "PRESS", "shift": True, "properties": [("name", "MACHIN3_MT_cursor_pie")]}],
+        "COLLECTIONS_PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "C", "value": "PRESS", "shift": True, "properties": [("name", "MACHIN3_MT_collections_pie")]}],
         "WORKSPACE_PIE": [{"keymap": "Window", "idname": "wm.call_menu_pie", "type": "PAUSE", "value": "PRESS", "properties": [("name", "MACHIN3_MT_workspace_pie")]}],
         }
