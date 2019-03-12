@@ -155,7 +155,7 @@ def addon_check(string, precise=True):
 def move_to_cursor(obj, scene):
     obj.select = True
     make_active(obj)
-    obj.location = bpy.context.scene.cursor_location
+    obj.location = bpy.context.scene.cursor.location
 
 
 def lock(obj, location=True, rotation=True, scale=True):

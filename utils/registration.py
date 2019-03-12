@@ -359,6 +359,14 @@ def get_tools():
     classlists, keylists, count = get_align(classlists, keylists, count)
 
 
+    # APPLY
+    classlists, keylists, count = get_apply(classlists, keylists, count)
+
+
+    # SELECT
+    classlists, keylists, count = get_select(classlists, keylists, count)
+
+
     # CUSTOMIZE
     classlists, keylists, count = get_customize(classlists, keylists, count)
 
@@ -398,6 +406,11 @@ def get_pie_menus():
     # CURSOR
 
     classlists, keylists, count = get_cursor_pie(classlists, keylists, count)
+
+
+    # COLLECTIONS
+
+    classlists, keylists, count = get_collections_pie(classlists, keylists, count)
 
 
     # WORKSPACE
@@ -497,6 +510,23 @@ def get_align(classlists=[], keylists=[], count=0):
     return classlists, keylists, count
 
 
+def get_apply(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_apply:
+        classlists.append(classesdict["APPLY"])
+        count +=1
+
+    return classlists, keylists, count
+
+
+def get_select(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_select:
+        classlists.append(classesdict["SELECT"])
+        # keylists.append(keysdict["ALIGN"])
+        count +=1
+
+    return classlists, keylists, count
+
+
 def get_customize(classlists=[], keylists=[], count=0):
     if get_prefs().activate_customize:
         classlists.append(classesdict["CUSTOMIZE"])
@@ -562,6 +592,15 @@ def get_cursor_pie(classlists=[], keylists=[], count=0):
     if get_prefs().activate_cursor_pie:
         classlists.append(classesdict["CURSOR_PIE"])
         keylists.append(keysdict["CURSOR_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_collections_pie(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_collections_pie:
+        classlists.append(classesdict["COLLECTIONS_PIE"])
+        keylists.append(keysdict["COLLECTIONS_PIE"])
         count += 1
 
     return classlists, keylists, count

@@ -3,6 +3,7 @@ from bpy.types import Menu
 import os
 from .. utils.registration import get_prefs, get_addon
 from .. utils.ui import get_icon
+from .. utils.collection import get_scene_collections
 
 # TODO: snapping pie
 # TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
@@ -332,8 +333,17 @@ class PieModes(Menu):
 
                 elif active.type == 'EMPTY':
                     # 4 - LEFT
-                    if grouppro and active.instance_collection:
+                    if grouppro and active.instance_collection and active.instance_collection.created_with_gp and not active.instance_collection.library:
                         pie.operator("object.edit_grouppro", text="Edit Group")
+
+                    elif active.instance_collection and active.instance_collection.library:
+                        blendpath = active.instance_collection.library.filepath
+                        library = active.instance_collection.library.name
+
+                        op = pie.operator("machin3.open_collection_instance_library", text="Open %s" % (os.path.basename(blendpath)))
+                        op.blendpath = blendpath
+                        op.library = library
+
                     else:
                         pie.separator()
 
@@ -341,11 +351,11 @@ class PieModes(Menu):
                     pie.separator()
 
                     # 2 - BOTTOM
-                    if grouppro and active.instance_collection:
+                    if grouppro and active.instance_collection and active.instance_collection.created_with_gp and not active.instance_collection.library:
                         if decalmachine:
-                            pie.operator("machin3.grouppro_dissolve", text="Dissolve", icon='OUTLINER_OB_GROUP_INSTANCE')
+                            pie.operator("machin3.grouppro_dissolve", text="Dissolve", icon='OUTLINER_OB_GROUP_INSTANCE').maxDept = 0
                         else:
-                            pie.operator("object.gpro_converttogeo", icon='OUTLINER_OB_GROUP_INSTANCE')
+                            pie.operator("object.gpro_converttogeo", icon='OUTLINER_OB_GROUP_INSTANCE').maxDept = 0
                     else:
                         pie.separator()
 
@@ -577,7 +587,6 @@ class PieModes(Menu):
 
             # 3 - BOTTOM - RIGHT
             pie.separator()
-
 
     def draw_grouppro(self, context, layout, addremove=True):
         box = layout.split()
@@ -925,10 +934,11 @@ class PieShading(Menu):
                 col.operator("machin3.colorize_materials", text='着色材质', icon='MATERIAL')
 
             elif view.shading.color_type == 'OBJECT':
-                r = col.split(factor=0.2)
-                r.label(text="Colorize")
-                r.operator("machin3.colorize_objects_from_materials", text='来自材质', icon='MATERIAL')
-                r.operator("machin3.colorize_objects_from_active", text='来自活动', icon='OBJECT_DATA')
+                r = col.split(factor=0.12, align=True)
+                r.label(text="来自")
+                r.operator("machin3.colorize_objects_from_active", text='活动', icon='OBJECT_DATA')
+                r.operator("machin3.colorize_objects_from_materials", text='材质', icon='MATERIAL')
+                r.operator("machin3.colorize_objects_from_collections", text='集合', icon='OUTLINER_OB_GROUP_INSTANCE')
 
         elif view.shading.type == "MATERIAL":
 
@@ -994,9 +1004,13 @@ class PieShading(Menu):
 
         elif view.shading.type == "WIREFRAME":
             row = col.row()
-            # TODO: make the whoe scene toggle an op called by pressing X
+            # # TODO: make the whoe scene toggle an op called by pressing X
             row.prop(view.shading, "show_xray_wireframe", text="")
             row.prop(view.shading, "xray_alpha_wireframe", text="X 光")
+
+            # wireframe color type
+            row = col.row(align=True)
+            row.prop(view.shading, "wireframe_color_type", expand=True)
 
     def draw_eevee(self, context, view, col):
         icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
@@ -1092,7 +1106,7 @@ class PieViews(Menu):
 
         b = box.box()
         column = b.column()
-        self.draw_right_column(view, r3d, column)
+        self.draw_right_column(context, view, r3d, column)
 
 
         # 7 - TOP - LEFT
@@ -1175,13 +1189,31 @@ class PieViews(Menu):
         op = row.operator("machin3.view_axis", text="后视图")
         op.axis='BACK'
 
-    def draw_right_column(self, view, r3d, col):
+    def draw_right_column(self, context, view, r3d, col):
         row = col.row()
         row.scale_y = 1.5
-        text, icon = ("正交", "VIEW_ORTHO") if r3d.is_perspective else ("透视", "VIEW_PERSPECTIVE")
-        row.operator("view3d.view_persportho", text=text, icon=icon)
 
-        col.prop(view, "lens", text="焦距")
+        # CAMERA ALIGNED
+
+        if view.region_3d.view_perspective == 'CAMERA':
+            cam = context.scene.camera
+
+            text, icon = ("正交", "VIEW_ORTHO") if cam.data.type == "PERSP" else ("透视", "VIEW_PERSPECTIVE")
+            row.operator("machin3.toggle_cam_persportho", text=text, icon=icon)
+
+            if cam.data.type == "PERSP":
+                col.prop(cam.data, "lens")
+
+            elif cam.data.type == "ORTHO":
+                col.prop(cam.data, "ortho_scale")
+
+        # USER VIEW
+
+        else:
+            text, icon = ("正交", "VIEW_ORTHO") if r3d.is_perspective else ("透视", "VIEW_PERSPECTIVE")
+            row.operator("view3d.view_persportho", text=text, icon=icon)
+
+            col.prop(view, "lens")
 
 
 class PieAlign(Menu):
@@ -1320,6 +1352,352 @@ class PieCursor(Menu):
 
         # 3 - BOTTOM - RIGHT
         pie.operator("view3d.snap_selected_to_grid", text="到栅格", icon="RESTRICT_SELECT_OFF")
+
+
+class PieCollections(Menu):
+    bl_idname = "MACHIN3_MT_collections_pie"
+    bl_label = "Collections"
+
+    def draw(self, context):
+        sel = context.selected_objects
+        active = context.active_object
+
+        grouppro, _, _, _ = get_addon("Group Pro")
+        batchops, _, _, _ = get_addon("Batch Operations™")
+        decalmachine, _, _, _ = get_addon("DECALmachine")
+
+        if sel:
+            collections = list(set(col for obj in sel for col in obj.users_collection if not (decalmachine and (col.DM.isdecaltypecol or col.DM.isdecalparentcol))))[:10]
+
+            if decalmachine:
+                decalparentcollections = list(set(col for obj in sel for col in obj.users_collection if col.DM.isdecalparentcol))[:10]
+
+        else:
+            if context.scene.collection.objects:
+                collections = get_scene_collections(context.scene)[:9]
+                collections.insert(0, context.scene.collection)
+
+            else:
+                collections = get_scene_collections(context.scene)[:10]
+
+            if decalmachine:
+                decalparentcollections = [col for col in get_scene_collections(context.scene, ignore_decals=False) if col.DM.isdecalparentcol][:10]
+
+
+        if decalmachine:
+            decalsname = ".Decals" if context.scene.DM.hide_decaltype_collections else "Decals"
+            dcol = bpy.data.collections.get(decalsname)
+
+
+
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        # 4 - LEFT
+        if sel:
+            pie.operator("machin3.remove_from_collection", text="Remove from", icon="REMOVE")
+
+        else:
+            pie.separator()
+
+        # 6 - RIGHT
+        if sel:
+            pie.operator("machin3.add_to_collection", text="Add to", icon="ADD")
+
+        else:
+            pie.separator()
+
+
+        # 2 - BOTTOM
+        if sel:
+            pie.operator("machin3.move_to_collection", text="Move to")
+
+        else:
+            pie.operator("machin3.create_collection", text="Create", icon="GROUP")
+
+        # 8 - TOP
+
+        if decalmachine and (decalparentcollections or dcol):
+
+            # 1 - 1 - 1
+            if len(collections) <= 5 and len(decalparentcollections) <= 5:
+                row = pie.split(factor=0.34)
+
+            # 1 - 2 - 1
+            elif len(collections) > 5 and len(decalparentcollections) <= 5:
+                row = pie.split(factor=0.25)
+                row.scale_x = 0.8
+
+            # 1 - 1 - 2
+            elif len(collections) <= 5 and len(decalparentcollections) > 5:
+                row = pie.split(factor=0.25)
+                row.scale_x = 0.8
+
+            # 1 - 2 - 2
+            else:
+                row = pie.split(factor=0.20)
+                row.scale_x = 0.8
+
+        else:
+            # 1 - 1
+            if len(collections) <= 5:
+                row = pie.split(factor=0.5)
+                row.scale_x = 1.5
+
+            # 1 - 2
+            elif len(collections) > 5:
+                row = pie.split(factor=0.33)
+                row.scale_x = 0.8
+
+
+        # LEFT
+
+        column = row.column()
+
+        box = column.box()
+        self.draw_left_top_column(context, box)
+
+        if grouppro:
+            box = column.box()
+            self.draw_left_bottom_column(context, box)
+
+
+        # MIDDLE
+
+        if decalmachine and (decalparentcollections or dcol):
+
+            # 1 - 1 - 1
+            if len(collections) <= 5 and len(decalparentcollections) <= 5:
+                r = row.split(factor=0.5)
+
+            # 1 - 2 - 1
+            elif len(collections) > 5 and len(decalparentcollections) <= 5:
+                r = row.split(factor=0.66)
+
+            # 1 - 1 - 2
+            elif len(collections) <= 5 and len(decalparentcollections) > 5:
+                r = row.split(factor=0.33)
+
+            # 1 - 2 - 2
+            else:
+                r = row.split(factor=0.5)
+
+
+        else:
+            r = row
+
+        box = r.box()
+        self.draw_center_column(context, batchops, sel, collections, box)
+
+
+        # RIGHT
+
+        if decalmachine and (decalparentcollections or dcol):
+
+            column = r.column()
+
+            # decal parent collections
+
+            if decalparentcollections:
+                box = column.box()
+                self.draw_right_top_column(context, batchops, sel, decalparentcollections, box)
+
+            # decal type collections
+
+            if dcol and dcol.DM.isdecaltypecol:
+                box = column.box()
+                self.draw_right_bottom_column(context, box)
+
+
+        # 7 - TOP - LEFT
+        pie.separator()
+
+        # 9 - TOP - RIGHT
+        pie.separator()
+
+        # 1 - BOTTOM - LEFT
+        pie.separator()
+
+        # 3 - BOTTOM - RIGHT
+        pie.separator()
+
+    def draw_left_top_column(self, context, layout):
+        column = layout.column()
+
+        row = column.row()
+        row.scale_y = 1.5
+        row.operator("machin3.purge_collections", text="Purge", icon='MONKEY')
+
+    def draw_left_bottom_column(self, context, layout):
+        m3 = context.scene.M3
+
+        column = layout.column()
+
+        column.label(text="GroupPro")
+
+        row = column.row()
+        row.prop(m3, "grouppro_dotnames", text=".hide", icon_only=True)
+        row.operator("object.gpro_cleanup", text="Cleanup")
+
+        row = column.row()
+        row.operator("machin3.sort_grouppro_groups", text="Sort Groups")
+
+    def draw_center_column(self, context, batchops, sel, collections, layout):
+        if sel:
+            layout.label(text="Scene Collections (Selection)")
+
+        else:
+            layout.label(text="Scene Collections")
+
+        if len(collections) <= 5:
+            column = layout.column(align=True)
+
+            for col in collections:
+                row = column.row(align=True)
+
+                # regular collections are drawn as a button
+                if col.children or col.objects:
+                    icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
+                    row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+
+                # empty collections are drawn as text
+                else:
+                    row.label(text=col.name)
+
+                if batchops and col != context.scene.collection:
+                    row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
+
+        else:
+            layout.scale_x = 2
+
+            cols1 = collections[:5]
+            cols2 = collections[5:10]
+
+            split = layout.split(factor=0.5)
+            column = split.column(align=True)
+
+            for col in cols1:
+                row = column.row(align=True)
+                if col.children or col.objects:
+                    icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
+                    row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                else:
+                    row.label(text=col.name)
+
+                if batchops:
+                    row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
+
+            column = split.column(align=True)
+
+            for col in cols2:
+                row = column.row(align=True)
+                if col.children or col.objects:
+                    icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
+                    row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                else:
+                    row.label(text=col.name)
+
+                if batchops:
+                    row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
+
+    def draw_right_top_column(self, context, batchops, sel, collections, layout):
+        if sel:
+            layout.label(text="Decal Parent Collections (Selection)")
+
+        else:
+            layout.label(text="Decal Parent Collections")
+
+
+        if len(collections) <= 5:
+            column = layout.column(align=True)
+
+            for col in collections:
+                row = column.row(align=True)
+
+                # regular collections are drawn as a button
+                if col.children or col.objects:
+                    icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
+                    row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+
+                # empty collections are drawn as text
+                else:
+                    row.label(text=col.name)
+
+                if batchops:
+                    row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
+
+        else:
+            layout.scale_x = 2
+
+            cols1 = collections[:5]
+            cols2 = collections[5:10]
+
+            split = layout.split(factor=0.5)
+            column = split.column(align=True)
+
+            for col in cols1:
+                row = column.row(align=True)
+                if col.children or col.objects:
+                    icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
+                    row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                else:
+                    row.label(text=col.name)
+
+                if batchops:
+                    row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
+
+            column = split.column(align=True)
+
+            for col in cols2:
+                row = column.row(align=True)
+                if col.children or col.objects:
+                    icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
+                    row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                else:
+                    row.label(text=col.name)
+
+                if batchops:
+                    row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
+
+    def draw_right_bottom_column(self, context, layout):
+        layout.label(text="Decal Type Collections")
+
+        row = layout.row(align=True)
+
+        decalsname = ".Decals" if context.scene.DM.hide_decaltype_collections else "Decals"
+        simplename = ".Simple" if context.scene.DM.hide_decaltype_collections else "Simple"
+        subsetname = ".Subset" if context.scene.DM.hide_decaltype_collections else "Subset"
+        infoname = ".Info" if context.scene.DM.hide_decaltype_collections else "Info"
+        panelname = ".Panel" if context.scene.DM.hide_decaltype_collections else "Panel"
+
+        op = row.operator("machin3.select_collection", text="Decals")
+        op.name = decalsname
+        op.force_all = True
+
+        simple = bpy.data.collections.get(simplename)
+        subset = bpy.data.collections.get(subsetname)
+        info = bpy.data.collections.get(infoname)
+        panel = bpy.data.collections.get(panelname)
+
+        if simple and simple.DM.isdecaltypecol and simple.objects:
+            row.operator("machin3.select_collection", text="Simple").name = simplename
+        else:
+            row.label(text="Simple")
+
+        if subset and subset.DM.isdecaltypecol and subset.objects:
+            row.operator("machin3.select_collection", text="Subset").name = subsetname
+        else:
+            row.label(text="Subset")
+
+        if info and info.DM.isdecaltypecol and info.objects:
+            row.operator("machin3.select_collection", text="Info").name = infoname
+        else:
+            row.label(text="Info")
+
+        if panel and panel.DM.isdecaltypecol and panel.objects:
+            row.operator("machin3.select_collection", text="Panel").name = panelname
+        else:
+            row.label(text="Panel")
 
 
 class PieWorkspace(Menu):

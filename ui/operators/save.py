@@ -6,6 +6,7 @@ import re
 import time
 from ... utils.registration import get_prefs
 from ... utils.append import append_material, append_world
+from ... utils.system import add_path_to_recent_files
 from ... utils import MACHIN3 as m3
 
 
@@ -64,13 +65,16 @@ class SaveIncremental(bpy.types.Operator):
         currentblend = bpy.data.filepath
 
         if currentblend:
-            incrblend = self.get_incremented_path(currentblend)
+            save_path = self.get_incremented_path(currentblend)
 
-            if os.path.exists(incrblend):
-                self.report({'ERROR'}, "File '%s' exists already!\nBlend has NOT been saved incrementally!" % (incrblend))
+            # add it to the recent files list
+            add_path_to_recent_files(save_path)
+
+            if os.path.exists(save_path):
+                self.report({'ERROR'}, "File '%s' exists already!\nBlend has NOT been saved incrementally!" % (save_path))
             else:
-                bpy.ops.wm.save_as_mainfile(filepath=incrblend)
-                print("Saved blend incrementally:", incrblend)
+                bpy.ops.wm.save_as_mainfile(filepath=save_path)
+                print("Saved blend incrementally:", save_path)
         else:
             bpy.ops.wm.save_mainfile('INVOKE_DEFAULT')
 
@@ -295,15 +299,8 @@ class LoadPrevious(bpy.types.Operator):
                 loadpath = os.path.join(currentpath, previousblend)
 
                 # add the path to the recent files list, for some reason it's not done automatically
-                try:
-                    recent_path = bpy.utils.user_resource('CONFIG', "recent-files.txt")
-                    with open(recent_path, "r+") as f:
-                        content = f.read()
-                        f.seek(0, 0)
-                        f.write(loadpath.rstrip('\r\n') + '\n' + content)
+                add_path_to_recent_files(loadpath)
 
-                except (IOError, OSError, FileNotFoundError):
-                    pass
 
                 print("Loading blend file %d/%d: %s" % (previousidx + 1, len(blendfiles), previousblend))
                 bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)
@@ -344,15 +341,7 @@ class LoadNext(bpy.types.Operator):
                 loadpath = os.path.join(currentpath, nextblend)
 
                 # add the path to the recent files list, for some reason it's not done automatically
-                try:
-                    recent_path = bpy.utils.user_resource('CONFIG', "recent-files.txt")
-                    with open(recent_path, "r+") as f:
-                        content = f.read()
-                        f.seek(0, 0)
-                        f.write(loadpath.rstrip('\r\n') + '\n' + content)
-
-                except (IOError, OSError, FileNotFoundError):
-                    pass
+                add_path_to_recent_files(loadpath)
 
                 print("Loading blend file %d/%d: %s" % (nextidx + 1, len(blendfiles), nextblend))
                 bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)

@@ -1,8 +1,7 @@
 import bpy
 from bpy.props import StringProperty
 from ... utils.registration import get_prefs
-from ... utils import MACHIN3 as m3
-
+from ... utils.view import set_xray, reset_xray
 
 
 user_cavity = True
@@ -15,11 +14,13 @@ class EditMode(bpy.types.Operator):
 
     def execute(self, context):
         global user_cavity
+
         shading = context.space_data.shading
         toggle_cavity = get_prefs().toggle_cavity
 
-
         if context.mode == "OBJECT":
+            set_xray(context)
+
             bpy.ops.object.mode_set(mode="EDIT")
 
             if toggle_cavity:
@@ -28,12 +29,7 @@ class EditMode(bpy.types.Operator):
 
 
         elif context.mode == "EDIT_MESH":
-            scene = context.scene
-
-            # reset xray
-            scene.M3.pass_through = False
-            scene.M3.show_edit_mesh_wire = False
-            shading.xray_alpha = 0.5
+            reset_xray(context)
 
             bpy.ops.object.mode_set(mode="OBJECT")
 
@@ -56,6 +52,8 @@ class VertexMode(bpy.types.Operator):
         toggle_cavity = get_prefs().toggle_cavity
 
         if context.mode == "OBJECT":
+            set_xray(context)
+
             bpy.ops.object.mode_set(mode="EDIT")
 
             if toggle_cavity:
@@ -81,6 +79,8 @@ class EdgeMode(bpy.types.Operator):
         toggle_cavity = get_prefs().toggle_cavity
 
         if context.mode == "OBJECT":
+            set_xray(context)
+
             bpy.ops.object.mode_set(mode="EDIT")
 
             if toggle_cavity:
@@ -107,6 +107,8 @@ class FaceMode(bpy.types.Operator):
         toggle_cavity = get_prefs().toggle_cavity
 
         if context.mode == "OBJECT":
+            set_xray(context)
+
             bpy.ops.object.mode_set(mode="EDIT")
 
             if toggle_cavity:

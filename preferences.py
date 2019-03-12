@@ -27,7 +27,7 @@ links = [("Documentation", "https://machin3.io/MACHIN3tools/docs/", "INFO"),
          ]
 
 
-# TODO: check if the aeppend world/materials paths exist and make them abosolute
+# TODO: check if the append world/materials paths exist and make them abosolute
 
 
 class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
@@ -114,6 +114,12 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_align(self, context):
         activate(self, register=self.activate_align, tool="align")
 
+    def update_activate_apply(self, context):
+        activate(self, register=self.activate_align, tool="apply")
+
+    def update_activate_select(self, context):
+        activate(self, register=self.activate_select, tool="select")
+
     def update_activate_customize(self, context):
         activate(self, register=self.activate_customize, tool="customize")
 
@@ -136,6 +142,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     def update_activate_cursor_pie(self, context):
         activate(self, register=self.activate_cursor_pie, tool="cursor_pie")
+
+    def update_activate_collections_pie(self, context):
+        activate(self, register=self.activate_collections_pie, tool="collections_pie")
 
     def update_activate_workspace_pie(self, context):
         activate(self, register=self.activate_workspace_pie, tool="workspace_pie")
@@ -184,6 +193,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_focus: BoolProperty(name="聚焦", default=True, update=update_activate_focus)
     activate_mirror: BoolProperty(name="镜射", default=True, update=update_activate_mirror)
     activate_align: BoolProperty(name="对齐", default=True, update=update_activate_align)
+    activate_apply: BoolProperty(name="应用", default=True, update=update_activate_apply)
+    activate_select: BoolProperty(name="选择", default=True, update=update_activate_select)
     activate_customize: BoolProperty(name="自定义", default=False, update=update_activate_customize)
 
 
@@ -195,6 +206,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_views_pie: BoolProperty(name="视图 的饼菜单", default=True, update=update_activate_views_pie)
     activate_align_pie: BoolProperty(name="对齐 的饼菜单", default=True, update=update_activate_align_pie)
     activate_cursor_pie: BoolProperty(name="游标 的饼菜单", default=True, update=update_activate_cursor_pie)
+    activate_collections_pie: BoolProperty(name="集合 的饼菜单", default=True, update=update_activate_collections_pie)
     activate_workspace_pie: BoolProperty(name="工作区 的饼菜单", default=False, update=update_activate_workspace_pie)
 
 
@@ -280,6 +292,14 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row.label(text="物体每个轴的位置、旋转和比例对齐。")
 
         row = column.split(factor=0.25)
+        row.prop(self, "activate_apply", toggle=True)
+        row.label(text="应用转换同时保持斜角宽度以及子转换不变。")
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_select", toggle=True)
+        row.label(text="选择助手。")
+
+        row = column.split(factor=0.25)
         row.prop(self, "activate_customize", toggle=True)
         row.label(text="自定义各种 Blender 首选项，设置和键盘映射。")
 
@@ -313,7 +333,11 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_cursor_pie", toggle=True)
-        row.label(text="游标相关。")
+        row.label(text="游标和原心操作。")
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_collections_pie", toggle=True)
+        row.label(text="集合管理。")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_workspace_pie", toggle=True)
@@ -339,6 +363,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         b = split.box()
         b.label(text="设置")
 
+        # CUSTOMIZE
 
         if getattr(bpy.types, "MACHIN3_OT_customize", False):
             bb = b.box()
@@ -379,7 +404,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             row = column.row()
 
             row.label()
-            row.operator("machin3.customize")
+            row.operator("machin3.customize", text="Customize")
             row.label()
 
 

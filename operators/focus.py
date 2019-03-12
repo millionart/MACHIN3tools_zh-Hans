@@ -38,7 +38,7 @@ class Focus(bpy.types.Operator):
 
         # local view
         if self.mode == "LOCALVIEW":
-            bpy.ops.view3d.localview()
+            bpy.ops.view3d.localview(frame_selected=False)
 
         # focus
         elif self.mode == "FOCUS":
