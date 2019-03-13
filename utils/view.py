@@ -17,3 +17,12 @@ def reset_xray(context):
 
     shading.show_xray = False
     shading.xray_alpha = 0.5
+
+
+def update_local_view(space_data, states):
+    """
+    states: list of (obj, bool) tuples, True being in local view, False being out
+    """
+    if space_data.local_view:
+        for obj, local in states:
+            obj.local_view_set(space_data, local)

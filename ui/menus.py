@@ -3,8 +3,8 @@ from .. utils.registration import get_prefs
 
 
 
-class MenuMACHIN3toolsObjectSpecials(bpy.types.Menu):
-    bl_idname = "MACHIN3_MT_machin3tools_object_specials"
+class MenuMACHIN3toolsObjectContextMenu(bpy.types.Menu):
+    bl_idname = "MACHIN3_MT_machin3tools_object_context_menu"
     bl_label = "MACHIN3tools"
 
     def draw(self, context):

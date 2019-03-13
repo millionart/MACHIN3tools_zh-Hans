@@ -115,7 +115,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         activate(self, register=self.activate_align, tool="align")
 
     def update_activate_apply(self, context):
-        activate(self, register=self.activate_align, tool="apply")
+        activate(self, register=self.activate_apply, tool="apply")
 
     def update_activate_select(self, context):
         activate(self, register=self.activate_select, tool="select")
@@ -152,8 +152,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     # RUNTIME MENU ACTIVATION
 
-    def update_activate_object_specials_menu(self, context):
-        activate(self, register=self.activate_object_specials_menu, tool="object_specials_menu")
+    def update_activate_object_context_menu(self, context):
+        activate(self, register=self.activate_object_context_menu, tool="object_context_menu")
 
 
     # PROPERTIES
@@ -211,7 +211,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
 
     # MACHIN3menus
-    activate_object_specials_menu: BoolProperty(name="Object Specials Menu", default=True, update=update_activate_object_specials_menu)
+    activate_object_context_menu: BoolProperty(name="Object Context Menu", default=True, update=update_activate_object_context_menu)
 
 
     # hidden
@@ -354,8 +354,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         column = bb.column()
 
         row = column.split(factor=0.25)
-        row.prop(self, "activate_object_specials_menu", toggle=True)
-        row.label(text="Object Specials, access tools, that aren't keymapped.")
+        row.prop(self, "activate_object_context_menu", toggle=True)
+        row.label(text="Object Context Menu, access tools, that aren't keymapped.")
 
 
         # RIGHT
