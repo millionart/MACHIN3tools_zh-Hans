@@ -88,6 +88,6 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
            "WORKSPACE_PIE": [("ui.pies", [("PieWorkspace", "workspace_pie")]),
                              ("ui.operators.switch_workspace", [("SwitchWorkspace", "switch_workspace")])],
 
-           "OBJECT_SPECIALS_MENU": [("ui.menus", [("MenuMACHIN3toolsObjectSpecials", "machin3tools_object_specials")])],
+           "OBJECT_CONTEXT_MENU": [("ui.menus", [("MenuMACHIN3toolsObjectContextMenu", "machin3tools_object_context_menu")])],
 
            }

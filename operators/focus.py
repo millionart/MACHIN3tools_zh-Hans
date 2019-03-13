@@ -53,14 +53,18 @@ class Focus(bpy.types.Operator):
             elif history:
                 self.unfocus(context, history)
 
-            # for epoch in history:
-                # print(epoch.name, ", hidden: ", [obj.name for obj in epoch.objects], ", unmirrored: ", [obj.name for obj in epoch.unmirrored])
+            print()
+            for epoch in history:
+                print(epoch.name, ", hidden: ", [obj.name for obj in epoch.objects], ", unmirrored: ", [obj.name for obj in epoch.unmirrored])
+
 
         return {'FINISHED'}
 
     def focus(self, context, sel, history):
         hidden = []
         visible = context.visible_objects
+
+        print("visible objects:", [obj.name for obj in visible])
 
         # hide objects not in the selection (and not already hidden)
 
@@ -83,7 +87,7 @@ class Focus(bpy.types.Operator):
                 entry.name = obj.name
 
             # disable mirror mods and store these unmirrored objects
-
+            """
             if self.unmirror:
                 for obj in sel:
                     mirrored = [(obj, mod) for mod in obj.modifiers if mod.type == "MIRROR"]
@@ -95,11 +99,14 @@ class Focus(bpy.types.Operator):
                             entry = epoch.unmirrored.add()
                             entry.obj = mobj
                             entry.name = mobj.name
+            """
 
             # view selected
 
+        """
         if self.view_selected:
             bpy.ops.view3d.view_selected()
+        # """
 
     def unfocus(self, context, history):
         selected = []
@@ -107,17 +114,20 @@ class Focus(bpy.types.Operator):
 
         # for view_selected, select visible objects
 
+        """
         if self.view_selected:
 
             for obj in visible:
                 obj.select_set(True)
                 selected.append(obj)
+        # """
 
         last_epoch = history[-1]
 
         # restore hidden objects and select them
 
         for entry in last_epoch.objects:
+            print(entry)
             entry.obj.hide_viewport = False
 
             if self.view_selected:
@@ -126,11 +136,13 @@ class Focus(bpy.types.Operator):
 
         # re-enbable mirror mods
 
+        """
         if self.unmirror:
             for entry in last_epoch.unmirrored:
                 for mod in entry.obj.modifiers:
                     if mod.type == "MIRROR":
                         mod.show_viewport = True
+        # """
 
         # delete the last epoch
 
@@ -140,8 +152,10 @@ class Focus(bpy.types.Operator):
 
         # view selected and deselect everythng
 
+        """
         if self.view_selected:
             bpy.ops.view3d.view_selected()
 
             for obj in selected:
                 obj.select_set(False)
+        # """

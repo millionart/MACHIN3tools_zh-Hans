@@ -32,12 +32,12 @@ class Apply(bpy.types.Operator):
         if any([self.rotation, self.scale]):
             decalmachine, _, _, _ = get_addon("DECALmachine")
 
-            parents = [obj for obj in context.selected_objects if not obj.parent]
+            parents = [obj for obj in context.selected_objects if obj.children]
 
             for obj in parents:
 
                 # fetch children and their current world mx
-                children = [(child, child.matrix_world) for child in bpy.data.objects if child.parent == obj]
+                children = [(child, child.matrix_world) for child in obj.children]
 
                 mx = obj.matrix_world
                 loc, rot, sca = mx.decompose()

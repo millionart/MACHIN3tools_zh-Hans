@@ -9,6 +9,10 @@ from .. utils.collection import get_scene_collections
 # TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
 # TODO: eevee presets
 
+# TODO: origin to selection
+# TODO: origin to bbox top, bottom, etc
+
+
 
 class PieModes(Menu):
     bl_idname = "MACHIN3_MT_modes_pie"

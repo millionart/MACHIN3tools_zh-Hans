@@ -4,7 +4,6 @@ import os
 from . import MACHIN3 as m3
 from .. keys import keys as keysdict
 from .. classes import classes as classesdict
-# from .. ui.menus import object_specials_menu
 
 
 
@@ -200,19 +199,19 @@ def unregister_icons(icons):
 
 # SPECIALS MENU ADDITION
 
-def object_specials_menu(self, context):
-    self.layout.menu("MACHIN3_MT_machin3tools_object_specials")
+def object_context_menu(self, context):
+    self.layout.menu("MACHIN3_MT_machin3tools_object_context_menu")
     self.layout.separator()
 
 
-def add_object_specials_menu(runtime=False):
-    if get_prefs().activate_object_specials_menu or runtime:
-        bpy.types.VIEW3D_MT_object_specials.prepend(object_specials_menu)
+def add_object_context_menu(runtime=False):
+    if get_prefs().activate_object_context_menu or runtime:
+        bpy.types.VIEW3D_MT_object_context_menu.prepend(object_context_menu)
 
 
-def remove_object_specials_menu(runtime=False):
-    # if get_prefs().activate_object_specials_menu or runtime:
-    bpy.types.VIEW3D_MT_object_specials.remove(object_specials_menu)
+def remove_object_context_menu(runtime=False):
+    # if get_prefs().activate_object_context_menu or runtime:
+    bpy.types.VIEW3D_MT_object_context_menu.remove(object_context_menu)
 
 
 # RUNTIME TOOL (DE)ACTIVATION
@@ -262,8 +261,8 @@ def activate(self, register, tool):
 
         # MENU ADDITION
 
-        if tool == "object_specials_menu":
-            add_object_specials_menu(runtime=True)
+        if tool == "object_context_menu":
+            add_object_context_menu(runtime=True)
 
 
     # UN-REGISTER
@@ -311,8 +310,8 @@ def activate(self, register, tool):
 
         # MENU REMOVAL
 
-        if tool == "object_specials_menu":
-            remove_object_specials_menu(runtime=True)
+        if tool == "object_context_menu":
+            remove_object_context_menu(runtime=True)
 
 
 # GET CORE, TOOLS and PIES - CLASSES and KEYMAPS - for startup registration
@@ -425,9 +424,9 @@ def get_menus():
     keylists = []
     count = 0
 
-    # OBJECT SPECIALS
+    # OBJECT CONTEXT MENU
 
-    classlists, keylists, count = get_object_specials_menu(classlists, keylists, count)
+    classlists, keylists, count = get_object_context_menu(classlists, keylists, count)
 
     return classlists, keylists, count
 
@@ -617,9 +616,9 @@ def get_workspace_pie(classlists=[], keylists=[], count=0):
 
 # GET OBJECT SPECIALS MENU
 
-def get_object_specials_menu(classlists=[], keylists=[], count=0):
-    if get_prefs().activate_object_specials_menu:
-        classlists.append(classesdict["OBJECT_SPECIALS_MENU"])
+def get_object_context_menu(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_object_context_menu:
+        classlists.append(classesdict["OBJECT_CONTEXT_MENU"])
         count += 1
 
     return classlists, keylists, count
