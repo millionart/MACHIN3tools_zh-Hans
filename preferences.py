@@ -115,7 +115,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         activate(self, register=self.activate_align, tool="align")
 
     def update_activate_apply(self, context):
-        activate(self, register=self.activate_align, tool="apply")
+        activate(self, register=self.activate_apply, tool="apply")
 
     def update_activate_select(self, context):
         activate(self, register=self.activate_select, tool="select")

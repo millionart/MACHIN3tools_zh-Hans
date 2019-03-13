@@ -1,7 +1,6 @@
 import bpy
 from bpy.props import BoolProperty, EnumProperty
 from .. utils.view import update_local_view
-from .. utils import MACHIN3 as m3
 
 
 levels_items = [("SINGLE", "Single", ""),
