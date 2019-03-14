@@ -115,7 +115,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         activate(self, register=self.activate_align, tool="align")
 
     def update_activate_apply(self, context):
-        activate(self, register=self.activate_align, tool="apply")
+        activate(self, register=self.activate_apply, tool="apply")
 
     def update_activate_select(self, context):
         activate(self, register=self.activate_select, tool="select")
@@ -152,8 +152,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     # RUNTIME MENU ACTIVATION
 
-    def update_activate_object_specials_menu(self, context):
-        activate(self, register=self.activate_object_specials_menu, tool="object_specials_menu")
+    def update_activate_object_context_menu(self, context):
+        activate(self, register=self.activate_object_context_menu, tool="object_context_menu")
 
 
     # PROPERTIES
@@ -170,7 +170,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     switchmatcap2: StringProperty(name="材质捕获 2", update=update_switchmatcap2)
 
     obj_mode_rotate_around_active: BoolProperty(name="围绕选择项旋转，但只在物体模式下", default=False)
-    toggle_cavity: BoolProperty(name="切换 空腔/曲率 在编辑模式下禁用 在物体模式下启用", default=True)
+    toggle_cavity: BoolProperty(name="切换 空腔 / 曲率 在编辑模式下禁用 在物体模式下启用", default=True)
 
     custom_theme: BoolProperty(name="主题", default=True)
     custom_matcaps: BoolProperty(name="材质捕获 (Matcaps) 和默认着色", default=True)
@@ -211,7 +211,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
 
     # MACHIN3menus
-    activate_object_specials_menu: BoolProperty(name="物体特别菜单", default=True, update=update_activate_object_specials_menu)
+    activate_object_context_menu: BoolProperty(name="对象上下文菜单", default=True, update=update_activate_object_context_menu)
 
 
     # hidden
@@ -321,7 +321,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_shading_pie", toggle=True)
-        row.label(text="控制着色，遮罩，eevee 和一些对象属性。")
+        row.label(text="控制着色，遮罩，EEVEE 和一些对象属性。")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_views_pie", toggle=True)
@@ -354,8 +354,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         column = bb.column()
 
         row = column.split(factor=0.25)
-        row.prop(self, "activate_object_specials_menu", toggle=True)
-        row.label(text="物体特殊，访问工具，没有键盘映射。")
+        row.prop(self, "activate_object_context_menu", toggle=True)
+        row.label(text="没有键盘映射的 对象上下文菜单，访问工具。")
 
 
         # RIGHT
@@ -486,7 +486,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         split = box.split()
 
         b = split.box()
-        b.label(text="Tools")
+        b.label(text="工具")
 
         if not self.draw_tool_keymaps(kc, keys, b):
             b.label(text="没有可用的键盘映射，因为没有激活任何工具。")

@@ -20,7 +20,7 @@ Copyright (C) 2016-2018 MACHIN3, machin3.io, support@machin3.io
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, 7),
+    "version": (0, 3, 8),
     "blender": (2, 80, 0),
     "location": "",
     "description": "简化 Blender 2.80.",
@@ -30,10 +30,10 @@ bl_info = {
 
 
 import bpy
-from bpy.props import BoolProperty, PointerProperty
+from bpy.props import PointerProperty
 from . properties import M3SceneProperties
 from . utils.registration import get_core, get_tools, get_pie_menus, get_menus
-from . utils.registration import register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, add_object_specials_menu, remove_object_specials_menu
+from . utils.registration import register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, add_object_context_menu, remove_object_context_menu
 
 
 def register():
@@ -57,7 +57,7 @@ def register():
     classes = register_classes(tool_classlists + pie_classlists + menu_classlists) + core_classes
     keymaps = register_keymaps(tool_keylists + pie_keylists + menu_keylists)
 
-    add_object_specials_menu()
+    add_object_context_menu()
 
 
     # ICONS
@@ -67,7 +67,7 @@ def register():
 
     # REGISTRATION OUTPUT
 
-    print("Registered %s %s with %d %s, %d pie %s and %s special %s" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, "tool" if tool_count == 1 else "tools", pie_count, "menu" if pie_count == 1 else "menus", menu_count, "menu" if menu_count == 1 else "menus"))
+    print("Registered %s %s with %d %s, %d pie %s and %s context %s" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, "tool" if tool_count == 1 else "tools", pie_count, "menu" if pie_count == 1 else "menus", menu_count, "menu" if menu_count == 1 else "menus"))
 
 
 def unregister():
@@ -75,7 +75,7 @@ def unregister():
 
     # TOOLS, PIE MENUS, KEYMAPS, MENUS
 
-    remove_object_specials_menu()
+    remove_object_context_menu()
 
     unregister_keymaps(keymaps)
     unregister_classes(classes)

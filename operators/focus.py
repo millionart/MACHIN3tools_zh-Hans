@@ -1,10 +1,12 @@
 import bpy
 from bpy.props import BoolProperty, EnumProperty
-from .. utils import MACHIN3 as m3
+from .. utils.view import update_local_view
 
 
-mode_items = [("FOCUS", "Focus", ""),
-              ("LOCALVIEW", "Local View", "")]
+levels_items = [("SINGLE", "Single", ""),
+                ("MULTIPLE", "Multiple", "")]
+
+# TODO: option to to it for all views? possible?
 
 
 class Focus(bpy.types.Operator):
@@ -12,9 +14,7 @@ class Focus(bpy.types.Operator):
     bl_label = "MACHIN3: 聚焦"
     bl_options = {'REGISTER', 'UNDO'}
 
-    mode: EnumProperty(name="Mode", items=mode_items, default="FOCUS")
-
-    view_selected: BoolProperty(name="查看选中项", default=True)
+    levels: EnumProperty(name="多级", items=levels_items, description="在单级 Blender 原生本地视图和多级 MACHIN3 聚焦之间切换", default="MULTIPLE")
     unmirror: BoolProperty(name="非镜像", default=True)
 
     def draw(self, context):
@@ -22,126 +22,124 @@ class Focus(bpy.types.Operator):
 
         column = layout.column()
 
-        row = column.row()
-        row.prop(self, "mode", expand=True)
-
-        if self.mode == "FOCUS":
+        # only show tool props when initializing local view
+        # this prevents switching modes and settings while in local view
+        if self.show_tool_props:
             row = column.row()
-            row.prop(self, "view_selected")
-            row.prop(self, "unmirror")
+            row.label(text="Levels")
+            row.prop(self, "levels", expand=True)
+
+            column.prop(self, "unmirror")
 
     @classmethod
     def poll(cls, context):
         return context.mode == "OBJECT"
 
     def execute(self, context):
+        view = context.space_data
+        self.show_tool_props = False
 
-        # local view
-        if self.mode == "LOCALVIEW":
+        sel = context.selected_objects
+        vis = context.visible_objects
+
+        # blender native local view
+        if self.levels == "SINGLE":
+            if self.unmirror:
+                if view.local_view:
+                    mirrored = [(obj, mod) for obj in vis for mod in obj.modifiers if mod.type == "MIRROR"]
+
+                else:
+                    mirrored = [(obj, mod) for obj in sel for mod in obj.modifiers if mod.type == "MIRROR"]
+
+                for obj, mod in mirrored:
+                    mod.show_viewport = True if view.local_view else False
+
+
+            if not view.local_view:
+                self.show_tool_props = True
+
             bpy.ops.view3d.localview(frame_selected=False)
 
-        # focus
-        elif self.mode == "FOCUS":
+
+        # multi level local view
+        else:
             history = context.scene.M3.focus_history
 
-            sel = context.selected_objects
+            # already in local view
+            if view.local_view:
 
-            if sel:
-                self.focus(context, sel, history)
+                # go deeper
+                if context.selected_objects:
+                    self.focus(context, view, sel, history)
 
+                # go higher
+                else:
+                    self.unfocus(context, view, history)
 
-            elif history:
-                self.unfocus(context, history)
+            # initialize local view
+            elif context.selected_objects:
+                self.show_tool_props = True
+                self.focus(context, view, sel, history, init=True)
+
 
             # for epoch in history:
                 # print(epoch.name, ", hidden: ", [obj.name for obj in epoch.objects], ", unmirrored: ", [obj.name for obj in epoch.unmirrored])
 
         return {'FINISHED'}
 
-    def focus(self, context, sel, history):
-        hidden = []
-        visible = context.visible_objects
-
-        # hide objects not in the selection (and not already hidden)
-
-        for obj in visible:
-            if obj not in sel:
-                hidden.append(obj)
-                obj.hide_viewport = True
-
-        # create new epoch, if objects were hidden
+    def focus(self, context, view, sel, history, init=False):
+        vis = context.visible_objects
+        hidden = [obj for obj in vis if obj not in sel]
 
         if hidden:
+            # initialize
+            if init:
+                bpy.ops.view3d.localview(frame_selected=False)
+
+            # hide
+            else:
+                update_local_view(view, [(obj, False) for obj in hidden])
+
+            # create new epoch
             epoch = history.add()
             epoch.name = "Epoch %d" % (len(history) - 1)
 
-            # store hidden objects
-
+            # store hidden objects in epoch
             for obj in hidden:
                 entry = epoch.objects.add()
                 entry.obj = obj
                 entry.name = obj.name
 
             # disable mirror mods and store these unmirrored objects
-
             if self.unmirror:
-                for obj in sel:
-                    mirrored = [(obj, mod) for mod in obj.modifiers if mod.type == "MIRROR"]
+                mirrored = [(obj, mod) for obj in sel for mod in obj.modifiers if mod.type == "MIRROR"]
 
-                    for mobj, mod in mirrored:
-                        if mod.show_viewport:
-                            mod.show_viewport = False
+                for obj, mod in mirrored:
+                    if mod.show_viewport:
+                        mod.show_viewport = False
 
-                            entry = epoch.unmirrored.add()
-                            entry.obj = mobj
-                            entry.name = mobj.name
+                        entry = epoch.unmirrored.add()
+                        entry.obj = obj
+                        entry.name = obj.name
 
-            # view selected
-
-        if self.view_selected:
-            bpy.ops.view3d.view_selected()
-
-    def unfocus(self, context, history):
-        selected = []
-        visible = context.visible_objects
-
-        # for view_selected, select visible objects
-
-        if self.view_selected:
-
-            for obj in visible:
-                obj.select_set(True)
-                selected.append(obj)
-
+    def unfocus(self, context, view, history):
         last_epoch = history[-1]
 
-        # restore hidden objects and select them
+        # de-inititalize
+        if len(history) == 1:
+            bpy.ops.view3d.localview(frame_selected=False)
 
-        for entry in last_epoch.objects:
-            entry.obj.hide_viewport = False
-
-            if self.view_selected:
-                entry.obj.select_set(True)
-                selected.append(entry.obj)
+        # unhide
+        else:
+            update_local_view(view, [(entry.obj, True) for entry in last_epoch.objects])
 
         # re-enbable mirror mods
+        for entry in last_epoch.unmirrored:
+            for mod in entry.obj.modifiers:
+                if mod.type == "MIRROR":
+                    mod.show_viewport = True
 
-        if self.unmirror:
-            for entry in last_epoch.unmirrored:
-                for mod in entry.obj.modifiers:
-                    if mod.type == "MIRROR":
-                        mod.show_viewport = True
 
         # delete the last epoch
-
         idx = history.keys().index(last_epoch.name)
-
         history.remove(idx)
-
-        # view selected and deselect everythng
-
-        if self.view_selected:
-            bpy.ops.view3d.view_selected()
-
-            for obj in selected:
-                obj.select_set(False)

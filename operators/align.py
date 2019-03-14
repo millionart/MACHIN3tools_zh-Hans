@@ -2,14 +2,15 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty
 from mathutils import Matrix, Vector, Euler
 from .. utils import MACHIN3 as m3
-from .. utils.math import get_loc_matrix, get_sca_matrix
+from .. utils.math import get_loc_matrix, get_rot_matrix, get_sca_matrix
 
 
-# TODO: bone support? you can't select a pose bone when in object mode
+# TODO: bone support? Make sure to activate. Make sure to have scene.tool_settings.lock_object_modes disabled
 
-modeitems = [("ACTIVE", "到活动项", ""),
-             ("FLOOR", "到地面（基面）", "")]
-             # ("CURSOR", "Cursor", "")]
+modeitems = [("ORIGIN", "原心", ""),
+             ("CURSOR", "指针", ""),
+             ("ACTIVE", "活动项", ""),
+             ("FLOOR", "地面（基面）", "")]
 
 
 class Align(bpy.types.Operator):
@@ -41,11 +42,13 @@ class Align(bpy.types.Operator):
 
         column = layout.column()
 
-        row = column.row()
-        row.prop(self, "mode", expand=True)
+        row = column.split(factor=0.3)
+        row.label(text="对齐到")
+        r = row.row()
+        r.prop(self, "mode", expand=True)
 
-        if self.mode == "ACTIVE":
-            row = column.split(factor=0.33)
+        if self.mode in ["ORIGIN", "CURSOR", "ACTIVE"]:
+            row = column.split(factor=0.3)
             row.prop(self, "location", text="位置")
 
             r = row.row(align=True)
@@ -54,8 +57,8 @@ class Align(bpy.types.Operator):
             r.prop(self, "loc_y", toggle=True)
             r.prop(self, "loc_z", toggle=True)
 
-
-            row = column.split(factor=0.33)
+        if self.mode in ["CURSOR", "ACTIVE"]:
+            row = column.split(factor=0.3)
             row.prop(self, "rotation", text="旋转")
 
             r = row.row(align=True)
@@ -64,8 +67,8 @@ class Align(bpy.types.Operator):
             r.prop(self, "rot_y", toggle=True)
             r.prop(self, "rot_z", toggle=True)
 
-
-            row = column.split(factor=0.33)
+        if self.mode == "ACTIVE":
+            row = column.split(factor=0.3)
             row.prop(self, "scale", text="缩放")
 
             r = row.row(align=True)
@@ -76,12 +79,18 @@ class Align(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.mode == "OBJECT"
+        return context.mode == "OBJECT" and context.selected_objects
 
     def execute(self, context):
         sel = m3.selected_objects()
 
-        if self.mode == "ACTIVE":
+        if self.mode == "ORIGIN":
+            self.align_to_origin(sel)
+
+        if self.mode == "CURSOR":
+            self.align_to_cursor(context.scene.cursor, sel)
+
+        elif self.mode == "ACTIVE":
             active = m3.get_active()
 
             if active in sel:
@@ -90,27 +99,103 @@ class Align(bpy.types.Operator):
                 self.align_to_active(active, sel)
 
         elif self.mode == "FLOOR":
-            self.put_on_floor(sel)
+            self.drop_to_floor(sel)
 
-
-        # elif self.mode == "CURSOR":
-            # TODO: align_to_cursor
-            # pass
 
         return {'FINISHED'}
 
-    def put_on_floor(self, selection):
-        for obj in selection:
-            mx = obj.matrix_world
+    def align_to_origin(self, sel):
+        for obj in sel:
+            # get object matrix and decompose
+            omx = obj.matrix_world
+            oloc, orot, osca = omx.decompose()
 
-            if obj.type == "MESH":
-                minz = min((mx @ v.co)[2] for v in obj.data.vertices)
+            # split components into x,y,z axis elements
+            olocx, olocy, olocz = oloc
+            orotx, oroty, orotz = orot.to_euler('XYZ')
+            oscax, oscay, oscaz = osca
 
-                mx.translation.z -= minz
+            # TRANSLATION
 
-            elif obj.type == "EMPTY":
-                mx.translation.z -= obj.location.z
+            # if location is aligned, pick the axis elements based on the loc axis props
+            if self.location:
+                locx = 0 if self.loc_x else olocx
+                locy = 0 if self.loc_y else olocy
+                locz = 0 if self.loc_z else olocz
 
+                # re-assemble into translation matrix
+                loc = get_loc_matrix(Vector((locx, locy, locz)))
+
+            # otherwise, just use the object's location component
+            else:
+                loc = get_loc_matrix(oloc)
+
+
+            # ROTATION
+
+            rot = orot.to_matrix().to_4x4()
+
+
+            # SCALE
+
+            sca = get_sca_matrix(osca)
+
+
+            # re-combine components into world matrix
+            obj.matrix_world = loc @ rot @ sca
+
+    def align_to_cursor(self, cursor, sel):
+        cursor.rotation_mode = 'XYZ'
+
+        for obj in sel:
+            # get object matrix and decompose
+            omx = obj.matrix_world
+            oloc, orot, osca = omx.decompose()
+
+            # split components into x,y,z axis elements
+            olocx, olocy, olocz = oloc
+            orotx, oroty, orotz = orot.to_euler('XYZ')
+            oscax, oscay, oscaz = osca
+
+            # TRANSLATION
+
+            # if location is aligned, pick the axis elements based on the loc axis props
+            if self.location:
+                locx = cursor.location.x if self.loc_x else olocx
+                locy = cursor.location.y if self.loc_y else olocy
+                locz = cursor.location.z if self.loc_z else olocz
+
+                # re-assemble into translation matrix
+                loc = get_loc_matrix(Vector((locx, locy, locz)))
+
+            # otherwise, just use the object's location component
+            else:
+                loc = get_loc_matrix(oloc)
+
+
+            # ROTATION
+
+            # if rotation is aligned, pick the axis elements based on the rot axis props
+            if self.rotation:
+                rotx = cursor.rotation_euler.x if self.rot_x else orotx
+                roty = cursor.rotation_euler.y if self.rot_y else oroty
+                rotz = cursor.rotation_euler.z if self.rot_z else orotz
+
+                # re-assemble into rotation matrix
+                rot = get_rot_matrix(Euler((rotx, roty, rotz), 'XYZ'))
+
+            # otherwise, just use the object's rotation component
+            else:
+                rot = get_rot_matrix(orot)
+
+
+            # SCALE
+
+            sca = get_sca_matrix(osca)
+
+
+            # re-combine components into world matrix
+            obj.matrix_world = loc @ rot @ sca
 
     def align_to_active(self, active, sel):
         # get target matrix and decompose
@@ -157,15 +242,14 @@ class Align(bpy.types.Operator):
                 rotz = arotz if self.rot_z else orotz
 
                 # re-assemble into rotation matrix
-                rot = Euler((rotx, roty, rotz), 'XYZ').to_matrix().to_4x4()
+                rot = get_rot_matrix(Euler((rotx, roty, rotz), 'XYZ'))
 
             # otherwise, just use the object's rotation component
             else:
-                rot = orot.to_matrix().to_4x4()
+                rot = get_rot_matrix(orot)
 
 
             # SCALE
-
 
             # if scale is aligned, pick the axis elements based on the sca axis props
             if self.scale:
@@ -183,3 +267,15 @@ class Align(bpy.types.Operator):
 
             # re-combine components into world matrix
             obj.matrix_world = loc @ rot @ sca
+
+    def drop_to_floor(self, selection):
+        for obj in selection:
+            mx = obj.matrix_world
+
+            if obj.type == "MESH":
+                minz = min((mx @ v.co)[2] for v in obj.data.vertices)
+
+                mx.translation.z -= minz
+
+            elif obj.type == "EMPTY":
+                mx.translation.z -= obj.location.z
