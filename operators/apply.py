@@ -32,9 +32,10 @@ class Apply(bpy.types.Operator):
         if any([self.rotation, self.scale]):
             decalmachine, _, _, _ = get_addon("DECALmachine")
 
-            parents = [obj for obj in context.selected_objects if obj.children]
+            # only apply the scale to objects, that arent't parented themselves
+            apply_objs = [obj for obj in context.selected_objects if not obj.parent]
 
-            for obj in parents:
+            for obj in apply_objs:
 
                 # fetch children and their current world mx
                 children = [(child, child.matrix_world) for child in obj.children]
