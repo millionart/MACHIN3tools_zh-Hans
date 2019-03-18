@@ -207,6 +207,10 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "object.mode_set":
                     kmi.active = False
 
+                if kmi.idname == "view3d.object_mode_pie_or_toggle":
+                    kmi.active = False
+
+
             # IMAGE
 
             km = kc.keymaps.get("Image")
