@@ -366,6 +366,10 @@ def get_tools():
     classlists, keylists, count = get_select(classlists, keylists, count)
 
 
+    # MESH CUT
+    classlists, keylists, count = get_mesh_cut(classlists, keylists, count)
+
+
     # CUSTOMIZE
     classlists, keylists, count = get_customize(classlists, keylists, count)
 
@@ -520,6 +524,15 @@ def get_apply(classlists=[], keylists=[], count=0):
 def get_select(classlists=[], keylists=[], count=0):
     if get_prefs().activate_select:
         classlists.append(classesdict["SELECT"])
+        # keylists.append(keysdict["ALIGN"])
+        count +=1
+
+    return classlists, keylists, count
+
+
+def get_mesh_cut(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_mesh_cut:
+        classlists.append(classesdict["MESH_CUT"])
         # keylists.append(keysdict["ALIGN"])
         count +=1
 
