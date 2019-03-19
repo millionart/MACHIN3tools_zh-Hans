@@ -43,8 +43,8 @@ class MeshCut(bpy.types.Operator):
         # cfmap = add_facemap(cutter, name="mesh_cut", ids=[f.index for f in cutter.data.polygons])
         # tfmap = add_facemap(target, name="mesh_cut")
 
-        cgroup = add_vgroup(cutter, name="mesh_cut", ids=[v.index for v in cutter.data.vertices])
-        tgroup = add_vgroup(target, name="mesh_cut")
+        add_vgroup(cutter, name="mesh_cut", ids=[v.index for v in cutter.data.vertices])
+        add_vgroup(target, name="mesh_cut")
 
         # join
         bpy.ops.object.join()
@@ -57,6 +57,7 @@ class MeshCut(bpy.types.Operator):
         bpy.ops.mesh.intersect()
 
         # select cutter mesh
+        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         bpy.ops.mesh.select_more()
 
