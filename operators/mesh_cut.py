@@ -6,7 +6,7 @@ from .. utils.object import flatten, add_facemap, add_vgroup
 class MeshCut(bpy.types.Operator):
     bl_idname = "machin3.mesh_cut"
     bl_label = "MACHIN3: Mesh Cut"
-    bl_description = "Knife Intersect a mesh, using another object.\nALT: flatten target object's modifier stack"
+    bl_description = "Knife Intersect a mesh, using another object.\nALT: flatten target object's modifier stack\nSHHIFT: Mark Seam"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -54,7 +54,10 @@ class MeshCut(bpy.types.Operator):
         bpy.ops.object.vertex_group_select()
 
         # knife intersect
-        bpy.ops.mesh.intersect()
+        if event.shift:
+            bpy.ops.mesh.intersect(separate_mode='ALL')
+        else:
+            bpy.ops.mesh.intersect(separate_mode='CUT')
 
         # select cutter mesh
         bpy.ops.mesh.select_all(action='DESELECT')
@@ -63,6 +66,14 @@ class MeshCut(bpy.types.Operator):
 
         # remove cutter mesh
         bpy.ops.mesh.delete(type='FACE')
+
+        # mark non-manifold edges
+        if event.shift:
+            bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.mesh.region_to_loop()
+
+            bpy.ops.mesh.mark_seam(clear=False)
+            bpy.ops.mesh.remove_doubles()
 
         # remove mesh_cut vgroup
         bpy.ops.object.mode_set(mode='OBJECT')
