@@ -27,6 +27,9 @@ class Apply(bpy.types.Operator):
         row.prop(self, "scale", toggle=True)
         row.prop(self, "rotation", toggle=True)
 
+    @classmethod
+    def poll(cls, context):
+        return context.selected_objects
 
     def execute(self, context):
         if any([self.rotation, self.scale]):
