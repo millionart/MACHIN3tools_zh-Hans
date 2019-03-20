@@ -40,6 +40,7 @@ class MenuAppendMaterials(bpy.types.Menu):
 
 
         for name in names:
+            layout.operator_context = 'INVOKE_DEFAULT'
 
             if name == "ALL":
                 layout.operator("machin3.append_material", text=name, icon="MATERIAL_DATA").name = name
