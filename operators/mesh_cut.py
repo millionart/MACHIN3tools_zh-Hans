@@ -42,7 +42,7 @@ class MeshCut(bpy.types.Operator):
         add_facemap(cutter, name="mesh_cut", ids=[f.index for f in cutter.data.polygons])
         tfmap = add_facemap(target, name="mesh_cut", ids=[f.index for f in target.data.polygons])
 
-        # there seems to be a bug, where an face map is not properly initialized, until you remove all face indices
+        # NOTE: there seems to be a bug, where an face map is not properly initialized, until you add and remove all face indices
         tfmap.remove([f.index for f in target.data.polygons])
 
         # join
