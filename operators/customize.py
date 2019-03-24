@@ -118,6 +118,14 @@ class Customize(bpy.types.Operator):
                     else:
                         kmi.active = False
 
+            # FRAMES
+
+            km = kc.keymaps.get("Frames")
+            for kmi in km.keymap_items:
+                if kmi.idname == "screen.animation_play":
+                    kmi.active = False
+
+
             # OUTLINER
 
             km = kc.keymaps.get("Outliner")
