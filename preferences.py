@@ -446,7 +446,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
             row = column.row()
             rows = len(self.appendmats) if len(self.appendmats) > 6 else 6
-            row.template_list("AppendMatsUIList", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
+            row.template_list("MACHIN3_UL_append_mats", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
 
             c = row.column(align=True)
             c.operator("machin3.move_appendmat", text="", icon='TRIA_UP').direction = "UP"
