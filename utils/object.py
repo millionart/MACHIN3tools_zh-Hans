@@ -12,7 +12,6 @@ def flatten(obj):
     bpy.data.meshes.remove(oldmesh, do_unlink=True)
 
 
-
 def add_vgroup(obj, name="", ids=[], weight=1):
     vgroup = obj.vertex_groups.new(name=name)
 
