@@ -120,6 +120,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_select(self, context):
         activate(self, register=self.activate_select, tool="select")
 
+    def update_activate_mesh_cut(self, context):
+        activate(self, register=self.activate_mesh_cut, tool="mesh_cut")
+
     def update_activate_customize(self, context):
         activate(self, register=self.activate_customize, tool="customize")
 
@@ -195,6 +198,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_align: BoolProperty(name="Align", default=True, update=update_activate_align)
     activate_apply: BoolProperty(name="Apply", default=True, update=update_activate_apply)
     activate_select: BoolProperty(name="Select", default=True, update=update_activate_select)
+    activate_mesh_cut: BoolProperty(name="Mesh Cut", default=True, update=update_activate_mesh_cut)
     activate_customize: BoolProperty(name="Customize", default=False, update=update_activate_customize)
 
 
@@ -298,6 +302,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row = column.split(factor=0.25)
         row.prop(self, "activate_select", toggle=True)
         row.label(text="Selection helpers.")
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_mesh_cut", toggle=True)
+        row.label(text="Knife intersect a mesh, using another object.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_customize", toggle=True)
@@ -438,7 +446,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
             row = column.row()
             rows = len(self.appendmats) if len(self.appendmats) > 6 else 6
-            row.template_list("AppendMatsUIList", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
+            row.template_list("MACHIN3_UL_append_mats", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
 
             c = row.column(align=True)
             c.operator("machin3.move_appendmat", text="", icon='TRIA_UP').direction = "UP"

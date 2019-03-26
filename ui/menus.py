@@ -19,6 +19,9 @@ class MenuMACHIN3toolsObjectContextMenu(bpy.types.Menu):
         if getattr(bpy.types, "MACHIN3_OT_apply_transformations", False):
             layout.operator("machin3.apply_transformations", text="Apply Transformations")
 
+        if getattr(bpy.types, "MACHIN3_OT_mesh_cut", False):
+            layout.operator("machin3.mesh_cut", text="Mesh Cut")
+
 
 class MenuAppendMaterials(bpy.types.Menu):
     bl_idname = "MACHIN3_MT_append_materials"
@@ -37,6 +40,7 @@ class MenuAppendMaterials(bpy.types.Menu):
 
 
         for name in names:
+            layout.operator_context = 'INVOKE_DEFAULT'
 
             if name == "ALL":
                 layout.operator("machin3.append_material", text=name, icon="MATERIAL_DATA").name = name

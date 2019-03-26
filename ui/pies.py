@@ -9,8 +9,10 @@ from .. utils.collection import get_scene_collections
 # TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
 # TODO: eevee presets
 
+
 # TODO: origin to selection
 # TODO: origin to bbox top, bottom, etc
+# TODO: align cursor to selected: align cursor rotation
 
 
 

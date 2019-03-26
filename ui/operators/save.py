@@ -165,6 +165,7 @@ class AppendWorld(bpy.types.Operator):
 class AppendMaterial(bpy.types.Operator):
     bl_idname = "machin3.append_material"
     bl_label = "Append Material"
+    bl_description = "Append material, or apply if it's already in the scene.\nSHIFT: Force append material, even if it's already in the scene."
     bl_options = {'REGISTER', 'UNDO'}
 
     name: StringProperty(name="Append Name")
@@ -183,7 +184,7 @@ class AppendMaterial(bpy.types.Operator):
 
         column.prop(self, "applymaterial")
 
-    def execute(self, context):
+    def invoke(self, context, event):
         path = get_prefs().appendmatspath
         name = self.name
 
@@ -194,7 +195,10 @@ class AppendMaterial(bpy.types.Operator):
                 if name != "---":
                     append_material(path, name)
         else:
-            mat = append_material(path, name)
+            mat = bpy.data.materials.get(name)
+
+            if not mat or event.shift:
+                mat = append_material(path, name)
 
             if mat:
                 if self.applymaterial:

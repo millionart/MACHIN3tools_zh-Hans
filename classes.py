@@ -18,6 +18,7 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
            "ALIGN": [("operators.align", [("Align", "align")])],
            "APPLY": [("operators.apply", [("Apply", "apply_transformations")])],
            "SELECT": [("operators.select", [("SelectCenterObjects", "select_center_objects")])],
+           "MESH_CUT": [("operators.mesh_cut", [("MeshCut", "mesh_cut")])],
            "CUSTOMIZE": [("operators.customize", [("Customize", "customize"),
                                                   ("RestoreKeymaps", "restore_keymaps")])],
 
