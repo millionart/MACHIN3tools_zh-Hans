@@ -120,6 +120,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_select(self, context):
         activate(self, register=self.activate_select, tool="select")
 
+    def update_activate_mesh_cut(self, context):
+        activate(self, register=self.activate_mesh_cut, tool="mesh_cut")
+
     def update_activate_customize(self, context):
         activate(self, register=self.activate_customize, tool="customize")
 
@@ -185,9 +188,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     # MACHIN3tools
 
-    activate_smart_vert: BoolProperty(name="智能点", default=True, update=update_activate_smart_vert)
-    activate_smart_edge: BoolProperty(name="智能线", default=True, update=update_activate_smart_edge)
-    activate_smart_face: BoolProperty(name="智能面", default=True, update=update_activate_smart_face)
+    activate_smart_vert: BoolProperty(name="智能 点", default=True, update=update_activate_smart_vert)
+    activate_smart_edge: BoolProperty(name="智能 线", default=True, update=update_activate_smart_edge)
+    activate_smart_face: BoolProperty(name="智能 面", default=True, update=update_activate_smart_face)
     activate_clean_up: BoolProperty(name="清理", default=True, update=update_activate_clean_up)
     activate_clipping_toggle: BoolProperty(name="裁剪切换", default=True, update=update_activate_clipping_toggle)
     activate_focus: BoolProperty(name="聚焦", default=True, update=update_activate_focus)
@@ -195,6 +198,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_align: BoolProperty(name="对齐", default=True, update=update_activate_align)
     activate_apply: BoolProperty(name="应用", default=True, update=update_activate_apply)
     activate_select: BoolProperty(name="选择", default=True, update=update_activate_select)
+    activate_mesh_cut: BoolProperty(name="网格切割", default=True, update=update_activate_mesh_cut)
     activate_customize: BoolProperty(name="自定义", default=False, update=update_activate_customize)
 
 
@@ -300,6 +304,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row.label(text="选择助手。")
 
         row = column.split(factor=0.25)
+        row.prop(self, "activate_mesh_cut", toggle=True)
+        row.label(text="使用另一个相交对象切割网格。")
+
+        row = column.split(factor=0.25)
         row.prop(self, "activate_customize", toggle=True)
         row.label(text="自定义各种 Blender 首选项，设置和键盘映射。")
 
@@ -317,7 +325,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_save_pie", toggle=True)
-        row.label(text="保存，打开，追加。 加载最近，上一个和下一个。 追加世界环境和材质。")
+        row.label(text="保存，打开，追加。加载最近，上一个和下一个。追加世界环境和材质。")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_shading_pie", toggle=True)
@@ -325,7 +333,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_views_pie", toggle=True)
-        row.label(text="控制视图。 创建和管理相机。")
+        row.label(text="控制视图。创建和管理相机。")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_align_pie", toggle=True)
@@ -438,7 +446,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
             row = column.row()
             rows = len(self.appendmats) if len(self.appendmats) > 6 else 6
-            row.template_list("AppendMatsUIList", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
+            row.template_list("MACHIN3_UL_append_mats", "", self, "appendmats", self, "appendmatsIDX", rows=rows)
 
             c = row.column(align=True)
             c.operator("machin3.move_appendmat", text="", icon='TRIA_UP').direction = "UP"

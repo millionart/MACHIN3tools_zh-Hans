@@ -13,7 +13,7 @@ from ... utils import MACHIN3 as m3
 
 class New(bpy.types.Operator):
     bl_idname = "machin3.new"
-    bl_label = "Current file is unsaved. Start a new file anyway?"
+    bl_label = "当前文件未保存。 无论如何都要开始一个新文件吗？"
     bl_options = {'REGISTER'}
 
 
@@ -34,7 +34,7 @@ class New(bpy.types.Operator):
 
 class Save(bpy.types.Operator):
     bl_idname = "machin3.save"
-    bl_label = "Save"
+    bl_label = "保存"
     bl_description = "Save"
     bl_options = {'REGISTER'}
 
@@ -56,8 +56,8 @@ class Save(bpy.types.Operator):
 
 class SaveIncremental(bpy.types.Operator):
     bl_idname = "machin3.save_incremental"
-    bl_label = "Incremental Save"
-    bl_description = "Incremental Save"
+    bl_label = "增量保存"
+    bl_description = "增量保存"
     bl_options = {'REGISTER'}
 
 
@@ -71,7 +71,7 @@ class SaveIncremental(bpy.types.Operator):
             add_path_to_recent_files(save_path)
 
             if os.path.exists(save_path):
-                self.report({'ERROR'}, "File '%s' exists already!\nBlend has NOT been saved incrementally!" % (save_path))
+                self.report({'ERROR'}, "文件 '%s' 已经存在！\nBlend 尚未增量保存！" % (save_path))
             else:
                 bpy.ops.wm.save_as_mainfile(filepath=save_path)
                 print("Saved blend incrementally:", save_path)
@@ -165,6 +165,7 @@ class AppendWorld(bpy.types.Operator):
 class AppendMaterial(bpy.types.Operator):
     bl_idname = "machin3.append_material"
     bl_label = "Append Material"
+    bl_description = "Append material, or apply if it's already in the scene.\nSHIFT: Force append material, even if it's already in the scene."
     bl_options = {'REGISTER', 'UNDO'}
 
     name: StringProperty(name="Append Name")
@@ -183,7 +184,7 @@ class AppendMaterial(bpy.types.Operator):
 
         column.prop(self, "applymaterial")
 
-    def execute(self, context):
+    def invoke(self, context, event):
         path = get_prefs().appendmatspath
         name = self.name
 
@@ -194,7 +195,10 @@ class AppendMaterial(bpy.types.Operator):
                 if name != "---":
                     append_material(path, name)
         else:
-            mat = append_material(path, name)
+            mat = bpy.data.materials.get(name)
+
+            if not mat or event.shift:
+                mat = append_material(path, name)
 
             if mat:
                 if self.applymaterial:

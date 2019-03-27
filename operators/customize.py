@@ -118,6 +118,14 @@ class Customize(bpy.types.Operator):
                     else:
                         kmi.active = False
 
+            # FRAMES
+
+            km = kc.keymaps.get("Frames")
+            for kmi in km.keymap_items:
+                if kmi.idname == "screen.animation_play":
+                    kmi.active = False
+
+
             # OUTLINER
 
             km = kc.keymaps.get("Outliner")
@@ -206,6 +214,10 @@ class Customize(bpy.types.Operator):
             for kmi in km.keymap_items:
                 if kmi.idname == "object.mode_set":
                     kmi.active = False
+
+                if kmi.idname == "view3d.object_mode_pie_or_toggle":
+                    kmi.active = False
+
 
             # IMAGE
 

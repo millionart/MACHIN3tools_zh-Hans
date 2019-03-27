@@ -1,5 +1,5 @@
 import bpy
-from bpy.props import EnumProperty
+from bpy.props import EnumProperty, BoolProperty
 import bmesh
 
 
@@ -24,20 +24,21 @@ class AlignEditMesh(bpy.types.Operator):
 
     axis: EnumProperty(name="Axis", items=axisitems, default="X")
     type: EnumProperty(name="Type", items=typeitems, default="MIN")
+    local: BoolProperty(name="Local Space", default=True)
 
     @classmethod
     def poll(cls, context):
         return context.mode == "EDIT_MESH"
 
     def invoke(self, context, event):
-        if event.alt:
-            self.align(context, axismap[self.axis], self.type, local=False)
+        self.local = not event.alt
 
-        else:
-            self.align(context, axismap[self.axis], self.type)
-
+        self.align(context, axismap[self.axis], self.type, local=self.local)
         return {'FINISHED'}
 
+    def execute(self, context):
+        self.align(context, axismap[self.axis], self.type, local=self.local)
+        return {'FINISHED'}
 
     def align(self, context, axis, type, local=True):
         active = context.active_object
