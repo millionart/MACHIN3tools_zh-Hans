@@ -231,6 +231,11 @@ class Customize(bpy.types.Operator):
 
             km = kc.keymaps.get("Mesh")
             for kmi in km.keymap_items:
+
+                if kmi.idname == "wm.call_menu":
+                    if kmi.properties.name == "VIEW3D_MT_edit_mesh_select_mode":
+                        kmi.active = False
+
                 if kmi.idname == "mesh.select_all":
                     if kmi.properties.action == "SELECT":
                         kmi.properties.action = "TOGGLE"
