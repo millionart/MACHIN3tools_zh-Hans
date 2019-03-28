@@ -74,7 +74,12 @@ class Focus(bpy.types.Operator):
 
                 # go higher
                 else:
-                    self.unfocus(context, view, history)
+                    if history:
+                        self.unfocus(context, view, history)
+
+                    # exit local view (for instance, when local view was initiated from batch ops, there won't be a history in that case)
+                    else:
+                        bpy.ops.view3d.localview(frame_selected=False)
 
             # initialize local view
             elif context.selected_objects:
