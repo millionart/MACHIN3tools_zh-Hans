@@ -306,6 +306,9 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "object.subdivision_set":
                     kmi.active = False
 
+                if kmi.idname == "mesh.merge":
+                    kmi.alt = False
+
 
             # CURVE
 
