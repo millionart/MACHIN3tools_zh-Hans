@@ -602,13 +602,13 @@ class PieModes(Menu):
         # group pro "object mode"
         if len(context.scene.storedGroupSettings) == 0:
             row = column.split(factor=0.7, align=True)
-            row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+            row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "GP_MT_grouppro_main_pie"
             row.operator("object.create_grouppro", text="Create")
 
         # group pro "edit mode"
         else:
             row = column.row()
-            row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+            row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "GP_MT_grouppro_main_pie"
 
             if addremove:
                 r = row.row(align=True)
