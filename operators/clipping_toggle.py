@@ -21,7 +21,7 @@ class ClippingToggle(bpy.types.Operator):
         bpy.context.space_data.clip_start = self.maximum
         self.avoid_state_update = True
         self.state = "MAX"
-        self.avoid_update = True
+        self.avoid_execute = True
 
     def update_clip_start_medium(self, context):
         if self.avoid_item_update:
@@ -31,7 +31,7 @@ class ClippingToggle(bpy.types.Operator):
         bpy.context.space_data.clip_start = self.medium
         self.avoid_state_update = True
         self.state = "MED"
-        self.avoid_update = True
+        self.avoid_execute = True
 
     def update_clip_start_minimum(self, context):
         if self.avoid_item_update:
@@ -41,11 +41,11 @@ class ClippingToggle(bpy.types.Operator):
         bpy.context.space_data.clip_start = self.minimum
         self.avoid_state_update = True
         self.state = "MIN"
-        self.avoid_update = True
+        self.avoid_execute = True
 
     def update_state(self, context):
-        if self.avoid_update:
-            self.avoid_update = False
+        if self.avoid_execute:
+            self.avoid_execute = False
             return
 
         if self.avoid_state_update:
@@ -63,7 +63,7 @@ class ClippingToggle(bpy.types.Operator):
         elif self.state == "MAX":
             view.clip_start = self.maximum
 
-        self.avoid_update = True
+        self.avoid_execute = True
 
     def update_reset(self, context):
         if not self.reset:
@@ -88,7 +88,7 @@ class ClippingToggle(bpy.types.Operator):
             view.clip_start = self.maximum
 
         self.reset = False
-        self.avoid_update = True
+        self.avoid_execute = True
 
     maximum: FloatProperty(name="Maximum", default=1, min=0, precision=2, step=10, update=update_clip_start_maximum)
     medium: FloatProperty(name="Medium", default=0.1, min=0, precision=3, step=1, update=update_clip_start_medium)
@@ -97,7 +97,7 @@ class ClippingToggle(bpy.types.Operator):
     state: EnumProperty(name="Current State", items=state_items, default="MED", update=update_state)
     reset: BoolProperty(default=False, update=update_reset)
 
-    avoid_update: BoolProperty(default=False)
+    avoid_execute: BoolProperty(default=False)
     avoid_state_update: BoolProperty(default=False)
     avoid_item_update: BoolProperty(default=False)
 
@@ -122,11 +122,11 @@ class ClippingToggle(bpy.types.Operator):
         row.label(text=str(round(view.clip_start, 6)))
 
     def execute(self, context):
-        if self.avoid_update:
-            self.avoid_update = False
+        if self.avoid_execute:
+            self.avoid_execute = False
 
         else:
-            self.avoid_update = True
+            self.avoid_execute = True
             self.state = step_enum(self.state, state_items, 1, loop=True)
 
             view = bpy.context.space_data
