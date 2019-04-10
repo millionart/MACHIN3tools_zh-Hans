@@ -202,8 +202,9 @@ class AppendMaterial(bpy.types.Operator):
 
             if mat:
                 if self.applymaterial:
-                    for obj in context.selected_objects:
+                    meshes = [obj for obj in context.selected_objects if obj.type in ["MESH", "SURFACE", "CURVE", "FONT", "META"]]
 
+                    for obj in meshes:
                         # append material when there are no slots[creates a new slot automatically, as well as when in edit mode
                         if not obj.material_slots or obj.mode == "EDIT":
                             obj.data.materials.append(mat)
