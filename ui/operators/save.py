@@ -4,7 +4,7 @@ import bmesh
 import os
 import re
 import time
-from ... utils.registration import get_prefs
+from ... utils.registration import get_prefs, get_addon
 from ... utils.append import append_material, append_world
 from ... utils.system import add_path_to_recent_files
 from ... utils import MACHIN3 as m3
@@ -203,6 +203,11 @@ class AppendMaterial(bpy.types.Operator):
             if mat:
                 if self.applymaterial:
                     meshes = [obj for obj in context.selected_objects if obj.type in ["MESH", "SURFACE", "CURVE", "FONT", "META"]]
+
+                    decalmachine, _, _, _ = get_addon("DECALmachine")
+
+                    if decalmachine:
+                        meshes = [obj for obj in meshes if not obj.DM.isdecal]
 
                     for obj in meshes:
                         # append material when there are no slots[creates a new slot automatically, as well as when in edit mode
