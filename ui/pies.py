@@ -602,13 +602,13 @@ class PieModes(Menu):
         # group pro "object mode"
         if len(context.scene.storedGroupSettings) == 0:
             row = column.split(factor=0.7, align=True)
-            row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+            row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "GP_MT_grouppro_main_pie"
             row.operator("object.create_grouppro", text="Create")
 
         # group pro "edit mode"
         else:
             row = column.row()
-            row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "object.grouppro_main_pie"
+            row.operator("wm.call_menu_pie", text="GroupPro", icon='STICKY_UVS_LOC').name = "GP_MT_grouppro_main_pie"
 
             if addremove:
                 r = row.row(align=True)
@@ -1565,10 +1565,14 @@ class PieCollections(Menu):
                 if col.children or col.objects:
                     icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
                     row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                    row.prop(col, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
 
                 # empty collections are drawn as text
                 else:
                     row.label(text=col.name)
+
+
+
 
                 if batchops and col != context.scene.collection:
                     row.operator("batch_ops_collections.contextual_click", text="", icon="GROUP").idname = col.name
@@ -1587,6 +1591,8 @@ class PieCollections(Menu):
                 if col.children or col.objects:
                     icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
                     row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                    row.prop(col, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
+
                 else:
                     row.label(text=col.name)
 
@@ -1600,6 +1606,7 @@ class PieCollections(Menu):
                 if col.children or col.objects:
                     icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
                     row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                    row.prop(col, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
                 else:
                     row.label(text=col.name)
 
@@ -1624,6 +1631,7 @@ class PieCollections(Menu):
                 if col.children or col.objects:
                     icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
                     row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                    row.prop(col, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
 
                 # empty collections are drawn as text
                 else:
@@ -1646,6 +1654,8 @@ class PieCollections(Menu):
                 if col.children or col.objects:
                     icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
                     row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                    row.prop(col, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
+
                 else:
                     row.label(text=col.name)
 
@@ -1659,6 +1669,7 @@ class PieCollections(Menu):
                 if col.children or col.objects:
                     icon = "RESTRICT_SELECT_ON" if col.objects and col.objects[0].hide_select else "RESTRICT_SELECT_OFF"
                     row.operator("machin3.select_collection", text=col.name, icon=icon).name = col.name
+                    row.prop(col, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
                 else:
                     row.label(text=col.name)
 
@@ -1680,30 +1691,37 @@ class PieCollections(Menu):
         op.name = decalsname
         op.force_all = True
 
+        decals = bpy.data.collections.get(decalsname)
         simple = bpy.data.collections.get(simplename)
         subset = bpy.data.collections.get(subsetname)
         info = bpy.data.collections.get(infoname)
         panel = bpy.data.collections.get(panelname)
 
+        row.prop(decals, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
+
         if simple and simple.DM.isdecaltypecol and simple.objects:
             row.operator("machin3.select_collection", text="Simple").name = simplename
+            row.prop(simple, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
         else:
             row.label(text="Simple")
 
         if subset and subset.DM.isdecaltypecol and subset.objects:
             row.operator("machin3.select_collection", text="Subset").name = subsetname
+            row.prop(subset, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
         else:
             row.label(text="Subset")
 
-        if info and info.DM.isdecaltypecol and info.objects:
-            row.operator("machin3.select_collection", text="Info").name = infoname
-        else:
-            row.label(text="Info")
-
         if panel and panel.DM.isdecaltypecol and panel.objects:
             row.operator("machin3.select_collection", text="Panel").name = panelname
+            row.prop(panel, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
         else:
             row.label(text="Panel")
+
+        if info and info.DM.isdecaltypecol and info.objects:
+            row.operator("machin3.select_collection", text="Info").name = infoname
+            row.prop(info, "hide_viewport", text="", icon="VISIBLE_IPO_ON")
+        else:
+            row.label(text="Info")
 
 
 class PieWorkspace(Menu):
