@@ -20,7 +20,7 @@ Copyright (C) 2016-2018 MACHIN3, machin3.io, support@machin3.io
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, 9),
+    "version": (0, 3, 10),
     "blender": (2, 80, 0),
     "location": "",
     "description": "简化 Blender 2.80.",

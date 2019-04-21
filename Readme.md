@@ -1,13 +1,12 @@
-
 # MACHIN3tools
 
-[MACHIN3tools](https://machin3.io/MACHIN3tools) 是一个不断改进的脚本合集，用于简化和自动化各种操作。
+[MACHIN3tools](https://machin3.io/MACHIN3tools) 是一个免费的，不断改进的 Blender 工具和饼图菜单合集，在一个可定制的包中。
 
 ## [使用文档（英文）](https://machin3.io/MACHIN3tools/docs)
 
 如果您觉得这个插件还不错，请考虑支持我的其他作品。
 
-[machin3.io](https://machin3.io) | [gumroad](https://gumroad.com/machin3) | [blender market](https://blendermarket.com/creators/machin3) | [youtube](https://www.youtube.com/channel/UC4yaFzFDILd2yAqOWRuLOvA/videos) | [twitter](https://twitter.com/machin3io) | [facebook](https://www.facebook.com/MACHIN3-1735915690014923)
+[machin3.io](https://machin3.io) | [gumroad](https://gumroad.com/machin3) | [blender market](https://blendermarket.com/creators/machin3) | [youtube](https://www.youtube.com/channel/UC4yaFzFDILd2yAqOWRuLOvA/videos) | [twitter](https://twitter.com/machin3io)
 
 ----
 
