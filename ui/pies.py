@@ -870,6 +870,7 @@ class PieShading(Menu):
             row.prop(view.overlay, "show_edge_crease", text="Creases", toggle=True)
             row.prop(view.overlay, "show_edge_sharp", text="Sharp", toggle=True)
             row.prop(view.overlay, "show_edge_bevel_weight", text="Bevel", toggle=True)
+            row.prop(view.overlay, "show_edge_seams", text="Seams", toggle=True)
 
             if not bpy.app.build_options.freestyle:
                 row.prop(view.overlay, "show_edge_seams", text="Seams", toggle=True)
