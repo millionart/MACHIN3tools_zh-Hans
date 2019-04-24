@@ -15,7 +15,6 @@ from .. utils.collection import get_scene_collections
 # TODO: align cursor to selected: align cursor rotation
 
 
-
 class PieModes(Menu):
     bl_idname = "MACHIN3_MT_modes_pie"
     bl_label = "Modes"
@@ -53,36 +52,7 @@ class PieModes(Menu):
                             pie.operator("machin3.edit_mode", text=text, icon_value=icon)
 
                         # 7 - TOP - LEFT
-                        box = pie.split()
-                        column = box.column()
-                        column.scale_y = 1.5
-                        column.scale_x = 1.5
-
-                        row = column.row(align=True)
-
-                        r = row.row(align=True)
-                        r.active = False if context.mode == 'TEXTURE_PAINT' else True
-                        r.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
-
-                        r = row.row(align=True)
-                        r.active = False if context.mode == 'WEIGHT_PAINT' else True
-                        r.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
-
-                        r = row.row(align=True)
-                        r.active = False if context.mode == 'VERTEX_PAINT' else True
-                        r.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
-
-                        r = row.row(align=True)
-                        r.active = False if context.mode == 'SCULPT' else True
-                        r.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
-
-                        r = row.row(align=True)
-                        r.active = False if context.mode == 'OBJECT' else True
-                        r.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
-
-                        r = row.row(align=True)
-                        r.active = False if context.mode == 'EDIT_MESH' else True
-                        r.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+                        self.draw_mesh_modes(context, pie)
 
 
                         # 9 - TOP - RIGHT
@@ -97,7 +67,7 @@ class PieModes(Menu):
                         pie.separator()
 
                         # 3 - BOTTOM - RIGHT
-                        if bpy.context.mode == "EDIT_MESH":
+                        if context.mode == "EDIT_MESH":
                             box = pie.split()
                             column = box.column()
 
@@ -263,27 +233,7 @@ class PieModes(Menu):
                             pie.operator("gpencil.paintmode_toggle", text=text, icon=icon)
 
                     # 7 - TOP - LEFT
-                    box = pie.split()
-                    column = box.column()
-                    column.scale_y = 1.5
-                    column.scale_x = 1.5
-
-                    row = column.row(align=True)
-                    r = row.row(align=True)
-                    r.active = False if context.mode == "WEIGHT_GPENCIL" else True
-                    r.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_GPENCIL'
-                    r = row.row(align=True)
-                    r.active = False if context.mode == "PAINT_GPENCIL" else True
-                    r.operator("object.mode_set", text="", icon="GREASEPENCIL").mode = 'PAINT_GPENCIL'
-                    r = row.row(align=True)
-                    r.active = False if context.mode == "SCULPT_GPENCIL" else True
-                    r.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT_GPENCIL'
-                    r = row.row(align=True)
-                    r.active = False if context.mode == "OBJECT" else True
-                    r.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
-                    r = row.row(align=True)
-                    r.active = False if context.mode == 'EDIT_GPENCIL' else True
-                    r.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT_GPENCIL'
+                    self.draw_gp_modes(context, pie)
 
                     # 9 - TOP - RIGHT
                     if context.mode == 'OBJECT' and grouppro:
@@ -402,20 +352,7 @@ class PieModes(Menu):
                     pie.separator()
 
                     # 7 - TOP - LEFT
-                    box = pie.split()
-                    column = box.column()
-                    column.scale_y = 1.5
-                    column.scale_x = 1.5
-
-                    row = column.row(align=True)
-                    row.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
-                    row.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
-                    row.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
-                    r = row.row(align=True)
-                    r.active = False
-                    r.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
-                    row.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
-                    row.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+                    self.draw_mesh_modes(context, pie)
 
                     # 9 - TOP - RIGHT
                     pie.separator()
@@ -440,20 +377,7 @@ class PieModes(Menu):
                     pie.separator()
 
                     # 7 - TOP - LEFT
-                    box = pie.split()
-                    column = box.column()
-                    column.scale_y = 1.5
-                    column.scale_x = 1.5
-
-                    row = column.row(align=True)
-                    r = row.row(align=True)
-                    r.active = False
-                    r.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
-                    row.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
-                    row.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
-                    row.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
-                    row.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
-                    row.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+                    self.draw_mesh_modes(context, pie)
 
                     # 9 - TOP - RIGHT
                     box = pie.split()
@@ -484,20 +408,7 @@ class PieModes(Menu):
                     pie.separator()
 
                     # 7 - TOP - LEFT
-                    box = pie.split()
-                    column = box.column()
-                    column.scale_y = 1.5
-                    column.scale_x = 1.5
-
-                    row = column.row(align=True)
-                    row.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
-                    r = row.row(align=True)
-                    r.active = False
-                    r.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
-                    row.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
-                    row.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
-                    row.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
-                    row.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+                    self.draw_mesh_modes(context, pie)
 
                     # 9 - TOP - RIGHT
                     box = pie.split()
@@ -529,20 +440,7 @@ class PieModes(Menu):
                     pie.separator()
 
                     # 7 - TOP - LEFT
-                    box = pie.split()
-                    column = box.column()
-                    column.scale_y = 1.5
-                    column.scale_x = 1.5
-
-                    row = column.row(align=True)
-                    row.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
-                    row.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
-                    r = row.row(align=True)
-                    r.active = False
-                    r.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
-                    row.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
-                    row.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
-                    row.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+                    self.draw_mesh_modes(context, pie)
 
                     # 9 - TOP - RIGHT
                     box = pie.split()
@@ -615,6 +513,66 @@ class PieModes(Menu):
                 r.scale_x = 1.2
                 r.operator("object.add_to_grouppro", text="", icon='ADD')
                 r.operator("object.remove_from_grouppro", text="", icon='REMOVE')
+
+    def draw_gp_modes(self, context, pie):
+        box = pie.split()
+        column = box.column()
+        column.scale_y = 1.5
+        column.scale_x = 1.5
+
+        row = column.row(align=True)
+        r = row.row(align=True)
+        r.active = False if context.mode == "WEIGHT_GPENCIL" else True
+        r.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_GPENCIL'
+        r = row.row(align=True)
+        r.active = False if context.mode == "PAINT_GPENCIL" else True
+        r.operator("object.mode_set", text="", icon="GREASEPENCIL").mode = 'PAINT_GPENCIL'
+        r = row.row(align=True)
+        r.active = False if context.mode == "SCULPT_GPENCIL" else True
+        r.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT_GPENCIL'
+        r = row.row(align=True)
+        r.active = False if context.mode == "OBJECT" else True
+        r.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+        r = row.row(align=True)
+        r.active = False if context.mode == 'EDIT_GPENCIL' else True
+        r.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT_GPENCIL'
+
+    def draw_mesh_modes(self, context, pie):
+        box = pie.split()
+        column = box.column()
+        column.scale_y = 1.5
+        column.scale_x = 1.5
+
+        row = column.row(align=True)
+
+        r = row.row(align=True)
+        r.active = False if context.mode == 'PAINT_GPENCIL' else True
+        r.operator("machin3.surface_draw_mode", text="", icon="GREASEPENCIL")
+
+        r = row.row(align=True)
+        r.active = False if context.mode == 'TEXTURE_PAINT' else True
+        r.operator("object.mode_set", text="", icon="TPAINT_HLT").mode = 'TEXTURE_PAINT'
+
+        r = row.row(align=True)
+        r.active = False if context.mode == 'WEIGHT_PAINT' else True
+        r.operator("object.mode_set", text="", icon="WPAINT_HLT").mode = 'WEIGHT_PAINT'
+
+        r = row.row(align=True)
+        r.active = False if context.mode == 'VERTEX_PAINT' else True
+        r.operator("object.mode_set", text="", icon="VPAINT_HLT").mode = 'VERTEX_PAINT'
+
+        r = row.row(align=True)
+        r.active = False if context.mode == 'SCULPT' else True
+        r.operator("object.mode_set", text="", icon="SCULPTMODE_HLT").mode = 'SCULPT'
+
+        r = row.row(align=True)
+        r.active = False if context.mode == 'OBJECT' else True
+        r.operator("object.mode_set", text="", icon="OBJECT_DATA").mode = 'OBJECT'
+
+        r = row.row(align=True)
+        r.active = False if context.mode == 'EDIT_MESH' else True
+        r.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
+
 
 
 class PieSave(Menu):

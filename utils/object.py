@@ -1,4 +1,18 @@
 import bpy
+from mathutils import Matrix
+
+
+def parent(obj, parentobj):
+    if not parentobj.parent and parentobj.matrix_parent_inverse != Matrix():
+        print("Resetting %s's parent inverse matrix, as no parent is defined." % (parentobj.name))
+        parentobj.matrix_parent_inverse = Matrix()
+
+    p = parentobj
+    while p.parent:
+        p = p.parent
+
+    obj.parent = parentobj
+    obj.matrix_world = p.matrix_parent_inverse @ obj.matrix_world
 
 
 def flatten(obj):
