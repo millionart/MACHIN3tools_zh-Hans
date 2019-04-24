@@ -1,4 +1,5 @@
 import bpy
+from bpy.props import BoolProperty
 import bmesh
 from bpy.props import EnumProperty
 from .. utils import MACHIN3 as m3
@@ -10,76 +11,111 @@ class SmartEdge(bpy.types.Operator):
     bl_label = "MACHIN3: Smart Edge"
     bl_options = {'REGISTER', 'UNDO'}
 
+    sharp: BoolProperty(name="Toggle Sharp", default=False)
+
+    def draw(self, context):
+        layout = self.layout
+
+        column = layout.column()
+
     @classmethod
     def poll(cls, context):
         return m3.get_mode() in ["VERT", "EDGE", "FACE"]
 
     def execute(self, context):
-        mode = m3.get_mode()
+        active = context.active_object
+
+        # TOGGLE SHARP
+
+        if self.sharp:
+            self.toggle_sharp(active)
+
+        # SMART
+
+        else:
+            mode = m3.get_mode()
+
+            if mode == "VERT":
+                selverts = m3.get_selection("VERT")
+
+                # KNIFE
+
+                if len(selverts) <= 1:
+                    bpy.ops.mesh.knife_tool('INVOKE_DEFAULT')
 
 
-        if mode == "VERT":
-            selverts = m3.get_selection("VERT")
+                # PATH / STAR CONNECT
 
-            # KNIFE
+                else:
 
-            if len(selverts) <= 1:
-                bpy.ops.mesh.knife_tool('INVOKE_DEFAULT')
+                    # star connects when appropriate, and if it doesn't returns false, because there doesn't seem to be a good way to do a path connect in bmesh
+                    connect = self.connect(active)
 
-
-            # PATH / STAR CONNECT
-
-            else:
-                active = m3.get_active()
-
-                # star connects when appropriate, and if it doesn't returns false, because there doesn't seem to be a good way to do a path connect in bmesh
-                connect = self.connect(active)
-
-                if not connect:
-                    bpy.ops.mesh.vert_connect_path()
+                    if not connect:
+                        bpy.ops.mesh.vert_connect_path()
 
 
-        elif mode == "EDGE":
-            seledges = m3.get_selection("EDGE")
+            elif mode == "EDGE":
+                seledges = m3.get_selection("EDGE")
 
-            # LOOPCUT
+                # LOOPCUT
 
-            if len(seledges) == 0:
-                bpy.ops.mesh.loopcut_slide('INVOKE_DEFAULT')
-
-
-            # TURN EDGE
-
-            elif 1 <= len(seledges) < 4:
-                bpy.ops.mesh.edge_rotate(use_ccw=False)
-
-            # LOOP TO REGION
-
-            elif len(seledges) >= 4:
-                bpy.ops.mesh.loop_to_region()
-                m3.set_mode("FACE")
+                if len(seledges) == 0:
+                    bpy.ops.mesh.loopcut_slide('INVOKE_DEFAULT')
 
 
-        elif mode == "FACE":
-            selfaces = m3.get_selection("FACE")
+                # TURN EDGE
 
-            # LOOPCUT
+                elif 1 <= len(seledges) < 4:
+                    bpy.ops.mesh.edge_rotate(use_ccw=False)
 
-            if len(selfaces) == 0:
-                bpy.ops.mesh.loopcut_slide('INVOKE_DEFAULT')
+                # LOOP TO REGION
 
-            # REGION TO LOOP
+                elif len(seledges) >= 4:
+                    bpy.ops.mesh.loop_to_region()
+                    m3.set_mode("FACE")
 
-            elif len(selfaces) >= 1:
 
-                # NOTE, there seems to be an issue, where blender doesn't update the mode properly
-                # futhermore, I can't manually update if after region to loop either
-                # doing it before works however
-                m3.set_mode("EDGE")
+            elif mode == "FACE":
+                selfaces = m3.get_selection("FACE")
 
-                bpy.ops.mesh.region_to_loop()
+                # LOOPCUT
+
+                if len(selfaces) == 0:
+                    bpy.ops.mesh.loopcut_slide('INVOKE_DEFAULT')
+
+                # REGION TO LOOP
+
+                elif len(selfaces) >= 1:
+
+                    # NOTE, there seems to be an issue, where blender doesn't update the mode properly
+                    # futhermore, I can't manually update if after region to loop either
+                    # doing it before works however
+                    m3.set_mode("EDGE")
+
+                    bpy.ops.mesh.region_to_loop()
 
         return {'FINISHED'}
+
+    def toggle_sharp(self, active):
+        bm = bmesh.from_edit_mesh(active.data)
+        bm.normal_update()
+
+        edges = [e for e in bm.edges if e.select]
+
+        # found sharp edges - unsharpen
+        if any([not e.smooth for e in edges]):
+            smooth = True
+
+        # no sharp edges found - sharpen
+        else:
+            smooth = False
+
+        # (un)sharpen
+        for e in edges:
+            e.smooth = smooth
+
+        bmesh.update_edit_mesh(active.data)
 
     def connect(self, active):
         bm = bmesh.from_edit_mesh(active.data)
