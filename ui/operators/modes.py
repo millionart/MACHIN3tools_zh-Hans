@@ -180,6 +180,7 @@ class SurfaceDrawMode(bpy.types.Operator):
         scene = context.scene
         ts = scene.tool_settings
         mcol = context.collection
+        view = context.space_data
         active = context.active_object
 
         existing_gps = [obj for obj in active.children if obj.type == "GPENCIL"]
@@ -201,6 +202,11 @@ class SurfaceDrawMode(bpy.types.Operator):
         gp.select_set(True)
 
         bpy.ops.object.mode_set(mode='PAINT_GPENCIL')
+
+        # surface placement
         ts.gpencil_stroke_placement_view3d = 'SURFACE'
+        gp.data.zdepth_offset = 0.0001
+
+        view.show_region_toolbar = True
 
         return {'FINISHED'}
