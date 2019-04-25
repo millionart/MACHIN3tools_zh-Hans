@@ -190,12 +190,14 @@ class SurfaceDrawMode(bpy.types.Operator):
 
         else:
             name = "%s_SurfaceDrawing" % (active.name)
-
             gp = bpy.data.objects.new(name, bpy.data.grease_pencils.new(name))
+
             mcol.objects.link(gp)
 
             gp.matrix_world = active.matrix_world
             parent(gp, active)
+
+        gp.data.layers.new(name="SurfaceLayer")
 
         context.view_layer.objects.active = gp
         active.select_set(False)
@@ -207,6 +209,7 @@ class SurfaceDrawMode(bpy.types.Operator):
         ts.gpencil_stroke_placement_view3d = 'SURFACE'
         gp.data.zdepth_offset = 0.0001
 
-        view.show_region_toolbar = True
+        if not view.show_region_toolbar:
+            view.show_region_toolbar = True
 
         return {'FINISHED'}

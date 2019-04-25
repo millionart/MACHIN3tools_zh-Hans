@@ -13,6 +13,7 @@ from .. utils.collection import get_scene_collections
 # TODO: origin to selection
 # TODO: origin to bbox top, bottom, etc
 # TODO: align cursor to selected: align cursor rotation
+# TODO: align origin to cursor, see https://polycount.com/discussion/comment/2683194/#Comment_2683194
 
 
 class PieModes(Menu):
