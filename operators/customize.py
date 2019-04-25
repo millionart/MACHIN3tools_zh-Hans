@@ -530,7 +530,7 @@ class Customize(bpy.types.Operator):
             shading = area.spaces[0].shading
 
             overlay.show_face_center = True
-            overlay.wireframe_threshold = 1
+            overlay.wireframe_threshold = 0.99
 
             shading.show_backface_culling = True
 
