@@ -15,32 +15,38 @@ class ToggleGrid(bpy.types.Operator):
     def execute(self, context):
         global axis_x, axis_y, axis_z
 
-        overlay = context.space_data.overlay
+        view = context.space_data
+        overlay = view.overlay
+        perspective_type = view.region_3d.view_perspective
 
-        grid = context.space_data.overlay.show_floor
+        mode = "GRID" if perspective_type == "ORTHO" else "FLOOR"
 
-        if grid:
-            # get axes states
-            axis_x = overlay.show_axis_x
-            axis_y = overlay.show_axis_y
-            axis_z = overlay.show_axis_z
+        if mode == "FLOOR":
+            if overlay.show_floor:
+                # get axes states
+                axis_x = overlay.show_axis_x
+                axis_y = overlay.show_axis_y
+                axis_z = overlay.show_axis_z
 
-            # turn grid OFF
-            overlay.show_floor = False
+                # turn grid OFF
+                overlay.show_floor = False
 
-            # turn axes OFF
-            overlay.show_axis_x = False
-            overlay.show_axis_y = False
-            overlay.show_axis_z = False
+                # turn axes OFF
+                overlay.show_axis_x = False
+                overlay.show_axis_y = False
+                overlay.show_axis_z = False
 
-        else:
-            # turn grid ON
-            overlay.show_floor = True
+            else:
+                # turn grid ON
+                overlay.show_floor = True
 
-            # turn axes ON (according to previous states)
-            overlay.show_axis_x = axis_x
-            overlay.show_axis_y = axis_y
-            overlay.show_axis_z = axis_z
+                # turn axes ON (according to previous states)
+                overlay.show_axis_x = axis_x
+                overlay.show_axis_y = axis_y
+                overlay.show_axis_z = axis_z
+
+        elif mode == "GRID":
+            overlay.show_ortho_grid = not overlay.show_ortho_grid
 
         return {'FINISHED'}
 

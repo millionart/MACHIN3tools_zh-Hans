@@ -1,16 +1,38 @@
 import bpy
+import bmesh
 from ... utils import MACHIN3 as m3
-
 
 
 class ShadeSmooth(bpy.types.Operator):
     bl_idname = "machin3.shade_smooth"
     bl_label = "Shade Smooth"
+    bl_description = "Set smooth shading in object and edit mode\nALT: Mark edges sharp if face angle > auto smooth angle"
     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
+    def invoke(self, context, event):
         if context.mode == "OBJECT":
             bpy.ops.object.shade_smooth()
+
+            # set sharps based on face angles + activate auto smooth + enable sharp overlays
+            if event.alt:
+                active = context.active_object
+                active.data.use_auto_smooth = True
+                angle = active.data.auto_smooth_angle
+
+                bm = bmesh.new()
+                bm.from_mesh(active.data)
+                bm.normal_update()
+
+                sharpen = [e for e in bm.edges if e.calc_face_angle() > angle]
+
+                for e in sharpen:
+                    e.smooth = False
+
+                bm.to_mesh(active.data)
+                bm.clear()
+
+                context.space_data.overlay.show_edge_sharp = True
+
         elif context.mode == "EDIT_MESH":
             bpy.ops.mesh.faces_shade_smooth()
 
@@ -20,11 +42,13 @@ class ShadeSmooth(bpy.types.Operator):
 class ShadeFlat(bpy.types.Operator):
     bl_idname = "machin3.shade_flat"
     bl_label = "Shade Flat"
+    bl_description = "Set flat shading in object and edit mode"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         if context.mode == "OBJECT":
             bpy.ops.object.shade_flat()
+
         elif context.mode == "EDIT_MESH":
             bpy.ops.mesh.faces_shade_flat()
 
@@ -34,6 +58,7 @@ class ShadeFlat(bpy.types.Operator):
 class ToggleAutoSmooth(bpy.types.Operator):
     bl_idname = "machin3.toggle_auto_smooth"
     bl_label = "Toggle Auto Smooth"
+    bl_description = "Toggle Auto Smooth"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
