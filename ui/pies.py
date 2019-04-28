@@ -11,10 +11,12 @@ from .. utils.collection import get_scene_collections
 
 
 # TODO: origin to selection
-# TODO: origin to bbox top, bottom, etc
+# TODO: origin to bbox center, top, bottom, etc
 # TODO: align cursor to selected: align cursor rotation
 # TODO: align origin to cursor, see https://polycount.com/discussion/comment/2683194/#Comment_2683194
 
+
+# TODO: modes gpencil: add modal shrinkwrap tool, if gpencil is parented
 
 class PieModes(Menu):
     bl_idname = "MACHIN3_MT_modes_pie"
@@ -209,10 +211,10 @@ class PieModes(Menu):
                     gpd = context.gpencil_data
 
                     # 4 - LEFT
-                    pie.operator("object.mode_set", text="Draw", icon='EDITMODE_HLT').mode = "PAINT_GPENCIL"
+                    pie.operator("object.mode_set", text="Draw", icon='GREASEPENCIL').mode = "PAINT_GPENCIL"
 
                     # 6 - RIGHT
-                    pie.operator("object.mode_set", text="Sculpt", icon='EDITMODE_HLT').mode = "SCULPT_GPENCIL"
+                    pie.operator("object.mode_set", text="Sculpt", icon='SCULPTMODE_HLT').mode = "SCULPT_GPENCIL"
 
                     # 2 - BOTTOM
                     pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT_GPENCIL"
@@ -222,7 +224,7 @@ class PieModes(Menu):
                         pie.operator("object.close_grouppro", text="Close Group")
 
                     else:
-                        text, icon = ("Draw", "EDITMODE_HLT") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
+                        text, icon = ("Draw", "GREASEPENCIL") if active.mode == "OBJECT" else ("Object", "OBJECT_DATAMODE")
 
                         if active.mode == "WEIGHT_GPENCIL":
                             pie.operator("gpencil.weightmode_toggle", text=text, icon=icon)
@@ -573,7 +575,6 @@ class PieModes(Menu):
         r = row.row(align=True)
         r.active = False if context.mode == 'EDIT_MESH' else True
         r.operator("object.mode_set", text="", icon="EDITMODE_HLT").mode = 'EDIT'
-
 
 
 class PieSave(Menu):
@@ -1177,7 +1178,7 @@ class PieViews(Menu):
 
         else:
             text, icon = ("Orthographic", "VIEW_ORTHO") if r3d.is_perspective else ("Perspective", "VIEW_PERSPECTIVE")
-            row.operator("view3d.view_persportho", text=text, icon=icon)
+            row.operator("machin3.toggle_view_persportho", text=text, icon=icon)
 
             col.prop(view, "lens")
 

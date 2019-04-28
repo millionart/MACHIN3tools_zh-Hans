@@ -23,7 +23,6 @@ class Customize(bpy.types.Operator):
 
         resourcespath = os.path.join(get_prefs().path, "resources")
 
-
         """ no longer needed, with the PRESS box select working perfectly
 
         # SET Select TOOL, in object and edit mode

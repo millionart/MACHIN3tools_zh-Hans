@@ -170,10 +170,10 @@ class UVMode(bpy.types.Operator):
 class SurfaceDrawMode(bpy.types.Operator):
     bl_idname = "machin3.surface_draw_mode"
     bl_label = "MACHIN3: Surface Draw Mode"
-    bl_description = "Surface Draw, create parented, emptyGreasePencil object and enters DRAW mode."
+    bl_description = "Surface Draw, create parented, emptyGreasePencil object and enters DRAW mode.\nSHIFT: Select the Line tool."
     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
+    def invoke(self, context, event):
         # forcing object mode at the beginning, avoids issues when calling this tool from PAINT_WEIGHT mode
         bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -211,5 +211,9 @@ class SurfaceDrawMode(bpy.types.Operator):
 
         if not view.show_region_toolbar:
             view.show_region_toolbar = True
+
+        # optionally select the line tool
+        if event.shift:
+            bpy.ops.wm.tool_set_by_id(name="builtin.line")
 
         return {'FINISHED'}
