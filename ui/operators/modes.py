@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import StringProperty
 from ... utils.registration import get_prefs
-from ... utils.view import set_xray, reset_xray
+from ... utils.view import set_xray, reset_xray, update_local_view
 from ... utils.object import parent
 
 
@@ -196,6 +196,8 @@ class SurfaceDrawMode(bpy.types.Operator):
 
             gp.matrix_world = active.matrix_world
             parent(gp, active)
+
+        update_local_view(view, [(gp, True)])
 
         gp.data.layers.new(name="SurfaceLayer")
 
