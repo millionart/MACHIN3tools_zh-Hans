@@ -57,8 +57,7 @@ class ShadeSmooth(bpy.types.Operator):
         for f in bm.faces:
             f.smooth = True
 
-
-        sharpen = [e for e in bm.edges if e.calc_face_angle() > angle]
+        sharpen = [e for e in bm.edges if len(e.link_faces) == 2 and e.calc_face_angle() > angle]
 
         for e in sharpen:
             e.smooth = False

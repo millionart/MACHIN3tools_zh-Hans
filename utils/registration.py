@@ -197,7 +197,7 @@ def unregister_icons(icons):
     previews.remove(icons)
 
 
-# SPECIALS MENU ADDITION
+# CONTEXT MENU ADDITION
 
 def object_context_menu(self, context):
     self.layout.menu("MACHIN3_MT_machin3tools_object_context_menu")
