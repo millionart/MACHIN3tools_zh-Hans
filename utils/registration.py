@@ -42,7 +42,7 @@ def get_addon(addon, debug=False):
                 print()
 
             return enabled, foldername, version, path
-    return None, None, None, None
+    return False, None, None, None
 
 
 def get_addon_prefs(addon):
