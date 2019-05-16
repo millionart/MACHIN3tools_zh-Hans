@@ -425,6 +425,11 @@ class Customize(bpy.types.Operator):
     def preferences(self, context):
         prefs = context.preferences
 
+        # turn off auto-save
+
+        prefs.use_preferences_save = False
+
+
         if get_prefs().custom_preferences_interface:
             print("\n» Changing Preferences: Interface")
 
@@ -454,7 +459,8 @@ class Customize(bpy.types.Operator):
 
             v.mini_axis_type = 'MINIMAL'
 
-            s.gpu_viewport_quality = 1
+            # s.gpu_viewport_quality = 1
+            s.viewport_aa = "8"
             s.multi_sample = "8"
 
         if get_prefs().custom_preferences_navigation:
