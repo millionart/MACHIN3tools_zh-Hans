@@ -214,6 +214,12 @@ def remove_object_context_menu(runtime=False):
     bpy.types.VIEW3D_MT_object_context_menu.remove(object_context_menu)
 
 
+# ADD OBJECTS ADDITION
+
+def add_object_buttons(self, context):
+    self.layout.operator("machin3.quadsphere", text="Quad Sphere", icon='SPHERE')
+
+
 # RUNTIME TOOL (DE)ACTIVATION
 
 def activate(self, register, tool):

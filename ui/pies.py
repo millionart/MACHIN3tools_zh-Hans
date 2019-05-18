@@ -1003,9 +1003,9 @@ class PieShading(Menu):
             row.prop(context.scene.eevee, "bloom_threshold")
             row.prop(context.scene.eevee, "bloom_radius")
 
-        icon = "TRIA_DOWN" if context.scene.eevee.use_volumetric else "TRIA_RIGHT"
-        col.prop(context.scene.eevee, "use_volumetric", icon=icon)
-        if context.scene.eevee.use_volumetric:
+        icon = "TRIA_DOWN" if context.scene.eevee.use_volumetric_lights else "TRIA_RIGHT"
+        col.prop(context.scene.eevee, "use_volumetric_lights", icon=icon)
+        if context.scene.eevee.use_volumetric_lights:
             row = col.row(align=True)
             row.prop(context.scene.eevee, "volumetric_start")
             row.prop(context.scene.eevee, "volumetric_end")

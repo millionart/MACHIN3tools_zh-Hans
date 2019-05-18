@@ -34,6 +34,7 @@ from bpy.props import PointerProperty
 from . properties import M3SceneProperties
 from . utils.registration import get_core, get_tools, get_pie_menus, get_menus
 from . utils.registration import register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, add_object_context_menu, remove_object_context_menu
+from . utils.registration import add_object_buttons
 
 
 def register():
@@ -59,6 +60,8 @@ def register():
 
     add_object_context_menu()
 
+    bpy.types.VIEW3D_MT_mesh_add.prepend(add_object_buttons)
+
 
     # ICONS
 
@@ -74,6 +77,8 @@ def unregister():
     global classes, keymaps, icons
 
     # TOOLS, PIE MENUS, KEYMAPS, MENUS
+
+    bpy.types.VIEW3D_MT_mesh_add.remove(add_object_buttons)
 
     remove_object_context_menu()
 
