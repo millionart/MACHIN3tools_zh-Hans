@@ -11,7 +11,7 @@ class MeshCut(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects
+        return context.mode == 'OBJECT' and len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects
 
     def invoke(self, context, event):
         target = context.active_object

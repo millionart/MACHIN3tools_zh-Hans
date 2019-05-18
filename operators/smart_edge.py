@@ -20,7 +20,8 @@ class SmartEdge(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return m3.get_mode() in ["VERT", "EDGE", "FACE"]
+        mode = tuple(bpy.context.scene.tool_settings.mesh_select_mode)
+        return any(mode == m for m in [(True, False, False), (False, True, False), (False, False, True)])
 
     def execute(self, context):
         active = context.active_object

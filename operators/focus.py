@@ -7,6 +7,7 @@ levels_items = [("SINGLE", "Single", ""),
                 ("MULTIPLE", "Multiple", "")]
 
 # TODO: option to to it for all views? possible?
+# TODO: add HUD
 
 
 class Focus(bpy.types.Operator):

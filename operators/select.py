@@ -24,6 +24,9 @@ class SelectCenterObjects(bpy.types.Operator):
         row = column.row()
         row.prop(self, "axis", expand=True)
 
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
 
     def execute(self, context):
         visible = [obj for obj in context.visible_objects if obj.type == "MESH"]

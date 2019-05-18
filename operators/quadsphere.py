@@ -22,6 +22,10 @@ class QuadSphere(bpy.types.Operator):
         row.prop(self, "subdivisions")
         row.prop(self, "align_rotation", toggle=True)
 
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT' or context.mode == 'EDIT_MESH'
+
     def execute(self, context):
         bpy.ops.mesh.primitive_cube_add(align='CURSOR' if self.align_rotation else 'WORLD')
 
@@ -33,5 +37,8 @@ class QuadSphere(bpy.types.Operator):
         for sub in range(self.subdivisions):
             bpy.ops.mesh.subdivide(number_cuts=1, smoothness=1)
             bpy.ops.transform.tosphere(value=1)
+
+        if mode == 'OBJECT':
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         return {'FINISHED'}

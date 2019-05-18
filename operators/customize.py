@@ -14,8 +14,7 @@ class Customize(bpy.types.Operator):
     bl_idname = "machin3.customize"
     bl_label = "MACHIN3: Customize"
     bl_description = "Customize various Blender preferences, settings and keymaps."
-    bl_options = {'REGISTER'}
-
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         scriptspath = bpy.utils.user_resource('SCRIPTS')
@@ -594,7 +593,7 @@ class Customize(bpy.types.Operator):
 class RestoreKeymaps(bpy.types.Operator):
     bl_idname = "machin3.restore_keymaps"
     bl_label = "MACHIN3: Restore Keymaps"
-    bl_options = {'REGISTER'}
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         kc = context.window_manager.keyconfigs.user
