@@ -15,14 +15,16 @@ def parent(obj, parentobj):
     obj.matrix_world = p.matrix_parent_inverse @ obj.matrix_world
 
 
-def flatten(obj):
-    bpy.context.scene.update()
+def flatten(obj, depsgraph=None):
+    if not depsgraph:
+        depsgraph = bpy.context.evaluated_depsgraph_get()
 
     oldmesh = obj.data
 
-    obj.data = obj.to_mesh(bpy.context.depsgraph, apply_modifiers=True)
+    obj.data = bpy.data.meshes.new_from_object(obj.evaluated_get(depsgraph))
     obj.modifiers.clear()
 
+    # remove the old mesh
     bpy.data.meshes.remove(oldmesh, do_unlink=True)
 
 
