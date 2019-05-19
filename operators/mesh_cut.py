@@ -14,7 +14,6 @@ class MeshCut(bpy.types.Operator):
         return context.mode == 'OBJECT' and len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects
 
     def invoke(self, context, event):
-        dg = context.evaluated_depsgraph_get()
 
         target = context.active_object
         cutter = [obj for obj in context.selected_objects if obj != target][0]
@@ -22,6 +21,9 @@ class MeshCut(bpy.types.Operator):
         # unhide both
         unhide_deselect(target.data)
         unhide_deselect(cutter.data)
+
+        # get depsgraph
+        dg = context.evaluated_depsgraph_get()
 
         # flatten the cutter
         flatten(cutter, dg)
@@ -47,6 +49,7 @@ class MeshCut(bpy.types.Operator):
         # select cutter mesh
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.object.face_map_select()
+
 
         # knife intersect
         if event.shift:
