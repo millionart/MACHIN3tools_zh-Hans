@@ -14,15 +14,13 @@ class Customize(bpy.types.Operator):
     bl_idname = "machin3.customize"
     bl_label = "MACHIN3: Customize"
     bl_description = "Customize various Blender preferences, settings and keymaps."
-    bl_options = {'REGISTER'}
-
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         scriptspath = bpy.utils.user_resource('SCRIPTS')
         datafilespath = bpy.utils.user_resource('DATAFILES')
 
         resourcespath = os.path.join(get_prefs().path, "resources")
-
 
         """ no longer needed, with the PRESS box select working perfectly
 
@@ -426,6 +424,11 @@ class Customize(bpy.types.Operator):
     def preferences(self, context):
         prefs = context.preferences
 
+        # turn off auto-save
+
+        prefs.use_preferences_save = False
+
+
         if get_prefs().custom_preferences_interface:
             print("\n» Changing Preferences: Interface")
 
@@ -455,7 +458,8 @@ class Customize(bpy.types.Operator):
 
             v.mini_axis_type = 'MINIMAL'
 
-            s.gpu_viewport_quality = 1
+            # s.gpu_viewport_quality = 1
+            s.viewport_aa = "8"
             s.multi_sample = "8"
 
         if get_prefs().custom_preferences_navigation:
@@ -530,7 +534,7 @@ class Customize(bpy.types.Operator):
             shading = area.spaces[0].shading
 
             overlay.show_face_center = True
-            overlay.wireframe_threshold = 1
+            overlay.wireframe_threshold = 0.99
 
             shading.show_backface_culling = True
 
@@ -589,7 +593,7 @@ class Customize(bpy.types.Operator):
 class RestoreKeymaps(bpy.types.Operator):
     bl_idname = "machin3.restore_keymaps"
     bl_label = "MACHIN3: Restore Keymaps"
-    bl_options = {'REGISTER'}
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         kc = context.window_manager.keyconfigs.user

@@ -11,12 +11,24 @@ def unhide(mesh):
         el.hide = False
 
 
+def unhide_select(mesh):
+    for el in set(mesh.polygons) | set(mesh.edges) | set(mesh.vertices):
+        el.hide = False
+        el.select = True
+
+
+def unhide_deselect(mesh):
+    for el in set(mesh.polygons) | set(mesh.edges) | set(mesh.vertices):
+        el.hide = False
+        el.select = False
+
+
 def select(mesh):
     for el in set(mesh.polygons) | set(mesh.edges) | set(mesh.vertices):
         el.select = True
 
 
-def unselect(mesh):
+def deselect(mesh):
     for el in set(mesh.polygons) | set(mesh.edges) | set(mesh.vertices):
         el.select = False
 

@@ -42,7 +42,7 @@ def get_addon(addon, debug=False):
                 print()
 
             return enabled, foldername, version, path
-    return None, None, None, None
+    return False, None, None, None
 
 
 def get_addon_prefs(addon):
@@ -197,7 +197,7 @@ def unregister_icons(icons):
     previews.remove(icons)
 
 
-# SPECIALS MENU ADDITION
+# CONTEXT MENU ADDITION
 
 def object_context_menu(self, context):
     self.layout.menu("MACHIN3_MT_machin3tools_object_context_menu")
@@ -212,6 +212,12 @@ def add_object_context_menu(runtime=False):
 def remove_object_context_menu(runtime=False):
     # if get_prefs().activate_object_context_menu or runtime:
     bpy.types.VIEW3D_MT_object_context_menu.remove(object_context_menu)
+
+
+# ADD OBJECTS ADDITION
+
+def add_object_buttons(self, context):
+    self.layout.operator("machin3.quadsphere", text="Quad Sphere", icon='SPHERE')
 
 
 # RUNTIME TOOL (DE)ACTIVATION

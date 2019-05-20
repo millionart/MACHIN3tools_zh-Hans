@@ -142,3 +142,32 @@ class ToggleCamPerspOrtho(bpy.types.Operator):
             cam.data.type = "PERSP"
 
         return {'FINISHED'}
+
+
+toggledprefs = False
+
+
+class ToggleViewPerspOrtho(bpy.types.Operator):
+    bl_idname = "machin3.toggle_view_persportho"
+    bl_label = "MACHIN3: Toggle View Perspective/Ortho"
+    bl_description = "Toggle Viewport Perspective/Ortho"
+    bl_options = {'REGISTER', 'UNDO'}
+
+
+    def execute(self, context):
+        global toggledprefs
+
+        view = context.space_data
+        viewtype = view.region_3d.view_perspective
+        prefs = context.preferences.inputs
+
+        if viewtype == "PERSP" and prefs.use_auto_perspective:
+            prefs.use_auto_perspective = False
+            toggledprefs = True
+
+        if viewtype == "ORTHO" and toggledprefs:
+            prefs.use_auto_perspective = True
+
+        bpy.ops.view3d.view_persportho()
+
+        return {'FINISHED'}

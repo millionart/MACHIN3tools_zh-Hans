@@ -1,5 +1,5 @@
 import bpy
-from .. utils.mesh import unhide, unselect
+from .. utils.mesh import unhide_deselect
 from .. utils.object import flatten, add_facemap, add_vgroup
 
 
@@ -11,26 +11,26 @@ class MeshCut(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects
+        return context.mode == 'OBJECT' and len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects
 
     def invoke(self, context, event):
+
         target = context.active_object
         cutter = [obj for obj in context.selected_objects if obj != target][0]
 
         # unhide both
-        unhide(target.data)
-        unhide(cutter.data)
+        unhide_deselect(target.data)
+        unhide_deselect(cutter.data)
 
-        # unselect both
-        unselect(target.data)
-        unselect(cutter.data)
+        # get depsgraph
+        dg = context.evaluated_depsgraph_get()
 
         # flatten the cutter
-        flatten(cutter)
+        flatten(cutter, dg)
 
         # flatten the target
         if event.alt:
-            flatten(target)
+            flatten(target, dg)
 
         # check for active cutter material
         mat = cutter.active_material
@@ -39,6 +39,7 @@ class MeshCut(bpy.types.Operator):
         if mat:
             cutter.data.materials.clear()
 
+        # initialize face maps
         add_facemap(cutter, name="mesh_cut", ids=[f.index for f in cutter.data.polygons])
         add_facemap(target, name="mesh_cut")
 
@@ -49,16 +50,15 @@ class MeshCut(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.object.face_map_select()
 
+
         # knife intersect
         if event.shift:
             bpy.ops.mesh.intersect(separate_mode='ALL')
         else:
             bpy.ops.mesh.intersect(separate_mode='CUT')
 
-        # select cutter mesh
+        # select cutter mesh and delete it
         bpy.ops.object.face_map_select()
-
-        # remove cutter mesh
         bpy.ops.mesh.delete(type='FACE')
 
         # mark non-manifold edges
