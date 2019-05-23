@@ -28,11 +28,19 @@ def flatten(obj, depsgraph=None):
     bpy.data.meshes.remove(oldmesh, do_unlink=True)
 
 
-def add_vgroup(obj, name="", ids=[], weight=1):
+def add_vgroup(obj, name="", ids=[], weight=1, debug=False):
     vgroup = obj.vertex_groups.new(name=name)
+
+    if debug:
+        print(" » Created new vertex group: %s" % (name))
 
     if ids:
         vgroup.add(ids, weight, "ADD")
+
+    # from selection
+    else:
+        obj.vertex_groups.active_index = vgroup.index
+        bpy.ops.object.vertex_group_assign()
 
     return vgroup
 

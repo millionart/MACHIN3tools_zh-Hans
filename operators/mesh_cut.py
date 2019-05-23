@@ -1,6 +1,9 @@
 import bpy
-from .. utils.mesh import unhide_deselect
+import bmesh
+from .. utils.mesh import unhide_deselect, join
 from .. utils.object import flatten, add_facemap, add_vgroup
+
+from time import time
 
 
 class MeshCut(bpy.types.Operator):
@@ -14,6 +17,9 @@ class MeshCut(bpy.types.Operator):
         return context.mode == 'OBJECT' and len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects
 
     def invoke(self, context, event):
+
+        start = time()
+
 
         target = context.active_object
         cutter = [obj for obj in context.selected_objects if obj != target][0]
@@ -32,45 +38,43 @@ class MeshCut(bpy.types.Operator):
         if event.alt:
             flatten(target, dg)
 
-        # check for active cutter material
-        mat = cutter.active_material
-
         # clear cutter materials
-        if mat:
-            cutter.data.materials.clear()
+        cutter.data.materials.clear()
 
-        # initialize face maps
-        add_facemap(cutter, name="mesh_cut", ids=[f.index for f in cutter.data.polygons])
-        add_facemap(target, name="mesh_cut")
-
-        # join
-        bpy.ops.object.join()
-
-        # select cutter mesh
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.object.face_map_select()
-
+        # join target and cutter
+        join(target, [cutter], select=[1])
 
         # knife intersect
+        bpy.ops.object.mode_set(mode='EDIT')
         if event.shift:
             bpy.ops.mesh.intersect(separate_mode='ALL')
         else:
             bpy.ops.mesh.intersect(separate_mode='CUT')
-
-        # select cutter mesh and delete it
-        bpy.ops.object.face_map_select()
-        bpy.ops.mesh.delete(type='FACE')
-
-        # mark non-manifold edges
-        if event.shift:
-            bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.mesh.region_to_loop()
-
-            bpy.ops.mesh.mark_seam(clear=False)
-            bpy.ops.mesh.remove_doubles()
-
-        # remove mesh_cut fmap
         bpy.ops.object.mode_set(mode='OBJECT')
-        bpy.ops.object.face_map_remove()
+
+        # remove cutter
+        bm = bmesh.new()
+        bm.from_mesh(target.data)
+        bm.normal_update()
+        bm.verts.ensure_lookup_table()
+
+        i = bm.faces.layers.int.verify()
+
+        cuuter_faces = [f for f in bm.faces if f[i] > 0]
+        bmesh.ops.delete(bm, geom=cuuter_faces, context='FACES')
+
+        # mark seams
+        if event.shift:
+            non_manifold = [e for e in bm.edges if not e.is_manifold]
+
+            for e in non_manifold:
+                e.seam = True
+
+            bmesh.ops.remove_doubles(bm, verts=list({v for e in non_manifold for v in e.verts}), dist=0.0001)
+
+        bm.to_mesh(target.data)
+        bm.clear()
+
+        print(time() - start)
 
         return {'FINISHED'}
