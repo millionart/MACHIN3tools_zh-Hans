@@ -107,11 +107,18 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "screen.redo_last":
                     kmi.type = "BUTTON4MOUSE"
 
+            # SCREEN EDITING
+
+            km = kc.keymaps.get("Screen Editing")
+            for kmi in km.keymap_items:
                 if kmi.idname == "screen.screen_full_area":
                     if kmi.properties.use_hide_panels:
                         kmi.shift = True
                         kmi.alt = False
                         kmi.ctrl = False
+
+                        kmi.type = 'SPACE'
+                        kmi.value = 'PRESS'
 
                     else:
                         kmi.active = False
