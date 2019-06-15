@@ -29,7 +29,7 @@ bl_info = {
     "category": "Mesh"}
 
 
-def reload_modules():
+def reload_modules(name):
     """
     This makes sure all modules are reloaded from new files, when the addon is removed and a new version is installed in the same session,
     or when Blender's 'Reload Scripts' operator is run manually.
@@ -45,11 +45,10 @@ def reload_modules():
     for module in utils_modules:
         impline = "from . utils import %s" % (module)
 
-        print("reloading %s" % (".".join(['MACHIN3tools'] + ['utils'] + [module])))
+        print("reloading %s" % (".".join([name] + ['utils'] + [module])))
 
         exec(impline)
         importlib.reload(eval(module))
-
 
     # then update the classes and keys dicts
     from . import dicts
@@ -73,14 +72,14 @@ def reload_modules():
         else:
             impline = "from . import %s" % (module)
 
-        print("reloading %s" % (".".join(['MACHIN3tools'] + path + [module])))
+        print("reloading %s" % (".".join([name] + path + [module])))
 
         exec(impline)
         importlib.reload(eval(module))
 
 
 if 'bpy' in locals():
-    reload_modules()
+    reload_modules(bl_info['name'])
 
 import bpy
 from bpy.props import PointerProperty
