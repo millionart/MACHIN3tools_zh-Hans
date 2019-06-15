@@ -49,11 +49,15 @@ def hide(mesh):
     mesh.edges.foreach_set('hide', [True] * len(mesh.edges))
     mesh.vertices.foreach_set('hide', [True] * len(mesh.vertices))
 
+    mesh.update()
+
 
 def unhide(mesh):
     mesh.polygons.foreach_set('hide', [False] * len(mesh.polygons))
     mesh.edges.foreach_set('hide', [False] * len(mesh.edges))
     mesh.vertices.foreach_set('hide', [False] * len(mesh.vertices))
+
+    mesh.update()
 
 
 def unhide_select(mesh):
@@ -69,6 +73,8 @@ def unhide_select(mesh):
     mesh.edges.foreach_set('select', [True] * edges)
     mesh.vertices.foreach_set('select', [True] * vertices)
 
+    mesh.update()
+
 
 def unhide_deselect(mesh):
     polygons = len(mesh.polygons)
@@ -83,11 +89,15 @@ def unhide_deselect(mesh):
     mesh.edges.foreach_set('select', [False] * edges)
     mesh.vertices.foreach_set('select', [False] * vertices)
 
+    mesh.update()
+
 
 def select(mesh):
     mesh.polygons.foreach_set('select', [True] * len(mesh.polygons))
     mesh.edges.foreach_set('select', [True] * len(mesh.edges))
     mesh.vertices.foreach_set('select', [True] * len(mesh.vertices))
+
+    mesh.update()
 
 
 def deselect(mesh):
@@ -95,6 +105,7 @@ def deselect(mesh):
     mesh.edges.foreach_set('select', [False] * len(mesh.edges))
     mesh.vertices.foreach_set('select', [False] * len(mesh.vertices))
 
+    mesh.update()
 
 # BMESH
 

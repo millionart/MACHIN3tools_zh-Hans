@@ -1,9 +1,7 @@
 import bpy
 import bmesh
 from .. utils.mesh import unhide_deselect, join
-from .. utils.object import flatten, add_facemap, add_vgroup
-
-from time import time
+from .. utils.object import flatten
 
 
 class MeshCut(bpy.types.Operator):
@@ -14,13 +12,9 @@ class MeshCut(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'OBJECT' and len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects
+        return context.mode == 'OBJECT' and len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects and all(obj.type == 'MESH' for obj in context.selected_objects)
 
     def invoke(self, context, event):
-
-        start = time()
-
-
         target = context.active_object
         cutter = [obj for obj in context.selected_objects if obj != target][0]
 
@@ -74,7 +68,5 @@ class MeshCut(bpy.types.Operator):
 
         bm.to_mesh(target.data)
         bm.clear()
-
-        print(time() - start)
 
         return {'FINISHED'}
