@@ -22,31 +22,6 @@ class Customize(bpy.types.Operator):
 
         resourcespath = os.path.join(get_prefs().path, "resources")
 
-        """ no longer needed, with the PRESS box select working perfectly
-
-        # SET Select TOOL, in object and edit mode
-        if context.area.type == "VIEW_3D":
-            bpy.ops.wm.tool_set_by_name(name="Select")
-
-            if context.active_object and context.active_object.type == "MESH":
-                bpy.ops.object.editmode_toggle()
-                bpy.ops.wm.tool_set_by_name(name="Select")
-                bpy.ops.object.editmode_toggle()
-
-
-        # context override https://blender.stackexchange.com/a/27182/33919
-        else:
-            overrides = [{'area': area} for screen in context.workspace.screens for area in screen.areas if area.type == "VIEW_3D"]
-            for o in overrides:
-                bpy.ops.wm.tool_set_by_name(o, name="Select")
-
-                if context.active_object and context.active_object.type == "MESH":
-                    bpy.ops.object.editmode_toggle()
-                    bpy.ops.wm.tool_set_by_name(o, name="Select")
-                    bpy.ops.object.editmode_toggle()
-        """
-
-
         # THEME
         if get_prefs().custom_theme:
             self.theme(scriptspath, resourcespath)
@@ -107,11 +82,18 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "screen.redo_last":
                     kmi.type = "BUTTON4MOUSE"
 
+            # SCREEN EDITING
+
+            km = kc.keymaps.get("Screen Editing")
+            for kmi in km.keymap_items:
                 if kmi.idname == "screen.screen_full_area":
                     if kmi.properties.use_hide_panels:
                         kmi.shift = True
                         kmi.alt = False
                         kmi.ctrl = False
+
+                        kmi.type = 'SPACE'
+                        kmi.value = 'PRESS'
 
                     else:
                         kmi.active = False
@@ -249,21 +231,19 @@ class Customize(bpy.types.Operator):
 
                 if kmi.idname == "mesh.loop_select":
                     if not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "toggle", "ring"]]):
-                        kmi.value = "PRESS"
-                        kmi.alt = True
-                        kmi.properties.toggle = True
-
-                    else:
                         kmi.active = False
+
+                    elif kmi.properties.toggle:
+                        kmi.value = "PRESS"
+                        kmi.shift = False
 
                 if kmi.idname == "mesh.edgering_select":
                     if kmi.properties.ring and not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "toggle"]]):
+                        kmi.active = False
+
+                    elif kmi.properties.toggle:
                         kmi.value = "PRESS"
                         kmi.shift = False
-                        kmi.properties.toggle = True
-
-                    else:
-                        kmi.active = False
 
                 if kmi.idname == "mesh.shortest_path_pick":
                     kmi.value = "PRESS"

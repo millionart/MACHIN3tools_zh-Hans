@@ -1,10 +1,8 @@
 import bpy
 from bpy.utils import register_class, unregister_class, previews
 import os
-from . import MACHIN3 as m3
-from .. keys import keys as keysdict
-from .. classes import classes as classesdict
-
+from .. dicts import keys as keysdict
+from .. dicts import classes as classesdict
 
 
 def get_path():

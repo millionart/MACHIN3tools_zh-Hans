@@ -1,6 +1,7 @@
 import bpy
 from bpy.props import IntProperty, BoolProperty
 from bpy_extras.object_utils import AddObjectHelper
+from math import radians
 
 
 class QuadSphere(bpy.types.Operator):
@@ -27,7 +28,7 @@ class QuadSphere(bpy.types.Operator):
         return context.mode == 'OBJECT' or context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        bpy.ops.mesh.primitive_cube_add(align='CURSOR' if self.align_rotation else 'WORLD')
+        obj = bpy.ops.mesh.primitive_cube_add(align='CURSOR' if self.align_rotation else 'WORLD')
 
         mode = bpy.context.mode
 
@@ -40,5 +41,8 @@ class QuadSphere(bpy.types.Operator):
 
         if mode == 'OBJECT':
             bpy.ops.object.mode_set(mode='OBJECT')
+
+        quadsphere = context.active_object
+        quadsphere.data.auto_smooth_angle = radians(60)
 
         return {'FINISHED'}

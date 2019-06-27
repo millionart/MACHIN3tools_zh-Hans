@@ -489,7 +489,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         # kc = wm.keyconfigs.addon
         kc = wm.keyconfigs.user
 
-        from . keys import keys
+        from . dicts import keys
 
         split = box.split()
 

@@ -42,7 +42,7 @@ class Populate(bpy.types.Operator):
         idx, mats, _ = get_mat()
 
         with bpy.data.libraries.load(get_prefs().appendmatspath, link=False) as (data_from, _):
-            for name in getattr(data_from, "materials"):
+            for name in reversed(getattr(data_from, "materials")):
                 if name not in mats:
                     am = mats.add()
                     am.name = name
