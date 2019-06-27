@@ -31,7 +31,7 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
                          ("ui.operators.modes", [("ImageMode", "image_mode"),
                                                  ("UVMode", "uv_mode"),
                                                  ("SurfaceDrawMode", "surface_draw_mode")]),
-                         ("ui.operators.open_blend", [("OpenCollectionInstanceLibrary", "open_collection_instance_library")])],
+                         ("ui.operators.open_blend", [("OpenLibraryBlend", "open_library_blend")])],
 
            "SAVE_PIE": [("ui.pies", [("PieSave", "save_pie")]),
                         ("ui.menus", [("MenuAppendMaterials", "append_materials")]),

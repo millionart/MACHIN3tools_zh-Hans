@@ -3,7 +3,7 @@ from bpy.props import StringProperty
 import subprocess
 
 
-class OpenCollectionInstanceLibrary(bpy.types.Operator):
+class OpenLibraryBlend(bpy.types.Operator):
     bl_idname = "machin3.open_library_blend"
     bl_label = "MACHIN3: Open Library Blend"
     bl_description = "Open new Blender instance, loading the library sourced in the selected object or collection instance."
