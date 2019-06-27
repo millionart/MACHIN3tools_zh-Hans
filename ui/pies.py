@@ -4,6 +4,7 @@ import os
 from .. utils.registration import get_prefs, get_addon
 from .. utils.ui import get_icon
 from .. utils.collection import get_scene_collections
+from .. utils.system import abspath
 
 # TODO: snapping pie
 # TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
@@ -37,51 +38,59 @@ class PieModes(Menu):
             if context.mode in ['OBJECT', 'EDIT_MESH', 'EDIT_ARMATURE', 'POSE', 'EDIT_CURVE', 'EDIT_TEXT', 'EDIT_SURFACE', 'EDIT_METABALL', 'EDIT_LATTICE', 'EDIT_GPENCIL', 'PAINT_GPENCIL', 'SCULPT_GPENCIL', 'WEIGHT_GPENCIL']:
                 if active.type == 'MESH':
                     if context.area.type == "VIEW_3D":
-                        # 4 - LEFT
-                        pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
 
-                        # 6 - RIGHT
-                        pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
+                        if active.library:
+                            blendpath = abspath(active.library.filepath)
+                            library = active.library.name
 
-                        # 2 - BOTTOM
-                        pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
-
-                        # 8 - TOP
-                        if context.mode == 'OBJECT' and grouppro and len(context.scene.storedGroupSettings):
-                            pie.operator("object.close_grouppro", text="Close Group")
+                            op = pie.operator("machin3.open_library_blend", text="Open %s" % (os.path.basename(blendpath)))
+                            op.blendpath = blendpath
+                            op.library = library
 
                         else:
-                            text, icon = ("Edit", get_icon('edit_mesh')) if active.mode == "OBJECT" else ("Object", get_icon('object'))
-                            pie.operator("machin3.edit_mode", text=text, icon_value=icon)
+                            # 4 - LEFT
+                            pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
 
-                        # 7 - TOP - LEFT
-                        self.draw_mesh_modes(context, pie)
+                            # 6 - RIGHT
+                            pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
 
+                            # 2 - BOTTOM
+                            pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
 
-                        # 9 - TOP - RIGHT
-                        if context.mode == 'OBJECT' and grouppro:
-                            self.draw_grouppro(context, pie)
+                            # 8 - TOP
+                            if context.mode == 'OBJECT' and grouppro and len(context.scene.storedGroupSettings):
+                                pie.operator("object.close_grouppro", text="Close Group")
 
-                        else:
+                            else:
+                                text, icon = ("Edit", get_icon('edit_mesh')) if active.mode == "OBJECT" else ("Object", get_icon('object'))
+                                pie.operator("machin3.edit_mode", text=text, icon_value=icon)
+
+                            # 7 - TOP - LEFT
+                            self.draw_mesh_modes(context, pie)
+
+                            # 9 - TOP - RIGHT
+                            if context.mode == 'OBJECT' and grouppro:
+                                self.draw_grouppro(context, pie)
+
+                            else:
+                                pie.separator()
+
+                            # 1 - BOTTOM - LEFT
                             pie.separator()
 
+                            # 3 - BOTTOM - RIGHT
+                            if context.mode == "EDIT_MESH":
+                                box = pie.split()
+                                column = box.column()
 
-                        # 1 - BOTTOM - LEFT
-                        pie.separator()
+                                row = column.row()
+                                row.scale_y = 1.2
+                                row.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
 
-                        # 3 - BOTTOM - RIGHT
-                        if context.mode == "EDIT_MESH":
-                            box = pie.split()
-                            column = box.column()
+                                column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
 
-                            row = column.row()
-                            row.scale_y = 1.2
-                            row.prop(context.scene.M3, "pass_through", text="Pass Through" if context.scene.M3.pass_through else "Occlude", icon="XRAY")
-
-                            column.prop(toolsettings, "use_mesh_automerge", text="Auto Merge")
-
-                        else:
-                            pie.separator()
+                            else:
+                                pie.separator()
 
                     if context.area.type == "IMAGE_EDITOR":
                         toolsettings = context.scene.tool_settings
@@ -296,10 +305,10 @@ class PieModes(Menu):
                         pie.operator("object.edit_grouppro", text="Edit Group")
 
                     elif active.instance_collection and active.instance_collection.library:
-                        blendpath = active.instance_collection.library.filepath
+                        blendpath = abspath(active.instance_collection.library.filepath)
                         library = active.instance_collection.library.name
 
-                        op = pie.operator("machin3.open_collection_instance_library", text="Open %s" % (os.path.basename(blendpath)))
+                        op = pie.operator("machin3.open_library_blend", text="Open %s" % (os.path.basename(blendpath)))
                         op.blendpath = blendpath
                         op.library = library
 

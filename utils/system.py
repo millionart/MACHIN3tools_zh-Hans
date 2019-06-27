@@ -1,4 +1,9 @@
 import bpy
+import os
+
+
+def abspath(path):
+    return os.path.abspath(bpy.path.abspath(path))
 
 
 def quotepath(path):
