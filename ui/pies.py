@@ -19,6 +19,11 @@ from .. utils.system import abspath
 
 # TODO: modes gpencil: add modal shrinkwrap tool, if gpencil is parented
 
+
+grouppro = None
+decalmachine = None
+
+
 class PieModes(Menu):
     bl_idname = "MACHIN3_MT_modes_pie"
     bl_label = "Modes"
@@ -27,8 +32,15 @@ class PieModes(Menu):
         layout = self.layout
         toolsettings = context.tool_settings
 
-        grouppro, _, _, _ = get_addon("Group Pro")
-        decalmachine, _, _, _ = get_addon("DECALmachine")
+        global grouppro
+        global decalmachine
+
+        if grouppro is None:
+            grouppro, _, _, _ = get_addon("Group Pro")
+
+        if decalmachine is None:
+            decalmachine, _, _, _ = get_addon("DECALmachine")
+
 
         active = context.active_object
 
@@ -229,7 +241,7 @@ class PieModes(Menu):
                     pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT_GPENCIL"
 
                     # 8 - TOP
-                    if context.mode == 'OBJET' and grouppro and len(context.scene.storedGroupSettings):
+                    if context.mode == 'OBJECT' and grouppro and len(context.scene.storedGroupSettings):
                         pie.operator("object.close_grouppro", text="Close Group")
 
                     else:

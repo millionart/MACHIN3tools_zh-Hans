@@ -438,7 +438,6 @@ class Customize(bpy.types.Operator):
 
             v.mini_axis_type = 'MINIMAL'
 
-            # s.gpu_viewport_quality = 1
             s.viewport_aa = "8"
             s.multi_sample = "8"
 
