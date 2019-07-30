@@ -90,8 +90,10 @@ class CleanUp(bpy.types.Operator):
 
         bm = self.clean_up(active)
 
+        """
         if self.select:
             self.select_geometry(bm)
+        """
 
         bmesh.update_edit_mesh(active.data)
 
@@ -142,14 +144,9 @@ class CleanUp(bpy.types.Operator):
     def dissolve_2_edged_verts(self, bm):
         all_2_edged_verts = [v for v in bm.verts if len(v.link_edges) == 2]
 
-        inside = [v for v in all_2_edged_verts if all([e.is_manifold for e in v.link_edges])]
-        outside = list(set(all_2_edged_verts) - set(inside))
-
-        # 2 edged verts on non-manifold edges should only be removed, if the 2 edges are almost straight
-        # corner verts contribute to the shape of a polygon and should be kept
-
         straight_edged = []
-        for v in outside:
+
+        for v in all_2_edged_verts:
             e1 = v.link_edges[0]
             e2 = v.link_edges[1]
 
@@ -161,7 +158,7 @@ class CleanUp(bpy.types.Operator):
             if self.angle_threshold + 1 <= angle <= 181:
                 straight_edged.append(v)
 
-        bmesh.ops.dissolve_verts(bm, verts=inside + straight_edged)
+        bmesh.ops.dissolve_verts(bm, verts=straight_edged)
 
     def select_geometry(self, bm):
         for f in bm.faces:
