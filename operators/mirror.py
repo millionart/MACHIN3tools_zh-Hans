@@ -46,7 +46,7 @@ class Mirror(bpy.types.Operator):
             r.prop(self, "bisect_y")
             r = row.row()
             r.active = self.use_z
-            r.prop(self, "bisect_y")
+            r.prop(self, "bisect_z")
 
             row = column.row(align=True)
             r = row.row()
@@ -57,7 +57,7 @@ class Mirror(bpy.types.Operator):
             r.prop(self, "flip_y")
             r = row.row()
             r.active = self.use_z
-            r.prop(self, "flip_y")
+            r.prop(self, "flip_z")
 
 
         DMenabled, _, _, _ = get_addon("DECALmachine")

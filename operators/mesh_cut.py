@@ -94,6 +94,9 @@ class MeshCut(bpy.types.Operator):
             # dissolve them
             bmesh.ops.dissolve_verts(bm, verts=straight_edged)
 
+        # remove face int layer, it's no longer needed
+        bm.faces.layers.int.remove(i)
+
         bm.to_mesh(target.data)
         bm.clear()
 
