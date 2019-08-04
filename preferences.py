@@ -175,6 +175,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     obj_mode_rotate_around_active: BoolProperty(name="Rotate Around Selection, but only in Object Mode", default=False)
     toggle_cavity: BoolProperty(name="Toggle Cavity/Curvature OFF in Edit Mode, ON in Object Mode", default=True)
 
+    custom_startup: BoolProperty(name="Startup Scene", default=True)
     custom_theme: BoolProperty(name="Theme", default=True)
     custom_matcaps: BoolProperty(name="Matcaps and Default Shading", default=True)
     custom_overlays: BoolProperty(name="Overlays", default=True)
@@ -223,7 +224,6 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     tabs: EnumProperty(name="Tabs", items=preferences_tabs, default="GENERAL")
     avoid_update: BoolProperty(default=False)
     dirty_keymaps: BoolProperty(default=False)
-
 
 
     def draw(self, context):
@@ -381,6 +381,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             column = bbb.column()
 
             row = column.row()
+            row.prop(self, "custom_startup")
             row.prop(self, "custom_theme")
             row.prop(self, "custom_matcaps")
             row.prop(self, "custom_overlays")
