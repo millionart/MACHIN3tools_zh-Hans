@@ -162,27 +162,25 @@ class AppendWorld(bpy.types.Operator):
         return {'FINISHED'}
 
 
+decalmachine = None
+
+
 class AppendMaterial(bpy.types.Operator):
     bl_idname = "machin3.append_material"
     bl_label = "Append Material"
     bl_description = "Append material, or apply if it's already in the scene.\nSHIFT: Force append material, even if it's already in the scene."
     bl_options = {'REGISTER', 'UNDO'}
 
-    name: StringProperty(name="Append Name")
+    name: StringProperty(name='Append Name')
 
-    applymaterial: BoolProperty(name="Apply Material to Selection", default=True)
 
+    def draw(self, context):
+        layout = self.layout
+        column = layout.column()
 
     @classmethod
     def poll(cls, context):
         return get_prefs().appendmatspath
-
-    def draw(self, context):
-        layout = self.layout
-
-        column = layout.column()
-
-        column.prop(self, "applymaterial")
 
     def invoke(self, context, event):
         path = get_prefs().appendmatspath
@@ -201,35 +199,59 @@ class AppendMaterial(bpy.types.Operator):
                 mat = append_material(path, name)
 
             if mat:
-                if self.applymaterial:
-                    meshes = [obj for obj in context.selected_objects if obj.type in ["MESH", "SURFACE", "CURVE", "FONT", "META"]]
+                matobjs = [obj for obj in context.selected_objects if obj.type in ['MESH', 'SURFACE', 'CURVE', 'FONT', 'META']]
 
-                    decalmachine, _, _, _ = get_addon("DECALmachine")
+                # filter out decals, never apply materials to the this way
+                global decalmachine
 
-                    if decalmachine:
-                        meshes = [obj for obj in meshes if not obj.DM.isdecal]
+                if decalmachine is None:
+                    decalmachine, _, _, _ = get_addon('DECALmachine')
 
-                    for obj in meshes:
-                        # append material when there are no slots[creates a new slot automatically, as well as when in edit mode
-                        if not obj.material_slots or obj.mode == "EDIT":
+                if decalmachine:
+                    matobjs = [obj for obj in matobjs if not obj.DM.isdecal]
+
+                for obj in matobjs:
+
+                    # without any slots, create a new one and assign the material
+                    if not obj.material_slots:
+                        obj.data.materials.append(mat)
+
+                    # with slots, but without any materials, clear all slots, create a new one and assign the material
+                    elif not any(mat for mat in obj.data.materials):
+                        obj.data.materials.clear()
+                        obj.data.materials.append(mat)
+
+                    # with slots and with existing materials and in edit mesh mode, assign the material to the selection
+                    elif context.mode == 'EDIT_MESH':
+
+                        # but first check if the material already is assigned to another slot
+                        slot_idx = None
+
+                        for idx, slot in enumerate(obj.material_slots):
+                            if slot.material == mat:
+                                slot_idx = idx
+                                break
+
+                        # append the mat, if it's not already in the stack
+                        if slot_idx is None:
                             obj.data.materials.append(mat)
-                            idx = len(obj.data.materials) - 1
-
-                            if obj.mode == "EDIT":
-                                bm = bmesh.from_edit_mesh(obj.data)
-                                bm.normal_update()
-
-                                faces = [f for f in bm.faces if f.select]
-
-                                for face in faces:
-                                    face.material_index = idx
-
-                                bmesh.update_edit_mesh(obj.data)
+                            slot_idx = len(obj.material_slots) - 1
 
 
-                        # other wise just set the first slot's material
-                        else:
-                            obj.material_slots[0].material = mat
+                        # update the selected faces material_index accordingly
+                        bm = bmesh.from_edit_mesh(obj.data)
+                        bm.normal_update()
+
+                        faces = [f for f in bm.faces if f.select]
+
+                        for face in faces:
+                            face.material_index = slot_idx
+
+                        bmesh.update_edit_mesh(obj.data)
+
+                    # otherwise just apply it to the first slot
+                    else:
+                        obj.material_slots[0].material = mat
 
             else:
                 self.report({'ERROR'}, "Material '%s' could not be appended.\nMake sure a material of that name exists in the material source file." % (name))

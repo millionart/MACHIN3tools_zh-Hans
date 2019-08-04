@@ -22,10 +22,17 @@ class Customize(bpy.types.Operator):
 
         resourcespath = os.path.join(get_prefs().path, "resources")
 
+        # remove 'Material'
+        matmat = bpy.data.materials.get('Material')
+        if matmat:
+            bpy.data.materials.remove(matmat, do_unlink=True)
+
+
+
+
         # THEME
         if get_prefs().custom_theme:
             self.theme(scriptspath, resourcespath)
-
 
         # MATCAPS + DEFAULT SHADING
         if get_prefs().custom_matcaps:
