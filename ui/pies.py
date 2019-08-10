@@ -1715,7 +1715,8 @@ class PieWorkspace(Menu):
         pie.operator("machin3.switch_workspace", text="MACHIN3", icon='VIEW3D').name="General"
 
         # 6 - RIGHT
-        pie.operator("machin3.switch_workspace", text="Compositing", icon='NODE_COMPOSITING').name="Compositing"
+        # pie.operator("machin3.switch_workspace", text="Compositing", icon='NODE_COMPOSITING').name="Compositing"
+        pie.separator()
 
         # 2 - BOTTOM
         pie.operator("machin3.switch_workspace", text="Scripting", icon='CONSOLE').name="Scripting"
@@ -1727,10 +1728,11 @@ class PieWorkspace(Menu):
         pie.operator("machin3.switch_workspace", text="UVs", icon='GROUP_UVS').name="UVs"
 
         # 9 - TOP - RIGHT
-        pie.operator("machin3.switch_workspace", text="World", icon='WORLD').name="World"
+        # pie.operator("machin3.switch_workspace", text="World", icon='WORLD').name="World"
+        pie.separator()
 
         # 1 - BOTTOM - LEFT
         pie.separator()
 
         # 3 - BOTTOM - RIGHT
-        pie.separator()
+        pie.operator("machin3.switch_workspace", text="Video", icon='FILE_MOVIE').name="Video"
