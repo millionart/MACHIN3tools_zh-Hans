@@ -374,6 +374,10 @@ def get_tools():
     classlists, keylists, count = get_mesh_cut(classlists, keylists, count)
 
 
+    # FILEBROWSER DELETE
+    classlists, keylists, count = get_filebrowser_delete(classlists, keylists, count)
+
+
     # CUSTOMIZE
     classlists, keylists, count = get_customize(classlists, keylists, count)
 
@@ -538,6 +542,15 @@ def get_mesh_cut(classlists=[], keylists=[], count=0):
     if get_prefs().activate_mesh_cut:
         classlists.append(classesdict["MESH_CUT"])
         # keylists.append(keysdict["ALIGN"])
+        count +=1
+
+    return classlists, keylists, count
+
+
+def get_filebrowser_delete(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_filebrowser_delete:
+        classlists.append(classesdict["FILEBROWSER_DELETE"])
+        keylists.append(keysdict["FILEBROWSER_DELETE"])
         count +=1
 
     return classlists, keylists, count
