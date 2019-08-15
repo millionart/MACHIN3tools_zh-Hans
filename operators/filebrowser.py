@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import StringProperty
 import os
-from .. utils.system import open_folder
+from .. utils.system import abspath, open_folder
 
 
 class Delete(bpy.types.Operator):
@@ -59,6 +59,8 @@ class Open(bpy.types.Operator):
         area = context.area
         params = area.spaces[0].params
 
-        directory = params.directory
+        directory = abspath(params.directory)
+
         open_folder(directory)
+
         return {'FINISHED'}

@@ -90,10 +90,8 @@ class CleanUp(bpy.types.Operator):
 
         bm = self.clean_up(active)
 
-        """
         if self.select:
             self.select_geometry(bm)
-        """
 
         bmesh.update_edit_mesh(active.data)
 
