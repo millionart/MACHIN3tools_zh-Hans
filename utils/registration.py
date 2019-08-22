@@ -18,10 +18,12 @@ def get_prefs():
 
 
 def get_addon(addon, debug=False):
+    """
+    look for addon by name
+    return registration status, foldername, version and path
+    """
     import addon_utils
 
-    # look for addon by name and find folder name and path
-    # Note, this will also find addons that aren't registered!
 
     for mod in addon_utils.modules():
         name = mod.bl_info["name"]
