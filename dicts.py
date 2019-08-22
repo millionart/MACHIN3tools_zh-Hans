@@ -111,7 +111,10 @@ keys = {"SMART_VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "mach
         "SMART_FACE": [{"keymap": "Mesh", "idname": "machin3.smart_face", "type": "FOUR", "value": "PRESS"}],
         "CLEAN_UP": [{"keymap": "Mesh", "idname": "machin3.clean_up", "type": "THREE", "value": "PRESS"}],
         "CLIPPING_TOGGLE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "machin3.clipping_toggle", "type": "BUTTON5MOUSE", "value": "PRESS"}],
-        "FOCUS": [{"keymap": "Object Mode", "idname": "machin3.focus", "type": "F", "value": "PRESS", "ctrl": True}],
+
+        "FOCUS": [{"label": "View Selected", "keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "machin3.focus", "type": "F", "value": "PRESS", "properties": [("method", "VIEW_SELECTED")]},
+                  {"label": "Local View", "keymap": "Object Mode", "idname": "machin3.focus", "type": "F", "value": "PRESS", "ctrl": True, "properties": [("method", "LOCAL_VIEW")]}],
+
         "MIRROR": [{"label": "X Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "X", "value": "PRESS", "alt": True, "shift": True, "properties": [("init", True), ("use_x", True), ("use_y", False), ("use_z", False)]},
                    {"label": "Y Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Y", "value": "PRESS", "alt": True, "shift": True, "properties": [("init", True), ("use_x", False), ("use_y", True), ("use_z", False)]},
                    {"label": "Z Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Z", "value": "PRESS", "alt": True, "shift": True, "properties": [("init", True), ("use_x", False), ("use_y", False), ("use_z", True)]}],

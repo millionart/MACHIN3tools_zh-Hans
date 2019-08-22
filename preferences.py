@@ -179,6 +179,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     obj_mode_rotate_around_active: BoolProperty(name="Rotate Around Selection, but only in Object Mode", default=False)
     toggle_cavity: BoolProperty(name="Toggle Cavity/Curvature OFF in Edit Mode, ON in Object Mode", default=True)
 
+    focus_view_transition: BoolProperty(name="Viewport Transitional Motion", default=True)
+
     custom_startup: BoolProperty(name="Startup Scene", default=True)
     custom_theme: BoolProperty(name="Theme", default=True)
     custom_matcaps: BoolProperty(name="Matcaps and Default Shading", default=True)
@@ -379,6 +381,16 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         b = split.box()
         b.label(text="Settings")
+
+        # FOCUS
+
+        if getattr(bpy.types, "MACHIN3_OT_focus", False):
+            bb = b.box()
+            bb.label(text="Focus")
+
+            column = bb.column()
+            column.prop(self, "focus_view_transition")
+
 
         # CUSTOMIZE
 
