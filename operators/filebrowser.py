@@ -19,10 +19,9 @@ class Delete(bpy.types.Operator):
     def invoke(self, context, event):
         wm = context.window_manager
 
-        area = context.area
-        params = area.spaces[0].params
+        params = context.space_data.params
 
-        directory = params.directory
+        directory = params.directory.decode()
         filename = params.filename
 
         if directory and filename:
@@ -56,10 +55,9 @@ class Open(bpy.types.Operator):
         return context.area.type == 'FILE_BROWSER'
 
     def execute(self, context):
-        area = context.area
-        params = area.spaces[0].params
+        params = context.space_data.params
 
-        directory = abspath(params.directory)
+        directory = abspath(params.directory.decode())
 
         open_folder(directory)
 

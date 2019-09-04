@@ -138,6 +138,12 @@ class ImageMode(bpy.types.Operator):
 
         if self.mode == "UV" and active:
             if active.mode == "OBJECT":
+                uvs = active.data.uv_layers
+
+                # create new uv layer
+                if not uvs:
+                    uvs.new()
+
                 bpy.ops.object.mode_set(mode="EDIT")
                 bpy.ops.mesh.select_all(action="SELECT")
 
