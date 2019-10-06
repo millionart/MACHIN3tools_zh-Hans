@@ -140,13 +140,13 @@ class ToggleAutoSmooth(bpy.types.Operator):
         active = m3.get_active()
 
         if active:
-            sel = m3.selected_objects()
+            sel = context.selected_objects
             if active not in sel:
                 sel.append(active)
 
             autosmooth = not active.data.use_auto_smooth
 
-            for obj in sel:
+            for obj in [obj for obj in sel if obj.type == 'MESH']:
                 obj.data.use_auto_smooth = autosmooth
 
         return {'FINISHED'}

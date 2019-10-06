@@ -5,10 +5,7 @@ from .. utils.view import update_local_view
 from .. items import focus_method_items, focus_levels_items
 
 
-# TODO: option to to it for all views? possible?
-# TODO: add HUD
-
-decalmachine = None
+# TODO: add HUD for local view levels
 
 
 class Focus(bpy.types.Operator):
@@ -22,8 +19,6 @@ class Focus(bpy.types.Operator):
     unmirror: BoolProperty(name="Un-Mirror", default=True)
     ignore_mirrors: BoolProperty(name="Ignore Mirrors", default=True)
 
-    decal_zoom: IntProperty(name="Decal Zoom Factor", default=-3, min=-10, max=10)
-
     def draw(self, context):
         layout = self.layout
 
@@ -32,13 +27,7 @@ class Focus(bpy.types.Operator):
         column = box.column()
 
         if self.method == 'VIEW_SELECTED':
-            decals = [obj for obj in context.selected_objects if obj.DM.isdecal] if decalmachine and self.ignore_mirrors else []
-
             column.prop(self, "ignore_mirrors", toggle=True)
-
-            if context.mode == 'OBJECT' and not get_prefs().focus_view_transition and len(decals) == 1:
-                column.prop(self, "decal_zoom")
-
 
         # only show tool props when initializing local view, this prevents switching modes and settings while in local view
         elif self.method == 'LOCAL_VIEW' and self.show_tool_props:
@@ -48,28 +37,21 @@ class Focus(bpy.types.Operator):
 
             column.prop(self, "unmirror", toggle=True)
 
-    # @classmethod
-    # def poll(cls, context):
-        # return context.mode == "OBJECT"
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.type == 'VIEW_3D' and context.region.type == 'WINDOW'
 
     def execute(self, context):
         if self.method == 'VIEW_SELECTED':
-
-            global decalmachine
-
-            if decalmachine is None:
-                decalmachine, _, _, _ = get_addon("DECALmachine")
-
-            self.view_selected(context, decalmachine)
+            self.view_selected(context)
 
         elif self.method == 'LOCAL_VIEW':
             self.local_view(context)
 
         return {'FINISHED'}
 
-    def view_selected(self, context, decalmachine):
+    def view_selected(self, context):
         mirrors = []
-        decals = []
 
         if context.mode == 'OBJECT':
             sel = context.selected_objects
@@ -79,24 +61,14 @@ class Focus(bpy.types.Operator):
                 for mod in mirrors:
                     mod.show_viewport = False
 
-            if decalmachine:
-                decals = [obj for obj in sel if obj.DM.isdecal]
-
         if get_prefs().focus_view_transition:
             bpy.ops.view3d.view_selected('INVOKE_DEFAULT')
 
         else:
             bpy.ops.view3d.view_selected()
 
-            # zoom out when a single decals without any active mirror mods is selected
-            if context.mode == 'OBJECT' and len(decals) == 1 and self.decal_zoom and not any([mod for mod in decals[0].modifiers if mod.type == 'MIRROR' and mod.show_viewport]):
-                for i in range(abs(self.decal_zoom)):
-                    bpy.ops.view3d.zoom(delta=-1 if self.decal_zoom < 0 else 1)
-
-
         for mod in mirrors:
             mod.show_viewport = True
-
 
     def local_view(self, context, debug=False):
         def focus(context, view, sel, history, init=False):
