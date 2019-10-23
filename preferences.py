@@ -126,8 +126,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_customize(self, context):
         activate(self, register=self.activate_customize, tool="customize")
 
-    def update_activate_filebrowser_delete(self, context):
-        activate(self, register=self.activate_filebrowser_delete, tool="filebrowser_delete")
+    def update_activate_filebrowser_tools(self, context):
+        activate(self, register=self.activate_filebrowser_tools, tool="filebrowser_open")
 
 
     # RUNTIME PIE ACTIVATION
@@ -206,7 +206,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_apply: BoolProperty(name="Apply", default=True, update=update_activate_apply)
     activate_select: BoolProperty(name="Select", default=True, update=update_activate_select)
     activate_mesh_cut: BoolProperty(name="Mesh Cut", default=True, update=update_activate_mesh_cut)
-    activate_filebrowser_delete: BoolProperty(name="Filebrowser Delete", default=True, update=update_activate_filebrowser_delete)
+    activate_filebrowser_tools: BoolProperty(name="Filebrowser Tools", default=True, update=update_activate_filebrowser_tools)
     activate_customize: BoolProperty(name="Customize", default=False, update=update_activate_customize)
 
 
@@ -315,8 +315,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row.label(text="Knife intersect a mesh, using another object.")
 
         row = column.split(factor=0.25)
-        row.prop(self, "activate_filebrowser_delete", toggle=True)
-        row.label(text="Delete Files in the Filebrowser.")
+        row.prop(self, "activate_filebrowser_tools", toggle=True)
+        row.label(text="Additional tools for the Filebrowser.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_customize", toggle=True)

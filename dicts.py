@@ -23,8 +23,7 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
            "CUSTOMIZE": [("operators.customize", [("Customize", "customize"),
                                                   ("RestoreKeymaps", "restore_keymaps")])],
 
-           "FILEBROWSER": [("operators.filebrowser", [("Delete", "filebrowser_delete"),
-                                                      ("Open", "filebrowser_open")])],
+           "FILEBROWSER_OPEN": [("operators.filebrowser", [("Open", "filebrowser_open")])],
 
            "MODES_PIE": [("ui.pies", [("PieModes", "modes_pie")]),
                          ("ui.operators.modes", [("EditMode", "edit_mode"),
@@ -120,8 +119,7 @@ keys = {"SMART_VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "mach
                    {"label": "Z Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Z", "value": "PRESS", "alt": True, "shift": True, "properties": [("init", True), ("use_x", False), ("use_y", False), ("use_z", True)]}],
         "ALIGN": [{"keymap": "Object Mode", "idname": "machin3.align", "type": "A", "value": "PRESS", "alt": True}],
 
-        "FILEBROWSER": [{"keymap": "File Browser", "space_type": "FILE_BROWSER", "idname": "machin3.filebrowser_delete", "type": "X", "value": "PRESS"},
-                        {"keymap": "File Browser", "space_type": "FILE_BROWSER", "idname": "machin3.filebrowser_open", "type": "O", "value": "PRESS"}],
+        "FILEBROWSER_OPEN": [{"keymap": "File Browser", "space_type": "FILE_BROWSER", "idname": "machin3.filebrowser_open", "type": "O", "value": "PRESS"}],
 
         "MODES_PIE": [{"label": "3D View", "keymap": "Object Non-modal", "idname": "wm.call_menu_pie", "type": "TAB", "value": "PRESS", "properties": [("name", "MACHIN3_MT_modes_pie")]},
                       {"label": "Image Editor", "keymap": "Image", "space_type": "IMAGE_EDITOR", "idname": "wm.call_menu_pie", "type": "TAB", "value": "PRESS", "properties": [("name", "MACHIN3_MT_modes_pie")]}],
