@@ -1290,6 +1290,97 @@ class PieAlign(Menu):
         op.type = "MAX"
 
 
+class PieUVAlign(Menu):
+    bl_idname = "MACHIN3_MT_uv_align_pie"
+    bl_label = "UV Align"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+
+        # 4 - LEFT
+        op = pie.operator("machin3.align_uv", text="V min")
+        op.axis = "V"
+        op.type = "MIN"
+
+        # 6 - RIGHT
+        op = pie.operator("machin3.align_uv", text="V max")
+        op.axis = "V"
+        op.type = "MAX"
+
+        # 2 - BOTTOM
+        pie.separator()
+
+        # 8 - TOP
+        pie.separator()
+
+        """
+        box = pie.split()
+        box.scale_y = 1.3
+
+        column = box.column(align=True)
+        column.label(icon="FREEZE")
+        op = column.operator("machin3.align_editmesh", text="X")
+        op.axis = "X"
+        op.type = "ZERO"
+        op = column.operator("machin3.align_editmesh", text="Y")
+        op.axis = "Y"
+        op.type = "ZERO"
+        op = column.operator("machin3.align_editmesh", text="Z")
+        op.axis = "Z"
+        op.type = "ZERO"
+
+        column = box.column(align=True)
+        column.label(icon="ARROW_LEFTRIGHT")
+        op = column.operator("machin3.align_editmesh", text="X")
+        op.axis = "X"
+        op.type = "AVERAGE"
+        op = column.operator("machin3.align_editmesh", text="Y")
+        op.axis = "Y"
+        op.type = "AVERAGE"
+        op = column.operator("machin3.align_editmesh", text="Z")
+        op.axis = "Z"
+        op.type = "AVERAGE"
+
+        column = box.column(align=True)
+        column.label(icon="PIVOT_CURSOR")
+        op = column.operator("machin3.align_editmesh", text="X")
+        op.axis = "X"
+        op.type = "CURSOR"
+        op = column.operator("machin3.align_editmesh", text="Y")
+        op.axis = "Y"
+        op.type = "CURSOR"
+        op = column.operator("machin3.align_editmesh", text="Z")
+        op.axis = "Z"
+        op.type = "CURSOR"
+
+        column.separator()
+        column.separator()
+        column.separator()
+        """
+
+        # 7 - TOP - LEFT
+        op = pie.operator("machin3.align_uv", text="U min")
+        op.axis = "U"
+        op.type = "MIN"
+
+        # 9 - TOP - RIGHT
+        op = pie.operator("machin3.align_uv", text="U max")
+        op.axis = "U"
+        op.type = "MAX"
+
+        # 1 - BOTTOM - LEFT
+        op = pie.operator("machin3.align_uv", text="U Cursor")
+        op.axis = "U"
+        op.type = "CURSOR"
+
+        # 3 - BOTTOM - RIGHT
+        op = pie.operator("machin3.align_uv", text="V Cursor")
+        op.axis = "V"
+        op.type = "CURSOR"
+
+
 class PieCursor(Menu):
     bl_idname = "MACHIN3_MT_cursor_pie"
     bl_label = "Cursor and Origin"

@@ -216,7 +216,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_save_pie: BoolProperty(name="Save Pie", default=True, update=update_activate_save_pie)
     activate_shading_pie: BoolProperty(name="Shading Pie", default=True, update=update_activate_shading_pie)
     activate_views_pie: BoolProperty(name="Views Pie", default=True, update=update_activate_views_pie)
-    activate_align_pie: BoolProperty(name="Align Pie", default=True, update=update_activate_align_pie)
+    activate_align_pie: BoolProperty(name="Align Pies", default=True, update=update_activate_align_pie)
     activate_cursor_pie: BoolProperty(name="Cursor Pie", default=True, update=update_activate_cursor_pie)
     activate_collections_pie: BoolProperty(name="Collections Pie", default=True, update=update_activate_collections_pie)
     activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False, update=update_activate_workspace_pie)
@@ -348,7 +348,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_align_pie", toggle=True)
-        row.label(text="Edit mesh alignments.")
+        row.label(text="Edit mesh and UV alignments.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_cursor_pie", toggle=True)
@@ -511,7 +511,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         # kc = wm.keyconfigs.addon
         kc = wm.keyconfigs.user
 
-        from . dicts import keys
+        from . registration import keys
 
         split = box.split()
 

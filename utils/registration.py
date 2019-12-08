@@ -1,8 +1,8 @@
 import bpy
 from bpy.utils import register_class, unregister_class, previews
 import os
-from .. dicts import keys as keysdict
-from .. dicts import classes as classesdict
+from .. registration import keys as keysdict
+from .. registration import classes as classesdict
 
 
 def get_path():

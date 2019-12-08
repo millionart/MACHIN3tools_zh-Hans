@@ -32,14 +32,14 @@ def reload_modules(name):
         importlib.reload(eval(module))
 
     # then update the classes and keys dicts
-    from . import dicts
-    importlib.reload(dicts)
+    from . import registration
+    importlib.reload(registration)
 
     # and based on that, reload the modules containing operator and menu classes
     modules = []
 
-    for label in dicts.classes:
-        entries = dicts.classes[label]
+    for label in registration.classes:
+        entries = registration.classes[label]
         for entry in entries:
             path = entry[0].split('.')
             module = path.pop(-1)
