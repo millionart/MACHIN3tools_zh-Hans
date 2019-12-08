@@ -796,6 +796,8 @@ class PieShading(Menu):
         row.operator("machin3.toggle_cavity", text="Cavity Toggle")
         r = row.row(align=True)
         # r.prop(view.shading, "cavity_ridge_factor", text="")
+
+        r.active = view.shading.show_cavity and view.shading.cavity_type in ['WORLD', 'BOTH']
         r.prop(view.shading, "cavity_valley_factor", text="")
         r.prop(context.scene.display, "matcap_ssao_distance", text="")
 
@@ -804,16 +806,18 @@ class PieShading(Menu):
         row = col.split(factor=0.45)
         row.operator("machin3.toggle_curvature", text="(V) Curvature Toggle")
         r = row.row(align=True)
+        r.active = view.shading.show_cavity and view.shading.cavity_type in ['SCREEN', 'BOTH']
         r.prop(view.shading, "curvature_ridge_factor", text="")
         r.prop(view.shading, "curvature_valley_factor", text="")
 
         # object axes
 
-        row = col.split(factor=0.7)
-        row.operator("machin3.toggle_object_axes", text="(E) Toggle Object Axes")
+        row = col.split(factor=0.45)
+        row.operator("machin3.toggle_object_axes", text="(E) Object Axes Toggle")
         r = row.row(align=True)
         r.active = True if bpy.app.driver_namespace.get('draw_object_axes') else False
         r.prop(context.scene.M3, "object_axes_size", text="")
+        r.prop(context.scene.M3, "object_axes_alpha", text="")
 
 
         active = context.active_object

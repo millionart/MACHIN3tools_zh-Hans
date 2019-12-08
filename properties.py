@@ -128,3 +128,4 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     eevee_preset: EnumProperty(name="Eevee Preset", description="Eevee Quality Presets", items=eevee_preset_items, default='NONE', update=update_eevee_preset)
 
     object_axes_size: FloatProperty(name="Object Axes Size", default=0.5, min=0)
+    object_axes_alpha: FloatProperty(name="Object Axes Alpha", default=0.75, min=0)

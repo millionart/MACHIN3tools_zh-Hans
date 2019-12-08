@@ -19,6 +19,7 @@ def remove_object_axes_drawing_handler(handler=None):
     if not handler:
         handler = bpy.app.driver_namespace.get('draw_object_axes')
 
+
     if handler:
         # print(" REMOVING object axes drawing handler")
 
@@ -29,31 +30,32 @@ def remove_object_axes_drawing_handler(handler=None):
 def draw_object_axes(args):
     context, objs = args
 
-    axes = [(Vector((1, 0, 0)), red), (Vector((0, 1, 0)), green), (Vector((0, 0, 1)), blue)]
+    if context.space_data.overlay.show_overlays:
+        axes = [(Vector((1, 0, 0)), red), (Vector((0, 1, 0)), green), (Vector((0, 0, 1)), blue)]
 
-    alpha = 0.75
-    size = context.scene.M3.object_axes_size
+        size = context.scene.M3.object_axes_size
+        alpha = context.scene.M3.object_axes_alpha
 
-    for axis, color in axes:
-        coords = []
+        for axis, color in axes:
+            coords = []
 
-        for obj in objs:
-            mx = obj.matrix_world
-            origin, _, _ = mx.decompose()
+            for obj in objs:
+                mx = obj.matrix_world
+                origin, _, _ = mx.decompose()
 
-            coords.append(origin)
-            coords.append(origin + mx.to_3x3() @ axis * size)
+                coords.append(origin)
+                coords.append(origin + mx.to_3x3() @ axis * size)
 
-        indices = [(i, i + 1) for i in range(0, len(coords), 2)]
+            indices = [(i, i + 1) for i in range(0, len(coords), 2)]
 
-        shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
-        shader.bind()
-        shader.uniform_float("color", (*color, alpha))
+            shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+            shader.bind()
+            shader.uniform_float("color", (*color, alpha))
 
-        bgl.glEnable(bgl.GL_BLEND)
-        bgl.glDisable(bgl.GL_DEPTH_TEST)
+            bgl.glEnable(bgl.GL_BLEND)
+            bgl.glDisable(bgl.GL_DEPTH_TEST)
 
-        bgl.glLineWidth(2)
+            bgl.glLineWidth(2)
 
-        batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
-        batch.draw(shader)
+            batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
+            batch.draw(shader)
