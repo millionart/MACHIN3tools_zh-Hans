@@ -1212,6 +1212,9 @@ class PieAlign(Menu):
         layout = self.layout
         pie = layout.menu_pie()
 
+        active = context.active_object
+        sel = [obj for obj in context.selected_objects if obj != active]
+
         # 4 - LEFT
         op = pie.operator("machin3.align_editmesh", text="Y min")
         op.axis = "Y"
@@ -1223,14 +1226,20 @@ class PieAlign(Menu):
         op.type = "MAX"
 
         # 2 - BOTTOM
-        box = pie.split()
-        column = box.column()
 
-        column.separator()
+        if sel:
+            box = pie.split()
+            column = box.column()
 
-        row = column.row()
-        row.scale_y = 1.5
-        row.operator("machin3.align_object_to_edge", text="Align Object to Edge")
+            column.separator()
+            row = column.row()
+
+            row.scale_y = 1.5
+            row.operator("machin3.align_object_to_edge", text="Align Object to Edge")
+
+        else:
+            pie.separator()
+
 
         # 8 - TOP
         box = pie.split()

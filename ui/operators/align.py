@@ -94,7 +94,7 @@ class AlignEditMesh(bpy.types.Operator):
 class AlignObjectToEdge(bpy.types.Operator):
     bl_idname = "machin3.align_object_to_edge"
     bl_label = "MACHIN3: Align Object to Edge"
-    bl_description = "Align two or more objects to edge in active object\nALT: Snap objects to edge, in addtion to aligning them"
+    bl_description = "Align one or more objects to edge in active object\nALT: Snap objects to edge, in addtion to aligning them"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
