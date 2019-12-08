@@ -203,6 +203,10 @@ class Unmirror(bpy.types.Operator):
         if mirror_meshes:
             return True
 
+        mirror_gpencils = [obj for obj in context.selected_objects if obj.type == "GPENCIL" and any(mod.type == "GP_MIRROR" for mod in obj.grease_pencil_modifiers)]
+        if mirror_gpencils:
+            return True
+
         groups = [obj for obj in context.selected_objects if obj.type == "EMPTY" and obj.instance_collection]
         if groups:
             return [empty for empty in groups if any(obj for obj in empty.instance_collection.objects if any(mod.type == "MIRROR" for mod in obj.modifiers))]
@@ -211,6 +215,9 @@ class Unmirror(bpy.types.Operator):
         for obj in context.selected_objects:
             if obj.type in ["MESH", "CURVE"]:
                 self.unmirror_mesh_obj(obj)
+
+            elif obj.type == "GPENCIL":
+                self.unmirror_gpencil_obj(obj)
 
             elif obj.type == "EMPTY" and obj.instance_collection:
                 col = obj.instance_collection
@@ -235,3 +242,9 @@ class Unmirror(bpy.types.Operator):
             target = mirrors[-1].mirror_object
             obj.modifiers.remove(mirrors[-1])
             return target
+
+    def unmirror_gpencil_obj(self, obj):
+        mirrors = [mod for mod in obj.grease_pencil_modifiers if mod.type == "GP_MIRROR"]
+
+        if mirrors:
+            obj.grease_pencil_modifiers.remove(mirrors[-1])
