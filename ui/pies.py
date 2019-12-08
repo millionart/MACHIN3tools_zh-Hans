@@ -1405,6 +1405,7 @@ class PieCursor(Menu):
         layout = self.layout
         pie = layout.menu_pie()
 
+
         # 4 - LEFT
         pie.operator("machin3.cursor_to_origin", text="to Origin", icon="PIVOT_CURSOR")
 
@@ -1417,6 +1418,7 @@ class PieCursor(Menu):
             box = pie.split()
             column = box.column()
 
+            column.separator()
             column.separator()
 
             row = column.split(factor=0.25)
@@ -1434,7 +1436,24 @@ class PieCursor(Menu):
             pie.separator()
 
         # 8 - TOP
-        pie.separator()
+        if context.mode == "OBJECT":
+            ts = context.scene.tool_settings
+
+            box = pie.split().box()
+
+            column = box.column()
+
+            column.label(text="Affect Only")
+
+            col = column.column(align=True)
+            col.scale_y = 1.2
+            col.prop(ts, "use_transform_data_origin", text="Origins")
+            col.prop(ts, "use_transform_pivot_point_align", text="Locations")
+            col.prop(ts, "use_transform_skip_children", text="Parents")
+
+        else:
+            pie.separator()
+
 
         # 7 - TOP - LEFT
         pie.operator("view3d.snap_cursor_to_selected", text="to Selected", icon="PIVOT_CURSOR")

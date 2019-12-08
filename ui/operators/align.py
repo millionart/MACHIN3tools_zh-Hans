@@ -3,19 +3,7 @@ from bpy.props import EnumProperty, BoolProperty
 import bmesh
 from mathutils import Vector, Matrix, geometry
 from ... utils.math import get_center_between_verts, create_rotation_difference_matrix_from_quat, get_loc_matrix
-
-
-axisitems = [("X", "X", ""),
-             ("Y", "Y", ""),
-             ("Z", "Z", "")]
-
-axismap = {"X": 0, "Y": 1, "Z": 2}
-
-typeitems = [("MIN", "Min", ""),
-             ("MAX", "Max", ""),
-             ("ZERO", "Zero", ""),
-             ("AVERAGE", "Average", ""),
-             ("CURSOR", "Cursor", "")]
+from ... items import axis_items, align_type_items, align_axis_mapping_dict
 
 
 class AlignEditMesh(bpy.types.Operator):
@@ -24,8 +12,8 @@ class AlignEditMesh(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Default: Local Align\nAlt + Click: Global Align."
 
-    axis: EnumProperty(name="Axis", items=axisitems, default="X")
-    type: EnumProperty(name="Type", items=typeitems, default="MIN")
+    axis: EnumProperty(name="Axis", items=axis_items, default="X")
+    type: EnumProperty(name="Type", items=align_type_items, default="MIN")
     local: BoolProperty(name="Local Space", default=True)
 
     @classmethod
@@ -35,11 +23,11 @@ class AlignEditMesh(bpy.types.Operator):
     def invoke(self, context, event):
         self.local = not event.alt
 
-        self.align(context, axismap[self.axis], self.type, local=self.local)
+        self.align(context, align_axis_mapping_dict[self.axis], self.type, local=self.local)
         return {'FINISHED'}
 
     def execute(self, context):
-        self.align(context, axismap[self.axis], self.type, local=self.local)
+        self.align(context, align_axis_mapping_dict[self.axis], self.type, local=self.local)
         return {'FINISHED'}
 
     def align(self, context, axis, type, local=True):
