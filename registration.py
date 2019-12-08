@@ -109,20 +109,16 @@ keys = {"SMART_VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "mach
                        {"label": "Connect Paths", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "alt": True, "ctrl": True, "properties": [("mode", "CONNECT"), ("slideoverride", False)]},
                        {"label": "Slide Extend", "keymap": "Mesh", "idname": "machin3.smart_vert", "type": "ONE", "value": "PRESS", "shift": True, "alt": True, "properties": [("slideoverride", True)]}],
         "SMART_EDGE": [{"label": "Smart Edge", "keymap": "Mesh", "idname": "machin3.smart_edge", "type": "TWO", "value": "PRESS", "properties": [("sharp", False)]},
-                       {"label": "Toggle Sharp", "keymap": "Mesh", "idname": "machin3.smart_edge", "type": "TWO", "shift": True, "value": "PRESS", "properties": [("sharp", True)]}
-                       ],
+                       {"label": "Toggle Sharp", "keymap": "Mesh", "idname": "machin3.smart_edge", "type": "TWO", "shift": True, "value": "PRESS", "properties": [("sharp", True)]}],
         "SMART_FACE": [{"keymap": "Mesh", "idname": "machin3.smart_face", "type": "FOUR", "value": "PRESS"}],
         "CLEAN_UP": [{"keymap": "Mesh", "idname": "machin3.clean_up", "type": "THREE", "value": "PRESS"}],
         "CLIPPING_TOGGLE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "machin3.clipping_toggle", "type": "BUTTON5MOUSE", "value": "PRESS"}],
-
         "FOCUS": [{"label": "View Selected", "keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "machin3.focus", "type": "F", "value": "PRESS", "properties": [("method", "VIEW_SELECTED")]},
                   {"label": "Local View", "keymap": "Object Mode", "idname": "machin3.focus", "type": "F", "value": "PRESS", "ctrl": True, "properties": [("method", "LOCAL_VIEW")]}],
-
-        "MIRROR": [{"label": "X Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "X", "value": "PRESS", "alt": True, "shift": True, "properties": [("init", True), ("use_x", True), ("use_y", False), ("use_z", False)]},
-                   {"label": "Y Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Y", "value": "PRESS", "alt": True, "shift": True, "properties": [("init", True), ("use_x", False), ("use_y", True), ("use_z", False)]},
-                   {"label": "Z Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Z", "value": "PRESS", "alt": True, "shift": True, "properties": [("init", True), ("use_x", False), ("use_y", False), ("use_z", True)]}],
+        "MIRROR": [{"label": "X Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "X", "value": "PRESS", "alt": True, "shift": True, "properties": [("use_x", True), ("use_y", False), ("use_z", False)]},
+                   {"label": "Y Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Y", "value": "PRESS", "alt": True, "shift": True, "properties": [("use_x", False), ("use_y", True), ("use_z", False)]},
+                   {"label": "Z Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Z", "value": "PRESS", "alt": True, "shift": True, "properties": [("use_x", False), ("use_y", False), ("use_z", True)]}],
         "ALIGN": [{"keymap": "Object Mode", "idname": "machin3.align", "type": "A", "value": "PRESS", "alt": True}],
-
         "FILEBROWSER_OPEN": [{"keymap": "File Browser", "space_type": "FILE_BROWSER", "idname": "machin3.filebrowser_open", "type": "O", "value": "PRESS"}],
 
         "MODES_PIE": [{"label": "3D View", "keymap": "Object Non-modal", "idname": "wm.call_menu_pie", "type": "TAB", "value": "PRESS", "properties": [("name", "MACHIN3_MT_modes_pie")]},
