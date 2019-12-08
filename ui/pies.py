@@ -1223,7 +1223,14 @@ class PieAlign(Menu):
         op.type = "MAX"
 
         # 2 - BOTTOM
-        pie.separator()
+        box = pie.split()
+        column = box.column()
+
+        column.separator()
+
+        row = column.row()
+        row.scale_y = 1.5
+        row.operator("machin3.align_object_to_edge", text="Align Object to Edge")
 
         # 8 - TOP
         box = pie.split()
