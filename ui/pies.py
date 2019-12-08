@@ -747,8 +747,7 @@ class PieShading(Menu):
 
         if view.shading.type == "MATERIAL":
             b = box.box()
-            column = b.column()
-            self.draw_eevee(context, view, column)
+            self.draw_eevee(context, view, b)
 
         # 7 - TOP - LEFT
         pie.separator()
@@ -1000,7 +999,16 @@ class PieShading(Menu):
             row = col.row(align=True)
             row.prop(view.shading, "wireframe_color_type", expand=True)
 
-    def draw_eevee(self, context, view, col):
+    def draw_eevee(self, context, view, layout):
+        column = layout.column()
+
+        row = column.row(align=True)
+        row.prop(context.scene.M3, "eevee_preset", expand=True)
+
+        # SSR
+
+        col = column.column(align=True)
+
         icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_ssr", icon=icon)
         if context.scene.eevee.use_ssr:
@@ -1008,6 +1016,13 @@ class PieShading(Menu):
             row.prop(context.scene.eevee, "ssr_thickness")
             row.prop(context.scene.eevee, "use_ssr_halfres")
 
+            row = col.row(align=True)
+            row.prop(context.scene.eevee, "use_ssr_refraction")
+
+
+        # SSAO
+
+        col = column.column(align=True)
 
         icon = "TRIA_DOWN" if context.scene.eevee.use_gtao else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_gtao", icon=icon)
@@ -1017,12 +1032,22 @@ class PieShading(Menu):
             # row.prop(context.scene.eevee, "gtao_factor")
             row.prop(context.scene.M3, "eevee_gtao_factor")
 
+
+        # BLOOM
+
+        col = column.column(align=True)
+
         icon = "TRIA_DOWN" if context.scene.eevee.use_bloom else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_bloom", icon=icon)
         if context.scene.eevee.use_bloom:
             row = col.row(align=True)
             row.prop(context.scene.eevee, "bloom_threshold")
             row.prop(context.scene.eevee, "bloom_radius")
+
+
+        # VOLUMETRICS
+
+        col = column.column(align=True)
 
         icon = "TRIA_DOWN" if context.scene.eevee.use_volumetric_lights else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_volumetric_lights", icon=icon)

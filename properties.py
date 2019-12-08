@@ -1,5 +1,6 @@
 import bpy
 from bpy.props import StringProperty, IntProperty, BoolProperty, CollectionProperty, PointerProperty, EnumProperty, FloatProperty
+from . items import eevee_preset_items
 
 
 # COLLECTIONS
@@ -79,6 +80,40 @@ class M3SceneProperties(bpy.types.PropertyGroup):
                 if col.name.startswith("."):
                     col.name = col.name[1:]
 
+    def update_eevee_preset(self, context):
+        eevee = context.scene.eevee
+
+        if self.eevee_preset == 'NONE':
+            eevee.use_ssr = False
+            eevee.use_gtao = False
+            eevee.use_bloom = False
+            eevee.use_volumetric_lights = False
+
+        elif self.eevee_preset == 'LOW':
+            eevee.use_ssr = True
+            eevee.use_ssr_halfres = True
+            eevee.use_ssr_refraction = False
+            eevee.use_gtao = True
+            eevee.use_bloom = False
+            eevee.use_volumetric_lights = False
+
+        elif self.eevee_preset == 'HIGH':
+            eevee.use_ssr = True
+            eevee.use_ssr_halfres = False
+            eevee.use_ssr_refraction = True
+            eevee.use_gtao = True
+            eevee.use_bloom = True
+            eevee.use_volumetric_lights = False
+
+        elif self.eevee_preset == 'ULTRA':
+            eevee.use_ssr = True
+            eevee.use_ssr_halfres = False
+            eevee.use_ssr_refraction = True
+            eevee.use_gtao = True
+            eevee.use_bloom = True
+            eevee.use_volumetric_lights = True
+
+
     pass_through: BoolProperty(name="Pass Through", default=False, update=update_xray)
     show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_xray)
     uv_sync_select: BoolProperty(name="Synce Selection", default=False, update=update_uv_sync_select)
@@ -90,3 +125,5 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     focus_history: CollectionProperty(type=HistoryEpochCollection)
 
     grouppro_dotnames: BoolProperty(name=".dotname GroupPro collections", default=False, update=update_grouppro_dotnames)
+
+    eevee_preset: EnumProperty(name="Eevee Preset", description="Eevee Quality Presets", items=eevee_preset_items, default='NONE', update=update_eevee_preset)

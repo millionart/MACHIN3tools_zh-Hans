@@ -17,3 +17,11 @@ align_type_items = [("MIN", "Min", ""),
                     ("CURSOR", "Cursor", "")]
 
 align_axis_mapping_dict = {"X": 0, "Y": 1, "Z": 2}
+
+
+# PIES
+
+eevee_preset_items = [("NONE", "None", ""),
+                      ("LOW", "Low", ""),
+                      ("HIGH", "High", ""),
+                      ("ULTRA", "Ultra", "")]
