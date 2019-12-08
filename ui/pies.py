@@ -790,7 +790,6 @@ class PieShading(Menu):
         row.operator("machin3.toggle_outline", text="(Q) Outline Toggle")
         row.prop(view.shading, "object_outline_color", text="")
 
-
         # cavity
 
         row = col.split(factor=0.45)
@@ -807,6 +806,14 @@ class PieShading(Menu):
         r = row.row(align=True)
         r.prop(view.shading, "curvature_ridge_factor", text="")
         r.prop(view.shading, "curvature_valley_factor", text="")
+
+        # object axes
+
+        row = col.split(factor=0.7)
+        row.operator("machin3.toggle_object_axes", text="(E) Toggle Object Axes")
+        r = row.row(align=True)
+        r.active = True if bpy.app.driver_namespace.get('draw_object_axes') else False
+        r.prop(context.scene.M3, "object_axes_size", text="")
 
 
         active = context.active_object
@@ -869,7 +876,8 @@ class PieShading(Menu):
 
         row = col.row()
         row.prop(view.overlay, "show_relationship_lines")
-        row.prop(view.overlay, "show_extra_indices")
+        if context.mode == 'EDIT_MESH':
+            row.prop(view.overlay, "show_extra_indices")
 
         active = context.active_object
 

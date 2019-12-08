@@ -68,6 +68,7 @@ from . properties import M3SceneProperties
 from . utils.registration import get_core, get_tools, get_pie_menus, get_menus
 from . utils.registration import register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, add_object_context_menu, remove_object_context_menu
 from . utils.registration import add_object_buttons
+from . handlers import update_object_axes_drawing
 
 
 def register():
@@ -101,6 +102,13 @@ def register():
     icons = register_icons()
 
 
+    # HANDLERS
+
+    bpy.app.handlers.undo_pre.append(update_object_axes_drawing)
+    bpy.app.handlers.redo_pre.append(update_object_axes_drawing)
+    bpy.app.handlers.load_pre.append(update_object_axes_drawing)
+
+
     # REGISTRATION OUTPUT
 
     print("Registered %s %s with %d %s, %d pie %s and %s context %s" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, "tool" if tool_count == 1 else "tools", pie_count, "menu" if pie_count == 1 else "menus", menu_count, "menu" if menu_count == 1 else "menus"))
@@ -108,6 +116,13 @@ def register():
 
 def unregister():
     global classes, keymaps, icons
+
+    # HANDLERS
+
+    bpy.app.handlers.undo_pre.remove(update_object_axes_drawing)
+    bpy.app.handlers.redo_pre.remove(update_object_axes_drawing)
+    bpy.app.handlers.load_pre.remove(update_object_axes_drawing)
+
 
     # TOOLS, PIE MENUS, KEYMAPS, MENUS
 

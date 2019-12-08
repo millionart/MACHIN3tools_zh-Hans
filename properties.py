@@ -113,7 +113,6 @@ class M3SceneProperties(bpy.types.PropertyGroup):
             eevee.use_bloom = True
             eevee.use_volumetric_lights = True
 
-
     pass_through: BoolProperty(name="Pass Through", default=False, update=update_xray)
     show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_xray)
     uv_sync_select: BoolProperty(name="Synce Selection", default=False, update=update_uv_sync_select)
@@ -127,3 +126,5 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     grouppro_dotnames: BoolProperty(name=".dotname GroupPro collections", default=False, update=update_grouppro_dotnames)
 
     eevee_preset: EnumProperty(name="Eevee Preset", description="Eevee Quality Presets", items=eevee_preset_items, default='NONE', update=update_eevee_preset)
+
+    object_axes_size: FloatProperty(name="Object Axes Size", default=0.5, min=0)
