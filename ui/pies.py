@@ -1055,6 +1055,8 @@ class PieShading(Menu):
             row = col.row(align=True)
             row.prop(context.scene.eevee, "bloom_threshold")
             row.prop(context.scene.eevee, "bloom_radius")
+            row = col.row(align=True)
+            row.prop(context.scene.M3, "eevee_bloom_intensity")
 
 
         # VOLUMETRICS

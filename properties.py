@@ -29,7 +29,6 @@ class HistoryEpochCollection(bpy.types.PropertyGroup):
 
 
 class M3SceneProperties(bpy.types.PropertyGroup):
-
     def update_xray(self, context):
         x = (self.pass_through, self.show_edit_mesh_wire)
         shading = context.space_data.shading
@@ -48,9 +47,6 @@ class M3SceneProperties(bpy.types.PropertyGroup):
 
         if not toolsettings.use_uv_select_sync:
             bpy.ops.mesh.select_all(action="SELECT")
-
-    def update_eevee_gtao_factor(self, context):
-        context.scene.eevee.gtao_factor = self.eevee_gtao_factor
 
     def update_show_cavity(self, context):
         t = (self.show_cavity, self.show_curvature)
@@ -79,6 +75,18 @@ class M3SceneProperties(bpy.types.PropertyGroup):
             else:
                 if col.name.startswith("."):
                     col.name = col.name[1:]
+
+    pass_through: BoolProperty(name="Pass Through", default=False, update=update_xray)
+    show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_xray)
+    uv_sync_select: BoolProperty(name="Synce Selection", default=False, update=update_uv_sync_select)
+
+    show_cavity: BoolProperty(name="Cavity", default=True, update=update_show_cavity)
+    show_curvature: BoolProperty(name="Curvature", default=False, update=update_show_cavity)
+
+    focus_history: CollectionProperty(type=HistoryEpochCollection)
+
+    grouppro_dotnames: BoolProperty(name=".dotname GroupPro collections", default=False, update=update_grouppro_dotnames)
+
 
     def update_eevee_preset(self, context):
         eevee = context.scene.eevee
@@ -113,19 +121,15 @@ class M3SceneProperties(bpy.types.PropertyGroup):
             eevee.use_bloom = True
             eevee.use_volumetric_lights = True
 
-    pass_through: BoolProperty(name="Pass Through", default=False, update=update_xray)
-    show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_xray)
-    uv_sync_select: BoolProperty(name="Synce Selection", default=False, update=update_uv_sync_select)
-    eevee_gtao_factor: FloatProperty(name="Factor", default=1, min=0, update=update_eevee_gtao_factor)
+    def update_eevee_gtao_factor(self, context):
+        context.scene.eevee.gtao_factor = self.eevee_gtao_factor
 
-    show_cavity: BoolProperty(name="Cavity", default=True, update=update_show_cavity)
-    show_curvature: BoolProperty(name="Curvature", default=False, update=update_show_cavity)
-
-    focus_history: CollectionProperty(type=HistoryEpochCollection)
-
-    grouppro_dotnames: BoolProperty(name=".dotname GroupPro collections", default=False, update=update_grouppro_dotnames)
+    def update_eevee_bloom_intensity(self, context):
+        context.scene.eevee.bloom_intensity = self.eevee_bloom_intensity
 
     eevee_preset: EnumProperty(name="Eevee Preset", description="Eevee Quality Presets", items=eevee_preset_items, default='NONE', update=update_eevee_preset)
+    eevee_gtao_factor: FloatProperty(name="Factor", default=1, min=0, step=0.1, update=update_eevee_gtao_factor)
+    eevee_bloom_intensity: FloatProperty(name="Intensity", default=0.05, min=0, step=0.1, update=update_eevee_bloom_intensity)
 
     object_axes_size: FloatProperty(name="Object Axes Size", default=0.5, min=0)
     object_axes_alpha: FloatProperty(name="Object Axes Alpha", default=0.75, min=0)
