@@ -1475,23 +1475,7 @@ class PieCursor(Menu):
             pie.separator()
 
         # 8 - TOP
-        if context.mode == "OBJECT":
-            ts = context.scene.tool_settings
-
-            box = pie.split().box()
-
-            column = box.column()
-
-            column.label(text="Affect Only")
-
-            col = column.column(align=True)
-            col.scale_y = 1.2
-            col.prop(ts, "use_transform_data_origin", text="Origins")
-            col.prop(ts, "use_transform_pivot_point_align", text="Locations")
-            col.prop(ts, "use_transform_skip_children", text="Parents")
-
-        else:
-            pie.separator()
+        pie.separator()
 
 
         # 7 - TOP - LEFT
@@ -1505,6 +1489,122 @@ class PieCursor(Menu):
 
         # 3 - BOTTOM - RIGHT
         pie.operator("view3d.snap_selected_to_grid", text="to Grid", icon="RESTRICT_SELECT_OFF")
+
+
+class PieTransform(Menu):
+    bl_idname = "MACHIN3_MT_transform_pie"
+    bl_label = "Transform"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        scene = context.scene
+
+        # align_active = bpy.context.scene.machin3.pieviewsalignactive
+
+        # 4 - LEFT
+        op = pie.operator('machin3.set_transform_preset', text='Local')
+        op.pivot = 'MEDIAN_POINT'
+        op.orientation = 'LOCAL'
+
+        # 6 - RIGHT
+        op = pie.operator('machin3.set_transform_preset', text='Global')
+        op.pivot = 'MEDIAN_POINT'
+        op.orientation = 'GLOBAL'
+
+        # 2 - BOTTOM
+        op = pie.operator('machin3.set_transform_preset', text='Active')
+        op.pivot = 'ACTIVE_ELEMENT'
+        op.orientation = 'NORMAL' if context.mode == 'EDIT_MESH' else 'LOCAL'
+
+        # 8 - TOP
+
+        box = pie.split()
+        # box = pie.box().split()
+
+        b = box.box()
+        column = b.column()
+        self.draw_left_column(scene, column)
+
+        b = box.box()
+        column = b.column()
+        self.draw_center_column(scene, column)
+
+        b = box.box()
+        column = b.column()
+        self.draw_right_column(context, scene, column)
+
+
+        # 7 - TOP - LEFT
+        pie.separator()
+
+        # 9 - TOP - RIGHT
+        pie.separator()
+
+        # 1 - BOTTOM - LEFT
+        op = pie.operator('machin3.set_transform_preset', text='Individual')
+        op.pivot = 'INDIVIDUAL_ORIGINS'
+        op.orientation = 'NORMAL' if context.mode == 'EDIT_MESH' else 'LOCAL'
+
+        # 3 - BOTTOM - RIGHT
+        op = pie.operator('machin3.set_transform_preset', text='Cursor')
+        # op.pivot = 'MEDIAN_POINT'
+        op.pivot = 'CURSOR'
+        op.orientation = 'CURSOR'
+
+
+    def draw_left_column(self, scene, layout):
+        layout.scale_x = 3
+
+        column = layout.column(align=True)
+        column.label(text="Pivot Point")
+
+        column.prop(scene.tool_settings, "transform_pivot_point", expand=True)
+
+    def draw_center_column(self, scene, layout):
+        slot = scene.transform_orientation_slots[0]
+        custom = slot.custom_orientation
+
+        column = layout.column(align=True)
+        column.label(text="Orientation")
+
+        column.prop(slot, "type", expand=True)
+
+        column = layout.column(align=True)
+        row = column.row(align=True)
+        row.scale_y = 1.2
+        row.operator("transform.create_orientation", text="Custom", icon='ADD', emboss=True).use = True
+
+        if custom:
+            row = column.row(align=True)
+            row.prop(custom, "name", text="")
+            row.operator("transform.delete_orientation", text="X", emboss=True)
+
+
+    def draw_right_column(self, context, scene, layout):
+        column = layout.column(align=True)
+
+        if context.mode == 'OBJECT':
+            column.label(text="Affect Only")
+
+            col = column.column(align=True)
+            col.scale_y = 1.2
+            col.prop(scene.tool_settings, "use_transform_data_origin", text="Origins")
+            col.prop(scene.tool_settings, "use_transform_pivot_point_align", text="Locations")
+            col.prop(scene.tool_settings, "use_transform_skip_children", text="Parents")
+
+        elif context.mode == 'EDIT_MESH':
+            column.label(text="Mirror Editing")
+
+            active = context.active_object
+
+            row = column.row(align=True)
+            row.prop(active.data, "use_mirror_x")
+            row.prop(active.data, "use_mirror_y")
+            row.prop(active.data, "use_mirror_z")
+
+            column.prop(active.data, "use_mirror_topology", toggle=True)
 
 
 class PieCollections(Menu):

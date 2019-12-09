@@ -150,6 +150,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_cursor_pie(self, context):
         activate(self, register=self.activate_cursor_pie, tool="cursor_pie")
 
+    def update_activate_transform_pie(self, context):
+        activate(self, register=self.activate_transform_pie, tool="transform_pie")
+
     def update_activate_collections_pie(self, context):
         activate(self, register=self.activate_collections_pie, tool="collections_pie")
 
@@ -217,7 +220,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_shading_pie: BoolProperty(name="Shading Pie", default=True, update=update_activate_shading_pie)
     activate_views_pie: BoolProperty(name="Views Pie", default=True, update=update_activate_views_pie)
     activate_align_pie: BoolProperty(name="Align Pies", default=True, update=update_activate_align_pie)
-    activate_cursor_pie: BoolProperty(name="Cursor Pie", default=True, update=update_activate_cursor_pie)
+    activate_cursor_pie: BoolProperty(name="Cursor Pie", default=True, update=update_activate_transform_pie)
+    activate_transform_pie: BoolProperty(name="Transform Pie", default=True, update=update_activate_cursor_pie)
     activate_collections_pie: BoolProperty(name="Collections Pie", default=True, update=update_activate_collections_pie)
     activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False, update=update_activate_workspace_pie)
 
@@ -353,6 +357,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row = column.split(factor=0.25)
         row.prop(self, "activate_cursor_pie", toggle=True)
         row.label(text="Cursor and Origin manipulation.")
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_transform_pie", toggle=True)
+        row.label(text="Transform Orientations and Pivots.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_collections_pie", toggle=True)

@@ -416,9 +416,14 @@ def get_pie_menus():
     classlists, keylists, count = get_align_pie(classlists, keylists, count)
 
 
-    # CURSOR
+    # CURSOR + ORIGIN
 
     classlists, keylists, count = get_cursor_pie(classlists, keylists, count)
+
+
+    # TRANSFORM
+
+    classlists, keylists, count = get_transform_pie(classlists, keylists, count)
 
 
     # COLLECTIONS
@@ -623,6 +628,15 @@ def get_cursor_pie(classlists=[], keylists=[], count=0):
     if get_prefs().activate_cursor_pie:
         classlists.append(classesdict["CURSOR_PIE"])
         keylists.append(keysdict["CURSOR_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_transform_pie(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_transform_pie:
+        classlists.append(classesdict["TRANSFORM_PIE"])
+        keylists.append(keysdict["TRANSFORM_PIE"])
         count += 1
 
     return classlists, keylists, count

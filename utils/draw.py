@@ -43,7 +43,8 @@ def draw_object_axes(args):
                 mx = obj.matrix_world
                 origin, _, _ = mx.decompose()
 
-                coords.append(origin)
+                # coords.append(origin)
+                coords.append(origin + mx.to_3x3() @ axis * size * 0.1)
                 coords.append(origin + mx.to_3x3() @ axis * size)
 
             indices = [(i, i + 1) for i in range(0, len(coords), 2)]

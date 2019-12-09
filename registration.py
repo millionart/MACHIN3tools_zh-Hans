@@ -87,6 +87,9 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
            "CURSOR_PIE": [("ui.pies", [("PieCursor", "cursor_pie")]),
                           ("ui.operators.cursor", [("CursorToOrigin", "cursor_to_origin")])],
 
+           "TRANSFORM_PIE": [("ui.pies", [("PieTransform", "transform_pie")]),
+                             ("ui.operators.set_transform_preset", [("SetTransformPreset", "set_transform_preset")])],
+
            "COLLECTIONS_PIE": [("ui.pies", [("PieCollections", "collections_pie")]),
                                ("ui.operators.collections", [("CreateCollection", "create_collection"),
                                                              ("AddToCollection", "add_to_collection"),
@@ -129,6 +132,7 @@ keys = {"SMART_VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "mach
         "ALIGN_PIE": [{"label": "Edit Mode", "keymap": "Mesh", "idname": "wm.call_menu_pie", "type": "A", "value": "PRESS", "alt": True, "properties": [("name", "MACHIN3_MT_align_pie")]},
                       {"label": "UV Editor", "keymap": "UV Editor", "idname": "wm.call_menu_pie", "type": "A", "value": "PRESS", "alt": True, "properties": [("name", "MACHIN3_MT_uv_align_pie")]}],
         "CURSOR_PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "S", "value": "PRESS", "shift": True, "properties": [("name", "MACHIN3_MT_cursor_pie")]}],
+        "TRANSFORM_PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "BUTTON4MOUSE", "value": "PRESS", "shift": True, "properties": [("name", "MACHIN3_MT_transform_pie")]}],
         "COLLECTIONS_PIE": [{"keymap": "3D View Generic", "space_type": "VIEW_3D", "idname": "wm.call_menu_pie", "type": "C", "value": "PRESS", "shift": True, "properties": [("name", "MACHIN3_MT_collections_pie")]}],
         "WORKSPACE_PIE": [{"keymap": "Window", "idname": "wm.call_menu_pie", "type": "PAUSE", "value": "PRESS", "properties": [("name", "MACHIN3_MT_workspace_pie")]}],
         }
