@@ -132,4 +132,4 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     eevee_bloom_intensity: FloatProperty(name="Intensity", default=0.05, min=0, step=0.1, update=update_eevee_bloom_intensity)
 
     object_axes_size: FloatProperty(name="Object Axes Size", default=0.5, min=0)
-    object_axes_alpha: FloatProperty(name="Object Axes Alpha", default=0.75, min=0)
+    object_axes_alpha: FloatProperty(name="Object Axes Alpha", default=0.75, min=0, max=1)
