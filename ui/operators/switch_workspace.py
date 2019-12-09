@@ -29,7 +29,7 @@ class SwitchWorkspace(bpy.types.Operator):
                 bpy.context.window.workspace = ws
 
         # set previous view matrix to new view
-        if viewmx:
+        if ws and viewmx:
             self.set_view_matrix(ws, viewmx)
 
         return {'FINISHED'}
