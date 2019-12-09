@@ -1477,9 +1477,8 @@ class PieCursor(Menu):
         # 8 - TOP
         pie.separator()
 
-
         # 7 - TOP - LEFT
-        pie.operator("view3d.snap_cursor_to_selected", text="to Selected", icon="PIVOT_CURSOR")
+        pie.operator("machin3.cursor_to_selected", text="to Selected", icon="PIVOT_CURSOR")
 
         # 9 - TOP - RIGHT
         pie.operator("view3d.snap_selected_to_cursor", text="to Cursor, Offset", icon="RESTRICT_SELECT_OFF").use_offset = True
