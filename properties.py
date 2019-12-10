@@ -1,5 +1,6 @@
 import bpy
 from bpy.props import StringProperty, IntProperty, BoolProperty, CollectionProperty, PointerProperty, EnumProperty, FloatProperty
+from . items import eevee_preset_items
 
 
 # COLLECTIONS
@@ -28,7 +29,6 @@ class HistoryEpochCollection(bpy.types.PropertyGroup):
 
 
 class M3SceneProperties(bpy.types.PropertyGroup):
-
     def update_xray(self, context):
         x = (self.pass_through, self.show_edit_mesh_wire)
         shading = context.space_data.shading
@@ -47,9 +47,6 @@ class M3SceneProperties(bpy.types.PropertyGroup):
 
         if not toolsettings.use_uv_select_sync:
             bpy.ops.mesh.select_all(action="SELECT")
-
-    def update_eevee_gtao_factor(self, context):
-        context.scene.eevee.gtao_factor = self.eevee_gtao_factor
 
     def update_show_cavity(self, context):
         t = (self.show_cavity, self.show_curvature)
@@ -82,7 +79,6 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     pass_through: BoolProperty(name="Pass Through", default=False, update=update_xray)
     show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_xray)
     uv_sync_select: BoolProperty(name="Synce Selection", default=False, update=update_uv_sync_select)
-    eevee_gtao_factor: FloatProperty(name="Factor", default=1, min=0, update=update_eevee_gtao_factor)
 
     show_cavity: BoolProperty(name="Cavity", default=True, update=update_show_cavity)
     show_curvature: BoolProperty(name="Curvature", default=False, update=update_show_cavity)
@@ -90,3 +86,63 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     focus_history: CollectionProperty(type=HistoryEpochCollection)
 
     grouppro_dotnames: BoolProperty(name=".dotname GroupPro collections", default=False, update=update_grouppro_dotnames)
+
+
+    def update_eevee_preset(self, context):
+        eevee = context.scene.eevee
+        shading = context.space_data.shading
+
+        if self.eevee_preset == 'NONE':
+            eevee.use_ssr = False
+            eevee.use_gtao = False
+            eevee.use_bloom = False
+            eevee.use_volumetric_lights = False
+
+            shading.use_scene_lights = False
+            shading.use_scene_world = False
+
+        elif self.eevee_preset == 'LOW':
+            eevee.use_ssr = True
+            eevee.use_ssr_halfres = True
+            eevee.use_ssr_refraction = False
+            eevee.use_gtao = True
+            eevee.use_bloom = False
+            eevee.use_volumetric_lights = False
+
+            shading.use_scene_lights = True
+            shading.use_scene_world = False
+
+        elif self.eevee_preset == 'HIGH':
+            eevee.use_ssr = True
+            eevee.use_ssr_halfres = False
+            eevee.use_ssr_refraction = True
+            eevee.use_gtao = True
+            eevee.use_bloom = True
+            eevee.use_volumetric_lights = False
+
+            shading.use_scene_lights = True
+            shading.use_scene_world = False
+
+        elif self.eevee_preset == 'ULTRA':
+            eevee.use_ssr = True
+            eevee.use_ssr_halfres = False
+            eevee.use_ssr_refraction = True
+            eevee.use_gtao = True
+            eevee.use_bloom = True
+            eevee.use_volumetric_lights = True
+
+            shading.use_scene_lights = True
+            shading.use_scene_world = True
+
+    def update_eevee_gtao_factor(self, context):
+        context.scene.eevee.gtao_factor = self.eevee_gtao_factor
+
+    def update_eevee_bloom_intensity(self, context):
+        context.scene.eevee.bloom_intensity = self.eevee_bloom_intensity
+
+    eevee_preset: EnumProperty(name="Eevee Preset", description="Eevee Quality Presets", items=eevee_preset_items, default='NONE', update=update_eevee_preset)
+    eevee_gtao_factor: FloatProperty(name="Factor", default=1, min=0, step=0.1, update=update_eevee_gtao_factor)
+    eevee_bloom_intensity: FloatProperty(name="Intensity", default=0.05, min=0, step=0.1, update=update_eevee_bloom_intensity)
+
+    object_axes_size: FloatProperty(name="Object Axes Size", default=0.3, min=0)
+    object_axes_alpha: FloatProperty(name="Object Axes Alpha", default=0.75, min=0, max=1)

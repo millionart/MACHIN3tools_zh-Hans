@@ -126,6 +126,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_customize(self, context):
         activate(self, register=self.activate_customize, tool="customize")
 
+    def update_activate_filebrowser_tools(self, context):
+        activate(self, register=self.activate_filebrowser_tools, tool="filebrowser_open")
+
+
     # RUNTIME PIE ACTIVATION
 
     def update_activate_modes_pie(self, context):
@@ -145,6 +149,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     def update_activate_cursor_pie(self, context):
         activate(self, register=self.activate_cursor_pie, tool="cursor_pie")
+
+    def update_activate_transform_pie(self, context):
+        activate(self, register=self.activate_transform_pie, tool="transform_pie")
 
     def update_activate_collections_pie(self, context):
         activate(self, register=self.activate_collections_pie, tool="collections_pie")
@@ -175,6 +182,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     obj_mode_rotate_around_active: BoolProperty(name="Rotate Around Selection, but only in Object Mode", default=False)
     toggle_cavity: BoolProperty(name="Toggle Cavity/Curvature OFF in Edit Mode, ON in Object Mode", default=True)
 
+    focus_view_transition: BoolProperty(name="Viewport Transitional Motion", default=True)
+
+    custom_startup: BoolProperty(name="Startup Scene", default=True)
     custom_theme: BoolProperty(name="Theme", default=True)
     custom_matcaps: BoolProperty(name="Matcaps and Default Shading", default=True)
     custom_overlays: BoolProperty(name="Overlays", default=True)
@@ -199,6 +209,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_apply: BoolProperty(name="Apply", default=True, update=update_activate_apply)
     activate_select: BoolProperty(name="Select", default=True, update=update_activate_select)
     activate_mesh_cut: BoolProperty(name="Mesh Cut", default=True, update=update_activate_mesh_cut)
+    activate_filebrowser_tools: BoolProperty(name="Filebrowser Tools", default=True, update=update_activate_filebrowser_tools)
     activate_customize: BoolProperty(name="Customize", default=False, update=update_activate_customize)
 
 
@@ -208,8 +219,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_save_pie: BoolProperty(name="Save Pie", default=True, update=update_activate_save_pie)
     activate_shading_pie: BoolProperty(name="Shading Pie", default=True, update=update_activate_shading_pie)
     activate_views_pie: BoolProperty(name="Views Pie", default=True, update=update_activate_views_pie)
-    activate_align_pie: BoolProperty(name="Align Pie", default=True, update=update_activate_align_pie)
+    activate_align_pie: BoolProperty(name="Align Pies", default=True, update=update_activate_align_pie)
     activate_cursor_pie: BoolProperty(name="Cursor Pie", default=True, update=update_activate_cursor_pie)
+    activate_transform_pie: BoolProperty(name="Transform Pie", default=True, update=update_activate_transform_pie)
     activate_collections_pie: BoolProperty(name="Collections Pie", default=True, update=update_activate_collections_pie)
     activate_workspace_pie: BoolProperty(name="Workspace Pie", default=False, update=update_activate_workspace_pie)
 
@@ -223,7 +235,6 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     tabs: EnumProperty(name="Tabs", items=preferences_tabs, default="GENERAL")
     avoid_update: BoolProperty(default=False)
     dirty_keymaps: BoolProperty(default=False)
-
 
 
     def draw(self, context):
@@ -308,6 +319,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row.label(text="Knife intersect a mesh, using another object.")
 
         row = column.split(factor=0.25)
+        row.prop(self, "activate_filebrowser_tools", toggle=True)
+        row.label(text="Additional tools for the Filebrowser.")
+
+        row = column.split(factor=0.25)
         row.prop(self, "activate_customize", toggle=True)
         row.label(text="Customize various Blender preferences, settings and keymaps.")
 
@@ -337,11 +352,15 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_align_pie", toggle=True)
-        row.label(text="Edit mesh alignments.")
+        row.label(text="Edit mesh and UV alignments.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_cursor_pie", toggle=True)
         row.label(text="Cursor and Origin manipulation.")
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_transform_pie", toggle=True)
+        row.label(text="Transform Orientations and Pivots.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_collections_pie", toggle=True)
@@ -371,6 +390,16 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         b = split.box()
         b.label(text="Settings")
 
+        # FOCUS
+
+        if getattr(bpy.types, "MACHIN3_OT_focus", False):
+            bb = b.box()
+            bb.label(text="Focus")
+
+            column = bb.column()
+            column.prop(self, "focus_view_transition")
+
+
         # CUSTOMIZE
 
         if getattr(bpy.types, "MACHIN3_OT_customize", False):
@@ -381,6 +410,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             column = bbb.column()
 
             row = column.row()
+            row.prop(self, "custom_startup")
             row.prop(self, "custom_theme")
             row.prop(self, "custom_matcaps")
             row.prop(self, "custom_overlays")
@@ -489,7 +519,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         # kc = wm.keyconfigs.addon
         kc = wm.keyconfigs.user
 
-        from . dicts import keys
+        from . registration import keys
 
         split = box.split()
 

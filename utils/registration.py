@@ -1,8 +1,8 @@
 import bpy
 from bpy.utils import register_class, unregister_class, previews
 import os
-from .. dicts import keys as keysdict
-from .. dicts import classes as classesdict
+from .. registration import keys as keysdict
+from .. registration import classes as classesdict
 
 
 def get_path():
@@ -18,10 +18,12 @@ def get_prefs():
 
 
 def get_addon(addon, debug=False):
+    """
+    look for addon by name
+    return registration status, foldername, version and path
+    """
     import addon_utils
 
-    # look for addon by name and find folder name and path
-    # Note, this will also find addons that aren't registered!
 
     for mod in addon_utils.modules():
         name = mod.bl_info["name"]
@@ -374,6 +376,10 @@ def get_tools():
     classlists, keylists, count = get_mesh_cut(classlists, keylists, count)
 
 
+    # FILEBROWSER TOOLS
+    classlists, keylists, count = get_filebrowser_open(classlists, keylists, count)
+
+
     # CUSTOMIZE
     classlists, keylists, count = get_customize(classlists, keylists, count)
 
@@ -410,9 +416,14 @@ def get_pie_menus():
     classlists, keylists, count = get_align_pie(classlists, keylists, count)
 
 
-    # CURSOR
+    # CURSOR + ORIGIN
 
     classlists, keylists, count = get_cursor_pie(classlists, keylists, count)
+
+
+    # TRANSFORM
+
+    classlists, keylists, count = get_transform_pie(classlists, keylists, count)
 
 
     # COLLECTIONS
@@ -543,6 +554,15 @@ def get_mesh_cut(classlists=[], keylists=[], count=0):
     return classlists, keylists, count
 
 
+def get_filebrowser_open(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_filebrowser_tools:
+        classlists.append(classesdict["FILEBROWSER_OPEN"])
+        keylists.append(keysdict["FILEBROWSER_OPEN"])
+        count +=1
+
+    return classlists, keylists, count
+
+
 def get_customize(classlists=[], keylists=[], count=0):
     if get_prefs().activate_customize:
         classlists.append(classesdict["CUSTOMIZE"])
@@ -608,6 +628,15 @@ def get_cursor_pie(classlists=[], keylists=[], count=0):
     if get_prefs().activate_cursor_pie:
         classlists.append(classesdict["CURSOR_PIE"])
         keylists.append(keysdict["CURSOR_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_transform_pie(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_transform_pie:
+        classlists.append(classesdict["TRANSFORM_PIE"])
+        keylists.append(keysdict["TRANSFORM_PIE"])
         count += 1
 
     return classlists, keylists, count

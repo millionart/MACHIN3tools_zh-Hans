@@ -7,17 +7,17 @@ from .. utils.collection import get_scene_collections
 from .. utils.system import abspath
 
 # TODO: snapping pie
-# TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
-# TODO: eevee presets
-
 
 # TODO: origin to selection
 # TODO: origin to bbox center, top, bottom, etc
-# TODO: align cursor to selected: align cursor rotation
-# TODO: align origin to cursor, see https://polycount.com/discussion/comment/2683194/#Comment_2683194
-
+# TODO: align origin to cursor, incl rotatation, see https://polycount.com/discussion/comment/2683194/#Comment_2683194
 
 # TODO: modes gpencil: add modal shrinkwrap tool, if gpencil is parented
+
+
+grouppro = None
+decalmachine = None
+
 
 class PieModes(Menu):
     bl_idname = "MACHIN3_MT_modes_pie"
@@ -27,8 +27,15 @@ class PieModes(Menu):
         layout = self.layout
         toolsettings = context.tool_settings
 
-        grouppro, _, _, _ = get_addon("Group Pro")
-        decalmachine, _, _, _ = get_addon("DECALmachine")
+        global grouppro
+        global decalmachine
+
+        if grouppro is None:
+            grouppro, _, _, _ = get_addon("Group Pro")
+
+        if decalmachine is None:
+            decalmachine, _, _, _ = get_addon("DECALmachine")
+
 
         active = context.active_object
 
@@ -229,7 +236,7 @@ class PieModes(Menu):
                     pie.operator("object.mode_set", text="Edit Mode", icon='EDITMODE_HLT').mode = "EDIT_GPENCIL"
 
                     # 8 - TOP
-                    if context.mode == 'OBJET' and grouppro and len(context.scene.storedGroupSettings):
+                    if context.mode == 'OBJECT' and grouppro and len(context.scene.storedGroupSettings):
                         pie.operator("object.close_grouppro", text="Close Group")
 
                     else:
@@ -735,8 +742,7 @@ class PieShading(Menu):
 
         if view.shading.type == "MATERIAL":
             b = box.box()
-            column = b.column()
-            self.draw_eevee(context, view, column)
+            self.draw_eevee(context, view, b)
 
         # 7 - TOP - LEFT
         pie.separator()
@@ -779,13 +785,14 @@ class PieShading(Menu):
         row.operator("machin3.toggle_outline", text="(Q) Outline Toggle")
         row.prop(view.shading, "object_outline_color", text="")
 
-
         # cavity
 
         row = col.split(factor=0.45)
         row.operator("machin3.toggle_cavity", text="Cavity Toggle")
         r = row.row(align=True)
         # r.prop(view.shading, "cavity_ridge_factor", text="")
+
+        r.active = view.shading.show_cavity and view.shading.cavity_type in ['WORLD', 'BOTH']
         r.prop(view.shading, "cavity_valley_factor", text="")
         r.prop(context.scene.display, "matcap_ssao_distance", text="")
 
@@ -794,8 +801,18 @@ class PieShading(Menu):
         row = col.split(factor=0.45)
         row.operator("machin3.toggle_curvature", text="(V) Curvature Toggle")
         r = row.row(align=True)
+        r.active = view.shading.show_cavity and view.shading.cavity_type in ['SCREEN', 'BOTH']
         r.prop(view.shading, "curvature_ridge_factor", text="")
         r.prop(view.shading, "curvature_valley_factor", text="")
+
+        # object axes
+
+        row = col.split(factor=0.45)
+        row.operator("machin3.toggle_object_axes", text="(E) Object Axes Toggle")
+        r = row.row(align=True)
+        r.active = True if bpy.app.driver_namespace.get('draw_object_axes') else False
+        r.prop(context.scene.M3, "object_axes_size", text="")
+        r.prop(context.scene.M3, "object_axes_alpha", text="")
 
 
         active = context.active_object
@@ -858,7 +875,8 @@ class PieShading(Menu):
 
         row = col.row()
         row.prop(view.overlay, "show_relationship_lines")
-        row.prop(view.overlay, "show_extra_indices")
+        if context.mode == 'EDIT_MESH':
+            row.prop(view.overlay, "show_extra_indices")
 
         active = context.active_object
 
@@ -988,7 +1006,16 @@ class PieShading(Menu):
             row = col.row(align=True)
             row.prop(view.shading, "wireframe_color_type", expand=True)
 
-    def draw_eevee(self, context, view, col):
+    def draw_eevee(self, context, view, layout):
+        column = layout.column()
+
+        row = column.row(align=True)
+        row.prop(context.scene.M3, "eevee_preset", expand=True)
+
+        # SSR
+
+        col = column.column(align=True)
+
         icon = "TRIA_DOWN" if context.scene.eevee.use_ssr else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_ssr", icon=icon)
         if context.scene.eevee.use_ssr:
@@ -996,6 +1023,13 @@ class PieShading(Menu):
             row.prop(context.scene.eevee, "ssr_thickness")
             row.prop(context.scene.eevee, "use_ssr_halfres")
 
+            row = col.row(align=True)
+            row.prop(context.scene.eevee, "use_ssr_refraction")
+
+
+        # SSAO
+
+        col = column.column(align=True)
 
         icon = "TRIA_DOWN" if context.scene.eevee.use_gtao else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_gtao", icon=icon)
@@ -1005,12 +1039,24 @@ class PieShading(Menu):
             # row.prop(context.scene.eevee, "gtao_factor")
             row.prop(context.scene.M3, "eevee_gtao_factor")
 
+
+        # BLOOM
+
+        col = column.column(align=True)
+
         icon = "TRIA_DOWN" if context.scene.eevee.use_bloom else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_bloom", icon=icon)
         if context.scene.eevee.use_bloom:
             row = col.row(align=True)
             row.prop(context.scene.eevee, "bloom_threshold")
             row.prop(context.scene.eevee, "bloom_radius")
+            row = col.row(align=True)
+            row.prop(context.scene.M3, "eevee_bloom_intensity")
+
+
+        # VOLUMETRICS
+
+        col = column.column(align=True)
 
         icon = "TRIA_DOWN" if context.scene.eevee.use_volumetric_lights else "TRIA_RIGHT"
         col.prop(context.scene.eevee, "use_volumetric_lights", icon=icon)
@@ -1200,6 +1246,9 @@ class PieAlign(Menu):
         layout = self.layout
         pie = layout.menu_pie()
 
+        active = context.active_object
+        sel = [obj for obj in context.selected_objects if obj != active]
+
         # 4 - LEFT
         op = pie.operator("machin3.align_editmesh", text="Y min")
         op.axis = "Y"
@@ -1211,7 +1260,20 @@ class PieAlign(Menu):
         op.type = "MAX"
 
         # 2 - BOTTOM
-        pie.separator()
+
+        if sel:
+            box = pie.split()
+            column = box.column()
+
+            column.separator()
+            row = column.row()
+
+            row.scale_y = 1.5
+            row.operator("machin3.align_object_to_edge", text="Align Object to Edge")
+
+        else:
+            pie.separator()
+
 
         # 8 - TOP
         box = pie.split()
@@ -1278,6 +1340,97 @@ class PieAlign(Menu):
         op.type = "MAX"
 
 
+class PieUVAlign(Menu):
+    bl_idname = "MACHIN3_MT_uv_align_pie"
+    bl_label = "UV Align"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+
+        # 4 - LEFT
+        op = pie.operator("machin3.align_uv", text="V min")
+        op.axis = "V"
+        op.type = "MIN"
+
+        # 6 - RIGHT
+        op = pie.operator("machin3.align_uv", text="V max")
+        op.axis = "V"
+        op.type = "MAX"
+
+        # 2 - BOTTOM
+        pie.separator()
+
+        # 8 - TOP
+        pie.separator()
+
+        """
+        box = pie.split()
+        box.scale_y = 1.3
+
+        column = box.column(align=True)
+        column.label(icon="FREEZE")
+        op = column.operator("machin3.align_editmesh", text="X")
+        op.axis = "X"
+        op.type = "ZERO"
+        op = column.operator("machin3.align_editmesh", text="Y")
+        op.axis = "Y"
+        op.type = "ZERO"
+        op = column.operator("machin3.align_editmesh", text="Z")
+        op.axis = "Z"
+        op.type = "ZERO"
+
+        column = box.column(align=True)
+        column.label(icon="ARROW_LEFTRIGHT")
+        op = column.operator("machin3.align_editmesh", text="X")
+        op.axis = "X"
+        op.type = "AVERAGE"
+        op = column.operator("machin3.align_editmesh", text="Y")
+        op.axis = "Y"
+        op.type = "AVERAGE"
+        op = column.operator("machin3.align_editmesh", text="Z")
+        op.axis = "Z"
+        op.type = "AVERAGE"
+
+        column = box.column(align=True)
+        column.label(icon="PIVOT_CURSOR")
+        op = column.operator("machin3.align_editmesh", text="X")
+        op.axis = "X"
+        op.type = "CURSOR"
+        op = column.operator("machin3.align_editmesh", text="Y")
+        op.axis = "Y"
+        op.type = "CURSOR"
+        op = column.operator("machin3.align_editmesh", text="Z")
+        op.axis = "Z"
+        op.type = "CURSOR"
+
+        column.separator()
+        column.separator()
+        column.separator()
+        """
+
+        # 7 - TOP - LEFT
+        op = pie.operator("machin3.align_uv", text="U min")
+        op.axis = "U"
+        op.type = "MIN"
+
+        # 9 - TOP - RIGHT
+        op = pie.operator("machin3.align_uv", text="U max")
+        op.axis = "U"
+        op.type = "MAX"
+
+        # 1 - BOTTOM - LEFT
+        op = pie.operator("machin3.align_uv", text="U Cursor")
+        op.axis = "U"
+        op.type = "CURSOR"
+
+        # 3 - BOTTOM - RIGHT
+        op = pie.operator("machin3.align_uv", text="V Cursor")
+        op.axis = "V"
+        op.type = "CURSOR"
+
+
 class PieCursor(Menu):
     bl_idname = "MACHIN3_MT_cursor_pie"
     bl_label = "Cursor and Origin"
@@ -1285,6 +1438,7 @@ class PieCursor(Menu):
     def draw(self, context):
         layout = self.layout
         pie = layout.menu_pie()
+
 
         # 4 - LEFT
         pie.operator("machin3.cursor_to_origin", text="to Origin", icon="PIVOT_CURSOR")
@@ -1298,6 +1452,7 @@ class PieCursor(Menu):
             box = pie.split()
             column = box.column()
 
+            column.separator()
             column.separator()
 
             row = column.split(factor=0.25)
@@ -1318,7 +1473,7 @@ class PieCursor(Menu):
         pie.separator()
 
         # 7 - TOP - LEFT
-        pie.operator("view3d.snap_cursor_to_selected", text="to Selected", icon="PIVOT_CURSOR")
+        pie.operator("machin3.cursor_to_selected", text="to Selected", icon="PIVOT_CURSOR")
 
         # 9 - TOP - RIGHT
         pie.operator("view3d.snap_selected_to_cursor", text="to Cursor, Offset", icon="RESTRICT_SELECT_OFF").use_offset = True
@@ -1328,6 +1483,122 @@ class PieCursor(Menu):
 
         # 3 - BOTTOM - RIGHT
         pie.operator("view3d.snap_selected_to_grid", text="to Grid", icon="RESTRICT_SELECT_OFF")
+
+
+class PieTransform(Menu):
+    bl_idname = "MACHIN3_MT_transform_pie"
+    bl_label = "Transform"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        scene = context.scene
+
+        # align_active = bpy.context.scene.machin3.pieviewsalignactive
+
+        # 4 - LEFT
+        op = pie.operator('machin3.set_transform_preset', text='Local')
+        op.pivot = 'MEDIAN_POINT'
+        op.orientation = 'LOCAL'
+
+        # 6 - RIGHT
+        op = pie.operator('machin3.set_transform_preset', text='Global')
+        op.pivot = 'MEDIAN_POINT'
+        op.orientation = 'GLOBAL'
+
+        # 2 - BOTTOM
+        op = pie.operator('machin3.set_transform_preset', text='Active')
+        op.pivot = 'ACTIVE_ELEMENT'
+        op.orientation = 'NORMAL' if context.mode == 'EDIT_MESH' else 'LOCAL'
+
+        # 8 - TOP
+
+        box = pie.split()
+        # box = pie.box().split()
+
+        b = box.box()
+        column = b.column()
+        self.draw_left_column(scene, column)
+
+        b = box.box()
+        column = b.column()
+        self.draw_center_column(scene, column)
+
+        b = box.box()
+        column = b.column()
+        self.draw_right_column(context, scene, column)
+
+
+        # 7 - TOP - LEFT
+        pie.separator()
+
+        # 9 - TOP - RIGHT
+        pie.separator()
+
+        # 1 - BOTTOM - LEFT
+        op = pie.operator('machin3.set_transform_preset', text='Individual')
+        op.pivot = 'INDIVIDUAL_ORIGINS'
+        op.orientation = 'NORMAL' if context.mode == 'EDIT_MESH' else 'LOCAL'
+
+        # 3 - BOTTOM - RIGHT
+        op = pie.operator('machin3.set_transform_preset', text='Cursor')
+        # op.pivot = 'MEDIAN_POINT'
+        op.pivot = 'CURSOR'
+        op.orientation = 'CURSOR'
+
+
+    def draw_left_column(self, scene, layout):
+        layout.scale_x = 3
+
+        column = layout.column(align=True)
+        column.label(text="Pivot Point")
+
+        column.prop(scene.tool_settings, "transform_pivot_point", expand=True)
+
+    def draw_center_column(self, scene, layout):
+        slot = scene.transform_orientation_slots[0]
+        custom = slot.custom_orientation
+
+        column = layout.column(align=True)
+        column.label(text="Orientation")
+
+        column.prop(slot, "type", expand=True)
+
+        column = layout.column(align=True)
+        row = column.row(align=True)
+        row.scale_y = 1.2
+        row.operator("transform.create_orientation", text="Custom", icon='ADD', emboss=True).use = True
+
+        if custom:
+            row = column.row(align=True)
+            row.prop(custom, "name", text="")
+            row.operator("transform.delete_orientation", text="X", emboss=True)
+
+
+    def draw_right_column(self, context, scene, layout):
+        column = layout.column(align=True)
+
+        if context.mode == 'OBJECT':
+            column.label(text="Affect Only")
+
+            col = column.column(align=True)
+            col.scale_y = 1.2
+            col.prop(scene.tool_settings, "use_transform_data_origin", text="Origins")
+            col.prop(scene.tool_settings, "use_transform_pivot_point_align", text="Locations")
+            col.prop(scene.tool_settings, "use_transform_skip_children", text="Parents")
+
+        elif context.mode == 'EDIT_MESH':
+            column.label(text="Mirror Editing")
+
+            active = context.active_object
+
+            row = column.row(align=True)
+            row.prop(active.data, "use_mirror_x")
+            row.prop(active.data, "use_mirror_y")
+            row.prop(active.data, "use_mirror_z")
+
+            column.prop(active.data, "use_mirror_topology", toggle=True)
 
 
 class PieCollections(Menu):
@@ -1703,7 +1974,8 @@ class PieWorkspace(Menu):
         pie.operator("machin3.switch_workspace", text="MACHIN3", icon='VIEW3D').name="General"
 
         # 6 - RIGHT
-        pie.operator("machin3.switch_workspace", text="Compositing", icon='NODE_COMPOSITING').name="Compositing"
+        # pie.operator("machin3.switch_workspace", text="Compositing", icon='NODE_COMPOSITING').name="Compositing"
+        pie.separator()
 
         # 2 - BOTTOM
         pie.operator("machin3.switch_workspace", text="Scripting", icon='CONSOLE').name="Scripting"
@@ -1721,4 +1993,4 @@ class PieWorkspace(Menu):
         pie.separator()
 
         # 3 - BOTTOM - RIGHT
-        pie.separator()
+        pie.operator("machin3.switch_workspace", text="Video", icon='FILE_MOVIE').name="Video"

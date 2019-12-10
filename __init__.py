@@ -1,29 +1,10 @@
-'''
-Copyright (C) 2016-2018 MACHIN3, machin3.io, support@machin3.io
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-'''
-
-
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, 12),
+    "version": (0, 3, 13),
     "blender": (2, 80, 0),
     "location": "",
-    "description": "Streamlining Blender 2.80.",
+    "description": "Streamlining Blender 2.80 and beyond.",
     "warning": "",
     "wiki_url": "https://machin3.io/MACHIN3tools/docs",
     "category": "Mesh"}
@@ -51,14 +32,14 @@ def reload_modules(name):
         importlib.reload(eval(module))
 
     # then update the classes and keys dicts
-    from . import dicts
-    importlib.reload(dicts)
+    from . import registration
+    importlib.reload(registration)
 
     # and based on that, reload the modules containing operator and menu classes
     modules = []
 
-    for label in dicts.classes:
-        entries = dicts.classes[label]
+    for label in registration.classes:
+        entries = registration.classes[label]
         for entry in entries:
             path = entry[0].split('.')
             module = path.pop(-1)
@@ -87,6 +68,7 @@ from . properties import M3SceneProperties
 from . utils.registration import get_core, get_tools, get_pie_menus, get_menus
 from . utils.registration import register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, add_object_context_menu, remove_object_context_menu
 from . utils.registration import add_object_buttons
+from . handlers import update_object_axes_drawing
 
 
 def register():
@@ -120,6 +102,13 @@ def register():
     icons = register_icons()
 
 
+    # HANDLERS
+
+    bpy.app.handlers.undo_pre.append(update_object_axes_drawing)
+    bpy.app.handlers.redo_pre.append(update_object_axes_drawing)
+    bpy.app.handlers.load_pre.append(update_object_axes_drawing)
+
+
     # REGISTRATION OUTPUT
 
     print("Registered %s %s with %d %s, %d pie %s and %s context %s" % (bl_info["name"], ".".join([str(i) for i in bl_info['version']]), tool_count, "tool" if tool_count == 1 else "tools", pie_count, "menu" if pie_count == 1 else "menus", menu_count, "menu" if menu_count == 1 else "menus"))
@@ -127,6 +116,13 @@ def register():
 
 def unregister():
     global classes, keymaps, icons
+
+    # HANDLERS
+
+    bpy.app.handlers.undo_pre.remove(update_object_axes_drawing)
+    bpy.app.handlers.redo_pre.remove(update_object_axes_drawing)
+    bpy.app.handlers.load_pre.remove(update_object_axes_drawing)
+
 
     # TOOLS, PIE MENUS, KEYMAPS, MENUS
 

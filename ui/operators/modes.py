@@ -138,6 +138,12 @@ class ImageMode(bpy.types.Operator):
 
         if self.mode == "UV" and active:
             if active.mode == "OBJECT":
+                uvs = active.data.uv_layers
+
+                # create new uv layer
+                if not uvs:
+                    uvs.new()
+
                 bpy.ops.object.mode_set(mode="EDIT")
                 bpy.ops.mesh.select_all(action="SELECT")
 
@@ -170,7 +176,7 @@ class UVMode(bpy.types.Operator):
 class SurfaceDrawMode(bpy.types.Operator):
     bl_idname = "machin3.surface_draw_mode"
     bl_label = "MACHIN3: Surface Draw Mode"
-    bl_description = "Surface Draw, create parented, emptyGreasePencil object and enters DRAW mode.\nSHIFT: Select the Line tool."
+    bl_description = "Surface Draw, create parented, empty GreasePencil object and enter DRAW mode.\nSHIFT: Select the Line tool."
     bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):

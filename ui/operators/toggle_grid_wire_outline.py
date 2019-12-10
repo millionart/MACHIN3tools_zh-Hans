@@ -19,7 +19,7 @@ class ToggleGrid(bpy.types.Operator):
         overlay = view.overlay
         perspective_type = view.region_3d.view_perspective
 
-        mode = "GRID" if perspective_type == "ORTHO" else "FLOOR"
+        mode = "GRID" if perspective_type == "ORTHO" and view.region_3d.is_orthographic_side_view else "FLOOR"
 
         if mode == "FLOOR":
             if overlay.show_floor:

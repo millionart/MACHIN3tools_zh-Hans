@@ -3,6 +3,9 @@ from bpy.props import BoolProperty
 from .. utils.registration import get_addon
 
 
+decalmachine = None
+
+
 class Mirror(bpy.types.Operator):
     bl_idname = "machin3.mirror"
     bl_label = "MACHIN3: Mirror"
@@ -23,8 +26,6 @@ class Mirror(bpy.types.Operator):
     DM_mirror_u: BoolProperty(name="U", default=True)
     DM_mirror_v: BoolProperty(name="V", default=False)
 
-    # hidden
-    init: BoolProperty()
 
     def draw(self, context):
         layout = self.layout
@@ -36,7 +37,7 @@ class Mirror(bpy.types.Operator):
         row.prop(self, "use_y", toggle=True)
         row.prop(self, "use_z", toggle=True)
 
-        if len(context.selected_objects) == 1 and context.active_object in context.selected_objects:
+        if self.meshes_present and len(context.selected_objects) == 1 and context.active_object in context.selected_objects:
             row = column.row(align=True)
             r = row.row()
             r.active = self.use_x
@@ -46,7 +47,7 @@ class Mirror(bpy.types.Operator):
             r.prop(self, "bisect_y")
             r = row.row()
             r.active = self.use_z
-            r.prop(self, "bisect_y")
+            r.prop(self, "bisect_z")
 
             row = column.row(align=True)
             r = row.row()
@@ -57,11 +58,9 @@ class Mirror(bpy.types.Operator):
             r.prop(self, "flip_y")
             r = row.row()
             r.active = self.use_z
-            r.prop(self, "flip_y")
+            r.prop(self, "flip_z")
 
-
-        DMenabled, _, _, _ = get_addon("DECALmachine")
-        if DMenabled:
+        if self.decals_present:
             column.separator()
 
             column.label(text="DECALmachine - UVs")
@@ -73,15 +72,32 @@ class Mirror(bpy.types.Operator):
     def poll(cls, context):
         return context.mode == "OBJECT"
 
-    def execute(self, context):
-        sel = context.selected_objects
-        active = context.active_object
+    def invoke(self, context, event):
+        global decalmachine
 
-        if self.init and len(sel) > 1:
+        if decalmachine is None:
+            decalmachine = get_addon("DECALmachine")[0]
+
+        self.dm = decalmachine
+
+        active = context.active_object
+        self.sel = context.selected_objects
+        self.meshes_present = True if any([obj for obj in self.sel if obj.type == 'MESH']) else False
+        self.decals_present = True if self.dm and any([obj for obj in self.sel if obj.DM.isdecal]) else False
+
+        if len(self.sel) > 1:
             self.bisect_x = self.bisect_y = self.bisect_z = False
             self.flip_x = self.flip_y = self.flip_z = False
 
-        self.mirror(context, active, sel)
+        self.mirror(context, active, self.sel)
+        return {'FINISHED'}
+
+
+    def execute(self, context):
+        active = context.active_object
+        self.sel = context.selected_objects
+
+        self.mirror(context, active, self.sel)
 
         return {'FINISHED'}
 
@@ -90,8 +106,12 @@ class Mirror(bpy.types.Operator):
             if active.type in ["MESH", "CURVE"]:
                 self.mirror_mesh_obj(context, active)
 
+            elif active.type == "GPENCIL":
+                self.mirror_gpencil_obj(context, active)
+
             elif active.type == "EMPTY" and active.instance_collection:
                 self.mirror_grouppro(context, active)
+
 
         elif len(sel) > 1 and active in sel:
             sel.remove(active)
@@ -100,8 +120,12 @@ class Mirror(bpy.types.Operator):
                 if obj.type in ["MESH", "CURVE"]:
                     self.mirror_mesh_obj(context, obj, active)
 
+                elif obj.type == "GPENCIL":
+                    self.mirror_gpencil_obj(context, obj, active)
+
                 elif obj.type == "EMPTY" and obj.instance_collection:
                     self.mirror_grouppro(context, obj, active)
+
 
             context.view_layer.objects.active = active
 
@@ -114,9 +138,7 @@ class Mirror(bpy.types.Operator):
         if active:
             mirror.mirror_object = active
 
-        DMenabled, _, _, _ = get_addon("DECALmachine")
-
-        if DMenabled:
+        if self.dm:
             if obj.DM.isdecal:
                 mirror.use_mirror_u = self.DM_mirror_u
                 mirror.use_mirror_v = self.DM_mirror_v
@@ -136,6 +158,15 @@ class Mirror(bpy.types.Operator):
 
                     obj.modifiers.remove(nrmtransfer)
                     new.name = "NormalTransfer"
+
+    def mirror_gpencil_obj(self, context, obj, active=None):
+        mirror = obj.grease_pencil_modifiers.new(name="Mirror", type="GP_MIRROR")
+        mirror.x_axis = self.use_x
+        mirror.y_axis = self.use_y
+        mirror.z_axis = self.use_z
+
+        if active:
+            mirror.object = active
 
     def mirror_grouppro(self, context, obj, active=None):
         mirrorempty = bpy.data.objects.new("mirror_empty", None)
@@ -172,6 +203,10 @@ class Unmirror(bpy.types.Operator):
         if mirror_meshes:
             return True
 
+        mirror_gpencils = [obj for obj in context.selected_objects if obj.type == "GPENCIL" and any(mod.type == "GP_MIRROR" for mod in obj.grease_pencil_modifiers)]
+        if mirror_gpencils:
+            return True
+
         groups = [obj for obj in context.selected_objects if obj.type == "EMPTY" and obj.instance_collection]
         if groups:
             return [empty for empty in groups if any(obj for obj in empty.instance_collection.objects if any(mod.type == "MIRROR" for mod in obj.modifiers))]
@@ -180,6 +215,9 @@ class Unmirror(bpy.types.Operator):
         for obj in context.selected_objects:
             if obj.type in ["MESH", "CURVE"]:
                 self.unmirror_mesh_obj(obj)
+
+            elif obj.type == "GPENCIL":
+                self.unmirror_gpencil_obj(obj)
 
             elif obj.type == "EMPTY" and obj.instance_collection:
                 col = obj.instance_collection
@@ -204,3 +242,9 @@ class Unmirror(bpy.types.Operator):
             target = mirrors[-1].mirror_object
             obj.modifiers.remove(mirrors[-1])
             return target
+
+    def unmirror_gpencil_obj(self, obj):
+        mirrors = [mod for mod in obj.grease_pencil_modifiers if mod.type == "GP_MIRROR"]
+
+        if mirrors:
+            obj.grease_pencil_modifiers.remove(mirrors[-1])

@@ -19,7 +19,6 @@ class ViewAxis(bpy.types.Operator):
 
     axis: EnumProperty(name="Axis", items=axisitems, default="FRONT")
 
-
     def invoke(self, context, event):
 
         if event.alt:

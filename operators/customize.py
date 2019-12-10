@@ -22,10 +22,14 @@ class Customize(bpy.types.Operator):
 
         resourcespath = os.path.join(get_prefs().path, "resources")
 
+
+        # STARTUP SCENE
+        if get_prefs().custom_startup:
+            self.startup()
+
         # THEME
         if get_prefs().custom_theme:
             self.theme(scriptspath, resourcespath)
-
 
         # MATCAPS + DEFAULT SHADING
         if get_prefs().custom_matcaps:
@@ -38,9 +42,6 @@ class Customize(bpy.types.Operator):
         # PREFERENCES
         self.preferences(context)
 
-
-        # START UP
-        # copy and load start up file, which includes workspaces
 
         return {'FINISHED'}
 
@@ -438,7 +439,6 @@ class Customize(bpy.types.Operator):
 
             v.mini_axis_type = 'MINIMAL'
 
-            # s.gpu_viewport_quality = 1
             s.viewport_aa = "8"
             s.multi_sample = "8"
 
@@ -568,6 +568,23 @@ class Customize(bpy.types.Operator):
 
         filepath = shutil.copy(themesourcepath, themetargetpath)
         bpy.ops.script.execute_preset(filepath=filepath, menu_idname="USERPREF_MT_interface_theme_presets")
+
+    def startup(self):
+        light = bpy.data.lights.get('Light')
+        if light:
+            bpy.data.lights.remove(light, do_unlink=True)
+
+        cube = bpy.data.meshes.get('Cube')
+        if cube:
+            bpy.data.meshes.remove(cube, do_unlink=True)
+
+        cam = bpy.data.cameras.get('Camera')
+        if cam:
+            bpy.data.cameras.remove(cam, do_unlink=True)
+
+        mat = bpy.data.materials.get('Material')
+        if mat:
+            bpy.data.materials.remove(mat, do_unlink=True)
 
 
 class RestoreKeymaps(bpy.types.Operator):

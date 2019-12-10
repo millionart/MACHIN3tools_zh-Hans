@@ -25,10 +25,10 @@ class QuadSphere(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'OBJECT' or context.mode == 'EDIT_MESH'
+        return context.mode in ['OBJECT', 'EDIT_MESH']
 
     def execute(self, context):
-        obj = bpy.ops.mesh.primitive_cube_add(align='CURSOR' if self.align_rotation else 'WORLD')
+        bpy.ops.mesh.primitive_cube_add(align='CURSOR' if self.align_rotation else 'WORLD')
 
         mode = bpy.context.mode
 
