@@ -7,15 +7,10 @@ from .. utils.collection import get_scene_collections
 from .. utils.system import abspath
 
 # TODO: snapping pie
-# TODO: orientation/pivot pie, merge it all into the cursor/origin pie?
-# TODO: eevee presets
-
 
 # TODO: origin to selection
 # TODO: origin to bbox center, top, bottom, etc
-# TODO: align cursor to selected: align cursor rotation
-# TODO: align origin to cursor, see https://polycount.com/discussion/comment/2683194/#Comment_2683194
-
+# TODO: align origin to cursor, incl rotatation, see https://polycount.com/discussion/comment/2683194/#Comment_2683194
 
 # TODO: modes gpencil: add modal shrinkwrap tool, if gpencil is parented
 
