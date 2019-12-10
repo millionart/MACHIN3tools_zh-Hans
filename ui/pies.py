@@ -1987,8 +1987,7 @@ class PieWorkspace(Menu):
         pie.operator("machin3.switch_workspace", text="UVs", icon='GROUP_UVS').name="UVs"
 
         # 9 - TOP - RIGHT
-        # pie.operator("machin3.switch_workspace", text="World", icon='WORLD').name="World"
-        pie.separator()
+        pie.operator("machin3.switch_workspace", text="World", icon='WORLD').name="World"
 
         # 1 - BOTTOM - LEFT
         pie.separator()

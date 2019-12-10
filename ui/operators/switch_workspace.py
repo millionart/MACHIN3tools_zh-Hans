@@ -15,7 +15,7 @@ class SwitchWorkspace(bpy.types.Operator):
         ws = bpy.data.workspaces.get(self.name)
 
         # get view matrix from 3d view (if present)
-        viewmx = self.get_view_matrix(context, ws)
+        view = self.get_view(context, ws)
         shading = self.get_shading(context, ws)
 
         # if the chosen workspace is already active, select the alternative one, if present and set the shading
@@ -36,8 +36,8 @@ class SwitchWorkspace(bpy.types.Operator):
             bpy.context.window.workspace = ws
 
         # set previous view matrix to new view
-        if ws and viewmx:
-            self.set_view_matrix(ws, viewmx)
+        if ws and view:
+            self.set_view(ws, view)
 
         return {'FINISHED'}
 
@@ -69,16 +69,40 @@ class SwitchWorkspace(bpy.types.Operator):
 
             return shading_type, studio_light, use_scene_lights, use_scene_world, show_overlays
 
-    def set_view_matrix(self, workspace, viewmx):
+    def set_view(self, workspace, view):
         for screen in workspace.screens:
             for area in screen.areas:
                 if area.type == 'VIEW_3D':
                     for space in area.spaces:
                         if space.type == 'VIEW_3D':
                             r3d = space.region_3d
-                            r3d.view_matrix = viewmx
+
+                            r3d.view_location = view[0]
+                            r3d.view_rotation = view[1]
+                            r3d.view_distance = view[2]
+
+                            # don't set camera views
+                            if r3d.view_perspective != 'CAMERA':
+                                r3d.view_perspective = view[3]
+
+                                r3d.is_perspective = view[4]
+                                r3d.is_orthographic_side_view = view[5]
+
                             return
 
-    def get_view_matrix(self, context, workspace):
+    def get_view(self, context, workspace):
         if context.space_data.type == 'VIEW_3D':
-            return context.space_data.region_3d.view_matrix
+            r3d = context.space_data.region_3d
+
+            # note, you could get/set the view_matrix, but matrix even with view_distance won't bring over the cameras orbit/focus point
+            view_location = r3d.view_location
+            view_rotation = r3d.view_rotation
+            view_distance = r3d.view_distance
+
+            view_perspective = r3d.view_perspective
+
+            is_perspective = r3d.is_perspective
+            is_side_view = r3d.is_orthographic_side_view
+
+            # don't get camera views
+            return (view_location, view_rotation, view_distance, view_perspective, is_perspective, is_side_view) if view_perspective != 'CAMERA' else None
