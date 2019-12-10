@@ -300,7 +300,7 @@ class LoadMaterialsSource(bpy.types.Operator):
 
 class LoadPrevious(bpy.types.Operator):
     bl_idname = "machin3.load_previous"
-    bl_label = "Load Previous"
+    bl_label = "Current file is unsaved. Load previous blend in folder anyway?"
     bl_description = "Load Previous Blend File in Current Folder"
     bl_options = {'REGISTER'}
 
@@ -308,45 +308,54 @@ class LoadPrevious(bpy.types.Operator):
     def poll(cls, context):
         return bpy.data.filepath
 
-    def execute(self, context):
-        filepath = bpy.data.filepath
+    def invoke(self, context, event):
+        if bpy.data.filepath:
+            path, _, idx = self.get_data(bpy.data.filepath)
 
+            if idx >= 0:
+                if bpy.data.is_dirty:
+                    return context.window_manager.invoke_confirm(self, event)
 
-        # """
+                else:
+                    self.execute(context)
 
-        if filepath:
-            currentpath = os.path.dirname(filepath)
-            currentblend = os.path.basename(filepath)
-
-            blendfiles = [f for f in sorted(os.listdir(currentpath)) if f.endswith(".blend")]
-
-            index = blendfiles.index(currentblend)
-
-            previousidx = index - 1
-
-            if previousidx >= 0:
-                previousblend = blendfiles[previousidx]
-
-
-                loadpath = os.path.join(currentpath, previousblend)
-
-                # add the path to the recent files list, for some reason it's not done automatically
-                add_path_to_recent_files(loadpath)
-
-
-                print("Loading blend file %d/%d: %s" % (previousidx + 1, len(blendfiles), previousblend))
-                bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)
             else:
-                self.report({'ERROR'}, "You've reached the first file in the current foler: %s." % (currentpath))
+                self.report({'ERROR'}, "You've reached the first file in the current folder: %s." % (path))
+        return {'FINISHED'}
 
 
+    def execute(self, context):
+        path, files, idx = self.get_data(bpy.data.filepath)
+
+        previousblend = files[idx]
+        loadpath = os.path.join(path, previousblend)
+
+        # add the path to the recent files list, for some reason it's not done automatically
+        add_path_to_recent_files(loadpath)
+
+        print("Loading blend file %d/%d: %s" % (idx + 1, len(files), previousblend))
+        bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)
 
         return {'FINISHED'}
 
 
+    def get_data(self, filepath):
+        """
+        return path of current blend, all blend files in the folder or the current file as well as the index of the previous blend
+        """
+        currentpath = os.path.dirname(filepath)
+        currentblend = os.path.basename(filepath)
+
+        blendfiles = [f for f in sorted(os.listdir(currentpath)) if f.endswith(".blend")]
+        index = blendfiles.index(currentblend)
+        previousidx = index - 1
+
+        return currentpath, blendfiles, previousidx
+
+
 class LoadNext(bpy.types.Operator):
     bl_idname = "machin3.load_next"
-    bl_label = "Load Next"
+    bl_label = "Current file is unsaved. Load next blend in folder anyway?"
     bl_description = "Load Next Blend File in Current Folder"
     bl_options = {'REGISTER'}
 
@@ -354,30 +363,45 @@ class LoadNext(bpy.types.Operator):
     def poll(cls, context):
         return bpy.data.filepath
 
-    def execute(self, context):
-        filepath = bpy.data.filepath
+    def invoke(self, context, event):
+        if bpy.data.filepath:
+            path, files, idx = self.get_data(bpy.data.filepath)
 
-        if filepath:
-            currentpath = os.path.dirname(filepath)
-            currentblend = os.path.basename(filepath)
+            if idx < len(files):
+                if bpy.data.is_dirty:
+                    return context.window_manager.invoke_confirm(self, event)
 
-            blendfiles = [f for f in sorted(os.listdir(currentpath)) if f.endswith(".blend")]
-
-            index = blendfiles.index(currentblend)
-
-            nextidx = index + 1
-
-            if nextidx < len(blendfiles):
-                nextblend = blendfiles[nextidx]
-
-                loadpath = os.path.join(currentpath, nextblend)
-
-                # add the path to the recent files list, for some reason it's not done automatically
-                add_path_to_recent_files(loadpath)
-
-                print("Loading blend file %d/%d: %s" % (nextidx + 1, len(blendfiles), nextblend))
-                bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)
+                else:
+                    self.execute(context)
             else:
-                self.report({'ERROR'}, "You've reached the last file in the current foler: %s." % (currentpath))
+                self.report({'ERROR'}, "You've reached the last file in the current foler: %s." % (path))
+        return {'FINISHED'}
+
+
+    def execute(self, context):
+        path, files, idx = self.get_data(bpy.data.filepath)
+
+        nextblend = files[idx]
+        loadpath = os.path.join(path, nextblend)
+
+        # add the path to the recent files list, for some reason it's not done automatically
+        add_path_to_recent_files(loadpath)
+
+        print("Loading blend file %d/%d: %s" % (idx + 1, len(files), nextblend))
+        bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)
 
         return {'FINISHED'}
+
+
+    def get_data(self, filepath):
+        """
+        return path of current blend, all blend files in the folder or the current file as well as the index of the next file 
+        """
+        currentpath = os.path.dirname(filepath)
+        currentblend = os.path.basename(filepath)
+
+        blendfiles = [f for f in sorted(os.listdir(currentpath)) if f.endswith(".blend")]
+        index = blendfiles.index(currentblend)
+        previousidx = index + 1
+
+        return currentpath, blendfiles, previousidx
