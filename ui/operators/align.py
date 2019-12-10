@@ -82,7 +82,7 @@ class AlignEditMesh(bpy.types.Operator):
 class AlignObjectToEdge(bpy.types.Operator):
     bl_idname = "machin3.align_object_to_edge"
     bl_label = "MACHIN3: Align Object to Edge"
-    bl_description = "Align one or more objects to edge in active object\nALT: Snap objects to edge, in addtion to aligning them"
+    bl_description = "Align one or more objects to edge in active object\nALT: Snap objects to edge by proximity\nCTRL: Snap objects to edge by midpoint"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -118,16 +118,25 @@ class AlignObjectToEdge(bpy.types.Operator):
                 obj.matrix_world = get_loc_matrix(loc) @ rmx @ get_loc_matrix(-loc) @ obj.matrix_world
 
                 # snap the objects together
-                if event.alt:
-                    # the mid point was returned in local space, and is now brough into world space AFTER the decal was rotated
-                    mid = obj.matrix_world @ mid
+                if event.alt or event.ctrl:
+                    # the mid point was returned in local space, and is now brough into world space AFTER the obj was rotated
+                    mid_world = obj.matrix_world @ mid
 
-                    # determine closed point on target edge to decal edge mid ponit
-                    co, _ = geometry.intersect_point_line(mid, *coords)
+                    # determine closed point on target edge to obj edge mid ponit
+                    co, _ = geometry.intersect_point_line(mid_world, *coords)
 
                     # snap the obj to the edge
                     if co:
-                        obj.matrix_world = Matrix.Translation(co - mid) @ obj.matrix_world
+                        obj.matrix_world = Matrix.Translation(co - mid_world) @ obj.matrix_world
+
+                        # snap the edge midpoints together as well
+                        if event.ctrl:
+                            mid_target = (coords[0] + coords[1]) / 2
+                            mid_obj = obj.matrix_world @ mid
+
+                            mxt = Matrix.Translation(mid_target - mid_obj)
+
+                            obj.matrix_world = mxt @ obj.matrix_world
 
         return {'FINISHED'}
 
@@ -140,7 +149,7 @@ class AlignObjectToEdge(bpy.types.Operator):
         bm = bmesh.from_edit_mesh(obj.data)
         edges = [e for e in bm.edges if e.select]
 
-        v_decal = (obj.matrix_world.to_3x3() @ Vector(edges[0].verts[0].co - edges[0].verts[1].co)).normalized() if len(edges) == 1 else None
+        v_obj = (obj.matrix_world.to_3x3() @ Vector(edges[0].verts[0].co - edges[0].verts[1].co)).normalized() if len(edges) == 1 else None
         mid = get_center_between_verts(*edges[0].verts) if edges else None
 
         bm = bmesh.from_edit_mesh(target.data)
@@ -149,13 +158,13 @@ class AlignObjectToEdge(bpy.types.Operator):
         v_target = (target.matrix_world.to_3x3() @ Vector(edges[0].verts[0].co - edges[0].verts[1].co)).normalized() if len(edges) == 1 else None
         coords = [target.matrix_world @ v.co for v in edges[0].verts] if edges else None
 
-        if v_decal and v_target:
+        if v_obj and v_target:
 
             # align them both the same
-            dot = v_decal.dot(v_target)
+            dot = v_obj.dot(v_target)
 
             if dot < 0:
-                v_decal.negate()
+                v_obj.negate()
 
-            return v_decal, v_target, mid, coords
+            return v_obj, v_target, mid, coords
         return None, None, None, None
