@@ -49,10 +49,13 @@ class SwitchWorkspace(bpy.types.Operator):
                         if space.type == 'VIEW_3D':
                             space.shading.type = shading[0]
                             space.shading.studio_light = shading[1]
-                            space.shading.use_scene_lights = shading[2]
-                            space.shading.use_scene_world = shading[3]
+                            space.shading.studiolight_rotate_z = shading[2]
+                            space.shading.studiolight_background_alpha = shading[3]
 
-                            space.overlay.show_overlays = shading[4]
+                            space.shading.use_scene_lights = shading[4]
+                            space.shading.use_scene_world = shading[5]
+
+                            space.overlay.show_overlays = shading[6]
                             return
 
     def get_shading(self, context, workspace):
@@ -61,13 +64,15 @@ class SwitchWorkspace(bpy.types.Operator):
 
             shading_type = shading.type
             studio_light = shading.studio_light
+            rotate_z = shading.studiolight_rotate_z
+            backgound_alpha = shading.studiolight_background_alpha
+
             use_scene_lights = shading.use_scene_lights
             use_scene_world = shading.use_scene_world
 
             show_overlays = context.space_data.overlay.show_overlays
 
-
-            return shading_type, studio_light, use_scene_lights, use_scene_world, show_overlays
+            return shading_type, studio_light, rotate_z, backgound_alpha, use_scene_lights, use_scene_world, show_overlays
 
     def set_view(self, workspace, view):
         for screen in workspace.screens:
