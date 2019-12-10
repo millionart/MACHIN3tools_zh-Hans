@@ -1,10 +1,10 @@
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, 12),
+    "version": (0, 3, 13),
     "blender": (2, 80, 0),
     "location": "",
-    "description": "Streamlining Blender 2.80.",
+    "description": "Streamlining Blender 2.80 and beyond.",
     "warning": "",
     "wiki_url": "https://machin3.io/MACHIN3tools/docs",
     "category": "Mesh"}

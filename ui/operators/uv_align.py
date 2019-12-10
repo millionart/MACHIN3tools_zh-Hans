@@ -19,7 +19,7 @@ class AlignUV(bpy.types.Operator):
     bl_idname = "machin3.align_uv"
     bl_label = "MACHIN3: Align (UV)"
     bl_options = {'REGISTER', 'UNDO'}
-    bl_description = ""
+    bl_description = "Align verts based on min/max UV values"
 
     axis: EnumProperty(name="Axis", items=axisitems, default="U")
     type: EnumProperty(name="Type", items=typeitems, default="MIN")

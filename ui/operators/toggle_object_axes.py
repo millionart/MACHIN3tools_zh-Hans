@@ -5,7 +5,7 @@ from ... utils.draw import add_object_axes_drawing_handler, remove_object_axes_d
 class ToggleObjectAxes(bpy.types.Operator):
     bl_idname = "machin3.toggle_object_axes"
     bl_label = "MACHIN3: Toggle Object Axes"
-    bl_description = ""
+    bl_description = "Show local axes on objects in selection, or all visible objects if nothing is selected"
     bl_options = {'REGISTER'}
 
     def execute(self, context):
