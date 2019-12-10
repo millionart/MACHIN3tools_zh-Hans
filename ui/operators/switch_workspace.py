@@ -27,7 +27,7 @@ class SwitchWorkspace(bpy.types.Operator):
                 self.set_shading(ws, shading)
 
         # switch back to original(non-alt workspace) and set shading
-        elif context.workspace.name.endswith(".alt"):
+        elif ws and ws.name + ".alt" == context.workspace.name:
             bpy.context.window.workspace = ws
             self.set_shading(ws, shading)
 
@@ -48,14 +48,26 @@ class SwitchWorkspace(bpy.types.Operator):
                     for space in area.spaces:
                         if space.type == 'VIEW_3D':
                             space.shading.type = shading[0]
-                            space.overlay.show_overlays = shading[1]
+                            space.shading.studio_light = shading[1]
+                            space.shading.use_scene_lights = shading[2]
+                            space.shading.use_scene_world = shading[3]
+
+                            space.overlay.show_overlays = shading[4]
                             return
 
     def get_shading(self, context, workspace):
         if context.space_data.type == 'VIEW_3D':
-            shading_type = context.space_data.shading.type
+            shading = context.space_data.shading
+
+            shading_type = shading.type
+            studio_light = shading.studio_light
+            use_scene_lights = shading.use_scene_lights
+            use_scene_world = shading.use_scene_world
+
             show_overlays = context.space_data.overlay.show_overlays
-            return shading_type, show_overlays
+
+
+            return shading_type, studio_light, use_scene_lights, use_scene_world, show_overlays
 
     def set_view_matrix(self, workspace, viewmx):
         for screen in workspace.screens:

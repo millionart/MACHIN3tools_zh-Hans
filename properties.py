@@ -90,12 +90,15 @@ class M3SceneProperties(bpy.types.PropertyGroup):
 
     def update_eevee_preset(self, context):
         eevee = context.scene.eevee
+        shading = context.space_data.shading
 
         if self.eevee_preset == 'NONE':
             eevee.use_ssr = False
             eevee.use_gtao = False
             eevee.use_bloom = False
             eevee.use_volumetric_lights = False
+
+            shading.use_scene_lights = False
 
         elif self.eevee_preset == 'LOW':
             eevee.use_ssr = True
@@ -105,6 +108,8 @@ class M3SceneProperties(bpy.types.PropertyGroup):
             eevee.use_bloom = False
             eevee.use_volumetric_lights = False
 
+            shading.use_scene_lights = True
+
         elif self.eevee_preset == 'HIGH':
             eevee.use_ssr = True
             eevee.use_ssr_halfres = False
@@ -113,6 +118,8 @@ class M3SceneProperties(bpy.types.PropertyGroup):
             eevee.use_bloom = True
             eevee.use_volumetric_lights = False
 
+            shading.use_scene_lights = True
+
         elif self.eevee_preset == 'ULTRA':
             eevee.use_ssr = True
             eevee.use_ssr_halfres = False
@@ -120,6 +127,8 @@ class M3SceneProperties(bpy.types.PropertyGroup):
             eevee.use_gtao = True
             eevee.use_bloom = True
             eevee.use_volumetric_lights = True
+
+            shading.use_scene_lights = True
 
     def update_eevee_gtao_factor(self, context):
         context.scene.eevee.gtao_factor = self.eevee_gtao_factor
