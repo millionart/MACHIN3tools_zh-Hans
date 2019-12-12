@@ -1,9 +1,9 @@
 import bpy
-from bpy.props import EnumProperty, BoolProperty
+from bpy.props import EnumProperty, BoolProperty, StringProperty
 import bmesh
 from mathutils import Vector, Matrix, geometry
-from ... utils.math import get_center_between_verts, create_rotation_difference_matrix_from_quat, get_loc_matrix, create_selection_bbox
-from ... items import axis_items, align_type_items, align_axis_mapping_dict
+from ... utils.math import get_center_between_verts, create_rotation_difference_matrix_from_quat, get_loc_matrix, create_selection_bbox, get_right_and_up_axes
+from ... items import axis_items, align_type_items, align_axis_mapping_dict, align_direction_items
 
 
 class AlignEditMesh(bpy.types.Operator):
@@ -12,49 +12,85 @@ class AlignEditMesh(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Default: Local Align\nAlt + Click: Global Align"
 
+    type: EnumProperty(name="Type", items=align_type_items, default="MINMAX")
+
     axis: EnumProperty(name="Axis", items=axis_items, default="X")
-    type: EnumProperty(name="Type", items=align_type_items, default="MIN")
+    direction: EnumProperty(name="Axis", items=align_direction_items, default="LEFT")
+
     local: BoolProperty(name="Local Space", default=True)
 
     @classmethod
     def poll(cls, context):
-        return context.mode == "EDIT_MESH"
+        if context.mode == "EDIT_MESH":
+            active = context.active_object
+            bm = bmesh.from_edit_mesh(active.data)
+            return [v for v in bm.verts if v.select]
 
     def invoke(self, context, event):
         self.local = not event.alt
 
-        self.align(context, align_axis_mapping_dict[self.axis], self.type, local=self.local)
+        self.align(context, self.type, align_axis_mapping_dict[self.axis], self.direction, local=self.local)
         return {'FINISHED'}
 
     def execute(self, context):
-        self.align(context, align_axis_mapping_dict[self.axis], self.type, local=self.local)
+        self.align(context, self.type, align_axis_mapping_dict[self.axis], self.direction, local=self.local)
         return {'FINISHED'}
 
-    def align(self, context, axis, type, local=True):
+    def align(self, context, type, axis, direction, local=True):
         active = context.active_object
         mx = active.matrix_world
+
+        mode = context.scene.M3.align_mode
+
+        # calculate axis from viewport
+        if mode == 'VIEW':
+            axis_right, axis_up, flip_right, flip_up = get_right_and_up_axes(context, mx=mx if local else Matrix())
+
+            if type == 'MINMAX':
+                axis = axis_right if direction in ['RIGHT', 'LEFT'] else axis_up
+
+            elif type in ['ZERO', 'AVERAGE', 'CURSOR']:
+                axis = axis_right if direction == "HORIZONTAL" else axis_up
+
 
         bm = bmesh.from_edit_mesh(active.data)
         bm.normal_update()
         bm.verts.ensure_lookup_table()
 
         verts = [v for v in bm.verts if v.select]
+
         axiscoords = [v.co[axis] for v in verts] if local else [(mx @ v.co)[axis] for v in verts]
 
-
-        # get target value depending on type
+        # get min or max target value
         if type == "MIN":
             target = min(axiscoords)
 
         elif type == "MAX":
             target = max(axiscoords)
 
+        # min or max in VIEW mode
+        elif type == 'MINMAX':
+            if direction == 'RIGHT':
+                target = min(axiscoords) if flip_right else max(axiscoords)
+
+            elif direction == 'LEFT':
+                target = max(axiscoords) if flip_right else min(axiscoords)
+
+            elif direction == 'TOP':
+                target = min(axiscoords) if flip_up else max(axiscoords)
+
+            elif direction == 'BOTTOM':
+                target = max(axiscoords) if flip_up else min(axiscoords)
+
+        # get the zero target value
         elif type == "ZERO":
             target = 0
 
+        # get the average target value
         elif type == "AVERAGE":
             target = sum(axiscoords) / len(axiscoords)
 
+        # get cursor target value
         elif type == "CURSOR":
             if local:
                 c_world = context.scene.cursor.location
@@ -63,7 +99,6 @@ class AlignEditMesh(bpy.types.Operator):
 
             else:
                 target = context.scene.cursor.location[axis]
-
 
         # set the new coordinates
         for v in verts:
@@ -76,6 +111,7 @@ class AlignEditMesh(bpy.types.Operator):
 
                 v.co = mx.inverted() @ world_co
 
+        bm.normal_update()
         bmesh.update_edit_mesh(active.data)
 
 
@@ -86,24 +122,37 @@ class CenterEditMesh(bpy.types.Operator):
     bl_description = "Default: Local Center\nAlt + Click: Global Center"
 
     axis: EnumProperty(name="Axis", items=axis_items, default="X")
+    direction: EnumProperty(name="Axis", items=align_direction_items, default="HORIZONTAL")
+
     local: BoolProperty(name="Local Space", default=True)
 
     @classmethod
     def poll(cls, context):
-        return context.mode == "EDIT_MESH"
+        if context.mode == "EDIT_MESH":
+            active = context.active_object
+            bm = bmesh.from_edit_mesh(active.data)
+            return [v for v in bm.verts if v.select]
 
     def invoke(self, context, event):
         self.local = not event.alt
 
-        self.center(context, align_axis_mapping_dict[self.axis], local=self.local)
+        self.center(context, align_axis_mapping_dict[self.axis], self.direction, local=self.local)
         return {'FINISHED'}
 
     def execute(self, context):
-        self.center(context, align_axis_mapping_dict[self.axis], local=self.local)
+        self.center(context, align_axis_mapping_dict[self.axis], self.direction, local=self.local)
         return {'FINISHED'}
 
-    def center(self, context, axis, local=True):
+    def center(self, context, axis, direction, local=True):
         active = context.active_object
+        mx = active.matrix_world
+
+        mode = context.scene.M3.align_mode
+
+        # calculate axis from viewport
+        if mode == 'VIEW':
+            axis_right, axis_up, flip_right, flip_up = get_right_and_up_axes(context, mx=mx if local else Matrix())
+            axis = axis_right if direction == "HORIZONTAL" else axis_up
 
         bm = bmesh.from_edit_mesh(active.data)
         bm.normal_update()
@@ -111,42 +160,39 @@ class CenterEditMesh(bpy.types.Operator):
 
         verts = [v for v in bm.verts if v.select]
 
-        if verts:
-            mx = active.matrix_world
+        # use the single vert's coordinate as the origin
+        if len(verts) == 1:
+            origin = verts[0].co
 
-            # use the single vert's coordinate as the origin
-            if len(verts) == 1:
-                origin = verts[0].co
+        # use the midpoint between two verts/one edge as the origin
+        elif len(verts) == 2:
+            origin = get_center_between_verts(*verts)
 
-            # use the midpoint between two verts/one edge as the origin
-            elif len(verts) == 2:
-                origin = get_center_between_verts(*verts)
+        # use the bounding box center as the origin
+        else:
+            _, origin = create_selection_bbox([v.co for v in verts])
 
-            # use the bounding box center as the origin
-            else:
-                _, origin = create_selection_bbox([v.co for v in verts])
+        # the target location will be the origin with the axis zeroed out
+        if local:
+            target = origin.copy()
+            target[axis] = 0
 
-            # the target location will be the origin with the axis zeroed out
-            if local:
-                target = origin.copy()
-                target[axis] = 0
+        # bring into world space
+        else:
+            origin = mx @ origin
+            target = origin.copy()
+            target[axis] = 0
 
-            # bring into world space
-            else:
-                origin = mx @ origin
-                target = origin.copy()
-                target[axis] = 0
+        # create mxt
+        if local:
+            mxt = get_loc_matrix(target - origin)
 
-            # create mxt
-            if local:
-                mxt = get_loc_matrix(target - origin)
+        else:
+            mxt = get_loc_matrix(mx.inverted().to_3x3() @ (target - origin))
 
-            else:
-                mxt = get_loc_matrix(mx.inverted().to_3x3() @ (target - origin))
-
-            # move the selection
-            for v in verts:
-                v.co = mxt @ v.co
+        # move the selection
+        for v in verts:
+            v.co = mxt @ v.co
 
         bmesh.update_edit_mesh(active.data)
 
