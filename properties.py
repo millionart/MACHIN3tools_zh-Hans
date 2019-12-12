@@ -1,6 +1,6 @@
 import bpy
 from bpy.props import StringProperty, IntProperty, BoolProperty, CollectionProperty, PointerProperty, EnumProperty, FloatProperty
-from . items import eevee_preset_items
+from . items import eevee_preset_items, align_mode_items
 
 
 # COLLECTIONS
@@ -146,3 +146,5 @@ class M3SceneProperties(bpy.types.PropertyGroup):
 
     object_axes_size: FloatProperty(name="Object Axes Size", default=0.3, min=0)
     object_axes_alpha: FloatProperty(name="Object Axes Alpha", default=0.75, min=0, max=1)
+
+    align_mode: EnumProperty(name="Align Mode", items=align_mode_items, default="AXES")

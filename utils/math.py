@@ -127,3 +127,31 @@ def create_selection_bbox(coords):
             Vector((maxx.x, maxy.y, maxz.z)), Vector((minx.x, maxy.y, maxz.z))]
 
     return bbox, mid
+
+
+def get_right_and_up_axes(context, mx):
+    r3d = context.space_data.region_3d
+
+    # get view right (and up) vectors in 3d space
+    view_right = r3d.view_rotation @ Vector((1, 0, 0))
+    view_up = r3d.view_rotation @ Vector((0, 1, 0))
+
+    # get the right and up axes in the objects or world space, depending on the axis that was passed in
+    axes_right = []
+    axes_up = []
+
+    for idx, axis in enumerate([Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))]):
+        dot = view_right.dot(mx.to_3x3() @ axis)
+        axes_right.append((dot, idx))
+
+        dot = view_up.dot(mx.to_3x3() @ axis)
+        axes_up.append((dot, idx))
+
+    axis_right = max(axes_right, key=lambda x: abs(x[0]))
+    axis_up = max(axes_up, key=lambda x: abs(x[0]))
+
+    # determine flip
+    flip_right = True if axis_right[0] < 0 else False
+    flip_up = True if axis_up[0] < 0 else False
+
+    return axis_right[1], axis_up[1], flip_right, flip_up
