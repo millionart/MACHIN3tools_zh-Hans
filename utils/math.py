@@ -100,7 +100,30 @@ def create_rotation_matrix_from_edge(obj, edge):
     return rotmx.transposed()
 
 
-
 def create_rotation_difference_matrix_from_quat(v1, v2):
     q = v1.rotation_difference(v2)
     return q.to_matrix().to_4x4()
+
+
+def create_selection_bbox(coords):
+    minx = min(coords, key=lambda x: x[0])
+    maxx = max(coords, key=lambda x: x[0])
+
+    miny = min(coords, key=lambda x: x[1])
+    maxy = max(coords, key=lambda x: x[1])
+
+    minz = min(coords, key=lambda x: x[2])
+    maxz = max(coords, key=lambda x: x[2])
+
+    midx = get_center_between_points(minx, maxx)
+    midy = get_center_between_points(miny, maxy)
+    midz = get_center_between_points(minz, maxz)
+
+    mid = Vector((midx[0], midy[1], midz[2]))
+
+    bbox = [Vector((minx.x, miny.y, minz.z)), Vector((maxx.x, miny.y, minz.z)),
+            Vector((maxx.x, maxy.y, minz.z)), Vector((minx.x, maxy.y, minz.z)),
+            Vector((minx.x, miny.y, maxz.z)), Vector((maxx.x, miny.y, maxz.z)),
+            Vector((maxx.x, maxy.y, maxz.z)), Vector((minx.x, maxy.y, maxz.z))]
+
+    return bbox, mid
