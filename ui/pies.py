@@ -1261,18 +1261,26 @@ class PieAlign(Menu):
 
         # 2 - BOTTOM
 
-        if sel:
-            box = pie.split()
-            column = box.column()
+        box = pie.split()
+        column = box.column()
 
-            column.separator()
+        column.separator()
+
+        row = column.split(factor=0.2)
+        row.separator()
+        row.label(text="Center")
+
+        row = column.row(align=True)
+        row.scale_y = 1.2
+        row.operator("machin3.center_editmesh", text="X").axis = "X"
+        row.operator("machin3.center_editmesh", text="Y").axis = "Y"
+        row.operator("machin3.center_editmesh", text="Z").axis = "Z"
+
+        if sel:
             row = column.row()
 
             row.scale_y = 1.5
             row.operator("machin3.align_object_to_edge", text="Align Object to Edge")
-
-        else:
-            pie.separator()
 
 
         # 8 - TOP
