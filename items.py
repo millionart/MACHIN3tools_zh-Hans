@@ -2,6 +2,10 @@ axis_items = [("X", "X", ""),
               ("Y", "Y", ""),
               ("Z", "Z", "")]
 
+uv_axis_items = [("U", "U", ""),
+                 ("V", "V", "")]
+
+
 # OPERATORS
 
 focus_method_items = [("VIEW_SELECTED", "View Selected", ""),
@@ -28,6 +32,9 @@ align_direction_items = [("LEFT", "Left", ""),
                          ("VERTICAL", "Vertical", "")]
 
 align_axis_mapping_dict = {"X": 0, "Y": 1, "Z": 2}
+
+uv_align_axis_mapping_dict = {"U": 0, "V": 1}
+
 
 
 # PIES

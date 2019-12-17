@@ -71,6 +71,9 @@ from . utils.registration import add_object_buttons
 from . handlers import update_object_axes_drawing
 
 
+# TODO: support translation, see https://blendermarket.com/inbox/conversations/20371
+
+
 def register():
     global classes, keymaps, icons
 

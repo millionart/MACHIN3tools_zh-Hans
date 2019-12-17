@@ -1,18 +1,7 @@
 import bpy
 from bpy.props import EnumProperty, BoolProperty
 import bmesh
-
-
-axisitems = [("U", "U", ""),
-             ("V", "V", "")]
-
-axismap = {"U": 0, "V": 1}
-
-typeitems = [("MIN", "Min", ""),
-             ("MAX", "Max", ""),
-             ("ZERO", "Zero", ""),
-             ("AVERAGE", "Average", ""),
-             ("CURSOR", "Cursor", "")]
+from ... items import uv_axis_items, uv_align_axis_mapping_dict, align_type_items, align_direction_items
 
 
 class AlignUV(bpy.types.Operator):
@@ -21,18 +10,19 @@ class AlignUV(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Align verts based on min/max UV values"
 
-    axis: EnumProperty(name="Axis", items=axisitems, default="U")
-    type: EnumProperty(name="Type", items=typeitems, default="MIN")
+    type: EnumProperty(name="Type", items=align_type_items, default="MIN")
+
+    axis: EnumProperty(name="Axis", items=uv_axis_items, default="U")
 
     @classmethod
     def poll(cls, context):
         return context.mode == "EDIT_MESH" and context.space_data.type == 'IMAGE_EDITOR'
 
     def execute(self, context):
-        self.uv_align(context, axismap[self.axis], self.type)
+        self.uv_align(context, self.type, uv_align_axis_mapping_dict[self.axis])
         return {'FINISHED'}
 
-    def uv_align(self, context, axis, type, local=True):
+    def uv_align(self, context, type, axis):
         active = context.active_object
         sync = context.scene.tool_settings.use_uv_select_sync
 
@@ -49,9 +39,7 @@ class AlignUV(bpy.types.Operator):
         else:
             loops = [l for f in bm.faces if f.select for l in f.loops if l[uvs].select]
 
-
         axiscoords = [l[uvs].uv[axis] for l in loops]
-
 
         # get target value depending on type
         if type == "MIN":

@@ -1250,12 +1250,10 @@ class PieAlign(Menu):
         active = context.active_object
         sel = [obj for obj in context.selected_objects if obj != active]
 
-
         if m3.align_mode == 'AXES':
             self.draw_align_with_axes(pie, m3, sel)
         elif m3.align_mode == "VIEW":
             self.draw_align_with_view(pie, m3, sel)
-
 
     def draw_align_with_axes(self, pie, m3, sel):
         """
@@ -1487,6 +1485,17 @@ class PieUVAlign(Menu):
         layout = self.layout
         pie = layout.menu_pie()
 
+        m3 = context.scene.M3
+
+        if m3.align_mode == 'AXES':
+            self.draw_align_with_axes(pie, m3)
+        elif m3.align_mode == "VIEW":
+            self.draw_align_with_view(pie, m3)
+
+    def draw_align_with_axes(self, pie, m3):
+        """
+        draw alignment options with axes as inputsw
+        """
 
         # 4 - LEFT
         op = pie.operator("machin3.align_uv", text="V min")
@@ -1502,52 +1511,14 @@ class PieUVAlign(Menu):
         pie.separator()
 
         # 8 - TOP
-        pie.separator()
-
-        """
         box = pie.split()
-        box.scale_y = 1.3
+        column = box.column()
 
-        column = box.column(align=True)
-        column.label(icon="FREEZE")
-        op = column.operator("machin3.align_editmesh", text="X")
-        op.axis = "X"
-        op.type = "ZERO"
-        op = column.operator("machin3.align_editmesh", text="Y")
-        op.axis = "Y"
-        op.type = "ZERO"
-        op = column.operator("machin3.align_editmesh", text="Z")
-        op.axis = "Z"
-        op.type = "ZERO"
-
-        column = box.column(align=True)
-        column.label(icon="ARROW_LEFTRIGHT")
-        op = column.operator("machin3.align_editmesh", text="X")
-        op.axis = "X"
-        op.type = "AVERAGE"
-        op = column.operator("machin3.align_editmesh", text="Y")
-        op.axis = "Y"
-        op.type = "AVERAGE"
-        op = column.operator("machin3.align_editmesh", text="Z")
-        op.axis = "Z"
-        op.type = "AVERAGE"
-
-        column = box.column(align=True)
-        column.label(icon="PIVOT_CURSOR")
-        op = column.operator("machin3.align_editmesh", text="X")
-        op.axis = "X"
-        op.type = "CURSOR"
-        op = column.operator("machin3.align_editmesh", text="Y")
-        op.axis = "Y"
-        op.type = "CURSOR"
-        op = column.operator("machin3.align_editmesh", text="Z")
-        op.axis = "Z"
-        op.type = "CURSOR"
+        row = column.row(align=True)
+        row.prop(m3, "align_mode", expand=True)
 
         column.separator()
         column.separator()
-        column.separator()
-        """
 
         # 7 - TOP - LEFT
         op = pie.operator("machin3.align_uv", text="U min")
@@ -1568,6 +1539,61 @@ class PieUVAlign(Menu):
         op = pie.operator("machin3.align_uv", text="V Cursor")
         op.axis = "V"
         op.type = "CURSOR"
+
+    def draw_align_with_view(self, pie, m3):
+        """
+        draw align alignment options using directions in the view as inputs
+        """
+
+        # 4 - LEFT
+        op = pie.operator("machin3.align_uv", text="Left")
+        op.axis = "U"
+        op.type = "MIN"
+
+        # 6 - RIGHT
+        op = pie.operator("machin3.align_uv", text="Right")
+        op.axis = "U"
+        op.type = "MAX"
+
+        # 2 - BOTTOM
+        op = pie.operator("machin3.align_uv", text="Bottom")
+        op.axis = "V"
+        op.type = "MIN"
+
+        # 8 - TOP
+        op = pie.operator("machin3.align_uv", text="Top")
+        op.axis = "V"
+        op.type = "MAX"
+
+        # 7 - TOP - LEFT
+        pie.separator()
+
+        # 9 - TOP - RIGHT
+        box = pie.split()
+        column = box.column()
+
+        row = column.row(align=True)
+        row.prop(m3, "align_mode", expand=True)
+
+        # 1 - BOTTOM - LEFT
+        pie.separator()
+
+        # 3 - BOTTOM - RIGHT
+        box = pie.split()
+        column = box.column()
+
+        row = column.split(factor=0.2)
+
+        row.label(icon="PIVOT_CURSOR")
+
+        r = row.row(align=True)
+        row.scale_y = 1.2
+        op = r.operator("machin3.align_uv", text="Horizontal")
+        op.type = "CURSOR"
+        op.axis = "U"
+        op = r.operator("machin3.align_uv", text="Vertical")
+        op.type = "CURSOR"
+        op.axis = "V"
 
 
 class PieCursor(Menu):
