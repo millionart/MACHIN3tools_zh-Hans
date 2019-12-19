@@ -310,14 +310,12 @@ class Straighten(bpy.types.Operator):
 
         verts = [v for v in bm.verts if v.select]
 
-        # get vert pairs from selection, using a set of frozensets removes duplicate pairings like [v, v2] and [v2, v], etc
-        pairs = {frozenset([v, v2]) for v in verts for v2 in verts if v2 != v}
+        # try to get start and end verts from selection history
+        v_start, v_end = self.get_start_and_end_from_history(bm)
 
-        # get distances for each vert pair
-        distances = [((v2.co - v.co).length, (v, v2)) for v, v2 in pairs]
-
-        # get the straight's start and end verts based on distance
-        v_start, v_end = max(distances, key=lambda x: x[0])[1]
+        # as a fallback, pick the most distant ones
+        if not v_start:
+            v_start, v_end = self.get_start_and_end_from_distance(verts)
 
         # move all verts but the start and end verts on the vector described by the two
         verts.remove(v_start)
@@ -330,3 +328,21 @@ class Straighten(bpy.types.Operator):
         bmesh.update_edit_mesh(active.data)
 
         return {'FINISHED'}
+
+    def get_start_and_end_from_distance(self, verts):
+        # get vert pairs from selection, using a set of frozensets removes duplicate pairings like [v, v2] and [v2, v], etc
+        pairs = {frozenset([v, v2]) for v in verts for v2 in verts if v2 != v}
+
+        # get distances for each vert pair
+        distances = [((v2.co - v.co).length, (v, v2)) for v, v2 in pairs]
+
+        # get the straight's start and end verts based on distance
+        return max(distances, key=lambda x: x[0])[1]
+
+    def get_start_and_end_from_history(self, bm):
+        history = list(bm.select_history)
+
+        # check if the selection history has at least 2 verts - and if so, determine the start and end vert from it
+        if len(history) >= 2 and all([isinstance(h, bmesh.types.BMVert) for h in history]):
+            return history[0], history[-1]
+        return None, None
