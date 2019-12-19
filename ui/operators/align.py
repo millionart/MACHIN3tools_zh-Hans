@@ -286,3 +286,47 @@ class AlignObjectToEdge(bpy.types.Operator):
 
             return v_obj, v_target, mid, coords
         return None, None, None, None
+
+
+class Straighten(bpy.types.Operator):
+    bl_idname = "machin3.straighten"
+    bl_label = "MACHIN3: Straighten"
+    bl_description = ""
+    bl_options = {'REGISTER', 'UNDO'}
+
+
+    @classmethod
+    def poll(cls, context):
+        if context.mode == 'EDIT_MESH':
+            bm = bmesh.from_edit_mesh(context.active_object.data)
+            return len([v for v in bm.verts if v.select]) > 2
+
+    def execute(self, context):
+        active = context.active_object
+
+        bm = bmesh.from_edit_mesh(active.data)
+        bm.normal_update()
+        bm.verts.ensure_lookup_table()
+
+        verts = [v for v in bm.verts if v.select]
+
+        # get vert pairs from selection, using a set of frozensets removes duplicate pairings like [v, v2] and [v2, v], etc
+        pairs = {frozenset([v, v2]) for v in verts for v2 in verts if v2 != v}
+
+        # get distances for each vert pair
+        distances = [((v2.co - v.co).length, (v, v2)) for v, v2 in pairs]
+
+        # get the straight's start and end verts based on distance
+        v_start, v_end = max(distances, key=lambda x: x[0])[1]
+
+        # move all verts but the start and end verts on the vector described by the two
+        verts.remove(v_start)
+        verts.remove(v_end)
+
+        for v in verts:
+            co, _ = geometry.intersect_point_line(v.co, v_start.co, v_end.co)
+            v.co = co
+
+        bmesh.update_edit_mesh(active.data)
+
+        return {'FINISHED'}

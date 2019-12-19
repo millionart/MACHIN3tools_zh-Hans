@@ -1287,6 +1287,10 @@ class PieAlign(Menu):
         row.operator("machin3.center_editmesh", text="Y").axis = "Y"
         row.operator("machin3.center_editmesh", text="Z").axis = "Z"
 
+        row = column.row(align=True)
+        row.scale_y = 1.2
+        row.operator("machin3.straighten", text="Straighten")
+
         if sel:
             column.separator()
             row = column.row()
@@ -1425,10 +1429,15 @@ class PieAlign(Menu):
         op = r.operator("machin3.center_editmesh", text="Vertical")
         op.direction = "VERTICAL"
 
+        column.separator()
+        row = column.split(factor=0.25)
+        row.scale_y = 1.2
+        row.separator()
+        row.operator("machin3.straighten", text="Straighten")
+
         if sel:
-            column.separator()
             row = column.split(factor=0.25)
-            row.scale_y = 1.5
+            row.scale_y = 1.2
             row.separator()
             row.operator("machin3.align_object_to_edge", text="Align Object to Edge")
 
