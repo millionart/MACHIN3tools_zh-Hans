@@ -312,14 +312,10 @@ class Straighten(bpy.types.Operator):
 
         # if in edge mode, check if there are connected vert sequences, that are non-cyclic and have at least 3 verts, then straighten each sequence
         if context.scene.tool_settings.mesh_select_mode[1]:
-            sequences = get_selected_vert_sequences(verts, ensure_seq_len=True, debug=True)
+            sequences = get_selected_vert_sequences(verts, ensure_seq_len=True, debug=False)
 
             if sequences:
-                vert_lists = []
-
-                for seq, cyclic in sequences:
-                    if len(seq) > 2 and not cyclic:
-                        vert_lists.append(seq)
+                vert_lists = [seq for seq, cyclic in sequences if len(seq) > 2 and not cyclic]
 
                 if vert_lists:
                     for verts in vert_lists:
