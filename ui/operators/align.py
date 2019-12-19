@@ -299,7 +299,7 @@ class Straighten(bpy.types.Operator):
     def poll(cls, context):
         if context.mode == 'EDIT_MESH':
             bm = bmesh.from_edit_mesh(context.active_object.data)
-            return len([v for v in bm.verts if v.select]) > 2
+            return len([v for v in bm.verts if v.select]) > 2 and not [f for f in bm.faces if f.select]
 
     def execute(self, context):
         active = context.active_object
