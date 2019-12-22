@@ -4,6 +4,7 @@ import bmesh
 from mathutils import Vector, Matrix, geometry
 from ... utils.math import get_center_between_verts, create_rotation_difference_matrix_from_quat, get_loc_matrix, create_selection_bbox, get_right_and_up_axes
 from ... items import axis_items, align_type_items, align_axis_mapping_dict, align_direction_items
+from ... utils.selection import get_selected_vert_sequences
 
 
 class AlignEditMesh(bpy.types.Operator):
@@ -286,3 +287,86 @@ class AlignObjectToEdge(bpy.types.Operator):
 
             return v_obj, v_target, mid, coords
         return None, None, None, None
+
+
+class Straighten(bpy.types.Operator):
+    bl_idname = "machin3.straighten"
+    bl_label = "MACHIN3: Straighten"
+    bl_description = "Straighten verts or edges"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        if context.mode == 'EDIT_MESH':
+            bm = bmesh.from_edit_mesh(context.active_object.data)
+            return len([v for v in bm.verts if v.select]) > 2 and not [f for f in bm.faces if f.select]
+
+    def execute(self, context):
+        active = context.active_object
+
+        bm = bmesh.from_edit_mesh(active.data)
+        bm.normal_update()
+        bm.verts.ensure_lookup_table()
+
+        verts = [v for v in bm.verts if v.select]
+
+        # if in edge mode, check if there are connected vert sequences, that are non-cyclic and have at least 3 verts, then straighten each sequence
+        if context.scene.tool_settings.mesh_select_mode[1]:
+            sequences = get_selected_vert_sequences(verts.copy(), ensure_seq_len=True, debug=False)
+
+            if sequences:
+                vert_lists = [seq for seq, cyclic in sequences if len(seq) > 2 and not cyclic]
+
+                if vert_lists:
+                    for verts in vert_lists:
+                        v_start = verts[0]
+                        v_end = verts[-1]
+
+                        self.straighten(bm, verts, v_start, v_end)
+
+                    bmesh.update_edit_mesh(active.data)
+
+                    return {'FINISHED'}
+
+        # if the sequence check didn't produce actionable results, try to get start and end verts from selection history
+        v_start, v_end = self.get_start_and_end_from_history(bm)
+
+        # and if that fails as well, pick the most distant ones
+        if not v_start:
+            v_start, v_end = self.get_start_and_end_from_distance(verts)
+
+        # straighten
+        self.straighten(bm, verts, v_start, v_end)
+
+        bmesh.update_edit_mesh(active.data)
+
+        return {'FINISHED'}
+
+    def straighten(self, bm, verts, v_start, v_end):
+        # move all verts but the start and end verts on the vector described by the two
+        verts.remove(v_start)
+        verts.remove(v_end)
+
+        for v in verts:
+            co, _ = geometry.intersect_point_line(v.co, v_start.co, v_end.co)
+            v.co = co
+
+        bm.normal_update()
+
+    def get_start_and_end_from_distance(self, verts):
+        # get vert pairs from selection, using a set of frozensets removes duplicate pairings like [v, v2] and [v2, v], etc
+        pairs = {frozenset([v, v2]) for v in verts for v2 in verts if v2 != v}
+
+        # get distances for each vert pair
+        distances = [((v2.co - v.co).length, (v, v2)) for v, v2 in pairs]
+
+        # get the straight's start and end verts based on distance
+        return max(distances, key=lambda x: x[0])[1]
+
+    def get_start_and_end_from_history(self, bm):
+        history = list(bm.select_history)
+
+        # check if the selection history has at least 2 verts - and if so, determine the start and end vert from it
+        if len(history) >= 2 and all([isinstance(h, bmesh.types.BMVert) for h in history]):
+            return history[0], history[-1]
+        return None, None

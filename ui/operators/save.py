@@ -301,14 +301,18 @@ class LoadMaterialsSource(bpy.types.Operator):
 class LoadPrevious(bpy.types.Operator):
     bl_idname = "machin3.load_previous"
     bl_label = "Current file is unsaved. Load previous blend in folder anyway?"
-    bl_description = "Load Previous Blend File in Current Folder"
+    bl_description = "Load Previous Blend File in Current Folder\nALT: Don't load ui"
     bl_options = {'REGISTER'}
+
+    load_ui: BoolProperty()
 
     @classmethod
     def poll(cls, context):
         return bpy.data.filepath
 
     def invoke(self, context, event):
+        self.load_ui = not event.alt
+
         if bpy.data.filepath:
             path, _, idx = self.get_data(bpy.data.filepath)
 
@@ -323,7 +327,6 @@ class LoadPrevious(bpy.types.Operator):
                 self.report({'ERROR'}, "You've reached the first file in the current folder: %s." % (path))
         return {'FINISHED'}
 
-
     def execute(self, context):
         path, files, idx = self.get_data(bpy.data.filepath)
 
@@ -334,10 +337,9 @@ class LoadPrevious(bpy.types.Operator):
         add_path_to_recent_files(loadpath)
 
         print("Loading blend file %d/%d: %s" % (idx + 1, len(files), previousblend))
-        bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)
+        bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=self.load_ui)
 
         return {'FINISHED'}
-
 
     def get_data(self, filepath):
         """
@@ -356,14 +358,18 @@ class LoadPrevious(bpy.types.Operator):
 class LoadNext(bpy.types.Operator):
     bl_idname = "machin3.load_next"
     bl_label = "Current file is unsaved. Load next blend in folder anyway?"
-    bl_description = "Load Next Blend File in Current Folder"
+    bl_description = "Load Next Blend File in Current Folder\nALT: Don't load ui"
     bl_options = {'REGISTER'}
+
+    load_ui: BoolProperty()
 
     @classmethod
     def poll(cls, context):
         return bpy.data.filepath
 
     def invoke(self, context, event):
+        self.load_ui = not event.alt
+
         if bpy.data.filepath:
             path, files, idx = self.get_data(bpy.data.filepath)
 
@@ -377,7 +383,6 @@ class LoadNext(bpy.types.Operator):
                 self.report({'ERROR'}, "You've reached the last file in the current foler: %s." % (path))
         return {'FINISHED'}
 
-
     def execute(self, context):
         path, files, idx = self.get_data(bpy.data.filepath)
 
@@ -388,10 +393,9 @@ class LoadNext(bpy.types.Operator):
         add_path_to_recent_files(loadpath)
 
         print("Loading blend file %d/%d: %s" % (idx + 1, len(files), nextblend))
-        bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=True)
+        bpy.ops.wm.open_mainfile(filepath=loadpath, load_ui=self.load_ui)
 
         return {'FINISHED'}
-
 
     def get_data(self, filepath):
         """

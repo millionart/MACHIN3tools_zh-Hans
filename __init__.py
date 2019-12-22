@@ -1,8 +1,8 @@
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, 13),
-    "blender": (2, 80, 0),
+    "version": (0, 3, 14),
+    "blender": (2, 81, 0),
     "location": "",
     "description": "Streamlining Blender 2.80 and beyond.",
     "warning": "",
@@ -69,6 +69,9 @@ from . utils.registration import get_core, get_tools, get_pie_menus, get_menus
 from . utils.registration import register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, add_object_context_menu, remove_object_context_menu
 from . utils.registration import add_object_buttons
 from . handlers import update_object_axes_drawing
+
+
+# TODO: support translation, see https://blendermarket.com/inbox/conversations/20371
 
 
 def register():
