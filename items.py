@@ -14,8 +14,8 @@ focus_method_items = [("VIEW_SELECTED", "View Selected", ""),
 focus_levels_items = [("SINGLE", "Single", ""),
                       ("MULTIPLE", "Multiple", "")]
 
-align_mode_items = [("AXES", "Axes", ""),
-                    ("VIEW", "View", "")]
+align_mode_items = [("VIEW", "View", ""),
+                    ("AXES", "Axes", "")]
 
 align_type_items = [("MIN", "Min", ""),
                     ("MAX", "Max", ""),
