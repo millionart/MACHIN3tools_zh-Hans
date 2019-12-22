@@ -322,9 +322,8 @@ class Straighten(bpy.types.Operator):
                         v_start = verts[0]
                         v_end = verts[-1]
 
-                        self.straighten(verts, v_start, v_end)
+                        self.straighten(bm, verts, v_start, v_end)
 
-                    bm.normal_update()
                     bmesh.update_edit_mesh(active.data)
 
                     return {'FINISHED'}
@@ -337,13 +336,13 @@ class Straighten(bpy.types.Operator):
             v_start, v_end = self.get_start_and_end_from_distance(verts)
 
         # straighten
-        self.straighten(verts, v_start, v_end)
+        self.straighten(bm, verts, v_start, v_end)
 
         bmesh.update_edit_mesh(active.data)
 
         return {'FINISHED'}
 
-    def straighten(self, verts, v_start, v_end):
+    def straighten(self, bm, verts, v_start, v_end):
         # move all verts but the start and end verts on the vector described by the two
         verts.remove(v_start)
         verts.remove(v_end)
@@ -351,6 +350,8 @@ class Straighten(bpy.types.Operator):
         for v in verts:
             co, _ = geometry.intersect_point_line(v.co, v_start.co, v_end.co)
             v.co = co
+
+        bm.normal_update()
 
     def get_start_and_end_from_distance(self, verts):
         # get vert pairs from selection, using a set of frozensets removes duplicate pairings like [v, v2] and [v2, v], etc
