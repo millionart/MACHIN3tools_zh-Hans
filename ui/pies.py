@@ -661,13 +661,13 @@ class PieSave(Menu):
         row.label(text="OBJ")
         r = row.row(align=True)
         r.operator("import_scene.obj", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export'))
+        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export')).use_selection = True
 
         row = col.split(factor=0.25)
         row.label(text="FBX")
         r = row.row(align=True)
         r.operator("import_scene.fbx", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export'))
+        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export')).use_selection = True
 
     def draw_center_column_bottom(self, col):
         row = col.split(factor=0.5)
