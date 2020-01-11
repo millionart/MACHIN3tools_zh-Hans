@@ -1,5 +1,6 @@
 import bpy
 from bpy.props import StringProperty, IntProperty, BoolProperty, CollectionProperty, PointerProperty, EnumProperty, FloatProperty
+import bmesh
 from . items import eevee_preset_items, align_mode_items
 
 
@@ -28,6 +29,7 @@ class HistoryEpochCollection(bpy.types.PropertyGroup):
 # SCENE PROPERTIES
 
 
+
 class M3SceneProperties(bpy.types.PropertyGroup):
     def update_xray(self, context):
         x = (self.pass_through, self.show_edit_mesh_wire)
@@ -41,12 +43,59 @@ class M3SceneProperties(bpy.types.PropertyGroup):
         elif self.pass_through:
             shading.xray_alpha = 1 if context.active_object and context.active_object.type == "MESH" else 0.5
 
-    def update_uv_sync_select(self, context):
-        toolsettings = context.scene.tool_settings
-        toolsettings.use_uv_select_sync = self.uv_sync_select
+    selected = []
 
-        if not toolsettings.use_uv_select_sync:
+    def update_uv_sync_select(self, context):
+        ts = context.scene.tool_settings
+        ts.use_uv_select_sync = self.uv_sync_select
+
+        global selected
+        active = context.active_object
+
+        # restore previous selection
+        if ts.use_uv_select_sync:
+            bpy.ops.mesh.select_all(action='DESELECT')
+
+            bm = bmesh.from_edit_mesh(active.data)
+            bm.normal_update()
+            bm.verts.ensure_lookup_table()
+
+            if selected:
+                for v in bm.verts:
+                    if v.index in selected:
+                        v.select_set(True)
+
+            bm.select_flush(True)
+
+            bmesh.update_edit_mesh(active.data)
+
+            # also sync the selection mode
+            if ts.uv_select_mode in ["VERTEX", "EDGE", "FACE"]:
+                bpy.ops.mesh.select_mode(type=ts.uv_select_mode.replace("VERTEX", "VERT"))
+
+
+        # store the active selection
+        else:
+            bm = bmesh.from_edit_mesh(active.data)
+            bm.normal_update()
+            bm.verts.ensure_lookup_table()
+
+            selected = [v.index for v in bm.verts if v.select]
+
             bpy.ops.mesh.select_all(action="SELECT")
+
+            # also sync the selection mode
+            mode = tuple(ts.mesh_select_mode)
+
+            if mode == (True, False, False):
+                ts.uv_select_mode = "VERTEX"
+
+            elif mode == (False, True, False):
+                ts.uv_select_mode = "EDGE"
+
+            else:
+                ts.uv_select_mode = "FACE"
+
 
     def update_show_cavity(self, context):
         t = (self.show_cavity, self.show_curvature)

@@ -56,13 +56,13 @@ class PieModes(Menu):
 
                         else:
                             # 4 - LEFT
-                            pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
+                            pie.operator("machin3.mesh_mode", text="Vertex", icon_value=get_icon('vertex')).mode = 'VERT'
 
                             # 6 - RIGHT
-                            pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
+                            pie.operator("machin3.mesh_mode", text="Face", icon_value=get_icon('face')).mode = 'FACE'
 
                             # 2 - BOTTOM
-                            pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
+                            pie.operator("machin3.mesh_mode", text="Edge", icon_value=get_icon('face')).mode = 'EDGE'
 
                             # 8 - TOP
                             if context.mode == 'OBJECT' and grouppro and len(context.scene.storedGroupSettings):
