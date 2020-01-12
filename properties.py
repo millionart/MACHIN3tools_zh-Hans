@@ -28,8 +28,6 @@ class HistoryEpochCollection(bpy.types.PropertyGroup):
 
 # SCENE PROPERTIES
 
-
-
 class M3SceneProperties(bpy.types.PropertyGroup):
     def update_xray(self, context):
         x = (self.pass_through, self.show_edit_mesh_wire)
@@ -70,9 +68,9 @@ class M3SceneProperties(bpy.types.PropertyGroup):
             bmesh.update_edit_mesh(active.data)
 
             # also sync the selection mode
-            if ts.uv_select_mode in ["VERTEX", "EDGE", "FACE"]:
-                bpy.ops.mesh.select_mode(type=ts.uv_select_mode.replace("VERTEX", "VERT"))
-
+            # NOTE: disabled again, seems like it's beneficial to just go back to the previous mesh selection mode
+            # if ts.uv_select_mode in ["VERTEX", "EDGE", "FACE"]:
+                # bpy.ops.mesh.select_mode(type=ts.uv_select_mode.replace("VERTEX", "VERT"))
 
         # store the active selection
         else:
@@ -87,15 +85,14 @@ class M3SceneProperties(bpy.types.PropertyGroup):
             # also sync the selection mode
             mode = tuple(ts.mesh_select_mode)
 
-            if mode == (True, False, False):
-                ts.uv_select_mode = "VERTEX"
-
-            elif mode == (False, True, False):
+            # EDGE mode in the mesh becomes, EDGE in uv as well
+            if mode == (False, True, False):
                 ts.uv_select_mode = "EDGE"
 
+            # everything else becomes VERTEX, including FACE
+            # that's because there's no reason to turn off sync for face selections in the first place, faces unlike verts and edges, are always only present once in uv space
             else:
-                ts.uv_select_mode = "FACE"
-
+                ts.uv_select_mode = "VERTEX"
 
     def update_show_cavity(self, context):
         t = (self.show_cavity, self.show_curvature)
