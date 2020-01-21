@@ -5,7 +5,7 @@ from bpy.props import StringProperty
 class SetTransformPreset(bpy.types.Operator):
     bl_idname = "machin3.set_transform_preset"
     bl_label = "MACHIN3: Set Transform Preset"
-    bl_description = "Access Transform Pivots and Orientations or set them both at the same time."
+    bl_description = "Set Transform Pivot and Orientation at the same time."
     bl_options = {'REGISTER', 'UNDO'}
 
     pivot: StringProperty(name="Transform Pivot")

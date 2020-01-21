@@ -66,7 +66,7 @@ class CleanUp(bpy.types.Operator):
         row.prop(self, "recalc_normals")
         r = row.row()
         r.active = self.recalc_normals
-        r.prop(self, "flip_normals")
+        r.prop(self, "flip_normals", text="Flip", toggle=True)
 
         box = layout.box()
         col = box.column()

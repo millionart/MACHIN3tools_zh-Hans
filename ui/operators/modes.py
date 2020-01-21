@@ -160,6 +160,8 @@ class SurfaceDrawMode(bpy.types.Operator):
         active.select_set(False)
         gp.select_set(True)
 
+        gp.color = (0, 0, 0, 1)
+
         bpy.ops.object.mode_set(mode='PAINT_GPENCIL')
 
         # surface placement
