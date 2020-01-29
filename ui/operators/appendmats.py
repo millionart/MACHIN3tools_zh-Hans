@@ -1,7 +1,6 @@
 import bpy
 from bpy.props import StringProperty, EnumProperty
 from ... utils.registration import get_prefs
-from ... utils import MACHIN3 as m3
 
 
 def get_mat():

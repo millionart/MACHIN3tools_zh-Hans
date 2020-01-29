@@ -1,6 +1,5 @@
 import bpy
 import bmesh
-from ... utils import MACHIN3 as m3
 
 
 class ShadeSmooth(bpy.types.Operator):
@@ -137,7 +136,7 @@ class ToggleAutoSmooth(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        active = m3.get_active()
+        active = context.active_object
 
         if active:
             sel = context.selected_objects

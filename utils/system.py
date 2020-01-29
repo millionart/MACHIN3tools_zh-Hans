@@ -39,3 +39,9 @@ def open_folder(path):
     else:
         # subprocess.Popen(["xdg-open", path])
         os.system('xdg-open "%s" %s &' % (path, "> /dev/null 2> /dev/null"))  # > sends stdout,  2> sends stderr
+
+
+def makedir(pathstring):
+    if not os.path.exists(pathstring):
+        os.makedirs(pathstring)
+    return pathstring

@@ -1,5 +1,4 @@
 import bpy
-from ... utils import MACHIN3 as m3
 
 
 axis_x = True
