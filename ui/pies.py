@@ -773,6 +773,8 @@ class PieShading(Menu):
         icon = get_icon('wireframe_overlay') if view.overlay.show_wireframes else get_icon('wireframe')
         row.operator("machin3.toggle_wireframe", text="Wire Toggle", icon_value=icon)
 
+        # TODO: use depress argument, see https://blenderartists.org/t/machin3tools/1135716/398
+
         r = row.split().row()
         if context.mode == "OBJECT":
             r.active = view.overlay.show_wireframes
@@ -813,7 +815,6 @@ class PieShading(Menu):
         r.active = True if bpy.app.driver_namespace.get('draw_object_axes') else False
         r.prop(context.scene.M3, "object_axes_size", text="")
         r.prop(context.scene.M3, "object_axes_alpha", text="")
-
 
         active = context.active_object
         if active:
@@ -1669,8 +1670,6 @@ class PieTransform(Menu):
 
         scene = context.scene
 
-        # align_active = bpy.context.scene.machin3.pieviewsalignactive
-
         # 4 - LEFT
         op = pie.operator('machin3.set_transform_preset', text='Local')
         op.pivot = 'MEDIAN_POINT'
@@ -1721,7 +1720,6 @@ class PieTransform(Menu):
         op.pivot = 'CURSOR'
         op.orientation = 'CURSOR'
 
-
     def draw_left_column(self, scene, layout):
         layout.scale_x = 3
 
@@ -1748,7 +1746,6 @@ class PieTransform(Menu):
             row = column.row(align=True)
             row.prop(custom, "name", text="")
             row.operator("transform.delete_orientation", text="X", emboss=True)
-
 
     def draw_right_column(self, context, scene, layout):
         column = layout.column(align=True)
