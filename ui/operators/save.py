@@ -7,8 +7,6 @@ import time
 from ... utils.registration import get_prefs, get_addon
 from ... utils.append import append_material, append_world
 from ... utils.system import add_path_to_recent_files
-from ... utils import MACHIN3 as m3
-
 
 
 class New(bpy.types.Operator):

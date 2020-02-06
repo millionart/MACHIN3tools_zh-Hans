@@ -1,8 +1,5 @@
 import bpy
 from bpy.props import EnumProperty, BoolProperty
-from ... utils import MACHIN3 as m3
-
-
 axisitems = [("FRONT", "Front", ""),
              ("BACK", "Back", ""),
              ("LEFT", "Left", ""),

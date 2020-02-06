@@ -2,7 +2,7 @@ import bpy
 import os
 import shutil
 from .. utils.registration import get_prefs
-from .. utils import MACHIN3 as m3
+from .. utils.system import makedir
 
 
 # TODO: do the prefs part based on a dictionary?
@@ -524,7 +524,7 @@ class Customize(bpy.types.Operator):
         print("\n» Adding Matcaps")
 
         matcapsourcepath = os.path.join(resourcespath, "matcaps")
-        matcaptargetpath = m3.makedir(os.path.join(datafilespath, "studiolights", "matcap"))
+        matcaptargetpath = makedir(os.path.join(datafilespath, "studiolights", "matcap"))
         matcaps = os.listdir(matcapsourcepath)
 
         for matcap in sorted(matcaps):
@@ -564,7 +564,7 @@ class Customize(bpy.types.Operator):
         print("\n» Installing and Enabling M3 theme")
 
         themesourcepath = os.path.join(resourcespath, "theme", "m3.xml")
-        themetargetpath = m3.makedir(os.path.join(scriptspath, "presets", "interface_theme"))
+        themetargetpath = makedir(os.path.join(scriptspath, "presets", "interface_theme"))
 
         filepath = shutil.copy(themesourcepath, themetargetpath)
         bpy.ops.script.execute_preset(filepath=filepath, menu_idname="USERPREF_MT_interface_theme_presets")

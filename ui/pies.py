@@ -56,13 +56,13 @@ class PieModes(Menu):
 
                         else:
                             # 4 - LEFT
-                            pie.operator("machin3.vertex_mode", text="Vertex", icon_value=get_icon('vertex'))
+                            pie.operator("machin3.mesh_mode", text="Vertex", icon_value=get_icon('vertex')).mode = 'VERT'
 
                             # 6 - RIGHT
-                            pie.operator("machin3.face_mode", text="Face", icon_value=get_icon('face'))
+                            pie.operator("machin3.mesh_mode", text="Face", icon_value=get_icon('face')).mode = 'FACE'
 
                             # 2 - BOTTOM
-                            pie.operator("machin3.edge_mode", text="Edge", icon_value=get_icon('edge'))
+                            pie.operator("machin3.mesh_mode", text="Edge", icon_value=get_icon('face')).mode = 'EDGE'
 
                             # 8 - TOP
                             if context.mode == 'OBJECT' and grouppro and len(context.scene.storedGroupSettings):
@@ -661,13 +661,13 @@ class PieSave(Menu):
         row.label(text="OBJ")
         r = row.row(align=True)
         r.operator("import_scene.obj", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export'))
+        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export')).use_selection = True
 
         row = col.split(factor=0.25)
         row.label(text="FBX")
         r = row.row(align=True)
         r.operator("import_scene.fbx", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export'))
+        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export')).use_selection = True
 
     def draw_center_column_bottom(self, col):
         row = col.split(factor=0.5)
@@ -773,6 +773,8 @@ class PieShading(Menu):
         icon = get_icon('wireframe_overlay') if view.overlay.show_wireframes else get_icon('wireframe')
         row.operator("machin3.toggle_wireframe", text="Wire Toggle", icon_value=icon)
 
+        # TODO: use depress argument, see https://blenderartists.org/t/machin3tools/1135716/398
+
         r = row.split().row()
         if context.mode == "OBJECT":
             r.active = view.overlay.show_wireframes
@@ -813,7 +815,6 @@ class PieShading(Menu):
         r.active = True if bpy.app.driver_namespace.get('draw_object_axes') else False
         r.prop(context.scene.M3, "object_axes_size", text="")
         r.prop(context.scene.M3, "object_axes_alpha", text="")
-
 
         active = context.active_object
         if active:
@@ -1271,7 +1272,6 @@ class PieAlign(Menu):
         op.type = "MAX"
 
         # 2 - BOTTOM
-
         box = pie.split()
         column = box.column()
 
@@ -1292,10 +1292,13 @@ class PieAlign(Menu):
         row.operator("machin3.straighten", text="Straighten")
 
         if sel:
+            row = column.row()
+            row.scale_y = 1.2
+            row.operator("machin3.align_object_to_vert", text="Align Object to Vert")
+
             column.separator()
             row = column.row()
-
-            row.scale_y = 1.5
+            row.scale_y = 1.2
             row.operator("machin3.align_object_to_edge", text="Align Object to Edge")
 
 
@@ -1436,6 +1439,11 @@ class PieAlign(Menu):
         row.operator("machin3.straighten", text="Straighten")
 
         if sel:
+            row = column.split(factor=0.25)
+            row.scale_y = 1.2
+            row.separator()
+            row.operator("machin3.align_object_to_vert", text="Align Object to Vert")
+
             row = column.split(factor=0.25)
             row.scale_y = 1.2
             row.separator()
@@ -1669,8 +1677,6 @@ class PieTransform(Menu):
 
         scene = context.scene
 
-        # align_active = bpy.context.scene.machin3.pieviewsalignactive
-
         # 4 - LEFT
         op = pie.operator('machin3.set_transform_preset', text='Local')
         op.pivot = 'MEDIAN_POINT'
@@ -1721,7 +1727,6 @@ class PieTransform(Menu):
         op.pivot = 'CURSOR'
         op.orientation = 'CURSOR'
 
-
     def draw_left_column(self, scene, layout):
         layout.scale_x = 3
 
@@ -1748,7 +1753,6 @@ class PieTransform(Menu):
             row = column.row(align=True)
             row.prop(custom, "name", text="")
             row.operator("transform.delete_orientation", text="X", emboss=True)
-
 
     def draw_right_column(self, context, scene, layout):
         column = layout.column(align=True)

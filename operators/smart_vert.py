@@ -4,14 +4,12 @@ from bpy.props import EnumProperty, BoolProperty
 import gpu
 from gpu_extras.batch import batch_for_shader
 import bgl
-from .. utils import MACHIN3 as m3
 from .. utils.graph import get_shortest_path
 from .. utils.ui import wrap_mouse
 
 
 modeitems = [("MERGE", "Merge", ""),
              ("CONNECT", "Connect Paths", "")]
-
 
 mergetypeitems = [("LAST", "Last", ""),
                   ("CENTER", "Center", ""),
@@ -37,7 +35,9 @@ class SmartVert(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return m3.get_mode() == "VERT"
+        if context.mode == 'EDIT_MESH' and tuple(context.scene.tool_settings.mesh_select_mode) == (True, False, False):
+            bm = bmesh.from_edit_mesh(context.active_object.data)
+            return [v for v in bm.verts if v.select]
 
     def draw(self, context):
         layout = self.layout
@@ -128,17 +128,17 @@ class SmartVert(bpy.types.Operator):
     def cancel_modal(self):
         bpy.types.SpaceView3D.draw_handler_remove(self.VIEW3D, 'WINDOW')
 
-        m3.set_mode("OBJECT")
+        bpy.ops.object.mode_set(mode='OBJECT')
         self.initbm.to_mesh(self.active.data)
-        m3.set_mode("EDIT")
+        bpy.ops.object.mode_set(mode='EDIT')
 
     def invoke(self, context, event):
         # SLIDE EXTEND
         if self.slideoverride:
+            bm = bmesh.from_edit_mesh(context.active_object.data)
+            verts = [v for v in bm.verts if v.select]
 
-            selverts = m3.get_selection("VERT")
-
-            if len(selverts) > 1:
+            if len(verts) > 1:
                 self.active = context.active_object
 
                 # make sure the current edit mode state is saved to obj.data
@@ -172,50 +172,54 @@ class SmartVert(bpy.types.Operator):
         return {'FINISHED'}
 
     def smart_vert(self, context):
-        selverts = m3.get_selection("VERT")
+        active = context.active_object
+        topo = True if self.pathtype == "TOPO" else False
+
+        bm = bmesh.from_edit_mesh(active.data)
+        bm.normal_update()
+        bm.verts.ensure_lookup_table()
+
+        verts = [v for v in bm.verts if v.select]
 
         # MERGE
 
         if self.mode == "MERGE":
 
             if self.mergetype == "LAST":
-                if len(selverts) >= 2:
-                    if self.has_valid_select_history(context.active_object, lazy=True):
+                if len(verts) >= 2:
+                    if self.validate_history(active, bm, lazy=True):
                         bpy.ops.mesh.merge(type='LAST')
 
             elif self.mergetype == "CENTER":
-                if len(selverts) >= 2:
+                if len(verts) >= 2:
                     bpy.ops.mesh.merge(type='CENTER')
 
             elif self.mergetype == "PATHS":
                 self.wrongselection = False
 
-                if len(selverts) == 4:
-                    bm, history = self.has_valid_select_history(context.active_object)
+                if len(verts) == 4:
+                    history = self.validate_history(active, bm)
 
                     if history:
-                        topo = True if self.pathtype == "TOPO" else False
-                        bm, path1, path2 = self.get_paths(bm, history, topo)
+                        path1, path2 = self.get_paths(bm, history, topo)
 
-                        self.weld(context.active_object, bm, path1, path2)
+                        self.weld(active, bm, path1, path2)
                         return
 
                 self.wrongselection = True
-
 
         # CONNECT
 
         elif self.mode == "CONNECT":
             self.wrongselection = False
 
-            if len(selverts) == 4:
-                bm, history = self.has_valid_select_history(context.active_object)
+            if len(verts) == 4:
+                history = self.validate_history(active, bm)
 
                 if history:
-                    topo = True if self.pathtype == "TOPO" else False
-                    bm, path1, path2 = self.get_paths(bm, history, topo)
+                    path1, path2 = self.get_paths(bm, history, topo)
 
-                    self.connect(context.active_object, bm, path1, path2)
+                    self.connect(active, bm, path1, path2)
                     return
 
             self.wrongselection = True
@@ -228,13 +232,9 @@ class SmartVert(bpy.types.Operator):
         path1 = get_shortest_path(bm, *pair1, topo=topo, select=True)
         path2 = get_shortest_path(bm, *pair2, topo=topo, select=True)
 
-        return bm, path1, path2
+        return path1, path2
 
-    def has_valid_select_history(self, active, lazy=False):
-        bm = bmesh.from_edit_mesh(active.data)
-        bm.normal_update()
-        bm.verts.ensure_lookup_table()
-
+    def validate_history(self, active, bm, lazy=False):
         verts = [v for v in bm.verts if v.select]
         history = list(bm.select_history)
 
@@ -243,8 +243,8 @@ class SmartVert(bpy.types.Operator):
             return history
 
         if len(verts) == len(history):
-            return bm, history
-        return None, None
+            return history
+        return None
 
     def weld(self, active, bm, path1, path2):
         targetmap = {}
@@ -265,7 +265,7 @@ class SmartVert(bpy.types.Operator):
     def slide(self, context, distance):
         mx = self.active.matrix_world
 
-        m3.set_mode("OBJECT")
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         bm = self.initbm.copy()
 
@@ -288,4 +288,4 @@ class SmartVert(bpy.types.Operator):
 
         bm.to_mesh(self.active.data)
 
-        m3.set_mode("EDIT")
+        bpy.ops.object.mode_set(mode='EDIT')

@@ -289,6 +289,43 @@ class AlignObjectToEdge(bpy.types.Operator):
         return None, None, None, None
 
 
+class AlignObjectToVert(bpy.types.Operator):
+    bl_idname = "machin3.align_object_to_vert"
+    bl_label = "MACHIN3: Align Object to Vert"
+    bl_description = "Align one or more objects to vertice in active object"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        if context.mode == 'EDIT_MESH':
+            active = context.active_object
+            sel = [obj for obj in context.selected_objects if obj != active]
+
+            if active and sel:
+                for obj in [active] + sel:
+                    bm = bmesh.from_edit_mesh(obj.data)
+
+                    if len([v for v in bm.verts if v.select]) != 1:
+                        return False
+                return True
+
+    def invoke(self, context, event):
+        target = context.active_object
+        objs = [obj for obj in context.selected_objects if obj != target]
+
+        mx_target = target.matrix_world
+        bm_target = bmesh.from_edit_mesh(target.data)
+        v_target = [v for v in bm_target.verts if v.select][0]
+
+        for obj in objs:
+            mx_obj = obj.matrix_world
+            bm_obj = bmesh.from_edit_mesh(obj.data)
+            v_obj = [v for v in bm_obj.verts if v.select][0]
+
+            obj.matrix_world = Matrix.Translation(mx_target @ v_target.co - mx_obj @ v_obj.co) @ obj.matrix_world
+        return {'FINISHED'}
+
+
 class Straighten(bpy.types.Operator):
     bl_idname = "machin3.straighten"
     bl_label = "MACHIN3: Straighten"

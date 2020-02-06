@@ -1,7 +1,6 @@
 import bpy
-from bpy.props import FloatProperty, BoolProperty
+from bpy.props import BoolProperty
 import bmesh
-from .. utils import MACHIN3 as m3
 
 
 class SmartFace(bpy.types.Operator):
@@ -9,64 +8,71 @@ class SmartFace(bpy.types.Operator):
     bl_label = "MACHIN3: Smart Face"
     bl_options = {'REGISTER', 'UNDO'}
 
-    automerge: BoolProperty(name="Merge to close-by Vert", default=True)
+    automerge: BoolProperty(name="Merge to closeby Vert", default=True)
 
     def draw(self, context):
         layout = self.layout
 
         column = layout.column()
 
-        if len(self.selverts) == 1:
-            column.prop(self, "automerge")
-
+        if self.mode[0] or self.mode[1]:
+            if len(self.verts) == 1:
+                column.prop(self, "automerge")
 
     @classmethod
     def poll(cls, context):
-        return m3.get_mode() in ["VERT", "EDGE", "FACE"]
+        if context.mode == 'EDIT_MESH':
+            mode = tuple(context.scene.tool_settings.mesh_select_mode)
+            return any(mode == m for m in [(True, False, False), (False, True, False), (False, False, True)])
 
     def execute(self, context):
-        mode = m3.get_mode()
-        active = m3.get_active()
+        active = context.active_object
+        ts = context.scene.tool_settings
 
-        if mode in ["VERT", "EDGE"]:
-            self.selverts = m3.get_selection("VERT")
+        self.mode = tuple(ts.mesh_select_mode)
 
-            if self.selverts:
-
-                # F3
-
-                if 1 <= len(self.selverts) <= 2:
-                    self.f3(active, self.automerge)
-
-                # Blender's face creation
-
-                elif len(self.selverts) > 2:
-                    bpy.ops.mesh.edge_face_add()
-
-        elif mode == "FACE":
-            selfaces = m3.get_selection("FACE")
-
-            # DUPLICATE and SEPARATE
-
-            if selfaces:
-                bpy.ops.mesh.duplicate()
-                bpy.ops.mesh.separate(type='SELECTED')
-
-                m3.set_mode("OBJECT")
-                sel = context.selected_objects
-                sel.remove(active)
-                active.select_set(False)
-                m3.make_active(sel[0])
-                m3.set_mode("EDIT")
-
-        return {'FINISHED'}
-
-    def f3(self, active, automerge):
         bm = bmesh.from_edit_mesh(active.data)
         bm.normal_update()
         bm.verts.ensure_lookup_table()
 
-        verts = [v for v in bm.verts if v.select]
+        # vert and edge mode - create new face
+        if self.mode[0] or self.mode[1]:
+            self.verts = [v for v in bm.verts if v.select]
+
+            if self.verts:
+
+                # F3
+                if len(self.verts) < 3:
+                    self.f3(active, bm)
+
+                # Blender's face creation
+                else:
+                    bpy.ops.mesh.edge_face_add()
+
+        # face mode - duplicate and separate selection
+        elif self.mode[2]:
+            faces = [f for f in bm.faces if f.select]
+
+            if faces:
+                bpy.ops.mesh.duplicate()
+                bpy.ops.mesh.separate(type='SELECTED')
+
+                bpy.ops.object.mode_set(mode='OBJECT')
+
+                objs = [obj for obj in context.selected_objects if obj != active]
+
+                if objs:
+                    obj = objs[0]
+
+                    active.select_set(False)
+                    obj.select_set(True)
+                    context.view_layer.objects.active = obj
+                    bpy.ops.object.mode_set(mode='EDIT')
+
+        return {'FINISHED'}
+
+    def f3(self, active, bm):
+        verts = self.verts
 
         if len(verts) == 1:
             vs = verts[0]
@@ -98,7 +104,8 @@ class SmartFace(bpy.types.Operator):
                 bmesh.ops.recalc_face_normals(bm, faces=[f])
 
                 # automatically merge the newly created vert to the closest non manifold vert if it's closer than the 2 other verts are
-                if automerge:
+                if self.automerge:
+                    print("   auto merging")
                     nonmanifoldverts = [v for v in bm.verts if any([not e.is_manifold for e in v.link_edges]) and v not in [vs, v_new, v1_other, v2_other]]
 
                     if nonmanifoldverts:

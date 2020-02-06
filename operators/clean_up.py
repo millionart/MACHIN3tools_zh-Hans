@@ -2,7 +2,6 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty
 import bmesh
 import math
-from .. utils import MACHIN3 as m3
 
 
 selecttypeitems = [("NON-MANIFOLD", "Non-Manifold", ""),
@@ -66,7 +65,7 @@ class CleanUp(bpy.types.Operator):
         row.prop(self, "recalc_normals")
         r = row.row()
         r.active = self.recalc_normals
-        r.prop(self, "flip_normals")
+        r.prop(self, "flip_normals", text="Flip", toggle=True)
 
         box = layout.box()
         col = box.column()
@@ -86,7 +85,7 @@ class CleanUp(bpy.types.Operator):
         return context.mode == "EDIT_MESH"
 
     def execute(self, context):
-        active = m3.get_active()
+        active = context.active_object
 
         bm = self.clean_up(active)
 
