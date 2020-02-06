@@ -21,7 +21,9 @@ class SmartFace(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'EDIT_MESH'
+        if context.mode == 'EDIT_MESH':
+            mode = tuple(context.scene.tool_settings.mesh_select_mode)
+            return any(mode == m for m in [(True, False, False), (False, True, False), (False, False, True)])
 
     def execute(self, context):
         active = context.active_object

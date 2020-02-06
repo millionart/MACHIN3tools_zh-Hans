@@ -87,15 +87,15 @@ class CursorToSelected(bpy.types.Operator):
                 normal = mx.to_3x3() @ element.normal
                 rmx = create_rotation_matrix_from_normal(active, normal)
 
+                # TODO: add switch to take face shape into account:construct tangent from face normal and longest edge, instead of face normal nad object's up axis
+
             # create quat from rmx
             quat = rmx.to_quaternion()
 
             set_cursor(origin, quat)
 
             return True
-
-        else:
-            return False
+        return False
 
     def cursor_to_active_object(self, active):
         mx = active.matrix_world

@@ -1272,7 +1272,6 @@ class PieAlign(Menu):
         op.type = "MAX"
 
         # 2 - BOTTOM
-
         box = pie.split()
         column = box.column()
 
@@ -1293,10 +1292,13 @@ class PieAlign(Menu):
         row.operator("machin3.straighten", text="Straighten")
 
         if sel:
+            row = column.row()
+            row.scale_y = 1.2
+            row.operator("machin3.align_object_to_vert", text="Align Object to Vert")
+
             column.separator()
             row = column.row()
-
-            row.scale_y = 1.5
+            row.scale_y = 1.2
             row.operator("machin3.align_object_to_edge", text="Align Object to Edge")
 
 
@@ -1437,6 +1439,11 @@ class PieAlign(Menu):
         row.operator("machin3.straighten", text="Straighten")
 
         if sel:
+            row = column.split(factor=0.25)
+            row.scale_y = 1.2
+            row.separator()
+            row.operator("machin3.align_object_to_vert", text="Align Object to Vert")
+
             row = column.split(factor=0.25)
             row.scale_y = 1.2
             row.separator()
