@@ -620,7 +620,7 @@ class PieSave(Menu):
 
         column = box.column()
         b = column.box()
-        self.draw_center_column_top(b)
+        self.draw_center_column_top(context, b)
 
         if bpy.data.filepath:
             b = column.box()
@@ -656,18 +656,18 @@ class PieSave(Menu):
         # col.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
         col.operator("wm.revert_mainfile", text="Revert", icon_value=get_icon('revert'))
 
-    def draw_center_column_top(self, col):
+    def draw_center_column_top(self, context, col):
         row = col.split(factor=0.25)
         row.label(text="OBJ")
         r = row.row(align=True)
         r.operator("import_scene.obj", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export')).use_selection = True
+        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export')).use_selection = True if context.selected_objects else False
 
         row = col.split(factor=0.25)
         row.label(text="FBX")
         r = row.row(align=True)
         r.operator("import_scene.fbx", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export')).use_selection = True
+        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export')).use_selection = True if context.selected_objects else False
 
     def draw_center_column_bottom(self, col):
         row = col.split(factor=0.5)
