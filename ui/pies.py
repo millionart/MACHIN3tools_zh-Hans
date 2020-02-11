@@ -828,13 +828,21 @@ class PieShading(Menu):
                 r.operator("machin3.shade_flat", text="Flat", icon_value=get_icon('flat'))
 
                 icon = "CHECKBOX_HLT" if mesh.use_auto_smooth else "CHECKBOX_DEHLT"
-                row.operator("machin3.toggle_auto_smooth", text="AutoSmooth", icon=icon)
+                row.operator("machin3.toggle_auto_smooth", text="AutoSmooth", icon=icon).angle = 0
+
+                row = col.split(factor=0.55)
+                r = row.row(align=True)
+                r.active = not mesh.has_custom_normals
+                for angle in [30, 60, 90, 180]:
+                    r.operator("machin3.toggle_auto_smooth", text=str(angle)).angle = angle
+
+                r = row.row()
+                r.active = not mesh.has_custom_normals and mesh.use_auto_smooth
+                r.prop(mesh, "auto_smooth_angle")
 
                 if mesh.use_auto_smooth:
                     if mesh.has_custom_normals:
                         col.operator("mesh.customdata_custom_splitnormals_clear", text="Clear Custom Normals")
-                    else:
-                        col.prop(mesh, "auto_smooth_angle")
 
                 if context.mode == "EDIT_MESH":
                     row = col.row(align=True)

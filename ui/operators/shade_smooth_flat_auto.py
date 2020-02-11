@@ -1,11 +1,13 @@
 import bpy
+from bpy.props import IntProperty
 import bmesh
+from math import radians
 
 
 class ShadeSmooth(bpy.types.Operator):
     bl_idname = "machin3.shade_smooth"
     bl_label = "Shade Smooth"
-    bl_description = "Set smooth shading in object and edit mode\nALT: Mark edges sharp if face angle > auto smooth angle"
+    bl_description = "Set smooth shading in object and edit mode\nALT: Mark edges sharp if face angle > auto smooth angle, then set the auto smooth angle to 180"
     bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
@@ -45,6 +47,8 @@ class ShadeSmooth(bpy.types.Operator):
         bm.to_mesh(obj.data)
         bm.clear()
 
+        obj.data.auto_smooth_angle = radians(180)
+
     def set_mesh_sharps(self, mesh):
         mesh.use_auto_smooth = True
         angle = mesh.auto_smooth_angle
@@ -62,6 +66,8 @@ class ShadeSmooth(bpy.types.Operator):
             e.smooth = False
 
         bmesh.update_edit_mesh(mesh)
+
+        mesh.auto_smooth_angle = radians(180)
 
 
 class ShadeFlat(bpy.types.Operator):
@@ -132,20 +138,32 @@ class ShadeFlat(bpy.types.Operator):
 class ToggleAutoSmooth(bpy.types.Operator):
     bl_idname = "machin3.toggle_auto_smooth"
     bl_label = "Toggle Auto Smooth"
-    bl_description = "Toggle Auto Smooth"
     bl_options = {'REGISTER', 'UNDO'}
+
+    angle: IntProperty(name="Auto Smooth Angle")
+
+    @classmethod
+    def description(cls, context, properties):
+        if properties.angle == 0:
+            return "Toggle Auto Smooth"
+        else:
+            return "Auto Smooth Angle Preset: %d" % (properties.angle)
 
     def execute(self, context):
         active = context.active_object
 
         if active:
             sel = context.selected_objects
+
             if active not in sel:
                 sel.append(active)
 
-            autosmooth = not active.data.use_auto_smooth
+            autosmooth = not active.data.use_auto_smooth if self.angle == 0 else True
 
             for obj in [obj for obj in sel if obj.type == 'MESH']:
                 obj.data.use_auto_smooth = autosmooth
+
+                if self.angle:
+                    obj.data.auto_smooth_angle = radians(self.angle)
 
         return {'FINISHED'}
