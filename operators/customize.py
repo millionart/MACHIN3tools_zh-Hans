@@ -440,7 +440,6 @@ class Customize(bpy.types.Operator):
             v.mini_axis_type = 'MINIMAL'
 
             s.viewport_aa = "8"
-            s.multi_sample = "8"
 
         if get_prefs().custom_preferences_navigation:
             print("\n» Changing Preferences: Navigation")
