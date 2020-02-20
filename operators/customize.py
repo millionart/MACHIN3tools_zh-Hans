@@ -409,7 +409,6 @@ class Customize(bpy.types.Operator):
 
         prefs.use_preferences_save = False
 
-
         if get_prefs().custom_preferences_interface:
             print("\n» Changing Preferences: Interface")
 
@@ -423,6 +422,7 @@ class Customize(bpy.types.Operator):
 
             v.header_align = 'BOTTOM'
             s.use_region_overlap = True
+            v.show_navigate_ui = False
 
             v.color_picker_type = "SQUARE_SV"
 
