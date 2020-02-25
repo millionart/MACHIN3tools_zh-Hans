@@ -127,7 +127,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         activate(self, register=self.activate_customize, tool="customize")
 
     def update_activate_filebrowser_tools(self, context):
-        activate(self, register=self.activate_filebrowser_tools, tool="filebrowser_open")
+        activate(self, register=self.activate_filebrowser_tools, tool="filebrowser")
 
 
     # RUNTIME PIE ACTIVATION
@@ -185,6 +185,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     focus_view_transition: BoolProperty(name="Viewport Transitional Motion", default=True)
 
     custom_startup: BoolProperty(name="Startup Scene", default=True)
+    custom_workspaces: BoolProperty(name="Workspaces", default=False)
     custom_theme: BoolProperty(name="Theme", default=True)
     custom_matcaps: BoolProperty(name="Matcaps and Default Shading", default=True)
     custom_overlays: BoolProperty(name="Overlays", default=True)
@@ -411,6 +412,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
             row = column.row()
             row.prop(self, "custom_startup")
+            row.prop(self, "custom_workspaces")
             row.prop(self, "custom_theme")
             row.prop(self, "custom_matcaps")
             row.prop(self, "custom_overlays")
@@ -527,14 +529,14 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         b.label(text="Tools")
 
         if not self.draw_tool_keymaps(kc, keys, b):
-            b.label(text="No keymappings available, because none the tools have been activated.")
+            b.label(text="No keymappings available, because none of the tools have been activated.")
 
 
         b = split.box()
         b.label(text="Pie Menus")
 
         if not self.draw_pie_keymaps(kc, keys, b):
-            b.label(text="No keymappings created, because none the pies have been activated.")
+            b.label(text="No keymappings created, because none of the pies have been activated.")
 
     def draw_about(self, box):
         column = box.column()

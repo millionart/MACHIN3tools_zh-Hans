@@ -1,4 +1,5 @@
 import bpy
+from mathutils import Matrix
 import os
 import shutil
 from .. utils.registration import get_prefs
@@ -22,10 +23,8 @@ class Customize(bpy.types.Operator):
 
         resourcespath = os.path.join(get_prefs().path, "resources")
 
-
-        # STARTUP SCENE
-        if get_prefs().custom_startup:
-            self.startup()
+        # PREFERENCES
+        self.preferences(context)
 
         # THEME
         if get_prefs().custom_theme:
@@ -39,9 +38,13 @@ class Customize(bpy.types.Operator):
         if get_prefs().custom_overlays:
             self.overlays(context)
 
-        # PREFERENCES
-        self.preferences(context)
+        # WORKSPACES
+        if get_prefs().custom_workspaces:
+            self.workspaces(context)
 
+        # STARTUP SCENE
+        if get_prefs().custom_startup:
+            self.startup(context)
 
         return {'FINISHED'}
 
@@ -568,7 +571,9 @@ class Customize(bpy.types.Operator):
         filepath = shutil.copy(themesourcepath, themetargetpath)
         bpy.ops.script.execute_preset(filepath=filepath, menu_idname="USERPREF_MT_interface_theme_presets")
 
-    def startup(self):
+    def startup(self, context):
+        print("\n» Modifying Startup Scene")
+
         light = bpy.data.lights.get('Light')
         if light:
             bpy.data.lights.remove(light, do_unlink=True)
@@ -584,6 +589,65 @@ class Customize(bpy.types.Operator):
         mat = bpy.data.materials.get('Material')
         if mat:
             bpy.data.materials.remove(mat, do_unlink=True)
+
+        # set view matrix
+        for screen in context.workspace.screens:
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    for space in area.spaces:
+                        if space.type == 'VIEW_3D':
+                            r3d = space.region_3d
+
+                            r3d.view_matrix = Matrix(((1,  0.0, 0.0,   0),
+                                                      (0,  0.2, 1.0,  -1),
+                                                      (0, -1.0, 0.2, -10),
+                                                      (0,  0.0, 0.0,   1)))
+
+
+    def workspaces(self, context):
+        print("\n» Modifying Workspaces")
+
+        # remove all but one Layout
+        workspaces = [ws for ws in bpy.data.workspaces if ws != context.workspace]
+        bpy.data.batch_remove(ids=workspaces)
+
+        # name the basic 3d workspace
+        bpy.data.workspaces[-1].name = "General"
+
+
+        # remove the dope sheet editor
+        screens = [screen for screen in context.workspace.screens if screen.name == 'Layout']
+
+        if screens:
+            screen = screens[0]
+            areas = [area for area in screen.areas if area.type == 'VIEW_3D']
+
+            if areas:
+                area = areas[0]
+
+                override = {'screen': screen,
+                            'area': area}
+
+                areas = [area for area in screen.areas if area.type == 'DOPESHEET_EDITOR']
+
+                if areas:
+                    area = areas[0]
+
+                    bpy.ops.screen.area_join(override, cursor=(area.x, area.y + area.height))
+                    # print(ret)
+
+                """ TODO: for some reason the workspaces won't end up in the correct order, but rather sorted alphabetically
+                names = ['General.alt', 'Uvs', 'UVs.alt', 'Material', 'World', 'Scripting']
+
+                for idx, name in enumerate(names):
+                    bpy.ops.workspace.duplicate(override)
+
+                for name, ws in zip(names, bpy.data.workspaces[1:]):
+                    print("renaming", ws.name, "to", name)
+                    ws.name = name
+                """
+
+
 
 
 class RestoreKeymaps(bpy.types.Operator):

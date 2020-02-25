@@ -24,12 +24,14 @@ class SwitchWorkspace(bpy.types.Operator):
 
             if ws:
                 bpy.context.window.workspace = ws
-                self.set_shading(ws, shading)
+                if shading:
+                    self.set_shading(ws, shading)
 
         # switch back to original(non-alt workspace) and set shading
         elif ws and ws.name + ".alt" == context.workspace.name:
             bpy.context.window.workspace = ws
-            self.set_shading(ws, shading)
+            if shading:
+                self.set_shading(ws, shading)
 
         # otherwise just switch to the chosen one, and don't set shading
         elif ws:
