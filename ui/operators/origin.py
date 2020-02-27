@@ -34,7 +34,7 @@ class OriginToActive(bpy.types.Operator):
             if self.skip_children:
                 children = self.unparent_children(obj.children)
 
-            obj.data.transform(mx.inverted() @ obj.matrix_world)
+            obj.data.transform(mx.inverted_safe() @ obj.matrix_world)
             obj.matrix_world = mx
 
             if obj.type == 'MESH':
