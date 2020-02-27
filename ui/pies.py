@@ -1660,6 +1660,13 @@ class PieCursor(Menu):
             row.operator("object.origin_set", text="to Cursor", icon="LAYER_ACTIVE").type = "ORIGIN_CURSOR"
             row.operator("object.origin_set", text="to Geometry", icon="OBJECT_ORIGIN").type = "ORIGIN_GEOMETRY"
 
+            row = column.split(factor=0.20)
+            row.scale_y = 1.5
+            row.separator()
+            r = row.split(factor=0.7)
+            r.operator("machin3.origin_to_active", text="to Active", icon="TRANSFORM_ORIGINS")
+
+
         else:
             pie.separator()
 

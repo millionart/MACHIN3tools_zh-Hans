@@ -15,6 +15,16 @@ def parent(obj, parentobj):
     obj.matrix_world = p.matrix_parent_inverse @ obj.matrix_world
 
 
+def unparent(obj):
+    if obj.parent:
+        p = obj.parent
+        while p.parent:
+            p = p.parent
+
+        obj.parent = None
+        obj.matrix_world = p.matrix_parent_inverse.inverted() @ obj.matrix_world
+
+
 def flatten(obj, depsgraph=None):
     if not depsgraph:
         depsgraph = bpy.context.evaluated_depsgraph_get()
