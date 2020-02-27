@@ -620,7 +620,7 @@ class PieSave(Menu):
 
         column = box.column()
         b = column.box()
-        self.draw_center_column_top(b)
+        self.draw_center_column_top(context, b)
 
         if bpy.data.filepath:
             b = column.box()
@@ -656,18 +656,18 @@ class PieSave(Menu):
         # col.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
         col.operator("wm.revert_mainfile", text="Revert", icon_value=get_icon('revert'))
 
-    def draw_center_column_top(self, col):
+    def draw_center_column_top(self, context, col):
         row = col.split(factor=0.25)
         row.label(text="OBJ")
         r = row.row(align=True)
         r.operator("import_scene.obj", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export')).use_selection = True
+        r.operator("export_scene.obj", text="Export", icon_value=get_icon('export')).use_selection = True if context.selected_objects else False
 
         row = col.split(factor=0.25)
         row.label(text="FBX")
         r = row.row(align=True)
         r.operator("import_scene.fbx", text="Import", icon_value=get_icon('import'))
-        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export')).use_selection = True
+        r.operator("export_scene.fbx", text="Export", icon_value=get_icon('export')).use_selection = True if context.selected_objects else False
 
     def draw_center_column_bottom(self, col):
         row = col.split(factor=0.5)
@@ -680,7 +680,11 @@ class PieSave(Menu):
         r = row.row(align=True)
         r.operator("wm.append", text="Append", icon_value=get_icon('append'))
         r.operator("wm.link", text="Link", icon_value=get_icon('link'))
-        row.operator("wm.call_menu", text="", icon_value=get_icon('external_data')).name = "TOPBAR_MT_file_external_data"
+
+        r = row.row(align=True)
+        r.operator("wm.call_menu", text="", icon_value=get_icon('external_data')).name = "TOPBAR_MT_file_external_data"
+        # r.operator_context = 'INVOKE_AREA'
+        r.operator("outliner.orphans_purge", text="Purge")
 
         # append world and materials
 
@@ -828,13 +832,21 @@ class PieShading(Menu):
                 r.operator("machin3.shade_flat", text="Flat", icon_value=get_icon('flat'))
 
                 icon = "CHECKBOX_HLT" if mesh.use_auto_smooth else "CHECKBOX_DEHLT"
-                row.operator("machin3.toggle_auto_smooth", text="AutoSmooth", icon=icon)
+                row.operator("machin3.toggle_auto_smooth", text="AutoSmooth", icon=icon).angle = 0
+
+                row = col.split(factor=0.55)
+                r = row.row(align=True)
+                r.active = not mesh.has_custom_normals
+                for angle in [30, 60, 90, 180]:
+                    r.operator("machin3.toggle_auto_smooth", text=str(angle)).angle = angle
+
+                r = row.row()
+                r.active = not mesh.has_custom_normals and mesh.use_auto_smooth
+                r.prop(mesh, "auto_smooth_angle")
 
                 if mesh.use_auto_smooth:
                     if mesh.has_custom_normals:
                         col.operator("mesh.customdata_custom_splitnormals_clear", text="Clear Custom Normals")
-                    else:
-                        col.prop(mesh, "auto_smooth_angle")
 
                 if context.mode == "EDIT_MESH":
                     row = col.row(align=True)
@@ -1647,6 +1659,13 @@ class PieCursor(Menu):
             row.scale_y = 1.5
             row.operator("object.origin_set", text="to Cursor", icon="LAYER_ACTIVE").type = "ORIGIN_CURSOR"
             row.operator("object.origin_set", text="to Geometry", icon="OBJECT_ORIGIN").type = "ORIGIN_GEOMETRY"
+
+            row = column.split(factor=0.20)
+            row.scale_y = 1.5
+            row.separator()
+            r = row.split(factor=0.7)
+            r.operator("machin3.origin_to_active", text="to Active", icon="TRANSFORM_ORIGINS")
+
 
         else:
             pie.separator()

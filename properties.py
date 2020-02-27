@@ -28,6 +28,9 @@ class HistoryEpochCollection(bpy.types.PropertyGroup):
 
 # SCENE PROPERTIES
 
+selected = []
+
+
 class M3SceneProperties(bpy.types.PropertyGroup):
     def update_xray(self, context):
         x = (self.pass_through, self.show_edit_mesh_wire)
@@ -40,8 +43,6 @@ class M3SceneProperties(bpy.types.PropertyGroup):
 
         elif self.pass_through:
             shading.xray_alpha = 1 if context.active_object and context.active_object.type == "MESH" else 0.5
-
-    selected = []
 
     def update_uv_sync_select(self, context):
         ts = context.scene.tool_settings
@@ -132,7 +133,6 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     focus_history: CollectionProperty(type=HistoryEpochCollection)
 
     grouppro_dotnames: BoolProperty(name=".dotname GroupPro collections", default=False, update=update_grouppro_dotnames)
-
 
     def update_eevee_preset(self, context):
         eevee = context.scene.eevee

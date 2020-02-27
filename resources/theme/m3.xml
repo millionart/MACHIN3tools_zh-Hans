@@ -8,6 +8,7 @@
         icon_saturation="0.4"
         widget_emboss="#00000005"
         editor_outline="#1c1d20"
+        widget_text_cursor="#3399e6"
         axis_x="#dc4242"
         axis_y="#42dc42"
         axis_z="#4242dc"
@@ -231,7 +232,7 @@
             show_shaded="FALSE"
             shadetop="10"
             shadedown="-10"
-            roundness="0.7"
+            roundness="0.8"
             >
           </ThemeWidgetColors>
         </wcol_pie_menu>
@@ -377,6 +378,8 @@
         face_dot="#49caff"
         facedot_size="4"
         freestyle_face_mark="#7fff7f33"
+        face_back="#ff0000b3"
+        face_front="#0000ffb3"
         nurb_uline="#909000"
         nurb_vline="#803060"
         nurb_sel_uline="#f0ff40"
@@ -542,8 +545,8 @@
             button_title="#ffffff"
             button_text="#ffffff"
             button_text_hi="#ffffff"
-            navigation_bar="#00000000"
-            execution_buts="#444444ff"
+            navigation_bar="#2f303500"
+            execution_buts="#2f303500"
             tab_active="#446499"
             tab_inactive="#28292d"
             tab_back="#28292dff"
@@ -566,7 +569,7 @@
         grid="#5e5e5e"
         view_sliders="#969696"
         dopesheet_channel="#5a85b2"
-        nla_track="#29282e"
+        nla_track="#424242"
         active_action="#cc701a66"
         active_action_unset="#9987614d"
         preview_range="#cc701a66"
@@ -711,6 +714,8 @@
         face_dot="#08c1ff"
         facedot_size="3"
         freestyle_face_mark="#00000000"
+        face_back="#00000000"
+        face_front="#00000000"
         editmesh_active="#08c1ffff"
         wire_edit="#5c5c5c"
         edge_select="#0067cb"
@@ -749,7 +754,7 @@
             header="#29282eff"
             header_text="#eeeeee"
             header_text_hi="#ffffff"
-            button="#2f303500"
+            button="#2f303599"
             button_title="#ffffff"
             button_text="#ffffff"
             button_text_hi="#ffffff"
@@ -792,6 +797,7 @@
         preview_back="#000000"
         metadatabg="#000000"
         metadatatext="#ffffff"
+        preview_range="#a14d0066"
         >
         <space>
           <ThemeSpaceGeneric
@@ -861,6 +867,7 @@
     </properties>
     <text_editor>
       <ThemeTextEditor
+        line_numbers="#d0d0d0"
         line_numbers_background="#313133"
         selected_text="#19191a"
         cursor="#ff0000"
@@ -976,7 +983,7 @@
     <outliner>
       <ThemeOutliner
         match="#337f33"
-        selected_highlight="#223a5b"
+        selected_highlight="#7297d0"
         active="#3b5689"
         selected_object="#e96a00"
         active_object="#ffaf29"

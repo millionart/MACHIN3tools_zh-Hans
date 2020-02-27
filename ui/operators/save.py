@@ -16,7 +16,7 @@ class New(bpy.types.Operator):
 
 
     def execute(self, context):
-        bpy.ops.wm.read_homefile(app_template="")
+        bpy.ops.wm.read_homefile(app_template="", load_ui=True)
 
         return {'FINISHED'}
 
@@ -24,7 +24,7 @@ class New(bpy.types.Operator):
         if bpy.data.is_dirty:
             return context.window_manager.invoke_confirm(self, event)
         else:
-            bpy.ops.wm.read_homefile(app_template="")
+            bpy.ops.wm.read_homefile(app_template="", load_ui=True)
             return {'FINISHED'}
 
 

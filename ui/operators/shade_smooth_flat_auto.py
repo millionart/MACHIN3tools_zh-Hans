@@ -1,5 +1,7 @@
 import bpy
+from bpy.props import IntProperty
 import bmesh
+from math import radians
 
 
 class ShadeSmooth(bpy.types.Operator):
@@ -15,13 +17,13 @@ class ShadeSmooth(bpy.types.Operator):
             # set sharps based on face angles + activate auto smooth + enable sharp overlays
             if event.alt:
                 for obj in context.selected_objects:
-                    self.set_obj_sharps(obj)
+                    self.set_sharps(context.mode, obj)
 
                 context.space_data.overlay.show_edge_sharp = True
 
         elif context.mode == "EDIT_MESH":
             if event.alt:
-                self.set_mesh_sharps(context.active_object.data)
+                self.set_sharps(context.mode, context.active_object)
 
                 context.space_data.overlay.show_edge_sharp = True
             else:
@@ -29,12 +31,21 @@ class ShadeSmooth(bpy.types.Operator):
 
         return {'FINISHED'}
 
-    def set_obj_sharps(self, obj):
+    def set_sharps(self, mode, obj):
         obj.data.use_auto_smooth = True
         angle = obj.data.auto_smooth_angle
 
-        bm = bmesh.new()
-        bm.from_mesh(obj.data)
+        if mode == 'OBJECT':
+            bm = bmesh.new()
+            bm.from_mesh(obj.data)
+
+        elif mode == 'EDIT_MESH':
+            bm = bmesh.from_edit_mesh(obj.data)
+
+            # smooth all faces like in object mode
+            for f in bm.faces:
+                f.smooth = True
+
         bm.normal_update()
 
         sharpen = [e for e in bm.edges if len(e.link_faces) == 2 and e.calc_face_angle() > angle]
@@ -42,26 +53,14 @@ class ShadeSmooth(bpy.types.Operator):
         for e in sharpen:
             e.smooth = False
 
-        bm.to_mesh(obj.data)
-        bm.clear()
+        if mode == 'OBJECT':
+            bm.to_mesh(obj.data)
+            bm.clear()
 
-    def set_mesh_sharps(self, mesh):
-        mesh.use_auto_smooth = True
-        angle = mesh.auto_smooth_angle
+        elif mode == 'EDIT_MESH':
+            bmesh.update_edit_mesh(obj.data)
 
-        bm = bmesh.from_edit_mesh(mesh)
-        bm.normal_update()
-
-        # smooth all faces like in object mode
-        for f in bm.faces:
-            f.smooth = True
-
-        sharpen = [e for e in bm.edges if len(e.link_faces) == 2 and e.calc_face_angle() > angle]
-
-        for e in sharpen:
-            e.smooth = False
-
-        bmesh.update_edit_mesh(mesh)
+        # obj.data.auto_smooth_angle = radians(180)
 
 
 class ShadeFlat(bpy.types.Operator):
@@ -132,20 +131,32 @@ class ShadeFlat(bpy.types.Operator):
 class ToggleAutoSmooth(bpy.types.Operator):
     bl_idname = "machin3.toggle_auto_smooth"
     bl_label = "Toggle Auto Smooth"
-    bl_description = "Toggle Auto Smooth"
     bl_options = {'REGISTER', 'UNDO'}
+
+    angle: IntProperty(name="Auto Smooth Angle")
+
+    @classmethod
+    def description(cls, context, properties):
+        if properties.angle == 0:
+            return "Toggle Auto Smooth"
+        else:
+            return "Auto Smooth Angle Preset: %d" % (properties.angle)
 
     def execute(self, context):
         active = context.active_object
 
         if active:
             sel = context.selected_objects
+
             if active not in sel:
                 sel.append(active)
 
-            autosmooth = not active.data.use_auto_smooth
+            autosmooth = not active.data.use_auto_smooth if self.angle == 0 else True
 
             for obj in [obj for obj in sel if obj.type == 'MESH']:
                 obj.data.use_auto_smooth = autosmooth
+
+                if self.angle:
+                    obj.data.auto_smooth_angle = radians(self.angle)
 
         return {'FINISHED'}

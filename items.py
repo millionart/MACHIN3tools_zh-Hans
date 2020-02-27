@@ -36,7 +36,6 @@ align_axis_mapping_dict = {"X": 0, "Y": 1, "Z": 2}
 uv_align_axis_mapping_dict = {"U": 0, "V": 1}
 
 
-
 # PIES
 
 eevee_preset_items = [("NONE", "None", ""),

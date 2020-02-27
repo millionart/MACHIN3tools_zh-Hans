@@ -45,4 +45,10 @@ class QuadSphere(bpy.types.Operator):
         quadsphere = context.active_object
         quadsphere.data.auto_smooth_angle = radians(60)
 
+        # clear uvs
+        mesh = quadsphere.data
+
+        while mesh.uv_layers:
+            mesh.uv_layers.remove(mesh.uv_layers[0])
+
         return {'FINISHED'}
