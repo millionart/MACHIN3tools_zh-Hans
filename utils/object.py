@@ -4,7 +4,7 @@ from mathutils import Matrix
 
 def parent(obj, parentobj):
     if not parentobj.parent and parentobj.matrix_parent_inverse != Matrix():
-        print("Resetting %s's parent inverse matrix, as no parent is defined." % (parentobj.name))
+        print("WARNING: Resetting %s's parent inverse matrix, as no parent is defined." % (parentobj.name))
         parentobj.matrix_parent_inverse = Matrix()
 
     p = parentobj
@@ -22,7 +22,7 @@ def unparent(obj):
             p = p.parent
 
         obj.parent = None
-        obj.matrix_world = p.matrix_parent_inverse.inverted() @ obj.matrix_world
+        obj.matrix_world = p.matrix_parent_inverse.inverted_safe() @ obj.matrix_world
 
 
 def flatten(obj, depsgraph=None):

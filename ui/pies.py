@@ -645,7 +645,7 @@ class PieSave(Menu):
     def draw_left_column(self, col):
         col.scale_x = 1.1
 
-        row = col.row()
+        row = col.row(align=True)
         row.scale_y = 1.5
         row.operator("machin3.load_most_recent", text="(R) Most Recent", icon_value=get_icon('open_recent'))
         # row.operator("wm.call_menu", text="All Recent", icon_value=get_icon('open_recent')).name = "INFO_MT_file_open_recent"

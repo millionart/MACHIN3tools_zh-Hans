@@ -22,10 +22,8 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
            "MESH_CUT": [("operators.mesh_cut", [("MeshCut", "mesh_cut")])],
            "CUSTOMIZE": [("operators.customize", [("Customize", "customize"),
                                                   ("RestoreKeymaps", "restore_keymaps")])],
-
            "FILEBROWSER": [("operators.filebrowser", [("Open", "filebrowser_open"),
                                                       ("Toggle", "filebrowser_toggle")])],
-
            "MODES_PIE": [("ui.pies", [("PieModes", "modes_pie")]),
                          ("ui.operators.modes", [("EditMode", "edit_mode"),
                                                  ("MeshMode", "mesh_mode")]),
@@ -33,7 +31,6 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
                                                  ("UVMode", "uv_mode"),
                                                  ("SurfaceDrawMode", "surface_draw_mode")]),
                          ("ui.operators.open_blend", [("OpenLibraryBlend", "open_library_blend")])],
-
            "SAVE_PIE": [("ui.pies", [("PieSave", "save_pie")]),
                         ("ui.menus", [("MenuAppendMaterials", "append_materials")]),
                         ("ui.operators.save", [("New", "new"),
@@ -90,10 +87,8 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
                           ("ui.operators.cursor", [("CursorToOrigin", "cursor_to_origin"),
                                                    ("CursorToSelected", "cursor_to_selected")]),
                           ("ui.operators.origin", [("OriginToActive", "origin_to_active")])],
-
            "TRANSFORM_PIE": [("ui.pies", [("PieTransform", "transform_pie")]),
                              ("ui.operators.set_transform_preset", [("SetTransformPreset", "set_transform_preset")])],
-
            "COLLECTIONS_PIE": [("ui.pies", [("PieCollections", "collections_pie")]),
                                ("ui.operators.collections", [("CreateCollection", "create_collection"),
                                                              ("AddToCollection", "add_to_collection"),
@@ -102,10 +97,8 @@ classes = {"CORE": [("ui.UILists", [("AppendMatsUIList", "")]),
                                                              ("SortGroupProGroups", "sort_grouppro_groups"),
                                                              ("Purge", "purge_collections"),
                                                              ("Select", "select_collection")])],
-
            "WORKSPACE_PIE": [("ui.pies", [("PieWorkspace", "workspace_pie")]),
                              ("ui.operators.switch_workspace", [("SwitchWorkspace", "switch_workspace")])],
-
            "OBJECT_CONTEXT_MENU": [("ui.menus", [("MenuMACHIN3toolsObjectContextMenu", "machin3tools_object_context_menu")])],
            }
 
@@ -126,12 +119,10 @@ keys = {"SMART_VERT": [{"label": "Merge Last", "keymap": "Mesh", "idname": "mach
                    {"label": "Y Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Y", "value": "PRESS", "alt": True, "shift": True, "properties": [("use_x", False), ("use_y", True), ("use_z", False)]},
                    {"label": "Z Axis", "keymap": "Object Mode", "idname": "machin3.mirror", "type": "Z", "value": "PRESS", "alt": True, "shift": True, "properties": [("use_x", False), ("use_y", False), ("use_z", True)]}],
         "ALIGN": [{"keymap": "Object Mode", "idname": "machin3.align", "type": "A", "value": "PRESS", "alt": True}],
-
         "FILEBROWSER": [{"label": "Open Filebrowser", "keymap": "File Browser", "space_type": "FILE_BROWSER", "idname": "machin3.filebrowser_open", "type": "O", "value": "PRESS"},
-                        {"label": "Toggle Sortign", "keymap": "File Browser", "space_type": "FILE_BROWSER", "idname": "machin3.filebrowser_toggle", "type": "ONE", "value": "PRESS", "properties": [("type", "SORT")]},
+                        {"label": "Toggle Sorting", "keymap": "File Browser", "space_type": "FILE_BROWSER", "idname": "machin3.filebrowser_toggle", "type": "ONE", "value": "PRESS", "properties": [("type", "SORT")]},
                         {"label": "Toggle Display", "keymap": "File Browser", "space_type": "FILE_BROWSER", "idname": "machin3.filebrowser_toggle", "type": "TWO", "value": "PRESS", "properties": [("type", "DISPLAY_TYPE")]},
                         {"label": "Toggle Hidden", "keymap": "File Browser", "space_type": "FILE_BROWSER", "idname": "machin3.filebrowser_toggle", "type": "THREE", "value": "PRESS", "properties": [("type", "HIDDEN")]}],
-
         "MODES_PIE": [{"label": "3D View", "keymap": "Object Non-modal", "idname": "wm.call_menu_pie", "type": "TAB", "value": "PRESS", "properties": [("name", "MACHIN3_MT_modes_pie")]},
                       {"label": "Image Editor", "keymap": "Image", "space_type": "IMAGE_EDITOR", "idname": "wm.call_menu_pie", "type": "TAB", "value": "PRESS", "properties": [("name", "MACHIN3_MT_modes_pie")]}],
         "SAVE_PIE": [{"keymap": "Window", "idname": "wm.call_menu_pie", "type": "S", "value": "PRESS", "ctrl": True, "properties": [("name", "MACHIN3_MT_save_pie")]}],

@@ -21,12 +21,12 @@ class OriginToActive(bpy.types.Operator):
     def poll(cls, context):
         if context.mode == 'OBJECT':
             active = context.active_object
-            sel = [obj for obj in context.selected_objects if obj != active]
+            sel = [obj for obj in context.selected_objects if obj != active and obj.type not in ['EMPTY', 'FONT']]
             return active and sel
 
     def execute(self, context):
         active = context.active_object
-        sel = [obj for obj in context.selected_objects if obj != active]
+        sel = [obj for obj in context.selected_objects if obj != active and obj.type not in ['EMPTY', 'FONT']]
 
         mx = active.matrix_world
 
@@ -34,11 +34,11 @@ class OriginToActive(bpy.types.Operator):
             if self.skip_children:
                 children = self.unparent_children(obj.children)
 
-            omx = obj.matrix_world.copy()
-
-            obj.data.transform(mx.inverted() @ omx)
+            obj.data.transform(mx.inverted_safe() @ obj.matrix_world)
             obj.matrix_world = mx
-            obj.data.update()
+
+            if obj.type == 'MESH':
+                obj.data.update()
 
             if self.skip_children:
                 self.reparent_children(children, obj)
