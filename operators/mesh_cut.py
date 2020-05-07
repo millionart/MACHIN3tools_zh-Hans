@@ -1,6 +1,8 @@
 import bpy
-from .. utils.mesh import unhide, unselect
-from .. utils.object import flatten, add_facemap, add_vgroup
+import bmesh
+from math import degrees
+from .. utils.mesh import unhide_deselect, join
+from .. utils.object import flatten
 
 
 class MeshCut(bpy.types.Operator):
@@ -11,66 +13,91 @@ class MeshCut(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects
+        return context.mode == 'OBJECT' and len(context.selected_objects) == 2 and context.active_object and context.active_object in context.selected_objects and all(obj.type == 'MESH' for obj in context.selected_objects)
 
     def invoke(self, context, event):
         target = context.active_object
         cutter = [obj for obj in context.selected_objects if obj != target][0]
 
         # unhide both
-        unhide(target.data)
-        unhide(cutter.data)
+        unhide_deselect(target.data)
+        unhide_deselect(cutter.data)
 
-        # unselect both
-        unselect(target.data)
-        unselect(cutter.data)
+        # get depsgraph
+        dg = context.evaluated_depsgraph_get()
 
         # flatten the cutter
-        flatten(cutter)
+        flatten(cutter, dg)
 
         # flatten the target
         if event.alt:
-            flatten(target)
-
-        # check for active cutter material
-        mat = cutter.active_material
+            flatten(target, dg)
 
         # clear cutter materials
-        if mat:
-            cutter.data.materials.clear()
+        cutter.data.materials.clear()
 
-        add_facemap(cutter, name="mesh_cut", ids=[f.index for f in cutter.data.polygons])
-        add_facemap(target, name="mesh_cut")
-
-        # join
-        bpy.ops.object.join()
-
-        # select cutter mesh
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.object.face_map_select()
+        # join target and cutter
+        join(target, [cutter], select=[1])
 
         # knife intersect
+        bpy.ops.object.mode_set(mode='EDIT')
         if event.shift:
             bpy.ops.mesh.intersect(separate_mode='ALL')
         else:
             bpy.ops.mesh.intersect(separate_mode='CUT')
-
-        # select cutter mesh
-        bpy.ops.object.face_map_select()
-
-        # remove cutter mesh
-        bpy.ops.mesh.delete(type='FACE')
-
-        # mark non-manifold edges
-        if event.shift:
-            bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.mesh.region_to_loop()
-
-            bpy.ops.mesh.mark_seam(clear=False)
-            bpy.ops.mesh.remove_doubles()
-
-        # remove mesh_cut fmap
         bpy.ops.object.mode_set(mode='OBJECT')
-        bpy.ops.object.face_map_remove()
+
+        # remove cutter
+        bm = bmesh.new()
+        bm.from_mesh(target.data)
+        bm.normal_update()
+        bm.verts.ensure_lookup_table()
+
+        i = bm.faces.layers.int.verify()
+        s = bm.edges.layers.string.verify()
+
+        cutter_faces = [f for f in bm.faces if f[i] > 0]
+        bmesh.ops.delete(bm, geom=cutter_faces, context='FACES')
+
+        # mark seams
+        if event.shift:
+            non_manifold = [e for e in bm.edges if not e.is_manifold]
+
+            # mark them and collect the verts as well
+            verts = set()
+
+            for e in non_manifold:
+                e.seam = True
+                e[s] = 'MESHCUT'.encode()
+
+                verts.update(e.verts)
+
+            # merge the open, non-manifold seam
+            bmesh.ops.remove_doubles(bm, verts=list({v for e in non_manifold for v in e.verts}), dist=0.0001)
+
+            # fetch the still valid verts and collect the straight 2-edged ones
+            straight_edged = []
+
+            for v in verts:
+                if v.is_valid and len(v.link_edges) == 2:
+                    e1 = v.link_edges[0]
+                    e2 = v.link_edges[1]
+
+                    vector1 = e1.other_vert(v).co - v.co
+                    vector2 = e2.other_vert(v).co - v.co
+
+                    angle = degrees(vector1.angle(vector2))
+
+                    if 179 <= angle <= 181:
+                        straight_edged.append(v)
+
+            # dissolve them
+            bmesh.ops.dissolve_verts(bm, verts=straight_edged)
+
+        # remove face int layer, it's no longer needed
+        bm.faces.layers.int.remove(i)
+
+        bm.to_mesh(target.data)
+        bm.clear()
 
         return {'FINISHED'}

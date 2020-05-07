@@ -1,6 +1,5 @@
 import bpy
 from bpy.props import StringProperty, BoolProperty
-import subprocess
 from ... utils.collection import get_groups_collection, get_scene_collections
 
 
@@ -194,27 +193,4 @@ class Select(bpy.types.Operator):
                         obj.select_set(True)
 
         self.force_all = False
-        return {'FINISHED'}
-
-
-class OpenCollectionInstanceLibrary(bpy.types.Operator):
-    bl_idname = "machin3.open_collection_instance_library"
-    bl_label = "MACHIN3: Open Collection Instance Library"
-    bl_description = "Opens new Blender instance, loading the library sourced in the selected collection instance."
-    bl_options = {'REGISTER'}
-
-    blendpath: StringProperty()
-    library: StringProperty()
-
-    def execute(self, context):
-        blenderbinpath = bpy.app.binary_path
-
-        cmd = [blenderbinpath, self.blendpath]
-        blender = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        if blender:
-            lib = bpy.data.libraries.get(self.library)
-            if lib:
-                lib.reload()
-
         return {'FINISHED'}

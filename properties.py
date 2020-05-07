@@ -1,5 +1,7 @@
 import bpy
 from bpy.props import StringProperty, IntProperty, BoolProperty, CollectionProperty, PointerProperty, EnumProperty, FloatProperty
+import bmesh
+from . items import eevee_preset_items, align_mode_items
 
 
 # COLLECTIONS
@@ -26,9 +28,10 @@ class HistoryEpochCollection(bpy.types.PropertyGroup):
 
 # SCENE PROPERTIES
 
+selected = []
+
 
 class M3SceneProperties(bpy.types.PropertyGroup):
-
     def update_xray(self, context):
         x = (self.pass_through, self.show_edit_mesh_wire)
         shading = context.space_data.shading
@@ -42,14 +45,55 @@ class M3SceneProperties(bpy.types.PropertyGroup):
             shading.xray_alpha = 1 if context.active_object and context.active_object.type == "MESH" else 0.5
 
     def update_uv_sync_select(self, context):
-        toolsettings = context.scene.tool_settings
-        toolsettings.use_uv_select_sync = self.uv_sync_select
+        ts = context.scene.tool_settings
+        ts.use_uv_select_sync = self.uv_sync_select
 
-        if not toolsettings.use_uv_select_sync:
+        global selected
+        active = context.active_object
+
+        # restore previous selection
+        if ts.use_uv_select_sync:
+            bpy.ops.mesh.select_all(action='DESELECT')
+
+            bm = bmesh.from_edit_mesh(active.data)
+            bm.normal_update()
+            bm.verts.ensure_lookup_table()
+
+            if selected:
+                for v in bm.verts:
+                    if v.index in selected:
+                        v.select_set(True)
+
+            bm.select_flush(True)
+
+            bmesh.update_edit_mesh(active.data)
+
+            # also sync the selection mode
+            # NOTE: disabled again, seems like it's beneficial to just go back to the previous mesh selection mode
+            # if ts.uv_select_mode in ["VERTEX", "EDGE", "FACE"]:
+                # bpy.ops.mesh.select_mode(type=ts.uv_select_mode.replace("VERTEX", "VERT"))
+
+        # store the active selection
+        else:
+            bm = bmesh.from_edit_mesh(active.data)
+            bm.normal_update()
+            bm.verts.ensure_lookup_table()
+
+            selected = [v.index for v in bm.verts if v.select]
+
             bpy.ops.mesh.select_all(action="SELECT")
 
-    def update_eevee_gtao_factor(self, context):
-        context.scene.eevee.gtao_factor = self.eevee_gtao_factor
+            # also sync the selection mode
+            mode = tuple(ts.mesh_select_mode)
+
+            # EDGE mode in the mesh becomes, EDGE in uv as well
+            if mode == (False, True, False):
+                ts.uv_select_mode = "EDGE"
+
+            # everything else becomes VERTEX, including FACE
+            # that's because there's no reason to turn off sync for face selections in the first place, faces unlike verts and edges, are always only present once in uv space
+            else:
+                ts.uv_select_mode = "VERTEX"
 
     def update_show_cavity(self, context):
         t = (self.show_cavity, self.show_curvature)
@@ -82,7 +126,6 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     pass_through: BoolProperty(name="Pass Through", default=False, update=update_xray)
     show_edit_mesh_wire: BoolProperty(name="Show Edit Mesh Wireframe", default=False, update=update_xray)
     uv_sync_select: BoolProperty(name="Synce Selection", default=False, update=update_uv_sync_select)
-    eevee_gtao_factor: FloatProperty(name="Factor", default=1, min=0, update=update_eevee_gtao_factor)
 
     show_cavity: BoolProperty(name="Cavity", default=True, update=update_show_cavity)
     show_curvature: BoolProperty(name="Curvature", default=False, update=update_show_cavity)
@@ -90,3 +133,64 @@ class M3SceneProperties(bpy.types.PropertyGroup):
     focus_history: CollectionProperty(type=HistoryEpochCollection)
 
     grouppro_dotnames: BoolProperty(name=".dotname GroupPro collections", default=False, update=update_grouppro_dotnames)
+
+    def update_eevee_preset(self, context):
+        eevee = context.scene.eevee
+        shading = context.space_data.shading
+
+        if self.eevee_preset == 'NONE':
+            eevee.use_ssr = False
+            eevee.use_gtao = False
+            eevee.use_bloom = False
+            eevee.use_volumetric_lights = False
+
+            shading.use_scene_lights = False
+            shading.use_scene_world = False
+
+        elif self.eevee_preset == 'LOW':
+            eevee.use_ssr = True
+            eevee.use_ssr_halfres = True
+            eevee.use_ssr_refraction = False
+            eevee.use_gtao = True
+            eevee.use_bloom = False
+            eevee.use_volumetric_lights = False
+
+            shading.use_scene_lights = True
+            shading.use_scene_world = False
+
+        elif self.eevee_preset == 'HIGH':
+            eevee.use_ssr = True
+            eevee.use_ssr_halfres = False
+            eevee.use_ssr_refraction = True
+            eevee.use_gtao = True
+            eevee.use_bloom = True
+            eevee.use_volumetric_lights = False
+
+            shading.use_scene_lights = True
+            shading.use_scene_world = False
+
+        elif self.eevee_preset == 'ULTRA':
+            eevee.use_ssr = True
+            eevee.use_ssr_halfres = False
+            eevee.use_ssr_refraction = True
+            eevee.use_gtao = True
+            eevee.use_bloom = True
+            eevee.use_volumetric_lights = True
+
+            shading.use_scene_lights = True
+            shading.use_scene_world = True
+
+    def update_eevee_gtao_factor(self, context):
+        context.scene.eevee.gtao_factor = self.eevee_gtao_factor
+
+    def update_eevee_bloom_intensity(self, context):
+        context.scene.eevee.bloom_intensity = self.eevee_bloom_intensity
+
+    eevee_preset: EnumProperty(name="Eevee Preset", description="Eevee Quality Presets", items=eevee_preset_items, default='NONE', update=update_eevee_preset)
+    eevee_gtao_factor: FloatProperty(name="Factor", default=1, min=0, step=0.1, update=update_eevee_gtao_factor)
+    eevee_bloom_intensity: FloatProperty(name="Intensity", default=0.05, min=0, step=0.1, update=update_eevee_bloom_intensity)
+
+    object_axes_size: FloatProperty(name="Object Axes Size", default=0.3, min=0)
+    object_axes_alpha: FloatProperty(name="Object Axes Alpha", default=0.75, min=0, max=1)
+
+    align_mode: EnumProperty(name="Align Mode", items=align_mode_items, default="VIEW")

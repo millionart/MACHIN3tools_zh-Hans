@@ -1,6 +1,5 @@
 import bpy
 from ... utils.registration import get_prefs
-from ... utils import MACHIN3 as m3
 
 
 class MatcapSwitch(bpy.types.Operator):

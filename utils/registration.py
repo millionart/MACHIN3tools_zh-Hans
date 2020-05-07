@@ -1,10 +1,8 @@
 import bpy
 from bpy.utils import register_class, unregister_class, previews
 import os
-from . import MACHIN3 as m3
-from .. keys import keys as keysdict
-from .. classes import classes as classesdict
-
+from .. registration import keys as keysdict
+from .. registration import classes as classesdict
 
 
 def get_path():
@@ -20,10 +18,12 @@ def get_prefs():
 
 
 def get_addon(addon, debug=False):
+    """
+    look for addon by name
+    return registration status, foldername, version and path
+    """
     import addon_utils
 
-    # look for addon by name and find folder name and path
-    # Note, this will also find addons that aren't registered!
 
     for mod in addon_utils.modules():
         name = mod.bl_info["name"]
@@ -42,7 +42,7 @@ def get_addon(addon, debug=False):
                 print()
 
             return enabled, foldername, version, path
-    return None, None, None, None
+    return False, None, None, None
 
 
 def get_addon_prefs(addon):
@@ -197,7 +197,7 @@ def unregister_icons(icons):
     previews.remove(icons)
 
 
-# SPECIALS MENU ADDITION
+# CONTEXT MENU ADDITION
 
 def object_context_menu(self, context):
     self.layout.menu("MACHIN3_MT_machin3tools_object_context_menu")
@@ -212,6 +212,12 @@ def add_object_context_menu(runtime=False):
 def remove_object_context_menu(runtime=False):
     # if get_prefs().activate_object_context_menu or runtime:
     bpy.types.VIEW3D_MT_object_context_menu.remove(object_context_menu)
+
+
+# ADD OBJECTS ADDITION
+
+def add_object_buttons(self, context):
+    self.layout.operator("machin3.quadsphere", text="Quad Sphere", icon='SPHERE')
 
 
 # RUNTIME TOOL (DE)ACTIVATION
@@ -370,6 +376,10 @@ def get_tools():
     classlists, keylists, count = get_mesh_cut(classlists, keylists, count)
 
 
+    # FILEBROWSER TOOLS
+    classlists, keylists, count = get_filebrowser(classlists, keylists, count)
+
+
     # CUSTOMIZE
     classlists, keylists, count = get_customize(classlists, keylists, count)
 
@@ -406,9 +416,14 @@ def get_pie_menus():
     classlists, keylists, count = get_align_pie(classlists, keylists, count)
 
 
-    # CURSOR
+    # CURSOR + ORIGIN
 
     classlists, keylists, count = get_cursor_pie(classlists, keylists, count)
+
+
+    # TRANSFORM
+
+    classlists, keylists, count = get_transform_pie(classlists, keylists, count)
 
 
     # COLLECTIONS
@@ -539,6 +554,15 @@ def get_mesh_cut(classlists=[], keylists=[], count=0):
     return classlists, keylists, count
 
 
+def get_filebrowser(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_filebrowser_tools:
+        classlists.append(classesdict["FILEBROWSER"])
+        keylists.append(keysdict["FILEBROWSER"])
+        count +=1
+
+    return classlists, keylists, count
+
+
 def get_customize(classlists=[], keylists=[], count=0):
     if get_prefs().activate_customize:
         classlists.append(classesdict["CUSTOMIZE"])
@@ -604,6 +628,15 @@ def get_cursor_pie(classlists=[], keylists=[], count=0):
     if get_prefs().activate_cursor_pie:
         classlists.append(classesdict["CURSOR_PIE"])
         keylists.append(keysdict["CURSOR_PIE"])
+        count += 1
+
+    return classlists, keylists, count
+
+
+def get_transform_pie(classlists=[], keylists=[], count=0):
+    if get_prefs().activate_transform_pie:
+        classlists.append(classesdict["TRANSFORM_PIE"])
+        keylists.append(keysdict["TRANSFORM_PIE"])
         count += 1
 
     return classlists, keylists, count

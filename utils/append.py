@@ -2,36 +2,46 @@ import bpy
 import os
 
 
-def append_group(filepath, name, link=False):
-    return append_element(filepath, "groups", name, link)
+def append_group(filepath, name, link=False, relative=False):
+    return append_element(filepath, "groups", name, link, relative)
 
 
-def append_object(filepath, name, link=False):
-    return append_element(filepath, "objects", name, link)
+def append_collection(filepath, name, link=False, relative=False):
+    return append_element(filepath, "collections", name, link, relative)
 
 
-def append_material(filepath, name, link=False):
-    return append_element(filepath, "materials", name, link)
+def append_object(filepath, name, link=False, relative=False):
+    return append_element(filepath, "objects", name, link, relative)
 
 
-def append_scene(filepath, name, link=False):
-    return append_element(filepath, "scenes", name, link)
+def append_material(filepath, name, link=False, relative=False):
+    return append_element(filepath, "materials", name, link, relative)
 
 
-def append_world(filepath, name, link=False):
-    return append_element(filepath, "worlds", name, link)
+def append_scene(filepath, name, link=False, relative=False):
+    return append_element(filepath, "scenes", name, link, relative)
 
 
-def append_element(filepath, collection_name, element_name, link):
+def append_world(filepath, name, link=False, relative=False):
+    return append_element(filepath, "worlds", name, link, relative)
+
+
+def append_nodetree(filepath, name, link=False, relative=False):
+    return append_element(filepath, "node_groups", name, link, relative)
+
+
+def append_element(filepath, collection, name, link, relative):
     if os.path.exists(filepath):
 
-        with bpy.data.libraries.load(filepath, link=link) as (data_from, data_to):
-            if element_name in getattr(data_from, collection_name):
-                getattr(data_to, collection_name).append(element_name)
-            else:
-                print("The %s name does not exist" % (collection_name[:-1]))
+        with bpy.data.libraries.load(filepath, link=link, relative=relative) as (data_from, data_to):
+            if name in getattr(data_from, collection):
+                getattr(data_to, collection).append(name)
 
-        return getattr(data_to, collection_name)[0]
+            else:
+                print("%s does not exist in %s/%s" % (name, filepath, collection))
+                return
+
+        return getattr(data_to, collection)[0]
 
     else:
-        print("The file path does not exist")
+        print("The file %s does not exist" % (filepath))

@@ -1,39 +1,77 @@
-'''
-Copyright (C) 2016-2018 MACHIN3, machin3.io, support@machin3.io
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-'''
-
-
 bl_info = {
     "name": "MACHIN3tools",
     "author": "MACHIN3",
-    "version": (0, 3, 10),
-    "blender": (2, 80, 0),
+    "version": (0, 3, 14),
+    "blender": (2, 81, 0),
     "location": "",
-    "description": "简化 Blender 2.80.",
+    "description": "简化 Blender 2.80 及更高版本。",
     "warning": "",
     "wiki_url": "https://machin3.io/MACHIN3tools/docs",
     "category": "Mesh"}
 
+
+def reload_modules(name):
+    """
+    This makes sure all modules are reloaded from new files, when the addon is removed and a new version is installed in the same session,
+    or when Blender's 'Reload Scripts' operator is run manually.
+    It's important, that utils modules are reloaded first, as operators and menus import from them
+    """
+
+    import os
+    import importlib
+
+    # first fetch and reload all utils modules
+    utils_modules = sorted([name[:-3] for name in os.listdir(os.path.join(__path__[0], "utils")) if name.endswith('.py')])
+
+    for module in utils_modules:
+        impline = "from . utils import %s" % (module)
+
+        print("reloading %s" % (".".join([name] + ['utils'] + [module])))
+
+        exec(impline)
+        importlib.reload(eval(module))
+
+    # then update the classes and keys dicts
+    from . import registration
+    importlib.reload(registration)
+
+    # and based on that, reload the modules containing operator and menu classes
+    modules = []
+
+    for label in registration.classes:
+        entries = registration.classes[label]
+        for entry in entries:
+            path = entry[0].split('.')
+            module = path.pop(-1)
+
+            if (path, module) not in modules:
+                modules.append((path, module))
+
+    for path, module in modules:
+        if path:
+            impline = "from . %s import %s" % (".".join(path), module)
+        else:
+            impline = "from . import %s" % (module)
+
+        print("reloading %s" % (".".join([name] + path + [module])))
+
+        exec(impline)
+        importlib.reload(eval(module))
+
+
+if 'bpy' in locals():
+    reload_modules(bl_info['name'])
 
 import bpy
 from bpy.props import PointerProperty
 from . properties import M3SceneProperties
 from . utils.registration import get_core, get_tools, get_pie_menus, get_menus
 from . utils.registration import register_classes, unregister_classes, register_keymaps, unregister_keymaps, register_icons, unregister_icons, add_object_context_menu, remove_object_context_menu
+from . utils.registration import add_object_buttons
+from . handlers import update_object_axes_drawing
+
+
+# TODO: support translation, see https://blendermarket.com/inbox/conversations/20371
 
 
 def register():
@@ -59,10 +97,19 @@ def register():
 
     add_object_context_menu()
 
+    bpy.types.VIEW3D_MT_mesh_add.prepend(add_object_buttons)
+
 
     # ICONS
 
     icons = register_icons()
+
+
+    # HANDLERS
+
+    bpy.app.handlers.undo_pre.append(update_object_axes_drawing)
+    bpy.app.handlers.redo_pre.append(update_object_axes_drawing)
+    bpy.app.handlers.load_pre.append(update_object_axes_drawing)
 
 
     # REGISTRATION OUTPUT
@@ -73,7 +120,16 @@ def register():
 def unregister():
     global classes, keymaps, icons
 
+    # HANDLERS
+
+    bpy.app.handlers.undo_pre.remove(update_object_axes_drawing)
+    bpy.app.handlers.redo_pre.remove(update_object_axes_drawing)
+    bpy.app.handlers.load_pre.remove(update_object_axes_drawing)
+
+
     # TOOLS, PIE MENUS, KEYMAPS, MENUS
+
+    bpy.types.VIEW3D_MT_mesh_add.remove(add_object_buttons)
 
     remove_object_context_menu()
 

@@ -29,7 +29,7 @@ class Apply(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.selected_objects
+        return context.mode == 'OBJECT' and context.selected_objects
 
     def execute(self, context):
         if any([self.rotation, self.scale]):

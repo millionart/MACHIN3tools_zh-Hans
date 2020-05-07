@@ -1,7 +1,6 @@
 import bpy
 from bpy.props import BoolProperty, EnumProperty
 from mathutils import Matrix, Vector, Euler
-from .. utils import MACHIN3 as m3
 from .. utils.math import get_loc_matrix, get_rot_matrix, get_sca_matrix
 
 
@@ -82,7 +81,7 @@ class Align(bpy.types.Operator):
         return context.mode == "OBJECT" and context.selected_objects
 
     def execute(self, context):
-        sel = m3.selected_objects()
+        sel = context.selected_objects
 
         if self.mode == "ORIGIN":
             self.align_to_origin(sel)
@@ -91,7 +90,7 @@ class Align(bpy.types.Operator):
             self.align_to_cursor(context.scene.cursor, sel)
 
         elif self.mode == "ACTIVE":
-            active = m3.get_active()
+            active = context.active_object
 
             if active in sel:
                 sel.remove(active)

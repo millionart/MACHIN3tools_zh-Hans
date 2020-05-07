@@ -1,4 +1,9 @@
 import bpy
+import os
+
+
+def abspath(path):
+    return os.path.abspath(bpy.path.abspath(path))
 
 
 def quotepath(path):
@@ -21,3 +26,22 @@ def add_path_to_recent_files(path):
 
     except (IOError, OSError, FileNotFoundError):
         pass
+
+
+def open_folder(path):
+    import platform
+    import subprocess
+
+    if platform.system() == "Windows":
+        os.startfile(path)
+    elif platform.system() == "Darwin":
+        subprocess.Popen(["open", path])
+    else:
+        # subprocess.Popen(["xdg-open", path])
+        os.system('xdg-open "%s" %s &' % (path, "> /dev/null 2> /dev/null"))  # > sends stdout,  2> sends stderr
+
+
+def makedir(pathstring):
+    if not os.path.exists(pathstring):
+        os.makedirs(pathstring)
+    return pathstring

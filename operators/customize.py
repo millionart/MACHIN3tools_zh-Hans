@@ -1,8 +1,9 @@
 import bpy
+from mathutils import Matrix
 import os
 import shutil
 from .. utils.registration import get_prefs
-from .. utils import MACHIN3 as m3
+from .. utils.system import makedir
 
 
 # TODO: do the prefs part based on a dictionary?
@@ -14,7 +15,7 @@ class Customize(bpy.types.Operator):
     bl_idname = "machin3.customize"
     bl_label = "MACHIN3: 自定义"
     bl_description = "自定义各种 Blender 首选项，设置和键盘映射。"
-    bl_options = {'REGISTER'}
+    bl_options = {'INTERNAL'}
 
 
     def execute(self, context):
@@ -23,36 +24,12 @@ class Customize(bpy.types.Operator):
 
         resourcespath = os.path.join(get_prefs().path, "resources")
 
-
-        """ no longer needed, with the PRESS box select working perfectly
-
-        # SET Select TOOL, in object and edit mode
-        if context.area.type == "VIEW_3D":
-            bpy.ops.wm.tool_set_by_name(name="Select")
-
-            if context.active_object and context.active_object.type == "MESH":
-                bpy.ops.object.editmode_toggle()
-                bpy.ops.wm.tool_set_by_name(name="Select")
-                bpy.ops.object.editmode_toggle()
-
-
-        # context override https://blender.stackexchange.com/a/27182/33919
-        else:
-            overrides = [{'area': area} for screen in context.workspace.screens for area in screen.areas if area.type == "VIEW_3D"]
-            for o in overrides:
-                bpy.ops.wm.tool_set_by_name(o, name="Select")
-
-                if context.active_object and context.active_object.type == "MESH":
-                    bpy.ops.object.editmode_toggle()
-                    bpy.ops.wm.tool_set_by_name(o, name="Select")
-                    bpy.ops.object.editmode_toggle()
-        """
-
+        # PREFERENCES
+        self.preferences(context)
 
         # THEME
         if get_prefs().custom_theme:
             self.theme(scriptspath, resourcespath)
-
 
         # MATCAPS + DEFAULT SHADING
         if get_prefs().custom_matcaps:
@@ -62,12 +39,13 @@ class Customize(bpy.types.Operator):
         if get_prefs().custom_overlays:
             self.overlays(context)
 
-        # PREFERENCES
-        self.preferences(context)
+        # WORKSPACES
+        if get_prefs().custom_workspaces:
+            self.workspaces(context)
 
-
-        # START UP
-        # copy and load start up file, which includes workspaces
+        # STARTUP SCENE
+        if get_prefs().custom_startup:
+            self.startup(context)
 
         return {'FINISHED'}
 
@@ -109,11 +87,18 @@ class Customize(bpy.types.Operator):
                 if kmi.idname == "screen.redo_last":
                     kmi.type = "BUTTON4MOUSE"
 
+            # SCREEN EDITING
+
+            km = kc.keymaps.get("Screen Editing")
+            for kmi in km.keymap_items:
                 if kmi.idname == "screen.screen_full_area":
                     if kmi.properties.use_hide_panels:
                         kmi.shift = True
                         kmi.alt = False
                         kmi.ctrl = False
+
+                        kmi.type = 'SPACE'
+                        kmi.value = 'PRESS'
 
                     else:
                         kmi.active = False
@@ -251,21 +236,19 @@ class Customize(bpy.types.Operator):
 
                 if kmi.idname == "mesh.loop_select":
                     if not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "toggle", "ring"]]):
-                        kmi.value = "PRESS"
-                        kmi.alt = True
-                        kmi.properties.toggle = True
-
-                    else:
                         kmi.active = False
+
+                    elif kmi.properties.toggle:
+                        kmi.value = "PRESS"
+                        kmi.shift = False
 
                 if kmi.idname == "mesh.edgering_select":
                     if kmi.properties.ring and not any([getattr(kmi.properties, name, False) for name in ["extend", "deselect", "toggle"]]):
+                        kmi.active = False
+
+                    elif kmi.properties.toggle:
                         kmi.value = "PRESS"
                         kmi.shift = False
-                        kmi.properties.toggle = True
-
-                    else:
-                        kmi.active = False
 
                 if kmi.idname == "mesh.shortest_path_pick":
                     kmi.value = "PRESS"
@@ -426,6 +409,10 @@ class Customize(bpy.types.Operator):
     def preferences(self, context):
         prefs = context.preferences
 
+        # turn off auto-save
+
+        prefs.use_preferences_save = False
+
         if get_prefs().custom_preferences_interface:
             print("\n» 正在更改首选项：界面")
 
@@ -439,6 +426,7 @@ class Customize(bpy.types.Operator):
 
             v.header_align = 'BOTTOM'
             s.use_region_overlap = True
+            v.show_navigate_ui = False
 
             v.color_picker_type = "SQUARE_SV"
 
@@ -455,8 +443,7 @@ class Customize(bpy.types.Operator):
 
             v.mini_axis_type = 'MINIMAL'
 
-            s.gpu_viewport_quality = 1
-            s.multi_sample = "8"
+            s.viewport_aa = "8"
 
         if get_prefs().custom_preferences_navigation:
             print("\n» 正在更改首选项：导航")
@@ -530,7 +517,7 @@ class Customize(bpy.types.Operator):
             shading = area.spaces[0].shading
 
             overlay.show_face_center = True
-            overlay.wireframe_threshold = 1
+            overlay.wireframe_threshold = 0.99
 
             shading.show_backface_culling = True
 
@@ -540,7 +527,7 @@ class Customize(bpy.types.Operator):
         print("\n» 正在添加材质捕获")
 
         matcapsourcepath = os.path.join(resourcespath, "matcaps")
-        matcaptargetpath = m3.makedir(os.path.join(datafilespath, "studiolights", "matcap"))
+        matcaptargetpath = makedir(os.path.join(datafilespath, "studiolights", "matcap"))
         matcaps = os.listdir(matcapsourcepath)
 
         for matcap in sorted(matcaps):
@@ -580,16 +567,94 @@ class Customize(bpy.types.Operator):
         print("\n» 正在安装和启用 M3 主题")
 
         themesourcepath = os.path.join(resourcespath, "theme", "m3.xml")
-        themetargetpath = m3.makedir(os.path.join(scriptspath, "presets", "interface_theme"))
+        themetargetpath = makedir(os.path.join(scriptspath, "presets", "interface_theme"))
 
         filepath = shutil.copy(themesourcepath, themetargetpath)
         bpy.ops.script.execute_preset(filepath=filepath, menu_idname="USERPREF_MT_interface_theme_presets")
+
+    def startup(self, context):
+        print("\n» Modifying Startup Scene")
+
+        light = bpy.data.lights.get('Light')
+        if light:
+            bpy.data.lights.remove(light, do_unlink=True)
+
+        cube = bpy.data.meshes.get('Cube')
+        if cube:
+            bpy.data.meshes.remove(cube, do_unlink=True)
+
+        cam = bpy.data.cameras.get('Camera')
+        if cam:
+            bpy.data.cameras.remove(cam, do_unlink=True)
+
+        mat = bpy.data.materials.get('Material')
+        if mat:
+            bpy.data.materials.remove(mat, do_unlink=True)
+
+        # set view matrix
+        for screen in context.workspace.screens:
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    for space in area.spaces:
+                        if space.type == 'VIEW_3D':
+                            r3d = space.region_3d
+
+                            r3d.view_matrix = Matrix(((1,  0.0, 0.0,   0),
+                                                      (0,  0.2, 1.0,  -1),
+                                                      (0, -1.0, 0.2, -10),
+                                                      (0,  0.0, 0.0,   1)))
+
+
+    def workspaces(self, context):
+        print("\n» Modifying Workspaces")
+
+        # remove all but one Layout
+        workspaces = [ws for ws in bpy.data.workspaces if ws != context.workspace]
+        bpy.data.batch_remove(ids=workspaces)
+
+        # name the basic 3d workspace
+        bpy.data.workspaces[-1].name = "General"
+
+
+        # remove the dope sheet editor
+        screens = [screen for screen in context.workspace.screens if screen.name == 'Layout']
+
+        if screens:
+            screen = screens[0]
+            areas = [area for area in screen.areas if area.type == 'VIEW_3D']
+
+            if areas:
+                area = areas[0]
+
+                override = {'screen': screen,
+                            'area': area}
+
+                areas = [area for area in screen.areas if area.type == 'DOPESHEET_EDITOR']
+
+                if areas:
+                    area = areas[0]
+
+                    bpy.ops.screen.area_join(override, cursor=(area.x, area.y + area.height))
+                    # print(ret)
+
+                """ TODO: for some reason the workspaces won't end up in the correct order, but rather sorted alphabetically
+                names = ['General.alt', 'Uvs', 'UVs.alt', 'Material', 'World', 'Scripting']
+
+                for idx, name in enumerate(names):
+                    bpy.ops.workspace.duplicate(override)
+
+                for name, ws in zip(names, bpy.data.workspaces[1:]):
+                    print("renaming", ws.name, "to", name)
+                    ws.name = name
+                """
+
+
 
 
 class RestoreKeymaps(bpy.types.Operator):
     bl_idname = "machin3.restore_keymaps"
     bl_label = "MACHIN3: Restore Keymaps"
-    bl_options = {'REGISTER'}
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         kc = context.window_manager.keyconfigs.user

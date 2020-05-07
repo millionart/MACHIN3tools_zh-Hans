@@ -126,6 +126,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     def update_activate_customize(self, context):
         activate(self, register=self.activate_customize, tool="customize")
 
+    def update_activate_filebrowser_tools(self, context):
+        activate(self, register=self.activate_filebrowser_tools, tool="filebrowser")
+
+
     # RUNTIME PIE ACTIVATION
 
     def update_activate_modes_pie(self, context):
@@ -145,6 +149,9 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
     def update_activate_cursor_pie(self, context):
         activate(self, register=self.activate_cursor_pie, tool="cursor_pie")
+
+    def update_activate_transform_pie(self, context):
+        activate(self, register=self.activate_transform_pie, tool="transform_pie")
 
     def update_activate_collections_pie(self, context):
         activate(self, register=self.activate_collections_pie, tool="collections_pie")
@@ -175,9 +182,13 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     obj_mode_rotate_around_active: BoolProperty(name="围绕选择项旋转，但只在物体模式下", default=False)
     toggle_cavity: BoolProperty(name="切换 空腔 / 曲率 在编辑模式下禁用 在物体模式下启用", default=True)
 
+    focus_view_transition: BoolProperty(name="视口平移运动", default=True)
+
+    custom_startup: BoolProperty(name="启动场景", default=True)
+    custom_workspaces: BoolProperty(name="工作区", default=False)
     custom_theme: BoolProperty(name="主题", default=True)
     custom_matcaps: BoolProperty(name="材质捕获 (Matcaps) 和默认着色", default=True)
-    custom_overlays: BoolProperty(name="遮罩", default=True)
+    custom_overlays: BoolProperty(name="叠加", default=True)
     custom_preferences_interface: BoolProperty(name="首选项：界面", default=True)
     custom_preferences_viewport: BoolProperty(name="首选项：视口", default=True)
     custom_preferences_navigation: BoolProperty(name="首选项：导航", default=True)
@@ -194,11 +205,12 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_clean_up: BoolProperty(name="清理", default=True, update=update_activate_clean_up)
     activate_clipping_toggle: BoolProperty(name="裁剪切换", default=True, update=update_activate_clipping_toggle)
     activate_focus: BoolProperty(name="聚焦", default=True, update=update_activate_focus)
-    activate_mirror: BoolProperty(name="镜射", default=True, update=update_activate_mirror)
+    activate_mirror: BoolProperty(name="镜像", default=True, update=update_activate_mirror)
     activate_align: BoolProperty(name="对齐", default=True, update=update_activate_align)
     activate_apply: BoolProperty(name="应用", default=True, update=update_activate_apply)
     activate_select: BoolProperty(name="选择", default=True, update=update_activate_select)
     activate_mesh_cut: BoolProperty(name="网格切割", default=True, update=update_activate_mesh_cut)
+    activate_filebrowser_tools: BoolProperty(name="文件浏览器工具", default=True, update=update_activate_filebrowser_tools)
     activate_customize: BoolProperty(name="自定义", default=False, update=update_activate_customize)
 
 
@@ -210,6 +222,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     activate_views_pie: BoolProperty(name="视图 的饼菜单", default=True, update=update_activate_views_pie)
     activate_align_pie: BoolProperty(name="对齐 的饼菜单", default=True, update=update_activate_align_pie)
     activate_cursor_pie: BoolProperty(name="游标 的饼菜单", default=True, update=update_activate_cursor_pie)
+    activate_transform_pie: BoolProperty(name="变换 的饼菜单", default=True, update=update_activate_transform_pie)
     activate_collections_pie: BoolProperty(name="集合 的饼菜单", default=True, update=update_activate_collections_pie)
     activate_workspace_pie: BoolProperty(name="工作区 的饼菜单", default=False, update=update_activate_workspace_pie)
 
@@ -223,7 +236,6 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
     tabs: EnumProperty(name="Tabs", items=preferences_tabs, default="GENERAL")
     avoid_update: BoolProperty(default=False)
     dirty_keymaps: BoolProperty(default=False)
-
 
 
     def draw(self, context):
@@ -308,6 +320,10 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         row.label(text="使用另一个相交对象切割网格。")
 
         row = column.split(factor=0.25)
+        row.prop(self, "activate_filebrowser_tools", toggle=True)
+        row.label(text="Additional tools for the Filebrowser.")
+
+        row = column.split(factor=0.25)
         row.prop(self, "activate_customize", toggle=True)
         row.label(text="自定义各种 Blender 首选项，设置和键盘映射。")
 
@@ -337,11 +353,15 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_align_pie", toggle=True)
-        row.label(text="编辑栅格对齐。")
+        row.label(text="编辑网格和 UV 对齐方式。")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_cursor_pie", toggle=True)
         row.label(text="游标和原心操作。")
+
+        row = column.split(factor=0.25)
+        row.prop(self, "activate_transform_pie", toggle=True)
+        row.label(text="Transform Orientations and Pivots.")
 
         row = column.split(factor=0.25)
         row.prop(self, "activate_collections_pie", toggle=True)
@@ -371,6 +391,16 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         b = split.box()
         b.label(text="设置")
 
+        # FOCUS
+
+        if getattr(bpy.types, "MACHIN3_OT_focus", False):
+            bb = b.box()
+            bb.label(text="Focus")
+
+            column = bb.column()
+            column.prop(self, "focus_view_transition")
+
+
         # CUSTOMIZE
 
         if getattr(bpy.types, "MACHIN3_OT_customize", False):
@@ -381,6 +411,8 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
             column = bbb.column()
 
             row = column.row()
+            row.prop(self, "custom_startup")
+            row.prop(self, "custom_workspaces")
             row.prop(self, "custom_theme")
             row.prop(self, "custom_matcaps")
             row.prop(self, "custom_overlays")
@@ -489,7 +521,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         # kc = wm.keyconfigs.addon
         kc = wm.keyconfigs.user
 
-        from . keys import keys
+        from . registration import keys
 
         split = box.split()
 
@@ -504,7 +536,7 @@ class MACHIN3toolsPreferences(bpy.types.AddonPreferences):
         b.label(text="饼菜单")
 
         if not self.draw_pie_keymaps(kc, keys, b):
-            b.label(text="没有创建键盘映射，因为没有激活馅饼。")
+            b.label(text="未创建任何键盘映射，因为没有激活任何饼菜单。")
 
     def draw_about(self, box):
         column = box.column()
